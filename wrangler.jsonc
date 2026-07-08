@@ -1,6 +1,6 @@
 {
   "name": "portfolio",
-  "compatibility_date": "2026-07-09",
+  "compatibility_date": "2024-09-01",
   "main": "./worker/index.js",
   "assets": {
     "directory": "./",
