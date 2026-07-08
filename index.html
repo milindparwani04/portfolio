@@ -780,6 +780,62 @@
           </span>
           <span class="track-play">&#9654;</span>
         </button>
+        <button class="track" data-index="3">
+          <span class="track-n">04</span>
+          <span class="track-meta">
+            <b>Beat It</b>
+            <span>Michael Jackson</span>
+          </span>
+          <span class="track-play">&#9654;</span>
+        </button>
+        <button class="track" data-index="4">
+          <span class="track-n">05</span>
+          <span class="track-meta">
+            <b>Footloose</b>
+            <span>Kenny Loggins</span>
+          </span>
+          <span class="track-play">&#9654;</span>
+        </button>
+        <button class="track" data-index="5">
+          <span class="track-n">06</span>
+          <span class="track-meta">
+            <b>Kiss from a Rose</b>
+            <span>Seal</span>
+          </span>
+          <span class="track-play">&#9654;</span>
+        </button>
+        <button class="track" data-index="6">
+          <span class="track-n">07</span>
+          <span class="track-meta">
+            <b>Knockin' on Heaven's Door</b>
+            <span>Bob Dylan</span>
+          </span>
+          <span class="track-play">&#9654;</span>
+        </button>
+        <button class="track" data-index="7">
+          <span class="track-n">08</span>
+          <span class="track-meta">
+            <b>Love Will Tear Us Apart</b>
+            <span>Joy Division</span>
+          </span>
+          <span class="track-play">&#9654;</span>
+        </button>
+        <button class="track" data-index="8">
+          <span class="track-n">09</span>
+          <span class="track-meta">
+            <b>All Out of Love</b>
+            <span>Air Supply</span>
+          </span>
+          <span class="track-play">&#9654;</span>
+        </button>
+        <button class="track" data-index="9">
+          <span class="track-n">10</span>
+          <span class="track-meta">
+            <b>Maniac</b>
+            <span>Michael Sembello</span>
+          </span>
+          <span class="track-play">&#9654;</span>
+        </button>
       </div>
 
       <span class="file-no playlists-label reveal">FEATURED PLAYLISTS</span>
@@ -1081,9 +1137,16 @@
   // Drop your mp3 files into an "audio/" folder next to this file,
   // then match the filename in `src` below. Full song, no ads, works offline.
   const TRACKS = [
-    { src:'audio/heaven-up-there.mp3', title:'Heaven Up There', artist:'Palace' },
-    { src:'audio/wicked-game.mp3',     title:'Wicked Game',     artist:'Chris Isaak' },
-    { src:'audio/free-fallin.mp3',     title:"Free Fallin'",    artist:'Tom Petty' },
+    { src:'audio/heaven-up-there.mp3',        title:'Heaven Up There',            artist:'Palace' },
+    { src:'audio/wicked-game.mp3',            title:'Wicked Game',                artist:'Chris Isaak' },
+    { src:'audio/free-fallin.mp3',            title:"Free Fallin'",               artist:'Tom Petty' },
+    { src:'audio/beat-it.mp3',                title:'Beat It',                    artist:'Michael Jackson' },
+    { src:'audio/footloose.mp3',              title:'Footloose',                  artist:'Kenny Loggins' },
+    { src:'audio/kiss-from-a-rose.mp3',       title:'Kiss from a Rose',           artist:'Seal' },
+    { src:'audio/knockin-on-heavens-door.mp3',title:"Knockin' on Heaven's Door",  artist:'Bob Dylan' },
+    { src:'audio/love-will-tear-us-apart.mp3',title:'Love Will Tear Us Apart',    artist:'Joy Division' },
+    { src:'audio/all-out-of-love.mp3',        title:'All Out of Love',            artist:'Air Supply' },
+    { src:'audio/maniac.wav',                 title:'Maniac',                     artist:'Michael Sembello' },
   ];
 
   const audio = document.getElementById('audioEl');
