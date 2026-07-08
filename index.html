@@ -139,11 +139,20 @@
 
   .ticker-wrap{
     background:var(--panel); border-bottom:1px solid var(--line);
-    overflow:hidden; white-space:nowrap; padding:7px 0;
+    display:flex; align-items:stretch;
   }
-  .ticker{ display:inline-block; font-family:var(--mono); font-size:.72rem; animation:scroll 42s linear infinite; }
-  .ticker span{ margin:0 1.9rem; color:var(--dim); }
-  .ticker span b{ color:var(--fg); font-weight:600; }
+  .ticker-badge{
+    flex-shrink:0; display:flex; align-items:center; gap:.45rem;
+    font-family:var(--mono); font-size:.68rem; font-weight:700; letter-spacing:.08em;
+    color:var(--fg); background:var(--bg); padding:0 .9rem;
+    border-right:1px solid var(--line);
+  }
+  .ticker-badge-dot{ width:6px; height:6px; border-radius:50%; background:#e0645a; animation:ticker-pulse 1.6s ease-in-out infinite; }
+  @keyframes ticker-pulse{ 0%,100%{ opacity:1; } 50%{ opacity:.3; } }
+  .ticker-track{ flex:1; min-width:0; overflow:hidden; white-space:nowrap; padding:7px 0; }
+  .ticker{ display:inline-block; font-family:var(--mono); font-size:.72rem; animation:scroll 55s linear infinite; }
+  .ticker span{ color:var(--dim); }
+  .ticker .ticker-sep{ margin:0 1.6rem; color:var(--dimmer); }
   @keyframes scroll{ from{ transform:translateX(0);} to{ transform:translateX(-50%);} }
 
   /* ============ HERO ============ */
@@ -554,7 +563,10 @@
     </div>
 
     <div class="ticker-wrap">
-      <div class="ticker" id="ticker"></div>
+      <div class="ticker-badge"><span class="ticker-badge-dot"></span>BBC NEWS</div>
+      <div class="ticker-track">
+        <div class="ticker" id="ticker">Loading headlines…</div>
+      </div>
     </div>
   </div>
 
@@ -1033,16 +1045,26 @@
   }
   setInterval(tick, 1000); tick();
 
-  const stats = [
-    { label:"JOURNAL ENTRIES", value:"3" },
-    { label:"TOOLS SHIPPED", value:"1 / 4" },
-    { label:"TRACKS ANALYSED", value:"0" },
-    { label:"CITIES MAPPED", value:"0" },
-    { label:"GAMES IN PROGRESS", value:"2" },
-    { label:"LAST DEPLOY", value:"JUST NOW" },
-  ];
-  const build = () => stats.map(s => `<span>${s.label} <b>${s.value}</b></span>`).join("");
-  document.getElementById('ticker').innerHTML = build() + build();
+  function escapeHtml(str){
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  async function loadTicker(){
+    const tickerEl = document.getElementById('ticker');
+    try{
+      const res = await fetch('/api/news');
+      if(!res.ok) throw new Error('bad response');
+      const data = await res.json();
+      if(!data.headlines || !data.headlines.length) throw new Error('no headlines');
+      const build = () => data.headlines.map(h => `<span>${escapeHtml(h)}</span>`).join('<span class="ticker-sep">&#8226;</span>');
+      const sep = '<span class="ticker-sep">&#8226;</span>';
+      tickerEl.innerHTML = build() + sep + build();
+    }catch(err){
+      tickerEl.innerHTML = '<span>Unable to load headlines right now — check back shortly.</span>';
+    }
+  }
+  loadTicker();
+  setInterval(loadTicker, 5 * 60 * 1000);
 
   const io = new IntersectionObserver((entries) => {
     entries.forEach(en => { if(en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target); } });
