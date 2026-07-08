@@ -1,0 +1,1971 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PARWANI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo+Black&family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0A0A0A;
+    --panel:#141414;
+    --fg:#F2F2F0;
+    --dim:#8A8A85;
+    --dimmer:#4A4A46;
+    --line: rgba(242,242,240,0.14);
+    --white:#F2F2F0;
+
+    --display:'Anton', sans-serif;
+    --mono:'IBM Plex Mono', monospace;
+    --sans:'Inter', sans-serif;
+  }
+  *{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  body{
+    margin:0; background:var(--bg); color:var(--fg);
+    font-family:var(--sans); -webkit-font-smoothing:antialiased; overflow-x:hidden;
+  }
+  body.locked{ overflow:hidden; height:100vh; }
+  a{ color:inherit; text-decoration:none; }
+  ::selection{ background:var(--fg); color:var(--bg); }
+  :focus-visible{ outline:2px solid var(--fg); outline-offset:3px; }
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; scroll-behavior:auto !important; }
+  }
+
+  /* ============ BOOT ============ */
+  #boot{
+    position:fixed; inset:0; z-index:9999; background:#000;
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--mono); cursor:pointer; text-align:center;
+  }
+  #boot .line{ color:var(--fg); font-size:clamp(1rem,2.2vw,1.3rem); letter-spacing:.02em; }
+  #boot .caret{ background:var(--fg); color:#000; animation:blink 1s steps(1) infinite; padding:0 .1em; margin-left:.1em; }
+  #boot .enter{ margin-top:1.6rem; color:var(--dim); font-size:.8rem; opacity:0; transition:opacity .5s ease; }
+  #boot .enter.show{ opacity:1; }
+  #boot .enter b{ color:var(--fg); }
+  @keyframes blink{ 50%{ opacity:0; } }
+  #boot.off{ animation:crtoff .5s ease forwards; }
+  @keyframes crtoff{
+    0%{ transform:scale(1,1); filter:brightness(1); opacity:1; }
+    60%{ transform:scale(1.05,.006); filter:brightness(3); opacity:1; }
+    100%{ transform:scale(1.5,.0006); filter:brightness(8); opacity:0; }
+  }
+  #site.powering{ animation:crton .6s ease .08s both; }
+  @keyframes crton{
+    0%{ opacity:0; filter:brightness(3) blur(2px); }
+    100%{ opacity:1; filter:none; }
+  }
+
+  /* ============ REDACTED BAR MOTIF ============ */
+  .redact{
+    display:inline-block; background:var(--fg); color:var(--fg);
+    padding:0 .5em; user-select:none; border-radius:1px;
+  }
+  .stamp{
+    font-family:var(--mono); font-size:.68rem; letter-spacing:.14em;
+    color:var(--dim); border:1px solid var(--line); padding:.3rem .6rem;
+    display:inline-flex; align-items:center; gap:.5rem; text-transform:uppercase;
+  }
+  .stamp::before{ content:''; width:6px; height:6px; background:var(--fg); border-radius:50%; }
+
+  /* ============ CHROME ============ */
+  .site-header{ position:sticky; top:0; z-index:40; }
+
+  .topbar{
+    position:relative; height:36px;
+    display:flex; align-items:center; gap:1rem;
+    padding:0 clamp(1rem,4vw,2.4rem);
+    background:rgba(10,10,10,.86); backdrop-filter:blur(8px);
+    font-family:var(--mono); font-size:.7rem; letter-spacing:.06em; text-transform:uppercase;
+  }
+
+  /* now playing — click-to-seek progress bar along the top bar's bottom edge */
+  .np-progress{
+    position:absolute; left:0; right:0; bottom:0; height:3px;
+    background:var(--line); cursor:pointer;
+    opacity:.35; transition:opacity .25s ease, height .15s ease;
+  }
+  .np-progress:hover{ height:5px; }
+  .np-progress.playing{ opacity:1; }
+  .np-progress-fill{ height:100%; width:0%; background:var(--fg); pointer-events:none; }
+  .topbar .id{ color:var(--dim); flex-shrink:0; }
+  .topbar .id b{ color:var(--fg); }
+  .topbar .clock{ color:var(--dim); flex-shrink:0; }
+
+  /* now playing — top bar */
+  .np{
+    flex:1; min-width:0; display:flex; align-items:center; justify-content:center; gap:.7rem;
+    padding:0 .9rem; height:100%;
+  }
+  .np-ctrls{ display:flex; align-items:center; gap:.45rem; flex-shrink:0; }
+  .np-btn{
+    background:none; border:1px solid var(--line); color:var(--dim);
+    width:20px; height:20px; display:flex; align-items:center; justify-content:center;
+    cursor:pointer; padding:0; font-size:.6rem; transition:border-color .2s, color .2s;
+  }
+  .np-btn:hover{ border-color:var(--fg); color:var(--fg); }
+  .np-btn:disabled{ opacity:.3; pointer-events:none; }
+
+  /* volume — iOS-style segmented bar, stepped by +/- rather than dragged */
+  .np-vol{ display:flex; align-items:center; gap:.4rem; flex-shrink:0; }
+  .np-vol-bar{ display:flex; align-items:center; gap:2px; }
+  .np-vol-seg{ width:4px; height:11px; background:var(--line); transition:background .15s ease; }
+  .np-vol-seg.filled{ background:var(--fg); }
+  @media (max-width:640px){ .np-vol{ display:none; } }
+
+  .np-marquee{
+    flex:0 1 300px; min-width:0; overflow:hidden; position:relative; height:100%;
+    display:flex; align-items:center;
+    -webkit-mask-image:linear-gradient(90deg, transparent 0, #000 8%, #000 92%, transparent 100%);
+    mask-image:linear-gradient(90deg, transparent 0, #000 8%, #000 92%, transparent 100%);
+  }
+  .np-marquee.idle{
+    -webkit-mask-image:none; mask-image:none;
+  }
+  .np-marquee-track{
+    display:inline-flex; white-space:nowrap; will-change:transform;
+    animation:np-scroll 14s linear infinite;
+    animation-play-state:paused;
+  }
+  .np-marquee.idle .np-marquee-track{ animation:none; justify-content:center; width:100%; }
+  .np-marquee.playing .np-marquee-track{ animation-play-state:running; }
+  .np-marquee-track span{ padding-right:3.5rem; color:var(--dim); }
+  .np-marquee.idle .np-marquee-track span{ padding-right:0; }
+  .np-marquee-track span b{ color:var(--fg); font-weight:600; }
+  @keyframes np-scroll{ from{ transform:translateX(0); } to{ transform:translateX(-50%); } }
+
+  .ticker-wrap{
+    background:var(--panel); border-bottom:1px solid var(--line);
+    overflow:hidden; white-space:nowrap; padding:7px 0;
+  }
+  .ticker{ display:inline-block; font-family:var(--mono); font-size:.72rem; animation:scroll 42s linear infinite; }
+  .ticker span{ margin:0 1.9rem; color:var(--dim); }
+  .ticker span b{ color:var(--fg); font-weight:600; }
+  @keyframes scroll{ from{ transform:translateX(0);} to{ transform:translateX(-50%);} }
+
+  /* ============ HERO ============ */
+  .hero-wrap{ height:calc(100vh - 74px); position:relative; }
+  .hero-sticky{
+    height:100%;
+    display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center;
+    padding:0 clamp(1.2rem,6vw,6rem); max-width:1240px; margin:0 auto;
+  }
+  .hero-tag{ margin-bottom:1.6rem; }
+  h1{
+    font-family:var(--display); font-weight:400;
+    font-size:clamp(2.6rem,9vw,7.2rem);
+    line-height:0.92; letter-spacing:.005em;
+    text-transform:uppercase;
+    margin:0 0 1.8rem;
+  }
+  h1 .line2{ display:block; color:var(--dim); -webkit-text-stroke:1.5px var(--fg); color:transparent; }
+  .hero-sub{ font-family:var(--sans); color:var(--dim); font-size:clamp(1rem,1.6vw,1.15rem); line-height:1.6; max-width:52ch; }
+  .hero-cta{ margin-top:2.4rem; display:flex; gap:.9rem; flex-wrap:wrap; justify-content:center; }
+  .cmd-btn{
+    font-family:var(--mono); font-size:.78rem; letter-spacing:.04em; text-transform:uppercase;
+    padding:.85rem 1.3rem; border:1px solid var(--line); color:var(--fg);
+    transition:border-color .2s, background .2s, color .2s;
+  }
+  .cmd-btn:hover{ border-color:var(--fg); }
+  .cmd-btn.solid{ background:var(--fg); color:var(--bg); border-color:var(--fg); }
+  .cmd-btn.solid:hover{ background:transparent; color:var(--fg); }
+  .scroll-hint{
+    position:absolute; bottom:1.2rem; left:0; right:0; margin:0 auto; width:fit-content;
+    font-family:var(--mono); font-size:.7rem; color:var(--dimmer); text-transform:uppercase; letter-spacing:.08em;
+    animation:bob 2.4s ease-in-out infinite;
+    transition:opacity .4s ease;
+  }
+  .scroll-hint.hidden{ opacity:0; pointer-events:none; }
+  @keyframes bob{ 0%,100%{ transform:translateY(0);} 50%{ transform:translateY(5px);} }
+
+  /* ============ SECTIONS ============ */
+  section.zone{ padding:6rem clamp(1.2rem,6vw,6rem); max-width:1240px; margin:0 auto; }
+  .zone-head{ display:flex; justify-content:space-between; align-items:flex-end; gap:1.5rem; margin-bottom:3rem; flex-wrap:wrap; border-bottom:1px solid var(--line); padding-bottom:1.6rem; }
+  .zone-head .file-no{ font-family:var(--mono); font-size:.7rem; color:var(--dimmer); letter-spacing:.1em; }
+  .zone-head h2{
+    font-family:var(--display); font-weight:400; text-transform:uppercase;
+    font-size:clamp(2rem,5vw,3.6rem); margin:.3rem 0 0; line-height:.95;
+  }
+  .zone-head p{ font-family:var(--sans); color:var(--dim); max-width:38ch; font-size:.92rem; line-height:1.5; }
+
+  /* journal */
+  .journal{ display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--line); border:1px solid var(--line); }
+  .entry{ background:var(--bg); padding:1.8rem; display:flex; flex-direction:column; gap:.8rem; transition:background .25s; }
+  .entry:hover{ background:var(--panel); }
+  .entry .date{ font-family:var(--mono); font-size:.68rem; color:var(--dimmer); text-transform:uppercase; }
+  .entry h3{ font-family:var(--sans); font-weight:600; font-size:1.18rem; line-height:1.3; margin:0; }
+  .entry p{ font-family:var(--sans); color:var(--dim); font-size:.88rem; line-height:1.5; margin:0; }
+  .entry .k{ font-family:var(--mono); font-size:.66rem; color:var(--dim); margin-top:auto; padding-top:.6rem; letter-spacing:.06em; }
+
+  /* chapter dividers */
+  .chapter{ height:120vh; position:relative; }
+  .chapter-sticky{ position:sticky; top:0; height:100vh; display:flex; align-items:center; justify-content:center; text-align:center; padding:0 1.2rem; flex-direction:column; gap:1rem; }
+  .chapter-tag{ font-family:var(--mono); font-size:.7rem; color:var(--dimmer); letter-spacing:.2em; text-transform:uppercase; }
+  .chapter-cmd{ font-family:var(--display); text-transform:uppercase; font-size:clamp(2rem,8vw,6rem); color:var(--fg); line-height:.9; }
+
+  /* projects */
+  .projects{ display:grid; grid-template-columns:repeat(2,1fr); gap:1px; background:var(--line); border:1px solid var(--line); }
+  .proj{ background:var(--bg); padding:2rem; display:flex; flex-direction:column; gap:.8rem; transition:background .25s; }
+  .proj:hover{ background:var(--panel); }
+  .proj .cat{ font-family:var(--mono); font-size:.66rem; color:var(--dim); letter-spacing:.1em; text-transform:uppercase; }
+  .proj h3{ font-family:var(--sans); font-weight:700; font-size:1.3rem; margin:0; text-transform:uppercase; letter-spacing:.01em; }
+  .proj p{ font-family:var(--sans); color:var(--dim); font-size:.9rem; line-height:1.55; margin:0; }
+  .proj .status{ align-self:flex-start; font-family:var(--mono); font-size:.64rem; padding:.28rem .6rem; margin-top:.3rem; border:1px solid var(--line); text-transform:uppercase; letter-spacing:.06em; }
+  .status.building{ color:var(--fg); border-color:var(--fg); }
+  .status.idea{ color:var(--dim); }
+
+  .bench{ margin-top:0; font-family:var(--mono); font-size:.8rem; color:var(--dim); border-top:1px solid var(--line); padding:1.4rem 2rem; line-height:1.7; grid-column:1 / -1; background:var(--bg); }
+  .bench b{ color:var(--fg); font-weight:500; }
+
+  /* tools */
+  .tools{ display:grid; grid-template-columns:repeat(4, 1fr); gap:1px; background:var(--line); border:1px solid var(--line); }
+  .tool{ background:var(--bg); padding:2.2rem 1.8rem; transition:background .25s; display:flex; flex-direction:column; }
+  .tool:hover{ background:var(--panel); }
+  .tool .n{ font-family:var(--mono); font-size:.7rem; color:var(--dimmer); }
+  /* fixed min-height reserves room for a 2-line title, so 1-line titles don't let the
+     description start higher than cards with a wrapped, 2-line title */
+  .tool h3{ font-family:var(--sans); font-weight:700; font-size:1.1rem; line-height:1.25; margin:.9rem 0 .5rem; text-transform:uppercase; min-height:2.5em; }
+  /* flex:1 lets the description absorb the leftover vertical space, so the open/soon
+     element below it always lands at the same bottom edge regardless of description length */
+  .tool p{ font-family:var(--sans); color:var(--dim); font-size:.87rem; line-height:1.5; margin:0 0 1.2rem; flex:1 0 auto; }
+  /* .open and .soon get a shared min-height so their differing padding/border doesn't
+     change how much space the flex-grown description above has to fill — otherwise a
+     taller element here silently shifts everything above it up to compensate */
+  .tool .open{
+    font-family:var(--mono); font-size:.74rem; line-height:1; color:var(--fg); border-bottom:1px solid var(--fg);
+    align-self:flex-start; display:inline-flex; align-items:flex-end; min-height:1.35rem; box-sizing:border-box; padding-bottom:.1rem;
+  }
+  .tool .soon{
+    font-family:var(--mono); font-size:.66rem; line-height:1; letter-spacing:.1em; text-transform:uppercase; color:var(--dimmer);
+    border:1px solid var(--line); padding:.28rem .6rem; align-self:flex-start; display:inline-flex; align-items:center;
+    min-height:1.35rem; box-sizing:border-box;
+  }
+
+  /* tool modal — image converter */
+  .tool-modal{ position:fixed; inset:0; z-index:200; display:none; }
+  .tool-modal.open{ display:block; }
+  .tool-modal-backdrop{ position:absolute; inset:0; background:rgba(0,0,0,.78); backdrop-filter:blur(4px); }
+  .tool-modal-panel{
+    position:relative; z-index:1; margin:5vh auto; width:min(640px, 92vw); max-height:88vh;
+    overflow-y:auto; background:var(--bg); border:1px solid var(--line);
+    padding:clamp(1.4rem,3vw,2.2rem); animation:modal-in .25s ease both;
+  }
+  @keyframes modal-in{ from{ opacity:0; transform:translateY(14px); } to{ opacity:1; transform:none; } }
+  .tool-modal-head{ display:flex; justify-content:space-between; align-items:flex-start; gap:1rem; }
+  .tool-modal-head h3{ font-family:var(--display); font-weight:400; text-transform:uppercase; font-size:clamp(1.5rem,3vw,2rem); margin:.3rem 0 0; line-height:.95; }
+  .tool-modal-close{
+    background:none; border:1px solid var(--line); color:var(--dim); width:28px; height:28px;
+    display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:.8rem; flex-shrink:0;
+    transition:border-color .2s, color .2s;
+  }
+  .tool-modal-close:hover{ border-color:var(--fg); color:var(--fg); }
+  .tool-modal-sub{ font-family:var(--sans); color:var(--dim); font-size:.88rem; line-height:1.5; margin:.9rem 0 1.6rem; }
+
+  .conv-format-row{ display:flex; flex-wrap:wrap; align-items:center; gap:1rem; margin-bottom:1.4rem; }
+  .conv-label{ font-family:var(--mono); font-size:.68rem; color:var(--dimmer); text-transform:uppercase; letter-spacing:.08em; }
+  .conv-format-opts{ display:flex; gap:.5rem; }
+  .conv-format-btn{
+    font-family:var(--mono); font-size:.72rem; letter-spacing:.04em; text-transform:uppercase;
+    padding:.5rem .9rem; border:1px solid var(--line); color:var(--dim); background:none; cursor:pointer;
+    transition:border-color .2s, color .2s, background .2s;
+  }
+  .conv-format-btn:hover{ border-color:var(--fg); color:var(--fg); }
+  .conv-format-btn.active{ background:var(--fg); color:var(--bg); border-color:var(--fg); }
+  .conv-quality{ display:flex; align-items:center; gap:.5rem; font-family:var(--mono); font-size:.7rem; color:var(--dim); margin-left:auto; }
+  .conv-quality[hidden]{ display:none; }
+  .conv-quality input[type="range"]{ accent-color:var(--fg); width:110px; }
+  .conv-quality span:last-child{ width:2.4em; color:var(--fg); }
+
+  .conv-drop{
+    border:1px dashed var(--line); padding:2.4rem 1.4rem; display:flex; flex-direction:column; align-items:center;
+    gap:.5rem; text-align:center; cursor:pointer; transition:border-color .2s, background .2s;
+  }
+  .conv-drop:hover, .conv-drop:focus-visible, .conv-drop.dragover{ border-color:var(--fg); background:var(--panel); }
+  .conv-drop-icon{ font-family:var(--mono); font-size:1.2rem; color:var(--dim); }
+  .conv-drop-text{ font-family:var(--sans); color:var(--fg); font-size:.92rem; }
+  .conv-drop-hint{ font-family:var(--mono); font-size:.68rem; color:var(--dimmer); text-transform:uppercase; letter-spacing:.05em; }
+
+  .conv-list{ display:flex; flex-direction:column; margin-top:1.2rem; }
+  .conv-item{ display:flex; align-items:center; gap:1rem; padding:.9rem 0; border-top:1px solid var(--line); }
+  .conv-item-thumb{ width:44px; height:44px; object-fit:cover; background:var(--panel); border:1px solid var(--line); flex-shrink:0; }
+  .conv-item-meta{ display:flex; flex-direction:column; gap:.2rem; flex:1; min-width:0; }
+  .conv-item-name{ font-family:var(--sans); font-size:.88rem; color:var(--fg); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .conv-item-size{ font-family:var(--mono); font-size:.7rem; color:var(--dim); }
+  .conv-item-actions{ display:flex; align-items:center; gap:.6rem; flex-shrink:0; }
+  .conv-item-status{ font-family:var(--mono); font-size:.68rem; color:var(--dimmer); text-transform:uppercase; }
+  .conv-item-download{
+    font-family:var(--mono); font-size:.7rem; text-transform:uppercase; color:var(--fg);
+    border:1px solid var(--line); padding:.4rem .7rem; transition:border-color .2s;
+  }
+  .conv-item-download:hover{ border-color:var(--fg); }
+  .conv-item-download[aria-disabled="true"]{ pointer-events:none; opacity:.35; }
+  .conv-item-remove{
+    background:none; border:1px solid var(--line); color:var(--dim); width:24px; height:24px;
+    display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:.7rem; flex-shrink:0;
+    transition:border-color .2s, color .2s;
+  }
+  .conv-item-remove:hover{ border-color:var(--fg); color:var(--fg); }
+
+  @media (max-width:560px){
+    .conv-quality{ margin-left:0; }
+    .conv-item-name{ max-width:120px; }
+  }
+
+  /* tool modal — password generator */
+  .pwgen-output{
+    display:flex; align-items:center; gap:.8rem; border:1px solid var(--line); background:var(--panel);
+    padding:1rem 1.1rem; margin-bottom:1.4rem;
+  }
+  .pwgen-value{
+    flex:1; min-width:0; font-family:var(--mono); font-size:1.05rem; color:var(--fg);
+    letter-spacing:.02em; word-break:break-all;
+  }
+  .pwgen-copy{
+    font-family:var(--mono); font-size:.7rem; text-transform:uppercase; color:var(--fg);
+    border:1px solid var(--line); background:none; padding:.5rem .8rem; cursor:pointer; flex-shrink:0;
+    transition:border-color .2s;
+  }
+  .pwgen-copy:hover{ border-color:var(--fg); }
+
+  .pwgen-row{ display:flex; align-items:center; gap:.8rem; margin-bottom:1.2rem; }
+  .pwgen-row input[type="range"]{ accent-color:var(--fg); flex:1; }
+  .pwgen-row span:last-child{ font-family:var(--mono); font-size:.75rem; color:var(--fg); width:2.4em; text-align:right; }
+
+  .pwgen-opts{ display:grid; grid-template-columns:1fr 1fr; gap:.7rem 1rem; margin-bottom:1.6rem; }
+  .pwgen-opt{
+    display:flex; align-items:center; gap:.55rem; font-family:var(--sans); font-size:.85rem; color:var(--dim); cursor:pointer;
+  }
+  .pwgen-opt input{ accent-color:var(--fg); }
+
+  .pwgen-regenerate{
+    width:100%; font-family:var(--mono); font-size:.74rem; text-transform:uppercase; letter-spacing:.04em;
+    padding:.8rem; border:1px solid var(--line); color:var(--fg); background:none; cursor:pointer;
+    transition:border-color .2s, background .2s;
+  }
+  .pwgen-regenerate:hover{ border-color:var(--fg); background:var(--panel); }
+
+  @media (max-width:560px){
+    .pwgen-opts{ grid-template-columns:1fr; }
+  }
+
+  /* tool modal — tempo tap */
+  .tempo-readout{ display:flex; flex-direction:column; align-items:center; margin-bottom:1.6rem; }
+  .tempo-bpm{ font-family:var(--display); font-weight:400; font-size:clamp(3rem,10vw,4.4rem); line-height:1; color:var(--fg); }
+  .tempo-bpm-label{ font-family:var(--mono); font-size:.7rem; letter-spacing:.12em; text-transform:uppercase; color:var(--dimmer); margin-top:.3rem; }
+
+  .tempo-pad{
+    width:100%; padding:2.6rem 1rem; border:1px solid var(--line); background:var(--panel);
+    font-family:var(--mono); font-size:1rem; letter-spacing:.15em; text-transform:uppercase; color:var(--fg);
+    cursor:pointer; transition:border-color .15s; user-select:none;
+  }
+  .tempo-pad:hover{ border-color:var(--fg); }
+  @keyframes tempo-pulse{ 0%{ background:var(--fg); color:var(--bg); } 100%{ background:var(--panel); color:var(--fg); } }
+  .tempo-pad.pulse{ animation:tempo-pulse .18s ease; }
+
+  .tempo-meta{ display:flex; align-items:center; justify-content:space-between; margin-top:1.2rem; }
+  .tempo-meta span{ font-family:var(--mono); font-size:.72rem; color:var(--dim); text-transform:uppercase; letter-spacing:.05em; }
+  .tempo-reset{
+    background:none; border:1px solid var(--line); color:var(--dim); padding:.4rem .8rem; cursor:pointer;
+    transition:border-color .2s, color .2s; font-family:var(--mono); font-size:.7rem; text-transform:uppercase;
+  }
+  .tempo-reset:hover{ border-color:var(--fg); color:var(--fg); }
+
+  /* tool modal — qr code generator */
+  .qr-input{
+    width:100%; font-family:var(--mono); font-size:.9rem; color:var(--fg); background:var(--panel);
+    border:1px solid var(--line); padding:.85rem 1rem; outline:none; transition:border-color .2s; box-sizing:border-box;
+  }
+  .qr-input:focus{ border-color:var(--fg); }
+  .qr-input::placeholder{ color:var(--dimmer); }
+
+  .qr-preview-wrap{ display:flex; justify-content:center; margin:1.6rem 0; }
+  .qr-preview{
+    width:216px; height:216px; display:flex; align-items:center; justify-content:center;
+    background:#fff; border:1px solid var(--line); padding:12px; box-sizing:border-box; flex-shrink:0;
+  }
+  .qr-preview canvas{ width:100%; height:100%; image-rendering:pixelated; display:block; }
+  .qr-preview canvas[hidden]{ display:none; }
+  .qr-preview-empty{ font-family:var(--mono); font-weight:700; font-size:.68rem; color:#000; text-align:center; text-transform:uppercase; letter-spacing:.05em; padding:0 1rem; }
+
+  .qr-download{
+    width:100%; font-family:var(--mono); font-size:.74rem; text-transform:uppercase; letter-spacing:.04em;
+    padding:.8rem; border:1px solid var(--line); color:var(--fg); background:none; cursor:pointer;
+    transition:border-color .2s, background .2s;
+  }
+  .qr-download:hover{ border-color:var(--fg); background:var(--panel); }
+  .qr-download[disabled]{ opacity:.35; pointer-events:none; }
+
+  /* tool modal — audio trimmer */
+  .trim-wave-wrap{
+    position:relative; width:100%; height:120px; background:var(--panel); border:1px solid var(--line);
+    margin-bottom:1rem; overflow:hidden; touch-action:none;
+    --trim-accent:#FF9F1C; --trim-accent-bright:#FFC15E;
+  }
+  .trim-wave-wrap canvas{ display:block; }
+  .trim-shade{ position:absolute; top:0; bottom:0; background:rgba(0,0,0,.6); pointer-events:none; }
+  .trim-shade-left{ left:0; }
+  .trim-shade-right{ right:0; }
+  /* wide invisible hit area, thin visible accent line so cuts can be placed precisely */
+  .trim-handle{
+    position:absolute; top:0; bottom:0; width:18px; margin-left:-9px;
+    background:transparent; cursor:ew-resize; touch-action:none; z-index:2;
+  }
+  .trim-handle::before{
+    content:''; position:absolute; left:50%; top:0; bottom:0; width:2px; margin-left:-1px;
+    background:var(--trim-accent); box-shadow:0 0 0 .5px rgba(0,0,0,.55); transition:background .15s;
+  }
+  /* grip knobs top and bottom for visibility without thickening the line */
+  .trim-handle::after{
+    content:''; position:absolute; left:50%; top:0; width:9px; height:11px; margin-left:-4.5px;
+    background:var(--trim-accent); transition:background .15s;
+  }
+  .trim-handle-cap{ position:absolute; left:50%; bottom:0; width:9px; height:11px; margin-left:-4.5px; background:var(--trim-accent); transition:background .15s; }
+  .trim-handle:hover::before, .trim-handle.dragging::before,
+  .trim-handle:hover::after, .trim-handle.dragging::after,
+  .trim-handle:hover .trim-handle-cap, .trim-handle.dragging .trim-handle-cap{ background:var(--trim-accent-bright); }
+  .trim-handle:focus-visible{ outline:1px solid var(--trim-accent-bright); outline-offset:1px; }
+
+  .trim-labels{ display:flex; align-items:center; justify-content:space-between; margin-bottom:1.2rem; gap:.6rem; }
+  .trim-labels > span{ font-family:var(--mono); font-size:.72rem; color:var(--fg); text-transform:uppercase; letter-spacing:.05em; }
+  .trim-nudge{ display:flex; align-items:center; gap:.4rem; }
+  .trim-nudge-val{ font-family:var(--mono); font-size:.72rem; color:var(--dim); letter-spacing:.03em; min-width:3.4em; text-align:center; }
+  .trim-nudge-btn{
+    font-family:var(--mono); font-size:.85rem; line-height:1; color:var(--fg); background:none;
+    border:1px solid var(--line); width:22px; height:22px; cursor:pointer; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center; transition:border-color .2s, background .2s;
+  }
+  .trim-nudge-btn:hover{ border-color:var(--fg); background:var(--panel); }
+  .trim-nudge-btn:active{ background:var(--trim-accent); color:var(--bg); border-color:var(--trim-accent); }
+
+  .trim-actions{ display:flex; gap:.6rem; }
+  .trim-btn{
+    font-family:var(--mono); font-size:.72rem; text-transform:uppercase; letter-spacing:.04em;
+    padding:.6rem 1rem; border:1px solid var(--line); color:var(--fg); background:none; cursor:pointer;
+    transition:border-color .2s, background .2s; flex:1;
+  }
+  .trim-btn:hover{ border-color:var(--fg); background:var(--panel); }
+  .trim-btn[disabled]{ opacity:.35; pointer-events:none; }
+  .trim-btn.active{ background:var(--fg); color:var(--bg); border-color:var(--fg); font-weight:700; }
+  .trim-btn.looping{ background:#EDC001; color:#000; border-color:#EDC001; font-weight:700; animation:trim-loop-pulse 1.1s ease-in-out infinite; }
+  @keyframes trim-loop-pulse{ 0%,100%{ box-shadow:0 0 0 0 rgba(237,192,1,.55); } 50%{ box-shadow:0 0 0 4px rgba(237,192,1,0); } }
+
+  /* listen */
+  .tracklist{ display:flex; flex-direction:column; border:1px solid var(--line); }
+  .track{
+    display:flex; align-items:center; gap:1.1rem; width:100%;
+    background:var(--bg); border:none; border-bottom:1px solid var(--line);
+    padding:1.1rem 1.5rem; cursor:pointer; text-align:left; color:var(--fg);
+    font-family:inherit; transition:background .2s;
+  }
+  .track:last-child{ border-bottom:none; }
+  .track:hover{ background:var(--panel); }
+  .track-n{ font-family:var(--mono); font-size:.75rem; color:var(--dimmer); flex-shrink:0; width:1.6rem; }
+  .track-meta{ display:flex; flex-direction:column; gap:.2rem; flex:1; min-width:0; }
+  .track-meta b{ font-family:var(--sans); font-weight:600; font-size:1rem; }
+  .track-meta span{ font-family:var(--mono); font-size:.76rem; color:var(--dim); text-transform:uppercase; letter-spacing:.05em; }
+  .track-play{ font-family:var(--mono); font-size:.7rem; color:var(--dimmer); border:1px solid var(--line); width:26px; height:26px; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:border-color .2s, color .2s; }
+  .track:hover .track-play{ border-color:var(--fg); color:var(--fg); }
+  .track.active{ background:var(--panel); }
+  .track.active .track-n{ color:var(--fg); }
+  .track.active .track-play{ border-color:var(--fg); color:var(--fg); }
+
+  .playlists-label{ display:block; margin:3rem 0 1rem; }
+  .playlist-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:1.1rem; }
+  .playlist-card{ background:var(--bg); border:1px solid var(--line); display:flex; flex-direction:column; transition:background .25s, border-color .25s; }
+  .playlist-card:hover{ background:var(--panel); border-color:var(--fg); }
+  .playlist-thumb-link{ display:block; aspect-ratio:1/1; overflow:hidden; background:var(--panel); }
+  .playlist-thumb{ width:100%; height:100%; object-fit:cover; display:block; filter:grayscale(.15); transition:filter .25s ease, transform .4s ease; }
+  .playlist-card:hover .playlist-thumb{ filter:grayscale(0); transform:scale(1.03); }
+  .playlist-info{ padding:1rem 1.1rem 1.2rem; display:flex; flex-direction:column; gap:.8rem; }
+  .playlist-title{ font-family:var(--sans); font-weight:600; font-size:.96rem; line-height:1.3; }
+  .playlist-actions{ display:flex; gap:.6rem; }
+  .playlist-action{
+    flex:1; display:flex; align-items:center; justify-content:center; gap:.4rem;
+    font-family:var(--mono); font-size:.68rem; letter-spacing:.05em; text-transform:uppercase;
+    padding:.55rem .5rem; border:1px solid var(--line); color:var(--dim);
+    transition:border-color .2s, color .2s;
+  }
+  .playlist-action:hover{ border-color:var(--fg); color:var(--fg); }
+  @media (max-width:880px){ .playlist-grid{ grid-template-columns:1fr; } }
+
+  footer{
+    padding:3rem clamp(1.2rem,6vw,6rem) 4rem; border-top:1px solid var(--line);
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;
+    font-family:var(--mono); font-size:.72rem; color:var(--dim); max-width:1240px; margin:0 auto; text-transform:uppercase; letter-spacing:.04em;
+  }
+  footer .links a{ margin-left:1.4rem; }
+  footer .links a:hover{ color:var(--fg); }
+
+  .reveal{ opacity:0; transform:translateY(26px); transition:opacity .7s ease, transform .7s ease; }
+  .reveal.in{ opacity:1; transform:none; }
+
+  @media (max-width:1120px){ .tools{ grid-template-columns:repeat(2, 1fr); } }
+
+  @media (max-width:880px){
+    .journal{ grid-template-columns:1fr; }
+    .projects{ grid-template-columns:1fr; }
+    .tools{ grid-template-columns:1fr; }
+    .hero-wrap{ height:150vh; }
+    .topbar .id b{ display:none; }
+    .topbar .id{ font-size:0; }
+    .topbar .id::before{ content:'REF'; font-size:.7rem; }
+    .np{ padding:0 .5rem; gap:.4rem; }
+  }
+</style>
+</head>
+<body class="locked">
+
+<div id="boot" role="button" tabindex="0" aria-label="Press enter to start">
+  <div>
+    <div class="line">C:\PARWANI&gt;<span class="caret">&nbsp;</span></div>
+    <div class="enter" id="bootEnter">press <b>ENTER</b> to continue</div>
+  </div>
+</div>
+
+<div id="site">
+  <div class="site-header" id="siteHeader">
+    <div class="topbar">
+      <div class="id">REF: <b>PARWANI.SITE</b></div>
+      <div class="np">
+        <div class="np-ctrls">
+          <button class="np-btn" id="npPrev" aria-label="Previous track">&#9664;&#9664;</button>
+          <button class="np-btn" id="npPlay" aria-label="Play or pause">&#9654;</button>
+          <button class="np-btn" id="npNext" aria-label="Next track">&#9654;&#9654;</button>
+        </div>
+        <div class="np-marquee idle" id="npMarquee">
+          <div class="np-marquee-track" id="npMarqueeTrack">
+            <span>select a track below to start listening</span>
+          </div>
+        </div>
+        <div class="np-vol" id="npVol">
+          <button class="np-btn" id="volDown" aria-label="Decrease volume">&#8722;</button>
+          <div class="np-vol-bar" id="npVolBar" aria-hidden="true">
+            <span class="np-vol-seg"></span><span class="np-vol-seg"></span><span class="np-vol-seg"></span><span class="np-vol-seg"></span><span class="np-vol-seg"></span><span class="np-vol-seg"></span><span class="np-vol-seg"></span><span class="np-vol-seg"></span><span class="np-vol-seg"></span><span class="np-vol-seg"></span>
+          </div>
+          <button class="np-btn" id="volUp" aria-label="Increase volume">&#43;</button>
+        </div>
+      </div>
+      <div class="clock" id="clock">--:--:--</div>
+      <div class="np-progress" id="npProgress" role="slider" aria-label="Seek" tabindex="0">
+        <div class="np-progress-fill" id="npProgressFill"></div>
+      </div>
+    </div>
+
+    <div class="ticker-wrap">
+      <div class="ticker" id="ticker"></div>
+    </div>
+  </div>
+
+  <audio id="audioEl" preload="none"></audio>
+
+  <main>
+    <div class="hero-wrap" data-section="HOME">
+      <div class="hero-sticky">
+        <div class="hero-tag"><span class="stamp">Welcome to my digital playground</span></div>
+        <h1>A record of<span class="line2">what I'm into.</span></h1>
+        <p class="hero-sub">Economics &amp; finance journaling, tools I made because I needed them, and side projects in music, travel, and games — all in one place.</p>
+        <div class="hero-cta">
+          <a href="#journal" class="cmd-btn solid">Read the journal</a>
+          <a href="buyer-risk-grade.html" class="cmd-btn">Launch demo</a>
+          <a href="#tools" class="cmd-btn">Open the toolbox</a>
+        </div>
+        <div class="scroll-hint">Scroll &#8595;</div>
+      </div>
+    </div>
+
+    <div class="chapter">
+      <div class="chapter-sticky">
+        <span class="chapter-tag">Ref. 01</span>
+        <div class="chapter-cmd">Journal</div>
+      </div>
+    </div>
+
+    <section class="zone" id="journal" data-section="JOURNAL">
+      <div class="zone-head reveal">
+        <div>
+          <span class="file-no">REF. 01 / JOURNAL</span>
+          <h2>Field Notes</h2>
+        </div>
+        <p>Short write-ups on economics &amp; finance news, and historical cases worth remembering.</p>
+      </div>
+      <div class="journal">
+        <article class="entry reveal">
+          <span class="date">Draft — pin your date</span>
+          <h3>Why the 2008 credit freeze still explains today's spreads</h3>
+          <p>The mechanics of the crisis, and what current credit markets are quietly repeating.</p>
+          <span class="k">MACRO / HISTORY</span>
+        </article>
+        <article class="entry reveal">
+          <span class="date">Draft — pin your date</span>
+          <h3>Reading the yield curve without the noise</h3>
+          <p>What inversion has predicted correctly, and what it's missed, in plain language.</p>
+          <span class="k">RATES</span>
+        </article>
+        <article class="entry reveal">
+          <span class="date">Draft — pin your date</span>
+          <h3>The tulip story is more interesting than the myth</h3>
+          <p>Revisiting Dutch tulip mania with the actual archival record, not the textbook shorthand.</p>
+          <span class="k">CASE STUDY</span>
+        </article>
+      </div>
+    </section>
+
+    <div class="chapter">
+      <div class="chapter-sticky">
+        <span class="chapter-tag">Ref. 02</span>
+        <div class="chapter-cmd">Projects</div>
+      </div>
+    </div>
+
+    <section class="zone" id="projects" data-section="PROJECTS">
+      <div class="zone-head reveal">
+        <div>
+          <span class="file-no">REF. 02 / PROJECTS</span>
+          <h2>On The Bench</h2>
+        </div>
+        <p>Music, travel, and games — the part of the site with no deadlines.</p>
+      </div>
+      <div class="projects">
+        <div class="proj reveal">
+          <span class="cat">Music</span>
+          <h3>Sounds Like</h3>
+          <p>Input a song, get back tracks that match its danceability, energy, and emotional tone — not just its genre.</p>
+          <span class="status building">Building</span>
+        </div>
+        <div class="proj reveal">
+          <span class="cat">Music</span>
+          <h3>Prompt Playlist</h3>
+          <p>Describe a mood — "songs that make you want to dance" — and get a playlist built to match it.</p>
+          <span class="status idea">Idea stage</span>
+        </div>
+        <div class="proj reveal">
+          <span class="cat">Travel</span>
+          <h3>Today, Somewhere</h3>
+          <p>Pick a city and a budget, get a same-day plan built from what's actually on — gigs, art shows, pub quizzes.</p>
+          <span class="status building">Building</span>
+        </div>
+        <div class="proj reveal">
+          <span class="cat">Travel</span>
+          <h3>Where Next</h3>
+          <p>Answer a few questions for a destination match — flight windows, price patterns, weather calls, and a built-in liveliness index scoring festivals, gigs, and hidden gems over tourist traps.</p>
+          <span class="status idea">Idea stage</span>
+        </div>
+        <div class="proj reveal">
+          <span class="cat">Game</span>
+          <h3>Speed Round</h3>
+          <p>A QuizUp-style trivia game on my favourite shows, films, and games — points for speed as much as accuracy.</p>
+          <span class="status idea">Idea stage</span>
+        </div>
+        <div class="proj reveal">
+          <span class="cat">Game</span>
+          <h3>[Untitled Terminal Adventure]</h3>
+          <p>A Zork-style, command-line text adventure — my own story, my own characters, typed one command at a time.</p>
+          <span class="status idea">Idea stage</span>
+        </div>
+        <div class="bench reveal">
+          also on the workbench: <b>chrome extensions</b> &amp; <b>Steam Workshop maps</b> (Meccha Chameleon)
+        </div>
+      </div>
+    </section>
+
+    <div class="chapter">
+      <div class="chapter-sticky">
+        <span class="chapter-tag">Ref. 03</span>
+        <div class="chapter-cmd">Toolbox</div>
+      </div>
+    </div>
+
+    <section class="zone" id="tools" data-section="TOOLS">
+      <div class="zone-head reveal">
+        <div>
+          <span class="file-no">REF. 03 / TOOLBOX</span>
+          <h2>Daily Utilities</h2>
+        </div>
+        <p>No accounts, no clutter — drop something in, get the result out.</p>
+      </div>
+      <div class="tools">
+        <div class="tool reveal">
+          <span class="n">01</span>
+          <h3>Image Converter</h3>
+          <p>Drop any photo, pick a format — WEBP, PNG, JPG — done in the browser.</p>
+          <a href="#" class="open" data-open-tool="imgConverterModal">Open tool</a>
+        </div>
+        <div class="tool reveal">
+          <span class="n">02</span>
+          <h3>Tempo Tap</h3>
+          <p>Tap along to any beat — spacebar, click, or touch — and read the BPM live.</p>
+          <a href="#" class="open" data-open-tool="tempoTapModal">Open tool</a>
+        </div>
+        <div class="tool reveal">
+          <span class="n">03</span>
+          <h3>Key / BPM Lookup</h3>
+          <p>Search a track by name, get its BPM and key in Camelot notation for mixing.</p>
+          <span class="soon">Coming soon</span>
+        </div>
+        <div class="tool reveal">
+          <span class="n">04</span>
+          <h3>QR Code Generator</h3>
+          <p>Paste a link, get a scannable QR code you can download in a click.</p>
+          <a href="#" class="open" data-open-tool="qrGenModal">Open tool</a>
+        </div>
+        <div class="tool reveal">
+          <span class="n">05</span>
+          <h3>Sample Finder</h3>
+          <p>Search by genre, mood, or BPM to dig up royalty-free samples.</p>
+          <span class="soon">Coming soon</span>
+        </div>
+        <div class="tool reveal">
+          <span class="n">06</span>
+          <h3>PDF Compressor</h3>
+          <p>Drop a PDF, shrink the file size without losing the content.</p>
+          <span class="soon">Coming soon</span>
+        </div>
+        <div class="tool reveal">
+          <span class="n">07</span>
+          <h3>Audio Trimmer</h3>
+          <p>Drop an audio file, cut it down to the exact clip you need.</p>
+          <a href="#" class="open" data-open-tool="audioTrimModal">Open tool</a>
+        </div>
+        <div class="tool reveal">
+          <span class="n">08</span>
+          <h3>Password Generator</h3>
+          <p>Generate a strong password instantly — length and character set, your call.</p>
+          <a href="#" class="open" data-open-tool="passwordGenModal">Open tool</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="zone" id="listen" data-section="LISTEN">
+      <div class="zone-head reveal">
+        <div>
+          <span class="file-no">REF. 04 / LISTEN</span>
+          <h2>Now Playing</h2>
+        </div>
+        <p>Pick a track — it'll keep playing from the top bar while you browse.</p>
+      </div>
+      <div class="tracklist reveal" id="tracklist">
+        <button class="track" data-index="0">
+          <span class="track-n">01</span>
+          <span class="track-meta">
+            <b>Heaven Up There</b>
+            <span>Palace</span>
+          </span>
+          <span class="track-play">&#9654;</span>
+        </button>
+        <button class="track" data-index="1">
+          <span class="track-n">02</span>
+          <span class="track-meta">
+            <b>Wicked Game</b>
+            <span>Chris Isaak</span>
+          </span>
+          <span class="track-play">&#9654;</span>
+        </button>
+        <button class="track" data-index="2">
+          <span class="track-n">03</span>
+          <span class="track-meta">
+            <b>Free Fallin'</b>
+            <span>Tom Petty</span>
+          </span>
+          <span class="track-play">&#9654;</span>
+        </button>
+      </div>
+
+      <span class="file-no playlists-label reveal">FEATURED PLAYLISTS</span>
+      <div class="playlist-grid reveal" id="playlistGrid">
+        <div class="playlist-card" data-playlist-id="1MhSnhyBju5i36bBWvHbff">
+          <a class="playlist-thumb-link" href="https://open.spotify.com/playlist/1MhSnhyBju5i36bBWvHbff" target="_blank" rel="noopener noreferrer" aria-label="Open playlist on Spotify">
+            <img class="playlist-thumb" alt="" loading="lazy">
+          </a>
+          <div class="playlist-info">
+            <span class="playlist-title">—</span>
+            <div class="playlist-actions">
+              <a class="playlist-action" href="https://open.spotify.com/playlist/1MhSnhyBju5i36bBWvHbff" target="_blank" rel="noopener noreferrer">&#9654; Play</a>
+              <a class="playlist-action" href="https://open.spotify.com/playlist/1MhSnhyBju5i36bBWvHbff" target="_blank" rel="noopener noreferrer">&#8646; Shuffle</a>
+            </div>
+          </div>
+        </div>
+        <div class="playlist-card" data-playlist-id="0xCGn0RL5DNNS7dlbjg5tv">
+          <a class="playlist-thumb-link" href="https://open.spotify.com/playlist/0xCGn0RL5DNNS7dlbjg5tv" target="_blank" rel="noopener noreferrer" aria-label="Open playlist on Spotify">
+            <img class="playlist-thumb" alt="" loading="lazy">
+          </a>
+          <div class="playlist-info">
+            <span class="playlist-title">—</span>
+            <div class="playlist-actions">
+              <a class="playlist-action" href="https://open.spotify.com/playlist/0xCGn0RL5DNNS7dlbjg5tv" target="_blank" rel="noopener noreferrer">&#9654; Play</a>
+              <a class="playlist-action" href="https://open.spotify.com/playlist/0xCGn0RL5DNNS7dlbjg5tv" target="_blank" rel="noopener noreferrer">&#8646; Shuffle</a>
+            </div>
+          </div>
+        </div>
+        <div class="playlist-card" data-playlist-id="57z4UxlbP2D2FFRh8fp6A5">
+          <a class="playlist-thumb-link" href="https://open.spotify.com/playlist/57z4UxlbP2D2FFRh8fp6A5" target="_blank" rel="noopener noreferrer" aria-label="Open playlist on Spotify">
+            <img class="playlist-thumb" alt="" loading="lazy">
+          </a>
+          <div class="playlist-info">
+            <span class="playlist-title">—</span>
+            <div class="playlist-actions">
+              <a class="playlist-action" href="https://open.spotify.com/playlist/57z4UxlbP2D2FFRh8fp6A5" target="_blank" rel="noopener noreferrer">&#9654; Play</a>
+              <a class="playlist-action" href="https://open.spotify.com/playlist/57z4UxlbP2D2FFRh8fp6A5" target="_blank" rel="noopener noreferrer">&#8646; Shuffle</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer data-section="END">
+      <div>&copy; 2026 Milind Parwani — built one section at a time</div>
+      <div class="links">
+        <a href="https://www.linkedin.com/in/milind-parwani-55a5b0266/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+        <a href="https://open.spotify.com/user/9zbpfc2ssjpy9tjiqo7xm3at0?si=728e36c1d1a6470e" target="_blank" rel="noopener noreferrer">Spotify</a>
+      </div>
+    </footer>
+  </main>
+</div>
+
+<!-- Tool modals live OUTSIDE #site so their position:fixed is relative to the viewport.
+     (#site keeps a non-none filter from the boot animation, which would otherwise make it
+     the containing block and push fixed children offscreen when the page is scrolled.) -->
+<div class="tool-modal" id="imgConverterModal" aria-hidden="true">
+  <div class="tool-modal-backdrop" data-close-tool></div>
+  <div class="tool-modal-panel" role="dialog" aria-modal="true" aria-labelledby="imgConverterTitle">
+    <div class="tool-modal-head">
+      <div>
+        <span class="file-no">REF. 03.01 / TOOL</span>
+        <h3 id="imgConverterTitle">Image Converter</h3>
+      </div>
+      <button class="tool-modal-close" data-close-tool aria-label="Close">&#10005;</button>
+    </div>
+    <p class="tool-modal-sub">Drop images below, pick an output format, download the result. Nothing leaves your browser.</p>
+
+    <div class="conv-format-row">
+      <span class="conv-label">Convert to</span>
+      <div class="conv-format-opts" id="convFormatOpts">
+        <button class="conv-format-btn active" data-format="png" data-ext="png">PNG</button>
+        <button class="conv-format-btn" data-format="jpeg" data-ext="jpg">JPG</button>
+        <button class="conv-format-btn" data-format="webp" data-ext="webp">WEBP</button>
+      </div>
+      <label class="conv-quality" id="convQualityWrap" hidden>
+        <span>Quality</span>
+        <input type="range" id="convQuality" min="0.3" max="1" step="0.05" value="0.9">
+        <span id="convQualityVal">90%</span>
+      </label>
+    </div>
+
+    <div class="conv-drop" id="convDrop" tabindex="0" role="button" aria-label="Add images">
+      <span class="conv-drop-icon">&#8595;</span>
+      <span class="conv-drop-text">Drag &amp; drop images here, or click to browse</span>
+      <span class="conv-drop-hint">Accepts WEBP, PNG, JPG, GIF, BMP</span>
+      <input type="file" id="convFileInput" accept="image/*" multiple hidden>
+    </div>
+
+    <div class="conv-list" id="convList"></div>
+  </div>
+</div>
+
+<div class="tool-modal" id="passwordGenModal" aria-hidden="true">
+  <div class="tool-modal-backdrop" data-close-tool></div>
+  <div class="tool-modal-panel" role="dialog" aria-modal="true" aria-labelledby="passwordGenTitle">
+    <div class="tool-modal-head">
+      <div>
+        <span class="file-no">REF. 03.10 / TOOL</span>
+        <h3 id="passwordGenTitle">Password Generator</h3>
+      </div>
+      <button class="tool-modal-close" data-close-tool aria-label="Close">&#10005;</button>
+    </div>
+    <p class="tool-modal-sub">Generate a strong password instantly. Nothing leaves your browser.</p>
+
+    <div class="pwgen-output">
+      <span class="pwgen-value" id="pwgenValue">&nbsp;</span>
+      <button class="pwgen-copy" id="pwgenCopy" type="button">Copy</button>
+    </div>
+
+    <div class="pwgen-row">
+      <span class="conv-label">Length</span>
+      <input type="range" id="pwgenLength" min="6" max="48" step="1" value="16">
+      <span id="pwgenLengthVal">16</span>
+    </div>
+
+    <div class="pwgen-opts">
+      <label class="pwgen-opt"><input type="checkbox" id="pwgenUpper" checked> Uppercase (A&ndash;Z)</label>
+      <label class="pwgen-opt"><input type="checkbox" id="pwgenLower" checked> Lowercase (a&ndash;z)</label>
+      <label class="pwgen-opt"><input type="checkbox" id="pwgenNumbers" checked> Numbers (0&ndash;9)</label>
+      <label class="pwgen-opt"><input type="checkbox" id="pwgenSymbols" checked> Symbols (!@#$&hellip;)</label>
+    </div>
+
+    <button class="pwgen-regenerate" id="pwgenRegenerate" type="button">Generate new password</button>
+  </div>
+</div>
+
+<div class="tool-modal" id="tempoTapModal" aria-hidden="true">
+  <div class="tool-modal-backdrop" data-close-tool></div>
+  <div class="tool-modal-panel" role="dialog" aria-modal="true" aria-labelledby="tempoTapTitle">
+    <div class="tool-modal-head">
+      <div>
+        <span class="file-no">REF. 03.02 / TOOL</span>
+        <h3 id="tempoTapTitle">Tempo Tap</h3>
+      </div>
+      <button class="tool-modal-close" data-close-tool aria-label="Close">&#10005;</button>
+    </div>
+    <p class="tool-modal-sub">Tap along to a beat — click, spacebar, or tap — and read the BPM live.</p>
+
+    <div class="tempo-readout">
+      <span class="tempo-bpm" id="tempoBpm">&mdash;</span>
+      <span class="tempo-bpm-label">BPM</span>
+    </div>
+
+    <button class="tempo-pad" id="tempoPad" type="button">Tap</button>
+
+    <div class="tempo-meta">
+      <span id="tempoTaps">0 taps</span>
+      <button class="tempo-reset" id="tempoReset" type="button">Reset</button>
+    </div>
+  </div>
+</div>
+
+<div class="tool-modal" id="qrGenModal" aria-hidden="true">
+  <div class="tool-modal-backdrop" data-close-tool></div>
+  <div class="tool-modal-panel" role="dialog" aria-modal="true" aria-labelledby="qrGenTitle">
+    <div class="tool-modal-head">
+      <div>
+        <span class="file-no">REF. 03.04 / TOOL</span>
+        <h3 id="qrGenTitle">QR Code Generator</h3>
+      </div>
+      <button class="tool-modal-close" data-close-tool aria-label="Close">&#10005;</button>
+    </div>
+    <p class="tool-modal-sub">Paste a link (or any text), get a scannable QR code. Nothing leaves your browser.</p>
+
+    <input type="text" id="qrInput" class="qr-input" placeholder="https://example.com" autocomplete="off" spellcheck="false">
+
+    <div class="qr-preview-wrap">
+      <div class="qr-preview">
+        <span class="qr-preview-empty" id="qrEmptyState">Paste something above to generate a code</span>
+        <canvas id="qrCanvas" hidden></canvas>
+      </div>
+    </div>
+
+    <button class="qr-download" id="qrDownload" type="button" disabled>Download PNG</button>
+  </div>
+</div>
+
+<div class="tool-modal" id="audioTrimModal" aria-hidden="true">
+  <div class="tool-modal-backdrop" data-close-tool></div>
+  <div class="tool-modal-panel" role="dialog" aria-modal="true" aria-labelledby="audioTrimTitle">
+    <div class="tool-modal-head">
+      <div>
+        <span class="file-no">REF. 03.09 / TOOL</span>
+        <h3 id="audioTrimTitle">Audio Trimmer</h3>
+      </div>
+      <button class="tool-modal-close" data-close-tool aria-label="Close">&#10005;</button>
+    </div>
+    <p class="tool-modal-sub">Drop an audio file, pick the range, download the clip. Nothing leaves your browser.</p>
+
+    <div class="conv-drop" id="trimDrop" tabindex="0" role="button" aria-label="Add audio file">
+      <span class="conv-drop-icon">&#8595;</span>
+      <span class="conv-drop-text" id="trimDropText">Drag &amp; drop an audio file here, or click to browse</span>
+      <span class="conv-drop-hint">Accepts MP3, WAV, OGG, M4A</span>
+      <input type="file" id="trimFileInput" accept="audio/*" hidden>
+    </div>
+
+    <div class="trim-editor" id="trimEditor" hidden>
+      <div class="trim-wave-wrap" id="trimWaveWrap">
+        <canvas id="trimWave"></canvas>
+        <div class="trim-shade trim-shade-left" id="trimShadeLeft"></div>
+        <div class="trim-shade trim-shade-right" id="trimShadeRight"></div>
+        <div class="trim-handle" id="trimHandleStart" role="slider" tabindex="0" aria-label="Trim start" aria-valuemin="0"><span class="trim-handle-cap"></span></div>
+        <div class="trim-handle" id="trimHandleEnd" role="slider" tabindex="0" aria-label="Trim end" aria-valuemin="0"><span class="trim-handle-cap"></span></div>
+      </div>
+
+      <div class="trim-labels">
+        <div class="trim-nudge">
+          <button class="trim-nudge-btn" type="button" data-edge="start" data-dir="-1" aria-label="Move start earlier">&minus;</button>
+          <span class="trim-nudge-val" id="trimStartVal">0:00.0</span>
+          <button class="trim-nudge-btn" type="button" data-edge="start" data-dir="1" aria-label="Move start later">+</button>
+        </div>
+        <span id="trimSelLength">Selection: 0:00.0</span>
+        <div class="trim-nudge">
+          <button class="trim-nudge-btn" type="button" data-edge="end" data-dir="-1" aria-label="Move end earlier">&minus;</button>
+          <span class="trim-nudge-val" id="trimEndVal">0:00.0</span>
+          <button class="trim-nudge-btn" type="button" data-edge="end" data-dir="1" aria-label="Move end later">+</button>
+        </div>
+      </div>
+
+      <div class="trim-actions">
+        <button class="trim-btn" id="trimPlay" type="button">Play</button>
+        <button class="trim-btn" id="trimLoop" type="button">Loop</button>
+        <button class="trim-btn" id="trimDownload" type="button">Download clip</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- QR Code Generator for JavaScript, (c) 2009 Kazuhiko Arase, MIT licensed. -->
+<script src="lib/qrcode.js"></script>
+
+<script>
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const bootScreen = document.getElementById('boot');
+  const bootEnter = document.getElementById('bootEnter');
+  let entered = false;
+
+  setTimeout(() => { bootEnter.classList.add('show'); }, reduced ? 0 : 700);
+
+  function enterSite(){
+    if(entered) return;
+    entered = true;
+    const site = document.getElementById('site');
+    if(reduced){ bootScreen.remove(); document.body.classList.remove('locked'); return; }
+    bootScreen.classList.add('off');
+    site.classList.add('powering');
+    document.body.classList.remove('locked');
+    setTimeout(() => bootScreen.remove(), 550);
+  }
+  bootScreen.addEventListener('click', enterSite);
+  document.addEventListener('keydown', (e) => {
+    if(!entered && (e.key === 'Enter' || e.key === ' ')){ e.preventDefault(); enterSite(); }
+  });
+
+  function tick(){
+    const d = new Date();
+    const p = n => String(n).padStart(2,'0');
+    const el = document.getElementById('clock');
+    if(el) el.textContent = `${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+  }
+  setInterval(tick, 1000); tick();
+
+  const stats = [
+    { label:"JOURNAL ENTRIES", value:"3" },
+    { label:"TOOLS SHIPPED", value:"1 / 4" },
+    { label:"TRACKS ANALYSED", value:"0" },
+    { label:"CITIES MAPPED", value:"0" },
+    { label:"GAMES IN PROGRESS", value:"2" },
+    { label:"LAST DEPLOY", value:"JUST NOW" },
+  ];
+  const build = () => stats.map(s => `<span>${s.label} <b>${s.value}</b></span>`).join("");
+  document.getElementById('ticker').innerHTML = build() + build();
+
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(en => { if(en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target); } });
+  }, { threshold:0.15 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  const scrollHint = document.querySelector('.scroll-hint');
+  if(scrollHint){
+    window.addEventListener('scroll', () => {
+      if(window.scrollY > 20){ scrollHint.classList.add('hidden'); }
+      else{ scrollHint.classList.remove('hidden'); }
+    }, { passive:true });
+  }
+
+  /* ============ NOW PLAYING ============ */
+  // Drop your mp3 files into an "audio/" folder next to this file,
+  // then match the filename in `src` below. Full song, no ads, works offline.
+  const TRACKS = [
+    { src:'audio/heaven-up-there.mp3', title:'Heaven Up There', artist:'Palace' },
+    { src:'audio/wicked-game.mp3',     title:'Wicked Game',     artist:'Chris Isaak' },
+    { src:'audio/free-fallin.mp3',     title:"Free Fallin'",    artist:'Tom Petty' },
+  ];
+
+  const audio = document.getElementById('audioEl');
+  let currentIndex = -1;
+  let isPlaying = false;
+
+  const npMarquee = document.getElementById('npMarquee');
+  const npMarqueeTrack = document.getElementById('npMarqueeTrack');
+  const npPlayBtn = document.getElementById('npPlay');
+  const npPrevBtn = document.getElementById('npPrev');
+  const npNextBtn = document.getElementById('npNext');
+  const npProgress = document.getElementById('npProgress');
+  const npProgressFill = document.getElementById('npProgressFill');
+  const trackButtons = Array.from(document.querySelectorAll('.track'));
+  const volDownBtn = document.getElementById('volDown');
+  const volUpBtn = document.getElementById('volUp');
+  const volSegs = Array.from(document.querySelectorAll('.np-vol-seg'));
+
+  const VOL_STEP = 0.1;
+  let volume = parseFloat(localStorage.getItem('parwani-volume'));
+  if(isNaN(volume) || volume < 0 || volume > 1) volume = 0.8;
+  audio.volume = volume;
+
+  function updateVolumeUI(){
+    const filled = Math.round(volume * volSegs.length);
+    volSegs.forEach((seg, i) => seg.classList.toggle('filled', i < filled));
+    volDownBtn.disabled = volume <= 0;
+    volUpBtn.disabled = volume >= 1;
+  }
+
+  function setVolume(v){
+    volume = Math.min(1, Math.max(0, Math.round(v * 100) / 100));
+    audio.volume = volume;
+    localStorage.setItem('parwani-volume', String(volume));
+    updateVolumeUI();
+  }
+
+  volDownBtn.addEventListener('click', () => setVolume(volume - VOL_STEP));
+  volUpBtn.addEventListener('click', () => setVolume(volume + VOL_STEP));
+  updateVolumeUI();
+
+  function setMarquee(text, loop){
+    npMarqueeTrack.innerHTML = loop
+      ? `<span>${text}</span><span>${text}</span>`
+      : `<span>${text}</span>`;
+  }
+
+  function updateMarquee(){
+    if(currentIndex === -1){
+      npMarquee.classList.add('idle'); npMarquee.classList.remove('playing');
+      setMarquee('select a track below to start listening', false);
+      return;
+    }
+    npMarquee.classList.remove('idle');
+    const t = TRACKS[currentIndex];
+    setMarquee(`<b>${t.title}</b> — ${t.artist}`, isPlaying);
+    if(isPlaying){ npMarquee.classList.add('playing'); } else { npMarquee.classList.remove('playing'); }
+  }
+
+  function updatePlayBtn(){
+    npPlayBtn.innerHTML = isPlaying ? '&#10073;&#10073;' : '&#9654;';
+  }
+
+  function updateActiveTrackRow(){
+    trackButtons.forEach(btn => {
+      const active = Number(btn.dataset.index) === currentIndex;
+      btn.classList.toggle('active', active);
+      const playGlyph = btn.querySelector('.track-play');
+      playGlyph.innerHTML = (active && isPlaying) ? '&#10073;&#10073;' : '&#9654;';
+    });
+  }
+
+  function updateProgressBarState(){
+    npProgress.classList.toggle('playing', isPlaying);
+  }
+
+  function updateProgress(){
+    if(!audio.duration || isNaN(audio.duration)){
+      npProgressFill.style.width = '0%';
+      return;
+    }
+    npProgressFill.style.width = ((audio.currentTime / audio.duration) * 100) + '%';
+  }
+
+  function refreshUI(){
+    updateMarquee();
+    updatePlayBtn();
+    updateActiveTrackRow();
+    updateProgressBarState();
+  }
+
+  function loadTrack(index, autoplay){
+    currentIndex = ((index % TRACKS.length) + TRACKS.length) % TRACKS.length;
+    audio.src = TRACKS[currentIndex].src;
+    updateProgress();
+    refreshUI(); // show selection immediately, regardless of whether the file loads
+    if(autoplay){
+      const p = audio.play();
+      if(p && p.catch){ p.catch(() => {}); }
+    }
+  }
+
+  function playPause(){
+    if(currentIndex === -1){ loadTrack(0, true); return; }
+    if(isPlaying){ audio.pause(); }
+    else{
+      const p = audio.play();
+      if(p && p.catch){ p.catch(() => {}); }
+    }
+  }
+
+  trackButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = Number(btn.dataset.index);
+      if(idx === currentIndex){ playPause(); }
+      else{ loadTrack(idx, true); }
+    });
+  });
+  npPlayBtn.addEventListener('click', playPause);
+  npPrevBtn.addEventListener('click', () => loadTrack(currentIndex === -1 ? 0 : currentIndex - 1, true));
+  npNextBtn.addEventListener('click', () => loadTrack(currentIndex === -1 ? 0 : currentIndex + 1, true));
+
+  function seekTo(ratio){
+    if(currentIndex === -1 || !audio.duration || isNaN(audio.duration)) return;
+    audio.currentTime = Math.min(Math.max(ratio, 0), 1) * audio.duration;
+    updateProgress();
+  }
+  npProgress.addEventListener('click', (e) => {
+    const rect = npProgress.getBoundingClientRect();
+    seekTo((e.clientX - rect.left) / rect.width);
+  });
+  npProgress.addEventListener('keydown', (e) => {
+    if(!audio.duration || isNaN(audio.duration)) return;
+    if(e.key === 'ArrowRight'){ e.preventDefault(); seekTo((audio.currentTime + 5) / audio.duration); }
+    else if(e.key === 'ArrowLeft'){ e.preventDefault(); seekTo((audio.currentTime - 5) / audio.duration); }
+  });
+
+  audio.addEventListener('play',  () => { isPlaying = true;  refreshUI(); });
+  audio.addEventListener('playing', () => { isPlaying = true;  refreshUI(); });
+  audio.addEventListener('pause', () => { isPlaying = false; refreshUI(); });
+  audio.addEventListener('timeupdate', updateProgress);
+  audio.addEventListener('ended', () => { loadTrack(currentIndex + 1, true); });
+  audio.addEventListener('error', () => {
+    const t = TRACKS[currentIndex];
+    if(!t) return;
+    isPlaying = false;
+    npMarquee.classList.add('idle'); npMarquee.classList.remove('playing');
+    setMarquee(`add ${t.src} to play this track`, false);
+    updatePlayBtn(); updateActiveTrackRow(); updateProgressBarState();
+  });
+
+  refreshUI();
+
+  /* ============ FEATURED PLAYLISTS ============ */
+  // Pulls cover art + title from Spotify's public oEmbed endpoint (no auth needed).
+  // Play/Shuffle just hand off to open.spotify.com — real playback happens over there.
+  document.querySelectorAll('#playlistGrid .playlist-card').forEach(async (card) => {
+    const id = card.dataset.playlistId;
+    const playlistUrl = `https://open.spotify.com/playlist/${id}`;
+    const titleEl = card.querySelector('.playlist-title');
+    const imgEl = card.querySelector('.playlist-thumb');
+    try{
+      const res = await fetch(`https://open.spotify.com/oembed?url=${encodeURIComponent(playlistUrl)}`);
+      if(!res.ok) throw new Error('oembed request failed');
+      const data = await res.json();
+      if(data.thumbnail_url){ imgEl.src = data.thumbnail_url; imgEl.alt = data.title || 'Playlist cover art'; }
+      if(data.title){ titleEl.textContent = data.title; }
+    } catch(e){
+      titleEl.textContent = 'Open on Spotify';
+    }
+  });
+
+  /* ============ TOOL MODALS (generic open/close) ============ */
+  function openToolModal(id){
+    const modal = document.getElementById(id);
+    if(!modal) return;
+    modal.classList.add('open');
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('locked');
+  }
+  function closeToolModal(modal){
+    modal.classList.remove('open');
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('locked');
+    modal.dispatchEvent(new CustomEvent('toolmodalclose'));
+  }
+  document.querySelectorAll('[data-open-tool]').forEach(trigger => {
+    trigger.addEventListener('click', (e) => {
+      e.preventDefault();
+      openToolModal(trigger.dataset.openTool);
+    });
+  });
+  document.querySelectorAll('.tool-modal').forEach(modal => {
+    modal.querySelectorAll('[data-close-tool]').forEach(btn => {
+      btn.addEventListener('click', () => closeToolModal(modal));
+    });
+  });
+  document.addEventListener('keydown', (e) => {
+    if(e.key !== 'Escape') return;
+    document.querySelectorAll('.tool-modal.open').forEach(modal => closeToolModal(modal));
+  });
+
+  /* ============ IMAGE CONVERTER ============ */
+  (() => {
+    const FORMAT_MIME = { png:'image/png', jpeg:'image/jpeg', webp:'image/webp' };
+    const FORMAT_EXT = { png:'png', jpeg:'jpg', webp:'webp' };
+
+    const drop = document.getElementById('convDrop');
+    const fileInput = document.getElementById('convFileInput');
+    const list = document.getElementById('convList');
+    const formatOpts = document.getElementById('convFormatOpts');
+    const qualityWrap = document.getElementById('convQualityWrap');
+    const qualityInput = document.getElementById('convQuality');
+    const qualityVal = document.getElementById('convQualityVal');
+
+    if(!drop) return; // converter markup not on this page
+
+    let format = 'png';
+    const items = new Map(); // id -> { file, img, thumbEl, sizeEl, statusEl, downloadEl, convertedUrl }
+    let nextId = 0;
+
+    function formatBytes(bytes){
+      if(bytes < 1024) return bytes + ' B';
+      if(bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+    }
+
+    function setFormat(f){
+      format = f;
+      formatOpts.querySelectorAll('.conv-format-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.format === f));
+      qualityWrap.hidden = (f === 'png');
+      items.forEach(item => convertItem(item));
+    }
+
+    formatOpts.querySelectorAll('.conv-format-btn').forEach(btn => {
+      btn.addEventListener('click', () => setFormat(btn.dataset.format));
+    });
+
+    qualityInput.addEventListener('input', () => {
+      qualityVal.textContent = Math.round(qualityInput.value * 100) + '%';
+    });
+    qualityInput.addEventListener('change', () => {
+      items.forEach(item => convertItem(item));
+    });
+
+    function convertItem(item){
+      item.statusEl.textContent = 'Converting…';
+      item.downloadEl.setAttribute('aria-disabled', 'true');
+      const canvas = document.createElement('canvas');
+      canvas.width = item.img.naturalWidth;
+      canvas.height = item.img.naturalHeight;
+      const ctx = canvas.getContext('2d');
+      if(format === 'jpeg'){ // jpeg has no alpha channel — flatten onto white first
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }
+      ctx.drawImage(item.img, 0, 0);
+      const quality = Number(qualityInput.value);
+      canvas.toBlob((blob) => {
+        if(!blob){ item.statusEl.textContent = 'Conversion failed'; return; }
+        if(item.convertedUrl) URL.revokeObjectURL(item.convertedUrl);
+        item.convertedUrl = URL.createObjectURL(blob);
+        const ext = FORMAT_EXT[format];
+        const baseName = item.file.name.replace(/\.[^.]+$/, '');
+        item.downloadEl.href = item.convertedUrl;
+        item.downloadEl.download = `${baseName}.${ext}`;
+        item.downloadEl.removeAttribute('aria-disabled');
+        item.statusEl.textContent = '';
+        item.sizeEl.textContent = `${formatBytes(item.file.size)} → ${formatBytes(blob.size)}`;
+      }, FORMAT_MIME[format], format === 'png' ? undefined : quality);
+    }
+
+    function addFiles(fileList){
+      Array.from(fileList).filter(f => f.type.startsWith('image/')).forEach(file => {
+        const id = nextId++;
+        const el = document.createElement('div');
+        el.className = 'conv-item';
+        el.innerHTML = `
+          <img class="conv-item-thumb" alt="">
+          <div class="conv-item-meta">
+            <span class="conv-item-name"></span>
+            <span class="conv-item-size"></span>
+          </div>
+          <div class="conv-item-actions">
+            <span class="conv-item-status">Loading…</span>
+            <a class="conv-item-download" aria-disabled="true">Download</a>
+            <button class="conv-item-remove" aria-label="Remove">&#10005;</button>
+          </div>`;
+        list.appendChild(el);
+
+        const thumbEl = el.querySelector('.conv-item-thumb');
+        const nameEl = el.querySelector('.conv-item-name');
+        const sizeEl = el.querySelector('.conv-item-size');
+        const statusEl = el.querySelector('.conv-item-status');
+        const downloadEl = el.querySelector('.conv-item-download');
+        const removeBtn = el.querySelector('.conv-item-remove');
+
+        nameEl.textContent = file.name;
+        const originalUrl = URL.createObjectURL(file);
+        thumbEl.src = originalUrl;
+
+        const item = { file, img:null, thumbEl, nameEl, sizeEl, statusEl, downloadEl, convertedUrl:null };
+        items.set(id, item);
+
+        removeBtn.addEventListener('click', () => {
+          if(item.convertedUrl) URL.revokeObjectURL(item.convertedUrl);
+          URL.revokeObjectURL(originalUrl);
+          items.delete(id);
+          el.remove();
+        });
+
+        const img = new Image();
+        img.onload = () => { item.img = img; convertItem(item); };
+        img.onerror = () => { statusEl.textContent = 'Could not read image'; };
+        img.src = originalUrl;
+      });
+    }
+
+    drop.addEventListener('click', () => fileInput.click());
+    drop.addEventListener('keydown', (e) => { if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); fileInput.click(); } });
+    fileInput.addEventListener('change', () => { addFiles(fileInput.files); fileInput.value = ''; });
+
+    ['dragenter', 'dragover'].forEach(evt => {
+      drop.addEventListener(evt, (e) => { e.preventDefault(); drop.classList.add('dragover'); });
+    });
+    ['dragleave', 'dragend'].forEach(evt => {
+      drop.addEventListener(evt, (e) => { e.preventDefault(); drop.classList.remove('dragover'); });
+    });
+    drop.addEventListener('drop', (e) => {
+      e.preventDefault();
+      drop.classList.remove('dragover');
+      if(e.dataTransfer && e.dataTransfer.files) addFiles(e.dataTransfer.files);
+    });
+
+    // stop stray drags outside the drop zone from navigating the whole page away
+    ['dragover', 'drop'].forEach(evt => {
+      window.addEventListener(evt, (e) => { if(e.target !== drop) e.preventDefault(); });
+    });
+  })();
+
+  /* ============ PASSWORD GENERATOR ============ */
+  (() => {
+    const valueEl = document.getElementById('pwgenValue');
+    const copyBtn = document.getElementById('pwgenCopy');
+    const lengthInput = document.getElementById('pwgenLength');
+    const lengthVal = document.getElementById('pwgenLengthVal');
+    const regenBtn = document.getElementById('pwgenRegenerate');
+    const upperEl = document.getElementById('pwgenUpper');
+    const lowerEl = document.getElementById('pwgenLower');
+    const numEl = document.getElementById('pwgenNumbers');
+    const symEl = document.getElementById('pwgenSymbols');
+    if(!valueEl) return;
+
+    const SETS = {
+      upper: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+      lower: 'abcdefghijklmnopqrstuvwxyz',
+      numbers: '0123456789',
+      symbols: '!@#$%^&*()_+-=[]{}|;:,.<>?'
+    };
+
+    function randomInt(max){
+      const buf = new Uint32Array(1);
+      crypto.getRandomValues(buf);
+      return buf[0] % max;
+    }
+
+    function generate(){
+      const pools = [];
+      if(upperEl.checked) pools.push(SETS.upper);
+      if(lowerEl.checked) pools.push(SETS.lower);
+      if(numEl.checked) pools.push(SETS.numbers);
+      if(symEl.checked) pools.push(SETS.symbols);
+      if(!pools.length){ valueEl.textContent = 'Select at least one character type'; return; }
+
+      const alphabet = pools.join('');
+      const length = Math.max(Number(lengthInput.value), pools.length);
+      const out = Array.from({ length }, () => alphabet[randomInt(alphabet.length)]);
+
+      // guarantee at least one char from each selected pool, then shuffle
+      pools.forEach((pool, i) => { out[i] = pool[randomInt(pool.length)]; });
+      for(let i = out.length - 1; i > 0; i--){
+        const j = randomInt(i + 1);
+        [out[i], out[j]] = [out[j], out[i]];
+      }
+
+      valueEl.textContent = out.join('');
+    }
+
+    lengthInput.addEventListener('input', () => { lengthVal.textContent = lengthInput.value; generate(); });
+    [upperEl, lowerEl, numEl, symEl].forEach(el => el.addEventListener('change', generate));
+    regenBtn.addEventListener('click', generate);
+
+    document.querySelectorAll('[data-open-tool="passwordGenModal"]').forEach(trigger => {
+      trigger.addEventListener('click', generate);
+    });
+
+    copyBtn.addEventListener('click', async () => {
+      try{
+        await navigator.clipboard.writeText(valueEl.textContent);
+        copyBtn.textContent = 'Copied';
+      }catch(e){
+        copyBtn.textContent = 'Failed';
+      }
+      setTimeout(() => { copyBtn.textContent = 'Copy'; }, 1400);
+    });
+
+    generate();
+  })();
+
+  /* ============ TEMPO TAP ============ */
+  (() => {
+    const modal = document.getElementById('tempoTapModal');
+    const pad = document.getElementById('tempoPad');
+    const bpmEl = document.getElementById('tempoBpm');
+    const tapsEl = document.getElementById('tempoTaps');
+    const resetBtn = document.getElementById('tempoReset');
+    if(!modal) return;
+
+    const RESET_GAP_MS = 2000;
+    const MAX_SAMPLES = 8;
+    let taps = [];
+    let tapCount = 0;
+    let resetTimer = null;
+
+    function resetState(){
+      taps = [];
+      tapCount = 0;
+      bpmEl.textContent = '—';
+      tapsEl.textContent = '0 taps';
+      clearTimeout(resetTimer);
+    }
+
+    function tap(){
+      const now = performance.now();
+      if(taps.length && now - taps[taps.length - 1] > RESET_GAP_MS){
+        taps = [];
+        tapCount = 0;
+      }
+      taps.push(now);
+      if(taps.length > MAX_SAMPLES) taps.shift();
+      tapCount++;
+
+      if(taps.length >= 2){
+        const intervals = [];
+        for(let i = 1; i < taps.length; i++) intervals.push(taps[i] - taps[i - 1]);
+        const avg = intervals.reduce((a, b) => a + b, 0) / intervals.length;
+        bpmEl.textContent = Math.round(60000 / avg);
+      }
+      tapsEl.textContent = `${tapCount} tap${tapCount === 1 ? '' : 's'}`;
+
+      pad.classList.remove('pulse');
+      void pad.offsetWidth;
+      pad.classList.add('pulse');
+
+      clearTimeout(resetTimer);
+      resetTimer = setTimeout(resetState, RESET_GAP_MS);
+    }
+
+    pad.addEventListener('click', tap);
+    resetBtn.addEventListener('click', resetState);
+
+    document.addEventListener('keydown', (e) => {
+      if(!modal.classList.contains('open')) return;
+      if(e.key === ' ' || e.code === 'Space'){
+        e.preventDefault();
+        tap();
+      }
+    });
+
+    document.querySelectorAll('[data-open-tool="tempoTapModal"]').forEach(trigger => {
+      trigger.addEventListener('click', resetState);
+    });
+  })();
+
+  /* ============ QR CODE GENERATOR ============ */
+  (() => {
+    const modal = document.getElementById('qrGenModal');
+    const input = document.getElementById('qrInput');
+    const canvas = document.getElementById('qrCanvas');
+    const emptyState = document.getElementById('qrEmptyState');
+    const downloadBtn = document.getElementById('qrDownload');
+    if(!modal || typeof qrcode === 'undefined') return;
+
+    const CELL_SIZE = 6;
+    const MARGIN = 2;
+    let debounceTimer = null;
+
+    function render(){
+      const text = input.value.trim();
+      if(!text){
+        canvas.hidden = true;
+        emptyState.hidden = false;
+        emptyState.textContent = 'Paste something above to generate a code';
+        downloadBtn.disabled = true;
+        return;
+      }
+
+      try{
+        const qr = qrcode(0, 'M');
+        qr.addData(text);
+        qr.make();
+
+        const moduleCount = qr.getModuleCount();
+        const size = (moduleCount + MARGIN * 2) * CELL_SIZE;
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(0, 0, size, size);
+        ctx.fillStyle = '#000';
+        for(let row = 0; row < moduleCount; row++){
+          for(let col = 0; col < moduleCount; col++){
+            if(qr.isDark(row, col)){
+              ctx.fillRect((col + MARGIN) * CELL_SIZE, (row + MARGIN) * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+            }
+          }
+        }
+
+        canvas.hidden = false;
+        emptyState.hidden = true;
+        downloadBtn.disabled = false;
+      }catch(e){
+        canvas.hidden = true;
+        emptyState.hidden = false;
+        emptyState.textContent = 'Too much text to encode — try something shorter';
+        downloadBtn.disabled = true;
+      }
+    }
+
+    input.addEventListener('input', () => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(render, 200);
+    });
+
+    downloadBtn.addEventListener('click', () => {
+      const a = document.createElement('a');
+      a.href = canvas.toDataURL('image/png');
+      a.download = 'qr-code.png';
+      a.click();
+    });
+
+    document.querySelectorAll('[data-open-tool="qrGenModal"]').forEach(trigger => {
+      trigger.addEventListener('click', () => setTimeout(() => input.focus(), 50));
+    });
+  })();
+
+  /* ============ AUDIO TRIMMER ============ */
+  (() => {
+    const modal = document.getElementById('audioTrimModal');
+    const drop = document.getElementById('trimDrop');
+    const dropText = document.getElementById('trimDropText');
+    const fileInput = document.getElementById('trimFileInput');
+    const editor = document.getElementById('trimEditor');
+    const waveWrap = document.getElementById('trimWaveWrap');
+    const waveCanvas = document.getElementById('trimWave');
+    const shadeLeft = document.getElementById('trimShadeLeft');
+    const shadeRight = document.getElementById('trimShadeRight');
+    const handleStart = document.getElementById('trimHandleStart');
+    const handleEnd = document.getElementById('trimHandleEnd');
+    const startVal = document.getElementById('trimStartVal');
+    const endVal = document.getElementById('trimEndVal');
+    const selLength = document.getElementById('trimSelLength');
+    const playBtn = document.getElementById('trimPlay');
+    const loopBtn = document.getElementById('trimLoop');
+    const downloadBtn = document.getElementById('trimDownload');
+    if(!modal) return;
+
+    const MIN_GAP = 0.05;
+    let audioCtx = null;
+    let decodedBuffer = null;
+    let playingSource = null;
+    let playMode = null; // null | 'once' | 'loop'
+    let selStart = 0;
+    let selEnd = 0;
+    let dragging = null;
+
+    function formatTime(sec){
+      sec = Math.max(0, sec);
+      const m = Math.floor(sec / 60);
+      const s = sec - m * 60;
+      return `${m}:${s.toFixed(1).padStart(4, '0')}`;
+    }
+
+    function drawWaveform(buffer){
+      const ctx = waveCanvas.getContext('2d');
+      const dpr = window.devicePixelRatio || 1;
+      const width = waveWrap.clientWidth;
+      const height = waveWrap.clientHeight;
+      waveCanvas.width = width * dpr;
+      waveCanvas.height = height * dpr;
+      waveCanvas.style.width = width + 'px';
+      waveCanvas.style.height = height + 'px';
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      const data = buffer.getChannelData(0);
+      const step = data.length / width;
+      const mid = height / 2;
+
+      // Peak-normalise the display: scale so the loudest sample reaches HEADROOM of the
+      // half-height. Quiet tracks get amplified up to be legible; loud/compressed tracks
+      // get pulled in from the edges. Kept well under 1 so even peaks sit clear of the
+      // top/bottom edges and the peaks/troughs stay readable within the zone.
+      const HEADROOM = 0.7;
+      let peak = 0;
+      for(let i = 0; i < data.length; i++){
+        const a = data[i] < 0 ? -data[i] : data[i];
+        if(a > peak) peak = a;
+      }
+      const scale = peak > 0 ? (HEADROOM / peak) : 1;
+
+      ctx.clearRect(0, 0, width, height);
+      ctx.strokeStyle = '#F2F2F0';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      for(let x = 0; x < width; x++){
+        let min = 1, max = -1;
+        const from = Math.floor(x * step);
+        const to = Math.max(from + 1, Math.floor((x + 1) * step));
+        for(let i = from; i < to && i < data.length; i++){
+          const v = data[i];
+          if(v < min) min = v;
+          if(v > max) max = v;
+        }
+        if(min > max){ min = 0; max = 0; }
+        ctx.moveTo(x + 0.5, mid + min * mid * scale);
+        ctx.lineTo(x + 0.5, mid + max * mid * scale);
+      }
+      ctx.stroke();
+    }
+
+    function updateLabels(){
+      startVal.textContent = formatTime(selStart);
+      endVal.textContent = formatTime(selEnd);
+      selLength.textContent = `Selection: ${formatTime(Math.max(0, selEnd - selStart))}`;
+    }
+
+    function updateHandlePositions(){
+      if(!decodedBuffer) return;
+      const duration = decodedBuffer.duration;
+      const width = waveWrap.clientWidth;
+      const startX = (selStart / duration) * width;
+      const endX = (selEnd / duration) * width;
+      handleStart.style.left = startX + 'px';
+      handleEnd.style.left = endX + 'px';
+      shadeLeft.style.width = startX + 'px';
+      shadeRight.style.width = (width - endX) + 'px';
+      handleStart.setAttribute('aria-valuemax', String(duration));
+      handleStart.setAttribute('aria-valuenow', String(selStart));
+      handleEnd.setAttribute('aria-valuemax', String(duration));
+      handleEnd.setAttribute('aria-valuenow', String(selEnd));
+    }
+
+    function refreshPlayButtons(){
+      if(playMode === 'once'){ playBtn.textContent = 'Stop'; playBtn.classList.add('active'); }
+      else { playBtn.textContent = 'Play'; playBtn.classList.remove('active'); }
+      if(playMode === 'loop'){ loopBtn.textContent = '● Looping'; loopBtn.classList.add('looping'); }
+      else { loopBtn.textContent = 'Loop'; loopBtn.classList.remove('looping'); }
+    }
+
+    function stopPlayback(){
+      if(playingSource){
+        playingSource.onended = null;
+        try{ playingSource.stop(); }catch(e){}
+        playingSource = null;
+      }
+      playMode = null;
+      refreshPlayButtons();
+    }
+
+    function startPlayback(loop){
+      if(!decodedBuffer) return;
+      if(playingSource){
+        playingSource.onended = null;
+        try{ playingSource.stop(); }catch(e){}
+        playingSource = null;
+      }
+      const source = audioCtx.createBufferSource();
+      source.buffer = getTrimmedBuffer();
+      source.loop = loop;
+      source.connect(audioCtx.destination);
+      source.onended = () => {
+        if(playingSource === source){ playingSource = null; playMode = null; refreshPlayButtons(); }
+      };
+      source.start();
+      playingSource = source;
+      playMode = loop ? 'loop' : 'once';
+      refreshPlayButtons();
+    }
+
+    function loadFile(file){
+      if(!file || !file.type.startsWith('audio/')) return;
+      dropText.textContent = `Decoding ${file.name}…`;
+
+      if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+      file.arrayBuffer()
+        .then(buf => audioCtx.decodeAudioData(buf))
+        .then(buffer => {
+          stopPlayback();
+          decodedBuffer = buffer;
+          dropText.textContent = `Loaded: ${file.name}`;
+          editor.hidden = false;
+
+          selStart = 0;
+          selEnd = buffer.duration;
+
+          updateLabels();
+          drawWaveform(buffer);
+          updateHandlePositions();
+        })
+        .catch(() => {
+          dropText.textContent = 'Could not decode that file — try a different audio file.';
+          editor.hidden = true;
+          decodedBuffer = null;
+        });
+    }
+
+    drop.addEventListener('click', () => fileInput.click());
+    drop.addEventListener('keydown', (e) => {
+      if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); fileInput.click(); }
+    });
+    fileInput.addEventListener('change', () => { if(fileInput.files[0]) loadFile(fileInput.files[0]); });
+
+    ['dragenter', 'dragover'].forEach(evt => {
+      drop.addEventListener(evt, (e) => { e.preventDefault(); drop.classList.add('dragover'); });
+    });
+    ['dragleave', 'dragend'].forEach(evt => {
+      drop.addEventListener(evt, (e) => { e.preventDefault(); drop.classList.remove('dragover'); });
+    });
+    drop.addEventListener('drop', (e) => {
+      e.preventDefault();
+      drop.classList.remove('dragover');
+      if(e.dataTransfer && e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]);
+    });
+
+    function timeFromClientX(clientX){
+      const rect = waveWrap.getBoundingClientRect();
+      const frac = Math.min(1, Math.max(0, (clientX - rect.left) / rect.width));
+      return frac * decodedBuffer.duration;
+    }
+
+    function onPointerMove(e){
+      if(!dragging || !decodedBuffer) return;
+      const t = timeFromClientX(e.clientX);
+      if(dragging === 'start'){
+        selStart = Math.max(0, Math.min(t, selEnd - MIN_GAP));
+      } else {
+        selEnd = Math.min(decodedBuffer.duration, Math.max(t, selStart + MIN_GAP));
+      }
+      updateLabels();
+      updateHandlePositions();
+    }
+
+    function stopDragging(){
+      if(!dragging) return;
+      dragging = null;
+      handleStart.classList.remove('dragging');
+      handleEnd.classList.remove('dragging');
+      window.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('pointerup', stopDragging);
+    }
+
+    function startDragging(which){
+      return (e) => {
+        if(!decodedBuffer) return;
+        e.preventDefault();
+        dragging = which;
+        stopPlayback();
+        (which === 'start' ? handleStart : handleEnd).classList.add('dragging');
+        window.addEventListener('pointermove', onPointerMove);
+        window.addEventListener('pointerup', stopDragging);
+      };
+    }
+
+    handleStart.addEventListener('pointerdown', startDragging('start'));
+    handleEnd.addEventListener('pointerdown', startDragging('end'));
+
+    function nudge(which, deltaSec){
+      if(!decodedBuffer) return;
+      if(which === 'start'){
+        selStart = Math.min(Math.max(0, selStart + deltaSec), selEnd - MIN_GAP);
+      } else {
+        selEnd = Math.max(Math.min(decodedBuffer.duration, selEnd + deltaSec), selStart + MIN_GAP);
+      }
+      updateLabels();
+      updateHandlePositions();
+      // keep audio in sync while fine-tuning, so you hear each 0.1s adjustment
+      if(playMode) startPlayback(playMode === 'loop');
+    }
+    handleStart.addEventListener('keydown', (e) => {
+      if(e.key === 'ArrowLeft'){ e.preventDefault(); nudge('start', -0.1); }
+      if(e.key === 'ArrowRight'){ e.preventDefault(); nudge('start', 0.1); }
+    });
+    handleEnd.addEventListener('keydown', (e) => {
+      if(e.key === 'ArrowLeft'){ e.preventDefault(); nudge('end', -0.1); }
+      if(e.key === 'ArrowRight'){ e.preventDefault(); nudge('end', 0.1); }
+    });
+
+    modal.querySelectorAll('.trim-nudge-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        nudge(btn.dataset.edge, 0.1 * Number(btn.dataset.dir));
+      });
+    });
+
+    window.addEventListener('resize', () => {
+      if(decodedBuffer && !editor.hidden){
+        drawWaveform(decodedBuffer);
+        updateHandlePositions();
+      }
+    });
+
+    function getTrimmedBuffer(){
+      const sampleRate = decodedBuffer.sampleRate;
+      const startSample = Math.floor(selStart * sampleRate);
+      const endSample = Math.floor(selEnd * sampleRate);
+      const frameCount = Math.max(1, endSample - startSample);
+
+      const trimmed = audioCtx.createBuffer(decodedBuffer.numberOfChannels, frameCount, sampleRate);
+      for(let ch = 0; ch < decodedBuffer.numberOfChannels; ch++){
+        const srcData = decodedBuffer.getChannelData(ch);
+        const destData = trimmed.getChannelData(ch);
+        destData.set(srcData.subarray(startSample, startSample + frameCount));
+      }
+      return trimmed;
+    }
+
+    playBtn.addEventListener('click', () => {
+      if(!decodedBuffer) return;
+      if(playMode === 'once') stopPlayback();
+      else startPlayback(false);
+    });
+
+    loopBtn.addEventListener('click', () => {
+      if(!decodedBuffer) return;
+      if(playMode === 'loop') stopPlayback();
+      else startPlayback(true);
+    });
+
+    modal.addEventListener('toolmodalclose', stopPlayback);
+
+    function encodeWav(buffer){
+      const numChannels = buffer.numberOfChannels;
+      const sampleRate = buffer.sampleRate;
+      const numFrames = buffer.length;
+      const blockAlign = numChannels * 2;
+      const dataSize = numFrames * blockAlign;
+
+      const arrayBuffer = new ArrayBuffer(44 + dataSize);
+      const view = new DataView(arrayBuffer);
+
+      function writeString(offset, str){
+        for(let i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i));
+      }
+
+      writeString(0, 'RIFF');
+      view.setUint32(4, 36 + dataSize, true);
+      writeString(8, 'WAVE');
+      writeString(12, 'fmt ');
+      view.setUint32(16, 16, true);
+      view.setUint16(20, 1, true);
+      view.setUint16(22, numChannels, true);
+      view.setUint32(24, sampleRate, true);
+      view.setUint32(28, sampleRate * blockAlign, true);
+      view.setUint16(32, blockAlign, true);
+      view.setUint16(34, 16, true);
+      writeString(36, 'data');
+      view.setUint32(40, dataSize, true);
+
+      const channelData = [];
+      for(let ch = 0; ch < numChannels; ch++) channelData.push(buffer.getChannelData(ch));
+
+      let offset = 44;
+      for(let i = 0; i < numFrames; i++){
+        for(let ch = 0; ch < numChannels; ch++){
+          let sample = Math.max(-1, Math.min(1, channelData[ch][i]));
+          view.setInt16(offset, sample < 0 ? sample * 0x8000 : sample * 0x7FFF, true);
+          offset += 2;
+        }
+      }
+
+      return new Blob([arrayBuffer], { type: 'audio/wav' });
+    }
+
+    downloadBtn.addEventListener('click', () => {
+      if(!decodedBuffer) return;
+      const trimmed = getTrimmedBuffer();
+      const blob = encodeWav(trimmed);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'trimmed-clip.wav';
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 2000);
+    });
+
+    document.querySelectorAll('[data-open-tool="audioTrimModal"]').forEach(trigger => {
+      trigger.addEventListener('click', stopPlayback);
+    });
+  })();
+
+</script>
+
+</body>
+</html>

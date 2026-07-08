@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "parwani-site",
+      "runtimeExecutable": "C:\\Users\\milin_gni6ae7\\OneDrive\\Documents\\Claude Code\\Portfolio\\.claude\\start-server.cmd",
+      "runtimeArgs": [],
+      "port": 5500
+    }
+  ]
+}
