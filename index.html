@@ -91,8 +91,6 @@
   .np-progress:hover{ height:5px; }
   .np-progress.playing{ opacity:1; }
   .np-progress-fill{ height:100%; width:0%; background:var(--fg); pointer-events:none; }
-  .topbar .id{ color:var(--dim); flex-shrink:0; }
-  .topbar .id b{ color:var(--fg); }
   .topbar .clock{ color:var(--dim); flex-shrink:0; }
 
   /* now playing — top bar */
@@ -521,9 +519,6 @@
     .journal{ grid-template-columns:1fr; }
     .projects{ grid-template-columns:1fr; }
     .tools{ grid-template-columns:1fr; }
-    .topbar .id b{ display:none; }
-    .topbar .id{ font-size:0; }
-    .topbar .id::before{ content:'REF'; font-size:.7rem; }
     .np{ padding:0 .5rem; gap:.4rem; }
   }
 </style>
@@ -540,7 +535,6 @@
 <div id="site">
   <div class="site-header" id="siteHeader">
     <div class="topbar">
-      <div class="id">REF: <b>PARWANI.SITE</b></div>
       <div class="np">
         <div class="np-ctrls">
           <button class="np-btn" id="npPrev" aria-label="Previous track">&#9664;&#9664;</button>
@@ -830,7 +824,7 @@
     </section>
 
     <footer data-section="END">
-      <div>&copy; 2026 Milind Parwani — built one section at a time</div>
+      <div>&copy; 2026 Milind Parwani</div>
       <div class="links">
         <a href="https://www.linkedin.com/in/milind-parwani-55a5b0266/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
         <a href="https://open.spotify.com/user/9zbpfc2ssjpy9tjiqo7xm3at0?si=728e36c1d1a6470e" target="_blank" rel="noopener noreferrer">Spotify</a>
