@@ -229,10 +229,12 @@
     padding:1.6rem 1.8rem; border:1px solid var(--line); background:var(--bg); transition:background .25s;
   }
   .publication:hover{ background:var(--panel); }
-  .publication h3{
-    font-family:var(--sans); font-weight:700; font-size:1rem; line-height:1.4; color:var(--fg); margin:0;
-    text-transform:uppercase; letter-spacing:.06em; flex:1 1 auto; min-width:0;
-  }
+  .pub-info{ display:flex; flex-direction:column; gap:.5rem; flex:1 1 auto; min-width:0; }
+  /* same typography as .proj .cat / h3 / p (the "Sounds Like" project cards), so this entry
+     reads as part of the same family rather than a differently-styled one-off */
+  .pub-info .cat{ font-family:var(--mono); font-size:.66rem; color:var(--dim); letter-spacing:.1em; text-transform:uppercase; }
+  .publication h3{ font-family:var(--sans); font-weight:700; font-size:1.3rem; margin:0; text-transform:uppercase; letter-spacing:.01em; }
+  .publication p{ font-family:var(--sans); color:var(--dim); font-size:.9rem; line-height:1.55; margin:0; }
   .pub-download{
     font-family:var(--mono); font-size:.72rem; text-transform:uppercase; letter-spacing:.04em;
     padding:.6rem 1.2rem; border:1px solid var(--line); color:var(--fg); background:none; cursor:pointer;
@@ -625,7 +627,11 @@
 
       <span class="file-no publications-label reveal">ACADEMIC PUBLICATIONS</span>
       <div class="publication reveal">
-        <h3>To What Extent Does Exposure To Conflict Affect Risk Preferences</h3>
+        <div class="pub-info">
+          <span class="cat">Dissertation</span>
+          <h3>To What Extent Does Exposure To Conflict Affect Risk Preferences</h3>
+          <p>A literature review, submitted as my third-year undergraduate dissertation.</p>
+        </div>
         <a href="dissertation.pdf" target="_blank" rel="noopener noreferrer" class="pub-download">Download</a>
       </div>
     </section>
