@@ -486,6 +486,12 @@
   .player-volume-range::-moz-range-progress{ background:var(--fg); height:4px; }
   .player-volume-range::-moz-range-track{ background:var(--line); height:4px; }
 
+  @media (max-width:560px){
+    .player-ctrls{ flex-wrap:wrap; row-gap:.9rem; }
+    .player-volume{ width:100%; }
+    .player-volume-range{ flex:1; width:auto; }
+  }
+
   .tracklist{ display:flex; flex-direction:column; border:1px solid var(--line); max-height:376px; overflow-y:auto; }
   .track{
     display:flex; align-items:center; gap:1.1rem; width:100%;
