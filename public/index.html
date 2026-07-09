@@ -23,9 +23,13 @@
   }
   *{ box-sizing:border-box; }
   html{ scroll-behavior:smooth; }
+  /* overflow-x:hidden deliberately NOT set on body/html: it's a well-documented Safari/WebKit
+     bug that overflow-x:hidden on any ancestor of a position:sticky element (here, .site-header)
+     breaks sticky positioning — Chrome tolerates the combination, Safari doesn't, which is why
+     this only shows up on real iOS devices and never in Chromium-based local testing. */
   body{
     margin:0; background:var(--bg); color:var(--fg);
-    font-family:var(--sans); -webkit-font-smoothing:antialiased; overflow-x:hidden;
+    font-family:var(--sans); -webkit-font-smoothing:antialiased;
   }
   body.locked{ overflow:hidden; height:100vh; }
   a{ color:inherit; text-decoration:none; }
@@ -515,7 +519,13 @@
     transition:border-color .2s, color .2s;
   }
   .playlist-action:hover{ border-color:var(--fg); color:var(--fg); }
-  @media (max-width:880px){ .playlist-grid{ grid-template-columns:1fr; } }
+  @media (max-width:880px){
+    .playlist-grid{ grid-template-columns:1fr; }
+    /* the 1:1 thumbnail ratio is fine at 1/3 grid width on desktop, but once the grid collapses
+       to a single full-width column on mobile, a square image becomes disproportionately tall
+       and drags the page out — use a wider banner ratio here instead */
+    .playlist-thumb-link{ aspect-ratio:16/9; }
+  }
 
   footer{
     padding:3rem clamp(1.2rem,6vw,6rem) 4rem; border-top:1px solid var(--line);
