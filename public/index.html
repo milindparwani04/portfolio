@@ -156,7 +156,15 @@
   .ticker-badge-dot{ width:6px; height:6px; border-radius:50%; background:#e0645a; animation:ticker-pulse 1.6s ease-in-out infinite; flex-shrink:0; }
   @keyframes ticker-pulse{ 0%,100%{ opacity:1; } 50%{ opacity:.3; } }
   .ticker-track{ flex:1; min-width:0; overflow:hidden; white-space:nowrap; display:flex; align-items:center; }
-  .ticker{ display:inline-block; font-family:var(--mono); font-size:.72rem; animation:scroll 90s linear infinite; }
+  /* flex:0 0 auto + width:max-content pin the ticker's width to its content, so mobile browsers
+     can't shrink it to the track width or leave it stale after the headlines load in async —
+     that stale/shrunk width is what broke the translateX(-50%) loop on real devices (worked in
+     desktop Chromium, froze/vanished on mobile until a rotation forced a reflow). will-change
+     promotes it to its own compositor layer for a smooth, reliable transform animation. */
+  .ticker{
+    flex:0 0 auto; width:max-content; display:inline-block; will-change:transform;
+    font-family:var(--mono); font-size:.72rem; animation:scroll 90s linear infinite;
+  }
   .ticker span{ color:var(--dim); }
   .ticker .ticker-sep{ margin:0 1.6rem; color:var(--dimmer); }
   @keyframes scroll{ from{ transform:translateX(0);} to{ transform:translateX(-50%);} }
@@ -521,11 +529,6 @@
     .projects{ grid-template-columns:1fr; }
     .tools{ grid-template-columns:1fr; }
     .np{ padding:0 .5rem; gap:.4rem; }
-    /* the ticker-track is much narrower on mobile, so the same 90s lap shows far less text
-       at any instant — same px/sec rate, but far less new content readable per second, which
-       reads as "slow". Scale duration down by the measured track-width ratio (~15%) so mobile
-       cycles through content proportionally faster and feels comparably paced to desktop. */
-    .ticker{ animation-duration:13.6s; }
   }
 </style>
 </head>
@@ -1060,22 +1063,50 @@
     return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
 
+  const tickerEl = document.getElementById('ticker');
+  const TICKER_SEP = '<span class="ticker-sep">&#8226;</span>';
+
+  // Set the ticker content, then hard-restart its CSS animation. The restart forces a reflow
+  // (offsetWidth) so translateX(-50%) is recomputed against the *final* content width — without
+  // this, mobile browsers kept animating against the pre-load placeholder width, which is why
+  // headlines froze/vanished until a rotation happened to force the same reflow.
+  function setTicker(html){
+    tickerEl.innerHTML = html;
+    tickerEl.style.animation = 'none';
+    void tickerEl.offsetWidth; // force reflow
+    tickerEl.style.animation = '';
+  }
+
   async function loadTicker(){
-    const tickerEl = document.getElementById('ticker');
     try{
       const res = await fetch('/api/news');
       if(!res.ok) throw new Error('bad response');
       const data = await res.json();
       if(!data.headlines || !data.headlines.length) throw new Error('no headlines');
-      const build = () => data.headlines.map(h => `<span>${escapeHtml(h)}</span>`).join('<span class="ticker-sep">&#8226;</span>');
-      const sep = '<span class="ticker-sep">&#8226;</span>';
-      tickerEl.innerHTML = build() + sep + build();
+      // Two identical units (each ending in a separator) so translateX(-50%) lands exactly on
+      // the seam of the duplicate — a truly seamless loop with no per-cycle jump.
+      const unit = data.headlines.map(h => `<span>${escapeHtml(h)}</span>`).join(TICKER_SEP) + TICKER_SEP;
+      setTicker(unit + unit);
     }catch(err){
-      tickerEl.innerHTML = '<span>Unable to load headlines right now — check back shortly.</span>';
+      const unit = '<span>Unable to load headlines right now — check back shortly.</span>' + TICKER_SEP;
+      setTicker(unit + unit);
     }
   }
   loadTicker();
   setInterval(loadTicker, 5 * 60 * 1000);
+
+  // Rotation was the accidental fix users found; make it (and any viewport resize) a deliberate
+  // one by restarting the animation against the new layout. Debounced so a drag-resize doesn't
+  // thrash it.
+  let tickerResizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(tickerResizeTimer);
+    tickerResizeTimer = setTimeout(() => {
+      tickerEl.style.animation = 'none';
+      void tickerEl.offsetWidth;
+      tickerEl.style.animation = '';
+    }, 200);
+  });
 
   const io = new IntersectionObserver((entries) => {
     entries.forEach(en => { if(en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target); } });
