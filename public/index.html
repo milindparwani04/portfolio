@@ -502,30 +502,6 @@
   .track.active .track-n{ color:var(--fg); }
   .track.active .track-play{ border-color:var(--fg); color:var(--fg); }
 
-  .playlists-label{ display:block; margin:3rem 0 1rem; }
-  .playlist-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:1.1rem; }
-  .playlist-card{ background:var(--bg); border:1px solid var(--line); display:flex; flex-direction:column; transition:background .25s, border-color .25s; }
-  .playlist-card:hover{ background:var(--panel); border-color:var(--fg); }
-  .playlist-thumb-link{ display:block; aspect-ratio:1/1; overflow:hidden; background:var(--panel); }
-  .playlist-thumb{ width:100%; height:100%; object-fit:cover; display:block; filter:grayscale(.15); transition:filter .25s ease, transform .4s ease; }
-  .playlist-card:hover .playlist-thumb{ filter:grayscale(0); transform:scale(1.03); }
-  .playlist-info{ padding:1rem 1.1rem 1.2rem; display:flex; flex-direction:column; gap:.8rem; }
-  .playlist-title{ font-family:var(--sans); font-weight:600; font-size:.96rem; line-height:1.3; }
-  .playlist-actions{ display:flex; gap:.6rem; }
-  .playlist-action{
-    flex:1; display:flex; align-items:center; justify-content:center; gap:.4rem;
-    font-family:var(--mono); font-size:.68rem; letter-spacing:.05em; text-transform:uppercase;
-    padding:.55rem .5rem; border:1px solid var(--line); color:var(--dim);
-    transition:border-color .2s, color .2s;
-  }
-  .playlist-action:hover{ border-color:var(--fg); color:var(--fg); }
-  @media (max-width:880px){
-    .playlist-grid{ grid-template-columns:1fr; }
-    /* the 1:1 thumbnail ratio is fine at 1/3 grid width on desktop, but once the grid collapses
-       to a single full-width column on mobile, a square image becomes disproportionately tall
-       and drags the page out — use a wider banner ratio here instead */
-    .playlist-thumb-link{ aspect-ratio:16/9; }
-  }
 
   footer{
     padding:3rem clamp(1.2rem,6vw,6rem) 4rem; border-top:1px solid var(--line);
@@ -545,6 +521,11 @@
     .projects{ grid-template-columns:1fr; }
     .tools{ grid-template-columns:1fr; }
     .np{ padding:0 .5rem; gap:.4rem; }
+    /* the ticker-track is much narrower on mobile, so the same 90s lap shows far less text
+       at any instant — same px/sec rate, but far less new content readable per second, which
+       reads as "slow". Scale duration down by the measured track-width ratio (~15%) so mobile
+       cycles through content proportionally faster and feels comparably paced to desktop. */
+    .ticker{ animation-duration:13.6s; }
   }
 </style>
 </head>
@@ -852,46 +833,6 @@
           </span>
           <span class="track-play">&#9654;</span>
         </button>
-      </div>
-
-      <span class="file-no playlists-label reveal">FEATURED PLAYLISTS</span>
-      <div class="playlist-grid reveal" id="playlistGrid">
-        <div class="playlist-card" data-playlist-id="1MhSnhyBju5i36bBWvHbff">
-          <a class="playlist-thumb-link" href="https://open.spotify.com/playlist/1MhSnhyBju5i36bBWvHbff" target="_blank" rel="noopener noreferrer" aria-label="Open playlist on Spotify">
-            <img class="playlist-thumb" alt="" loading="lazy">
-          </a>
-          <div class="playlist-info">
-            <span class="playlist-title">—</span>
-            <div class="playlist-actions">
-              <a class="playlist-action" href="https://open.spotify.com/playlist/1MhSnhyBju5i36bBWvHbff" target="_blank" rel="noopener noreferrer">&#9654; Play</a>
-              <a class="playlist-action" href="https://open.spotify.com/playlist/1MhSnhyBju5i36bBWvHbff" target="_blank" rel="noopener noreferrer">&#8646; Shuffle</a>
-            </div>
-          </div>
-        </div>
-        <div class="playlist-card" data-playlist-id="0xCGn0RL5DNNS7dlbjg5tv">
-          <a class="playlist-thumb-link" href="https://open.spotify.com/playlist/0xCGn0RL5DNNS7dlbjg5tv" target="_blank" rel="noopener noreferrer" aria-label="Open playlist on Spotify">
-            <img class="playlist-thumb" alt="" loading="lazy">
-          </a>
-          <div class="playlist-info">
-            <span class="playlist-title">—</span>
-            <div class="playlist-actions">
-              <a class="playlist-action" href="https://open.spotify.com/playlist/0xCGn0RL5DNNS7dlbjg5tv" target="_blank" rel="noopener noreferrer">&#9654; Play</a>
-              <a class="playlist-action" href="https://open.spotify.com/playlist/0xCGn0RL5DNNS7dlbjg5tv" target="_blank" rel="noopener noreferrer">&#8646; Shuffle</a>
-            </div>
-          </div>
-        </div>
-        <div class="playlist-card" data-playlist-id="57z4UxlbP2D2FFRh8fp6A5">
-          <a class="playlist-thumb-link" href="https://open.spotify.com/playlist/57z4UxlbP2D2FFRh8fp6A5" target="_blank" rel="noopener noreferrer" aria-label="Open playlist on Spotify">
-            <img class="playlist-thumb" alt="" loading="lazy">
-          </a>
-          <div class="playlist-info">
-            <span class="playlist-title">—</span>
-            <div class="playlist-actions">
-              <a class="playlist-action" href="https://open.spotify.com/playlist/57z4UxlbP2D2FFRh8fp6A5" target="_blank" rel="noopener noreferrer">&#9654; Play</a>
-              <a class="playlist-action" href="https://open.spotify.com/playlist/57z4UxlbP2D2FFRh8fp6A5" target="_blank" rel="noopener noreferrer">&#8646; Shuffle</a>
-            </div>
-          </div>
-        </div>
       </div>
     </section>
 
@@ -1315,25 +1256,6 @@
   });
 
   refreshUI();
-
-  /* ============ FEATURED PLAYLISTS ============ */
-  // Pulls cover art + title from Spotify's public oEmbed endpoint (no auth needed).
-  // Play/Shuffle just hand off to open.spotify.com — real playback happens over there.
-  document.querySelectorAll('#playlistGrid .playlist-card').forEach(async (card) => {
-    const id = card.dataset.playlistId;
-    const playlistUrl = `https://open.spotify.com/playlist/${id}`;
-    const titleEl = card.querySelector('.playlist-title');
-    const imgEl = card.querySelector('.playlist-thumb');
-    try{
-      const res = await fetch(`https://open.spotify.com/oembed?url=${encodeURIComponent(playlistUrl)}`);
-      if(!res.ok) throw new Error('oembed request failed');
-      const data = await res.json();
-      if(data.thumbnail_url){ imgEl.src = data.thumbnail_url; imgEl.alt = data.title || 'Playlist cover art'; }
-      if(data.title){ titleEl.textContent = data.title; }
-    } catch(e){
-      titleEl.textContent = 'Open on Spotify';
-    }
-  });
 
   /* ============ TOOL MODALS (generic open/close) ============ */
   function openToolModal(id){
