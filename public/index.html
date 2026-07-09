@@ -80,64 +80,12 @@
 
   .topbar{
     position:relative; height:36px;
-    display:flex; align-items:center; gap:1rem;
+    display:flex; align-items:center; justify-content:center;
     padding:0 clamp(1rem,4vw,2.4rem);
     background:rgba(10,10,10,.86); backdrop-filter:blur(8px);
     font-family:var(--mono); font-size:.7rem; letter-spacing:.06em; text-transform:uppercase;
   }
-
-  /* now playing — click-to-seek progress bar along the top bar's bottom edge */
-  .np-progress{
-    position:absolute; left:0; right:0; bottom:0; height:3px;
-    background:var(--line); cursor:pointer;
-    opacity:.35; transition:opacity .25s ease, height .15s ease;
-  }
-  .np-progress:hover{ height:5px; }
-  .np-progress.playing{ opacity:1; }
-  .np-progress-fill{ height:100%; width:0%; background:var(--fg); pointer-events:none; }
-  .topbar .clock{ color:var(--dim); flex-shrink:0; }
-
-  /* now playing — top bar */
-  .np{
-    flex:1; min-width:0; display:flex; align-items:center; justify-content:center; gap:.7rem;
-    padding:0 .9rem; height:100%;
-  }
-  .np-ctrls{ display:flex; align-items:center; gap:.45rem; flex-shrink:0; }
-  .np-btn{
-    background:none; border:1px solid var(--line); color:var(--dim);
-    width:20px; height:20px; display:flex; align-items:center; justify-content:center;
-    cursor:pointer; padding:0; font-size:.6rem; transition:border-color .2s, color .2s;
-  }
-  .np-btn:hover{ border-color:var(--fg); color:var(--fg); }
-  .np-btn:disabled{ opacity:.3; pointer-events:none; }
-
-  /* volume — iOS-style segmented bar, stepped by +/- rather than dragged */
-  .np-vol{ display:flex; align-items:center; gap:.4rem; flex-shrink:0; }
-  .np-vol-bar{ display:flex; align-items:center; gap:2px; }
-  .np-vol-seg{ width:4px; height:11px; background:var(--line); transition:background .15s ease; }
-  .np-vol-seg.filled{ background:var(--fg); }
-  @media (max-width:640px){ .np-vol{ display:none; } }
-
-  .np-marquee{
-    flex:0 1 300px; min-width:0; overflow:hidden; position:relative; height:100%;
-    display:flex; align-items:center;
-    -webkit-mask-image:linear-gradient(90deg, transparent 0, #000 8%, #000 92%, transparent 100%);
-    mask-image:linear-gradient(90deg, transparent 0, #000 8%, #000 92%, transparent 100%);
-  }
-  .np-marquee.idle{
-    -webkit-mask-image:none; mask-image:none;
-  }
-  .np-marquee-track{
-    display:inline-flex; white-space:nowrap; will-change:transform;
-    animation:np-scroll 14s linear infinite;
-    animation-play-state:paused;
-  }
-  .np-marquee.idle .np-marquee-track{ animation:none; justify-content:center; width:100%; }
-  .np-marquee.playing .np-marquee-track{ animation-play-state:running; }
-  .np-marquee-track span{ padding-right:3.5rem; color:var(--dim); }
-  .np-marquee.idle .np-marquee-track span{ padding-right:0; }
-  .np-marquee-track span b{ color:var(--fg); font-weight:600; }
-  @keyframes np-scroll{ from{ transform:translateX(0); } to{ transform:translateX(-50%); } }
+  .topbar .clock{ color:var(--dim); text-align:center; }
 
   /* explicit height on the row + both children centered against it directly, rather than
      letting flex-stretch + padding implicitly derive matching heights — Safari has a known
@@ -493,6 +441,35 @@
   @keyframes trim-loop-pulse{ 0%,100%{ box-shadow:0 0 0 0 rgba(237,192,1,.55); } 50%{ box-shadow:0 0 0 4px rgba(237,192,1,0); } }
 
   /* listen */
+  .player-box{
+    border:1px solid var(--line); background:var(--bg); padding:1.5rem 1.7rem 1.7rem;
+    display:flex; flex-direction:column; gap:1.1rem; margin-bottom:1.2rem;
+  }
+  .player-top{ display:flex; align-items:baseline; justify-content:space-between; gap:1.2rem; }
+  .player-meta{ font-family:var(--sans); font-size:.95rem; color:var(--dim); min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .player-meta b{ color:var(--fg); font-weight:600; }
+  .player-time{ font-family:var(--mono); font-size:.72rem; color:var(--dim); flex-shrink:0; letter-spacing:.03em; }
+
+  .player-seek{ position:relative; height:4px; background:var(--line); cursor:pointer; touch-action:none; }
+  .player-seek-fill{ height:100%; width:0%; background:var(--fg); pointer-events:none; }
+  .player-seek-handle{
+    position:absolute; top:50%; left:0%; width:11px; height:11px; border-radius:50%; background:var(--fg);
+    transform:translate(-50%,-50%) scale(1); pointer-events:none; transition:transform .15s ease;
+  }
+  .player-seek:hover .player-seek-handle, .player-seek.dragging .player-seek-handle{ transform:translate(-50%,-50%) scale(1.4); }
+
+  .player-ctrls{ display:flex; align-items:center; justify-content:center; gap:.9rem; }
+  .player-btn{
+    background:none; border:1px solid var(--line); color:var(--dim);
+    width:32px; height:32px; display:flex; align-items:center; justify-content:center;
+    cursor:pointer; padding:0; font-size:.68rem; transition:border-color .2s, color .2s, background .2s;
+  }
+  .player-btn:hover{ border-color:var(--fg); color:var(--fg); }
+  .player-btn:disabled{ opacity:.3; pointer-events:none; }
+  .player-btn.active{ background:var(--fg); color:var(--bg); border-color:var(--fg); }
+  .player-btn-play{ width:42px; height:42px; font-size:.8rem; background:var(--fg); color:var(--bg); border-color:var(--fg); }
+  .player-btn-play:hover{ background:var(--dim); border-color:var(--dim); color:var(--bg); }
+
   .tracklist{ display:flex; flex-direction:column; border:1px solid var(--line); max-height:376px; overflow-y:auto; }
   .track{
     display:flex; align-items:center; gap:1.1rem; width:100%;
@@ -530,7 +507,6 @@
     .journal{ grid-template-columns:1fr; }
     .projects{ grid-template-columns:1fr; }
     .tools{ grid-template-columns:1fr; }
-    .np{ padding:0 .5rem; gap:.4rem; }
   }
 </style>
 </head>
@@ -546,29 +522,7 @@
 <div id="site">
   <div class="site-header" id="siteHeader">
     <div class="topbar">
-      <div class="np">
-        <div class="np-ctrls">
-          <button class="np-btn" id="npPrev" aria-label="Previous track">&#9664;&#9664;</button>
-          <button class="np-btn" id="npPlay" aria-label="Play or pause">&#9654;</button>
-          <button class="np-btn" id="npNext" aria-label="Next track">&#9654;&#9654;</button>
-        </div>
-        <div class="np-marquee idle" id="npMarquee">
-          <div class="np-marquee-track" id="npMarqueeTrack">
-            <span>select a track below to start listening</span>
-          </div>
-        </div>
-        <div class="np-vol" id="npVol">
-          <button class="np-btn" id="volDown" aria-label="Decrease volume">&#8722;</button>
-          <div class="np-vol-bar" id="npVolBar" aria-hidden="true">
-            <span class="np-vol-seg"></span><span class="np-vol-seg"></span><span class="np-vol-seg"></span><span class="np-vol-seg"></span><span class="np-vol-seg"></span><span class="np-vol-seg"></span><span class="np-vol-seg"></span><span class="np-vol-seg"></span><span class="np-vol-seg"></span><span class="np-vol-seg"></span>
-          </div>
-          <button class="np-btn" id="volUp" aria-label="Increase volume">&#43;</button>
-        </div>
-      </div>
-      <div class="clock" id="clock">--:--:--</div>
-      <div class="np-progress" id="npProgress" role="slider" aria-label="Seek" tabindex="0">
-        <div class="np-progress-fill" id="npProgressFill"></div>
-      </div>
+      <div class="clock" id="clock">--:-- -- - -</div>
     </div>
 
     <div class="ticker-wrap">
@@ -759,8 +713,27 @@
           <span class="file-no">REF. 04 / LISTEN</span>
           <h2>Now Playing</h2>
         </div>
-        <p>Pick a track — it'll keep playing from the top bar while you browse.</p>
+        <p>Pick a track — the player above keeps it going as you browse.</p>
       </div>
+
+      <div class="player-box reveal">
+        <div class="player-top">
+          <div class="player-meta" id="playerTrackInfo">Select a track below to start listening</div>
+          <div class="player-time" id="playerTime">0:00 / 0:00</div>
+        </div>
+        <div class="player-seek" id="npProgress" role="slider" aria-label="Seek" tabindex="0" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+          <div class="player-seek-fill" id="npProgressFill"></div>
+          <div class="player-seek-handle" id="npProgressHandle"></div>
+        </div>
+        <div class="player-ctrls">
+          <button class="player-btn" id="npShuffle" aria-label="Shuffle" aria-pressed="false">&#8646;</button>
+          <button class="player-btn" id="npPrev" aria-label="Previous track">&#9664;&#9664;</button>
+          <button class="player-btn player-btn-play" id="npPlay" aria-label="Play or pause">&#9654;</button>
+          <button class="player-btn" id="npNext" aria-label="Next track">&#9654;&#9654;</button>
+          <button class="player-btn" id="npRepeat" aria-label="Repeat" aria-pressed="false">&#8635;</button>
+        </div>
+      </div>
+
       <div class="tracklist reveal" id="tracklist">
         <button class="track" data-index="0">
           <span class="track-n">01</span>
@@ -1057,11 +1030,25 @@
     if(!entered && (e.key === 'Enter' || e.key === ' ')){ e.preventDefault(); enterSite(); }
   });
 
+  const WEEKDAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+  function ordinal(n){
+    const suf = ['th','st','nd','rd'];
+    const v = n % 100;
+    return n + (suf[(v - 20) % 10] || suf[v] || suf[0]);
+  }
+
   function tick(){
     const d = new Date();
-    const p = n => String(n).padStart(2,'0');
     const el = document.getElementById('clock');
-    if(el) el.textContent = `${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+    if(!el) return;
+    let h = d.getHours();
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    h = h % 12 || 12;
+    const m = String(d.getMinutes()).padStart(2, '0');
+    const dateStr = `${WEEKDAYS[d.getDay()]} ${ordinal(d.getDate())} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+    el.textContent = `${h}:${m} ${ampm} - ${dateStr}`;
   }
   setInterval(tick, 1000); tick();
 
@@ -1146,58 +1133,38 @@
   const audio = document.getElementById('audioEl');
   let currentIndex = -1;
   let isPlaying = false;
+  let shuffleOn = false;
+  let repeatOn = false;
 
-  const npMarquee = document.getElementById('npMarquee');
-  const npMarqueeTrack = document.getElementById('npMarqueeTrack');
+  const playerTrackInfo = document.getElementById('playerTrackInfo');
+  const playerTime = document.getElementById('playerTime');
   const npPlayBtn = document.getElementById('npPlay');
   const npPrevBtn = document.getElementById('npPrev');
   const npNextBtn = document.getElementById('npNext');
+  const npShuffleBtn = document.getElementById('npShuffle');
+  const npRepeatBtn = document.getElementById('npRepeat');
   const npProgress = document.getElementById('npProgress');
   const npProgressFill = document.getElementById('npProgressFill');
+  const npProgressHandle = document.getElementById('npProgressHandle');
   const trackButtons = Array.from(document.querySelectorAll('.track'));
-  const volDownBtn = document.getElementById('volDown');
-  const volUpBtn = document.getElementById('volUp');
-  const volSegs = Array.from(document.querySelectorAll('.np-vol-seg'));
 
-  const VOL_STEP = 0.1;
+  // No volume UI anymore (dropped along with the top-bar player), but still honour whatever
+  // level a returning visitor had previously set via localStorage.
   let volume = parseFloat(localStorage.getItem('parwani-volume'));
   if(isNaN(volume) || volume < 0 || volume > 1) volume = 0.8;
   audio.volume = volume;
 
-  function updateVolumeUI(){
-    const filled = Math.round(volume * volSegs.length);
-    volSegs.forEach((seg, i) => seg.classList.toggle('filled', i < filled));
-    volDownBtn.disabled = volume <= 0;
-    volUpBtn.disabled = volume >= 1;
+  function formatTime(sec){
+    if(!isFinite(sec) || sec < 0) sec = 0;
+    const m = Math.floor(sec / 60);
+    const s = Math.floor(sec % 60);
+    return `${m}:${String(s).padStart(2, '0')}`;
   }
 
-  function setVolume(v){
-    volume = Math.min(1, Math.max(0, Math.round(v * 100) / 100));
-    audio.volume = volume;
-    localStorage.setItem('parwani-volume', String(volume));
-    updateVolumeUI();
-  }
-
-  volDownBtn.addEventListener('click', () => setVolume(volume - VOL_STEP));
-  volUpBtn.addEventListener('click', () => setVolume(volume + VOL_STEP));
-  updateVolumeUI();
-
-  function setMarquee(text, loop){
-    npMarqueeTrack.innerHTML = loop
-      ? `<span>${text}</span><span>${text}</span>`
-      : `<span>${text}</span>`;
-  }
-
-  function updateMarquee(){
-    if(currentIndex === -1){
-      npMarquee.classList.add('idle'); npMarquee.classList.remove('playing');
-      setMarquee('select a track below to start listening', false);
-      return;
-    }
-    npMarquee.classList.remove('idle');
-    const t = TRACKS[currentIndex];
-    setMarquee(`<b>${t.title}</b> — ${t.artist}`, isPlaying);
-    if(isPlaying){ npMarquee.classList.add('playing'); } else { npMarquee.classList.remove('playing'); }
+  function updateTrackInfo(){
+    playerTrackInfo.innerHTML = currentIndex === -1
+      ? 'Select a track below to start listening'
+      : `<b>${TRACKS[currentIndex].title}</b> — ${TRACKS[currentIndex].artist}`;
   }
 
   function updatePlayBtn(){
@@ -1213,23 +1180,32 @@
     });
   }
 
-  function updateProgressBarState(){
-    npProgress.classList.toggle('playing', isPlaying);
+  function updateShuffleRepeatUI(){
+    npShuffleBtn.classList.toggle('active', shuffleOn);
+    npShuffleBtn.setAttribute('aria-pressed', String(shuffleOn));
+    npRepeatBtn.classList.toggle('active', repeatOn);
+    npRepeatBtn.setAttribute('aria-pressed', String(repeatOn));
   }
 
   function updateProgress(){
     if(!audio.duration || isNaN(audio.duration)){
       npProgressFill.style.width = '0%';
+      npProgressHandle.style.left = '0%';
+      playerTime.textContent = '0:00 / 0:00';
+      npProgress.setAttribute('aria-valuenow', '0');
       return;
     }
-    npProgressFill.style.width = ((audio.currentTime / audio.duration) * 100) + '%';
+    const pct = (audio.currentTime / audio.duration) * 100;
+    npProgressFill.style.width = pct + '%';
+    npProgressHandle.style.left = pct + '%';
+    playerTime.textContent = `${formatTime(audio.currentTime)} / ${formatTime(audio.duration)}`;
+    npProgress.setAttribute('aria-valuenow', String(Math.round(pct)));
   }
 
   function refreshUI(){
-    updateMarquee();
+    updateTrackInfo();
     updatePlayBtn();
     updateActiveTrackRow();
-    updateProgressBarState();
   }
 
   function loadTrack(index, autoplay){
@@ -1252,6 +1228,17 @@
     }
   }
 
+  // Shuffle picks any other track at random; otherwise the next one in sequence (wrapping is
+  // handled by loadTrack's modulo). Shared by the Next button and auto-advance on 'ended'.
+  function nextIndex(){
+    if(shuffleOn && TRACKS.length > 1){
+      let idx;
+      do{ idx = Math.floor(Math.random() * TRACKS.length); } while(idx === currentIndex);
+      return idx;
+    }
+    return currentIndex === -1 ? 0 : currentIndex + 1;
+  }
+
   trackButtons.forEach(btn => {
     btn.addEventListener('click', () => {
       const idx = Number(btn.dataset.index);
@@ -1261,17 +1248,43 @@
   });
   npPlayBtn.addEventListener('click', playPause);
   npPrevBtn.addEventListener('click', () => loadTrack(currentIndex === -1 ? 0 : currentIndex - 1, true));
-  npNextBtn.addEventListener('click', () => loadTrack(currentIndex === -1 ? 0 : currentIndex + 1, true));
+  npNextBtn.addEventListener('click', () => loadTrack(nextIndex(), true));
+  npShuffleBtn.addEventListener('click', () => { shuffleOn = !shuffleOn; updateShuffleRepeatUI(); });
+  npRepeatBtn.addEventListener('click', () => { repeatOn = !repeatOn; updateShuffleRepeatUI(); });
+  updateShuffleRepeatUI();
 
   function seekTo(ratio){
     if(currentIndex === -1 || !audio.duration || isNaN(audio.duration)) return;
     audio.currentTime = Math.min(Math.max(ratio, 0), 1) * audio.duration;
     updateProgress();
   }
-  npProgress.addEventListener('click', (e) => {
+
+  // Draggable seek: pointerdown starts a drag (and immediately seeks to that position),
+  // pointermove continues seeking while held, pointerup/cancel ends it. Pointer capture keeps
+  // the drag tracking even if the cursor leaves the (thin, 4px-tall) bar mid-drag.
+  function ratioFromPointer(e){
     const rect = npProgress.getBoundingClientRect();
-    seekTo((e.clientX - rect.left) / rect.width);
+    return (e.clientX - rect.left) / rect.width;
+  }
+  let seeking = false;
+  npProgress.addEventListener('pointerdown', (e) => {
+    seeking = true;
+    npProgress.classList.add('dragging');
+    npProgress.setPointerCapture(e.pointerId);
+    seekTo(ratioFromPointer(e));
   });
+  npProgress.addEventListener('pointermove', (e) => {
+    if(!seeking) return;
+    seekTo(ratioFromPointer(e));
+  });
+  function endSeek(e){
+    if(!seeking) return;
+    seeking = false;
+    npProgress.classList.remove('dragging');
+    try{ npProgress.releasePointerCapture(e.pointerId); }catch(err){}
+  }
+  npProgress.addEventListener('pointerup', endSeek);
+  npProgress.addEventListener('pointercancel', endSeek);
   npProgress.addEventListener('keydown', (e) => {
     if(!audio.duration || isNaN(audio.duration)) return;
     if(e.key === 'ArrowRight'){ e.preventDefault(); seekTo((audio.currentTime + 5) / audio.duration); }
@@ -1282,14 +1295,21 @@
   audio.addEventListener('playing', () => { isPlaying = true;  refreshUI(); });
   audio.addEventListener('pause', () => { isPlaying = false; refreshUI(); });
   audio.addEventListener('timeupdate', updateProgress);
-  audio.addEventListener('ended', () => { loadTrack(currentIndex + 1, true); });
+  audio.addEventListener('ended', () => {
+    if(repeatOn){
+      audio.currentTime = 0;
+      const p = audio.play();
+      if(p && p.catch){ p.catch(() => {}); }
+      return;
+    }
+    loadTrack(nextIndex(), true);
+  });
   audio.addEventListener('error', () => {
     const t = TRACKS[currentIndex];
     if(!t) return;
     isPlaying = false;
-    npMarquee.classList.add('idle'); npMarquee.classList.remove('playing');
-    setMarquee(`add ${t.src} to play this track`, false);
-    updatePlayBtn(); updateActiveTrackRow(); updateProgressBarState();
+    playerTrackInfo.textContent = `add ${t.src} to play this track`;
+    updatePlayBtn(); updateActiveTrackRow();
   });
 
   refreshUI();
