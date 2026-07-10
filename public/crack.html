@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRACK — PARWANI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0A0A0A;
+    --panel:#141414;
+    --fg:#F2F2F0;
+    --dim:#8A8A85;
+    --dimmer:#4A4A46;
+    --line: rgba(242,242,240,0.14);
+    --amber:#EDC001;
+
+    --display:'Anton', sans-serif;
+    --mono:'IBM Plex Mono', monospace;
+    --sans:'Inter', sans-serif;
+  }
+  *{ box-sizing:border-box; }
+  body{
+    margin:0; background:var(--bg); color:var(--fg);
+    font-family:var(--sans); -webkit-font-smoothing:antialiased;
+  }
+
+  .ck-topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:1.2rem clamp(1.2rem,4vw,3rem); border-bottom:1px solid var(--line);
+  }
+  .ck-back{
+    display:inline-flex; align-items:center; gap:.5rem; font-family:var(--mono); font-size:.78rem;
+    text-transform:uppercase; letter-spacing:.06em; color:var(--dim); text-decoration:none;
+    transition:color .2s;
+  }
+  .ck-back:hover{ color:var(--fg); }
+  .ck-topbar .file-no{ font-family:var(--mono); font-size:.7rem; color:var(--dimmer); letter-spacing:.1em; text-transform:uppercase; }
+
+  .ck-page{ max-width:1160px; margin:0 auto; padding:clamp(2rem,5vw,3.6rem) clamp(1.2rem,4vw,3rem) 5rem; }
+  .ck-page h1{ font-family:var(--display); font-weight:400; text-transform:uppercase; font-size:clamp(2.2rem,6vw,3.6rem); line-height:.95; margin:.6rem 0 1.1rem; }
+  .ck-intro{ font-family:var(--sans); color:var(--dim); font-size:1rem; line-height:1.65; max-width:70ch; margin:0 0 2.4rem; }
+  .ck-intro b{ color:var(--fg); font-weight:600; }
+  .ck-label{ font-family:var(--mono); font-size:.7rem; color:var(--dimmer); letter-spacing:.1em; text-transform:uppercase; }
+
+  /* HUD */
+  .ck-hud{ display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--line); border:1px solid var(--line); margin-bottom:1px; }
+  .ck-stat{ background:var(--bg); padding:1rem 1.2rem; }
+  .ck-stat .v{ font-family:var(--mono); font-size:1.35rem; font-weight:600; margin-top:.35rem; letter-spacing:.02em; }
+  .ck-stat .v.warn{ color:var(--amber); }
+
+  /* lives read as redaction bars: solid = held, struck out = spent */
+  .lives{ display:flex; gap:.4rem; align-items:center; height:1.35rem; }
+  .life{ width:28px; height:13px; border:1px solid var(--fg); background:var(--fg); position:relative; }
+  .life.last{ background:var(--amber); border-color:var(--amber); }
+  .life.spent{ background:none; border-color:var(--dimmer); }
+  .life.spent::before, .life.spent::after{
+    content:""; position:absolute; left:0; right:0; top:50%; height:1px; background:var(--dimmer);
+  }
+  .life.spent::before{ transform:rotate(24deg); }
+  .life.spent::after{ transform:rotate(-24deg); }
+
+  /* machine */
+  .ck-machine{ border:1px solid var(--line); border-top:none; background:var(--bg); padding:clamp(1.6rem,4vw,3rem); }
+
+  .ck-target{ text-align:center; margin-bottom:2.2rem; }
+  .ck-target .digits{
+    font-family:var(--mono); font-size:clamp(1rem,2.4vw,1.35rem); font-weight:500;
+    letter-spacing:.72em; color:var(--dim); margin-top:.7rem; padding-left:.72em;
+  }
+
+  .ck-readout{
+    display:flex; justify-content:center; gap:clamp(.5rem,1.6vw,1rem);
+    padding:clamp(1.4rem,3vw,2.4rem) 0;
+  }
+  .slot{
+    width:clamp(56px,9vw,104px); height:clamp(78px,12vw,140px);
+    border:1px solid var(--line); background:var(--panel);
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--mono); font-weight:600; font-size:clamp(2rem,5.2vw,4rem);
+    color:var(--dimmer); position:relative; transition:border-color .18s, color .18s, background .18s;
+  }
+  .slot.active{ color:var(--fg); border-color:var(--fg); background:var(--bg); }
+  .slot.active::after{
+    content:""; position:absolute; left:12%; right:12%; bottom:10px; height:2px; background:var(--amber);
+  }
+  .slot.locked{ color:var(--amber); border-color:var(--amber); background:var(--bg); }
+  .slot.miss{ color:var(--fg); border-color:var(--fg); background:#241a1a; }
+
+  .ck-status{
+    text-align:center; font-family:var(--mono); font-size:.78rem; letter-spacing:.08em;
+    text-transform:uppercase; color:var(--dim); min-height:1.2em; margin-bottom:1.8rem;
+  }
+  .ck-status.good{ color:var(--amber); }
+
+  .ck-controls{ display:flex; justify-content:center; gap:.8rem; flex-wrap:wrap; }
+  .ck-btn{
+    font-family:var(--mono); font-size:.78rem; text-transform:uppercase; letter-spacing:.08em;
+    padding:.9rem 2.4rem; border:1px solid var(--line); color:var(--dim); background:none; cursor:pointer;
+    transition:border-color .2s, color .2s;
+  }
+  .ck-btn:hover{ border-color:var(--fg); color:var(--fg); }
+  .ck-btn.solid{ background:var(--fg); color:var(--bg); border-color:var(--fg); }
+  .ck-btn.solid:hover{ background:var(--dim); border-color:var(--dim); }
+  .ck-hint{ text-align:center; font-family:var(--mono); font-size:.7rem; color:var(--dimmer); letter-spacing:.06em; margin-top:1.4rem; text-transform:uppercase; }
+
+  .ck-log{
+    margin-top:2.4rem; border:1px solid var(--line); background:var(--panel);
+    font-family:var(--mono); font-size:.74rem; color:var(--dim); line-height:1.9;
+    padding:1rem 1.2rem; max-height:150px; overflow-y:auto;
+  }
+  .ck-log div span{ color:var(--dimmer); }
+
+  @media (max-width:640px){
+    .ck-hud{ grid-template-columns:repeat(2,1fr); }
+  }
+</style>
+</head>
+<body>
+
+<div class="ck-topbar">
+  <a href="index.html" class="ck-back">&#8592; Back to site</a>
+  <span class="file-no">REF. 02.07 / CRACK</span>
+</div>
+
+<div class="ck-page">
+  <span class="ck-label">Game prototype</span>
+  <h1>[Crack]</h1>
+  <p class="ck-intro">A five-digit code sits behind the readout. Each position cycles through <b>0&ndash;9</b> in turn &mdash; hit <b>lock</b> the instant the cycling digit matches the target. Every digit you land speeds the next one up. Miss, and the dial spins on without you.</p>
+
+  <div class="ck-hud">
+    <div class="ck-stat"><span class="ck-label">Level</span><div class="v" id="s-level">1</div></div>
+    <div class="ck-stat"><span class="ck-label">Cycle speed</span><div class="v" id="s-speed">260ms</div></div>
+    <div class="ck-stat"><span class="ck-label">Lives</span><div class="v lives" id="s-lives"></div></div>
+    <div class="ck-stat"><span class="ck-label">Best level</span><div class="v" id="s-best">&mdash;</div></div>
+  </div>
+
+  <div class="ck-machine">
+    <div class="ck-target">
+      <span class="ck-label">Target code</span>
+      <div class="digits" id="target">&#183; &#183; &#183; &#183; &#183;</div>
+    </div>
+
+    <div class="ck-readout" id="readout"></div>
+
+    <div class="ck-status" id="status">Press start to begin</div>
+
+    <div class="ck-controls">
+      <button class="ck-btn solid" id="lock">Lock</button>
+    </div>
+    <div class="ck-hint">Space or Enter to lock</div>
+  </div>
+
+  <div class="ck-log" id="log"><div><span>&gt;</span> awaiting input&#8230;</div></div>
+</div>
+
+<script>
+(function(){
+  /* LEVEL_RATE is solved, not guessed: it places the final digit of the final
+     level at exactly MIN, so the curve peaks at FINAL rather than clipping early. */
+  var SLOTS = 5, BASE = 260, MIN = 70, DECAY = 0.87, LEVEL_RATE = 0.961, FINAL = 20, MAX_LIVES = 3;
+
+  var readout = document.getElementById('readout');
+  var targetEl = document.getElementById('target');
+  var statusEl = document.getElementById('status');
+  var lockBtn = document.getElementById('lock');
+  var logEl = document.getElementById('log');
+  var sLevel = document.getElementById('s-level');
+  var sSpeed = document.getElementById('s-speed');
+  var sLives = document.getElementById('s-lives');
+  var sBest = document.getElementById('s-best');
+
+  var slots = [], state = {}, runStart = 0;
+  var cycleTimer = null, pendingTimer = null, gen = 0;
+  for (var i=0;i<SLOTS;i++){
+    var d = document.createElement('div');
+    d.className = 'slot';
+    d.textContent = '·';
+    readout.appendChild(d);
+    slots.push(d);
+  }
+
+  var best = 0;
+  try { best = parseInt(localStorage.getItem('crack_best'),10) || 0; } catch(e){}
+  sBest.textContent = best ? best : '—';
+
+  function log(msg){
+    var d = document.createElement('div');
+    d.innerHTML = '<span>&gt;</span> ' + msg;
+    logEl.insertBefore(d, logEl.firstChild);
+    while (logEl.children.length > 30) logEl.removeChild(logEl.lastChild);
+  }
+
+  function fresh(level){
+    var code = [];
+    for (var i=0;i<SLOTS;i++) code.push(Math.floor(Math.random()*10));
+    return {
+      running: true, paused: false, level: level, code: code, pos: 0, digit: 0,
+      speed: Math.max(MIN, Math.round(BASE * Math.pow(LEVEL_RATE, level-1))),
+      lives: state.lives === undefined ? MAX_LIVES : state.lives
+    };
+  }
+
+  function render(){
+    for (var i=0;i<SLOTS;i++){
+      var s = slots[i];
+      s.className = 'slot';
+      if (i < state.pos){ s.className = 'slot locked'; s.textContent = state.code[i]; }
+      else if (i === state.pos && state.running){ s.className = 'slot active'; s.textContent = state.digit; }
+      else { s.textContent = '·'; }
+    }
+    sLevel.textContent = state.level + ' / ' + FINAL;
+    sSpeed.textContent = state.speed + 'ms';
+    sLives.innerHTML = '';
+    for (var L=0; L<MAX_LIVES; L++){
+      var b = document.createElement('span');
+      var held = L < state.lives;
+      b.className = 'life' + (held ? (state.lives === 1 ? ' last' : '') : ' spent');
+      sLives.appendChild(b);
+    }
+    targetEl.textContent = state.code.join(' ');
+  }
+
+  /* Every cycle chain carries the generation it was born in. stopTimer() bumps the
+     generation, so any chain still in flight — including one whose timer handle was
+     overwritten by a second chain — sees the mismatch on its next hop and dies.
+     Without this, two overlapping chains step the same digit and it appears to
+     count 1,3,5,7,9 at double speed while the interval is unchanged. */
+  function tick(myGen){
+    if (myGen !== gen) return;
+    state.digit = (state.digit + 1) % 10;
+    render();
+    cycleTimer = setTimeout(function(){ tick(myGen); }, state.speed);
+  }
+
+  function run(){
+    stopTimer();
+    var g = gen;
+    cycleTimer = setTimeout(function(){ tick(g); }, state.speed);
+  }
+
+  function stopTimer(){
+    if (cycleTimer){ clearTimeout(cycleTimer); cycleTimer = null; }
+    if (pendingTimer){ clearTimeout(pendingTimer); pendingTimer = null; }
+    gen++;
+  }
+
+  function start(level){
+    stopTimer();
+    level = level || 1;
+    /* a run always begins with a full set of lives — otherwise "try again"
+       after a lockout inherits the 0 lives that caused it */
+    if (level === 1){ runStart = Date.now(); state.lives = MAX_LIVES; }
+    state = fresh(level);
+    statusEl.className = 'ck-status';
+    statusEl.textContent = 'Cracking… lock on ' + state.code[0];
+    lockBtn.textContent = 'Lock';
+    log('LEVEL ' + state.level + ' — code ' + state.code.join('') + ' — ' + state.speed + 'ms');
+    render();
+    run();
+  }
+
+  function attempt(){
+    if (!state.running){ start(1); return; }
+    /* the dial is frozen between a miss and its restart — input here would both
+       double-decrement lives and spawn a second cycle chain */
+    if (state.paused) return;
+    if (state.digit === state.code[state.pos]){
+      stopTimer();
+      state.pos++;
+      state.speed = Math.max(MIN, Math.round(state.speed * DECAY));
+      log('position ' + state.pos + ' locked — ' + state.speed + 'ms');
+      if (state.pos === SLOTS){ win(); return; }
+      statusEl.className = 'ck-status good';
+      statusEl.textContent = 'Locked. Next target ' + state.code[state.pos];
+      state.digit = Math.floor(Math.random()*10);
+      render();
+      run();
+      return;
+    }
+    miss();
+  }
+
+  function miss(){
+    stopTimer();
+    state.lives--;
+    var s = slots[state.pos];
+    s.className = 'slot miss';
+    log('miss at position ' + (state.pos+1) + ' — wanted ' + state.code[state.pos] + ', got ' + state.digit);
+    if (state.lives <= 0){
+      state.running = false;
+      statusEl.className = 'ck-status';
+      statusEl.textContent = 'Lockout — reached level ' + state.level;
+      lockBtn.textContent = 'Try again';
+      log('LOCKOUT at level ' + state.level);
+      render();
+      return;
+    }
+    state.paused = true;
+    render();
+    statusEl.className = 'ck-status';
+    statusEl.textContent = 'Miss — ' + state.lives + ' ' + (state.lives===1?'life':'lives') + ' left';
+    pendingTimer = setTimeout(function(){
+      pendingTimer = null;
+      if (!state.running) return;
+      state.paused = false;
+      state.digit = Math.floor(Math.random()*10);
+      statusEl.textContent = 'Lock on ' + state.code[state.pos];
+      render(); run();
+    }, 700);
+  }
+
+  function fmt(ms){
+    var t = Math.round(ms/1000);
+    return Math.floor(t/60) + 'm ' + ('0' + (t%60)).slice(-2) + 's';
+  }
+
+  function win(){
+    var lvl = state.level;
+    if (lvl > best){ best = lvl; sBest.textContent = best; try{ localStorage.setItem('crack_best', best); }catch(e){} }
+    render();
+
+    if (lvl === FINAL){ complete(); return; }
+
+    state.paused = true;
+    statusEl.className = 'ck-status good';
+    statusEl.textContent = 'Vault open — level ' + lvl + ' cleared';
+    log('VAULT OPEN — level ' + lvl + ' cleared');
+    var carry = state.lives;
+    pendingTimer = setTimeout(function(){
+      pendingTimer = null;
+      state.lives = carry;
+      start(lvl + 1);
+    }, 1200);
+  }
+
+  function complete(){
+    stopTimer();
+    state.running = false;
+    var elapsed = Date.now() - runStart;
+    var bt = 0;
+    try { bt = parseInt(localStorage.getItem('crack_best_time'),10) || 0; } catch(e){}
+    var record = !bt || elapsed < bt;
+    if (record){ try{ localStorage.setItem('crack_best_time', elapsed); }catch(e){} }
+    statusEl.className = 'ck-status good';
+    statusEl.textContent = 'Vault open — all ' + FINAL + ' cracked · ' + fmt(elapsed) + (record ? ' · new record' : '');
+    lockBtn.textContent = 'Play again';
+    log('ALL ' + FINAL + ' LEVELS CRACKED — ' + fmt(elapsed) + (record ? ' (record)' : ''));
+  }
+
+  lockBtn.addEventListener('click', attempt);
+  document.addEventListener('keydown', function(e){
+    if (e.code === 'Space' || e.key === 'Enter'){ e.preventDefault(); attempt(); }
+  });
+
+  state = { lives:3, level:1, speed:BASE, code:[0,0,0,0,0], pos:0, digit:0, running:false };
+  render();
+  targetEl.innerHTML = '&#183; &#183; &#183; &#183; &#183;';
+  statusEl.textContent = 'Press lock to begin';
+})();
+</script>
+
+</body>
+</html>

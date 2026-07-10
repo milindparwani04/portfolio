@@ -244,12 +244,24 @@
   .projects{ display:grid; grid-template-columns:repeat(2,1fr); gap:1px; background:var(--line); border:1px solid var(--line); }
   .proj{ background:var(--bg); padding:2rem; display:flex; flex-direction:column; gap:.8rem; transition:background .25s; }
   .proj:hover{ background:var(--panel); }
+  .proj.wide{ grid-column:1 / -1; }
   .proj .cat{ font-family:var(--mono); font-size:.66rem; color:var(--dim); letter-spacing:.1em; text-transform:uppercase; }
   .proj h3{ font-family:var(--sans); font-weight:700; font-size:1.3rem; margin:0; text-transform:uppercase; letter-spacing:.01em; }
   .proj p{ font-family:var(--sans); color:var(--dim); font-size:.9rem; line-height:1.55; margin:0; }
   .proj .status{ align-self:flex-start; font-family:var(--mono); font-size:.64rem; padding:.28rem .6rem; margin-top:.3rem; border:1px solid var(--line); text-transform:uppercase; letter-spacing:.06em; }
   .status.building{ color:var(--fg); border-color:var(--fg); }
   .status.idea{ color:var(--dim); }
+  .status.playable{ color:#EDC001; border-color:#EDC001; }
+
+  .proj-foot{ display:flex; align-items:center; gap:.7rem; margin-top:.3rem; }
+  .proj-foot .status{ margin-top:0; }
+  .proj-play{
+    font-family:var(--mono); font-size:.64rem; padding:.28rem .7rem;
+    border:1px solid var(--fg); background:var(--fg); color:var(--bg);
+    text-transform:uppercase; letter-spacing:.06em; text-decoration:none;
+    transition:background .2s, border-color .2s;
+  }
+  .proj-play:hover{ background:var(--dim); border-color:var(--dim); }
 
   .bench{ margin-top:0; font-family:var(--mono); font-size:.8rem; color:var(--dim); border-top:1px solid var(--line); padding:1.4rem 2rem; line-height:1.7; grid-column:1 / -1; background:var(--bg); }
   .bench b{ color:var(--fg); font-weight:500; }
@@ -716,6 +728,15 @@
           <h3>[Untitled Terminal Adventure]</h3>
           <p>A Zork-style, command-line text adventure — my own story, my own characters, typed one command at a time.</p>
           <span class="status idea">Idea stage</span>
+        </div>
+        <div class="proj wide reveal">
+          <span class="cat">Game</span>
+          <h3>[CRACK]</h3>
+          <p>A digit cycles in a terminal readout — tap to lock it in before it moves on, one position at a time, faster with every correct guess.</p>
+          <div class="proj-foot">
+            <span class="status playable">Playable</span>
+            <a href="crack.html" class="proj-play">Play &#8594;</a>
+          </div>
         </div>
         <div class="bench reveal">
           also on the workbench: <b>chrome extensions</b> &amp; <b>Steam Workshop maps</b> (Meccha Chameleon)
