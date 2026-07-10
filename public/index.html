@@ -20,6 +20,11 @@
     --display:'Anton', sans-serif;
     --mono:'IBM Plex Mono', monospace;
     --sans:'Inter', sans-serif;
+
+    /* .site-header's real height: 36px .topbar + 34px .ticker-wrap. The floating nav offsets from
+       this, and sections use it for scroll-margin-top so anchor jumps clear the sticky header. */
+    --header-h:70px;
+    --nav-gap:clamp(1rem,4vw,2.4rem);
   }
   *{ box-sizing:border-box; }
   html{ scroll-behavior:smooth; }
@@ -77,6 +82,45 @@
 
   /* ============ CHROME ============ */
   .site-header{ position:sticky; top:0; z-index:40; }
+
+  /* position:fixed, NOT sticky. .site-header is sticky at top:0 and never leaves the viewport, so
+     a fixed offset of (header height + gap) is permanently docked just below it — visually the
+     "sticky" behavior wanted, without sticky's containing-block trap: a sticky element can only
+     travel within its parent's box, so any zero/short-height wrapper makes it scroll away like a
+     static element. Offsetting from --header-h keeps this tied to the real header height (36px
+     topbar + 34px ticker). Equal --nav-gap on top and left. .nav-panel is absolute against this
+     fixed box, so the expanded menu rides along with it for free. */
+  .nav-float{
+    position:fixed; z-index:45; font-family:var(--mono);
+    top:calc(var(--header-h) + var(--nav-gap)); left:var(--nav-gap);
+  }
+  .nav-toggle{
+    display:flex; align-items:center; justify-content:center;
+    width:38px; height:38px; padding:0; border:1px solid var(--line); background:var(--bg); color:var(--fg);
+    cursor:pointer; transition:border-color .2s, background .2s;
+  }
+  .nav-toggle:hover{ border-color:var(--fg); }
+  .nav-toggle.open{ background:var(--fg); border-color:var(--fg); }
+  .nav-toggle-bars{ display:flex; flex-direction:column; gap:4px; width:16px; }
+  .nav-toggle-bars span{ display:block; height:2px; background:var(--fg); }
+  .nav-toggle.open .nav-toggle-bars span{ background:var(--bg); }
+  .nav-panel{
+    position:absolute; top:100%; left:0; margin-top:.5rem;
+    display:flex; flex-direction:column; width:max-content; min-width:150px;
+    background:var(--bg); border:1px solid var(--line);
+    animation:modal-in .2s ease both;
+  }
+  /* explicit [hidden] override: .nav-panel already sets display:flex, and [hidden] alone loses
+     to any same-or-higher-specificity display rule — see project_known_bugs_and_gotchas.md #5. */
+  .nav-panel[hidden]{ display:none; }
+  .nav-link{
+    font-family:var(--mono); font-size:.7rem; letter-spacing:.04em; text-transform:uppercase;
+    padding:.7rem .9rem; color:var(--dim); border-top:1px solid var(--line);
+    transition:color .2s, background .2s;
+  }
+  .nav-link:first-child{ border-top:none; }
+  .nav-link:hover{ color:var(--fg); background:var(--panel); }
+  .nav-link.active{ color:#EDC001; }
 
   .topbar{
     position:relative; height:36px;
@@ -153,7 +197,9 @@
   @keyframes bob{ 0%,100%{ transform:translateY(0);} 50%{ transform:translateY(5px);} }
 
   /* ============ SECTIONS ============ */
-  section.zone{ padding:6rem clamp(1.2rem,6vw,6rem); max-width:1560px; margin:0 auto; }
+  /* scroll-margin-top keeps #journal/#projects/#tools/#listen anchor jumps from landing underneath
+     the sticky .site-header, which would otherwise cover the top of the section. */
+  section.zone{ padding:6rem clamp(1.2rem,6vw,6rem); max-width:1560px; margin:0 auto; scroll-margin-top:var(--header-h); }
   .zone-head{ display:flex; justify-content:space-between; align-items:flex-end; gap:1.5rem; margin-bottom:3rem; flex-wrap:wrap; border-bottom:1px solid var(--line); padding-bottom:1.6rem; }
   .zone-head .file-no{ font-family:var(--mono); font-size:.7rem; color:var(--dimmer); letter-spacing:.1em; }
   .zone-head h2{
@@ -553,6 +599,18 @@
         <div class="ticker" id="ticker">Loading headlines…</div>
       </div>
     </div>
+  </div>
+
+  <div class="nav-float" id="navFloat">
+    <button class="nav-toggle" id="navToggle" type="button" aria-expanded="false" aria-controls="navPanel" aria-label="Toggle navigation">
+      <span class="nav-toggle-bars"><span></span><span></span><span></span></span>
+    </button>
+    <nav class="nav-panel" id="navPanel" hidden>
+      <a href="#journal" class="nav-link" data-nav="journal">Journal</a>
+      <a href="#projects" class="nav-link" data-nav="projects">Projects</a>
+      <a href="#tools" class="nav-link" data-nav="tools">Toolbox</a>
+      <a href="#listen" class="nav-link" data-nav="listen">Now Playing</a>
+    </nav>
   </div>
 
   <audio id="audioEl" preload="none"></audio>
@@ -1133,6 +1191,44 @@
     entries.forEach(en => { if(en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target); } });
   }, { threshold:0.15 });
   document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  /* ============ FLOATING NAV ============ */
+  const navFloat = document.getElementById('navFloat');
+  const navToggle = document.getElementById('navToggle');
+  const navPanel = document.getElementById('navPanel');
+  const navLinks = navPanel.querySelectorAll('.nav-link');
+
+  function closeNav(){
+    navToggle.setAttribute('aria-expanded', 'false');
+    navToggle.classList.remove('open');
+    navPanel.hidden = true;
+  }
+  navToggle.addEventListener('click', () => {
+    const open = navToggle.getAttribute('aria-expanded') === 'true';
+    navToggle.setAttribute('aria-expanded', String(!open));
+    navToggle.classList.toggle('open', !open);
+    navPanel.hidden = open;
+  });
+  navLinks.forEach(a => a.addEventListener('click', closeNav));
+  document.addEventListener('click', (e) => { if(!navFloat.contains(e.target)) closeNav(); });
+  document.addEventListener('keydown', (e) => { if(e.key === 'Escape') closeNav(); });
+
+  // rootMargin collapses the viewport to a thin band near its vertical center, so whichever
+  // section is crossing that band is treated as "current" — standard scrollspy technique.
+  // The hero is observed too: without it, scrolling back up to the hero leaves the last section
+  // highlighted, since no section intersects the band up there and nothing clears the old state.
+  const spySections = ['journal','projects','tools','listen']
+    .map(id => document.getElementById(id)).filter(Boolean);
+  const heroWrap = document.querySelector('.hero-wrap');
+  if(heroWrap) spySections.push(heroWrap);
+  const spyObserver = new IntersectionObserver((entries) => {
+    entries.forEach(en => {
+      if(en.isIntersecting){
+        navLinks.forEach(a => a.classList.toggle('active', a.dataset.nav === en.target.id));
+      }
+    });
+  }, { rootMargin:'-45% 0px -50% 0px', threshold:0 });
+  spySections.forEach(sec => spyObserver.observe(sec));
 
   const scrollHint = document.querySelector('.scroll-hint');
   if(scrollHint){
