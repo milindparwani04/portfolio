@@ -1110,6 +1110,18 @@
     site.classList.add('powering');
     document.body.classList.remove('locked');
     setTimeout(() => bootScreen.remove(), 550);
+
+    // Drop .powering once the CRT-on animation finishes. It must not persist: crton animates
+    // `filter`, and animation-fill-mode:both freezes the final keyframe as an identity filter
+    // list (brightness(1) blur(0px)) rather than the keyword `none`. Any real filter value makes
+    // #site a containing block for its position:fixed descendants, so .nav-float would anchor to
+    // #site and scroll away instead of staying pinned to the viewport. The end state of crton is
+    // #site's natural appearance anyway, so removing the class changes nothing visually.
+    // Guard on animationName/target: child animations (e.g. .nav-panel's modal-in) also bubble
+    // an animationend up to #site, and an early removal would cut the fade-in short.
+    site.addEventListener('animationend', (e) => {
+      if(e.target === site && e.animationName === 'crton'){ site.classList.remove('powering'); }
+    });
   }
   bootScreen.addEventListener('click', enterSite);
   document.addEventListener('keydown', (e) => {
