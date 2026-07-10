@@ -6,6 +6,12 @@
       "runtimeExecutable": "C:\\Users\\milin_gni6ae7\\OneDrive\\Documents\\Claude Code\\Portfolio\\.claude\\start-server.cmd",
       "runtimeArgs": [],
       "port": 5500
+    },
+    {
+      "name": "parwani-site-autoport",
+      "runtimeExecutable": "C:\\Users\\milin_gni6ae7\\OneDrive\\Documents\\Claude Code\\Portfolio\\.claude\\start-server-autoport.cmd",
+      "runtimeArgs": [],
+      "autoPort": true
     }
   ]
 }
