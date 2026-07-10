@@ -173,7 +173,9 @@
   @keyframes scroll{ from{ transform:translateX(0);} to{ transform:translateX(-50%);} }
 
   /* ============ HERO ============ */
-  .hero-wrap{ height:calc(100vh - 74px); position:relative; }
+  /* scroll-margin-top so the #home jump-link lands at the very top of the page rather than at the
+     hero's own offset (70px down, under the sticky header) — same reason section.zone has it. */
+  .hero-wrap{ height:calc(100vh - 74px); position:relative; scroll-margin-top:var(--header-h); }
   .hero-sticky{
     height:100%;
     display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center;
@@ -629,6 +631,7 @@
       <span class="nav-toggle-bars"><span></span><span></span><span></span></span>
     </button>
     <nav class="nav-panel" id="navPanel" hidden>
+      <a href="#home" class="nav-link" data-nav="home">Home</a>
       <a href="#journal" class="nav-link" data-nav="journal">Journal</a>
       <a href="#projects" class="nav-link" data-nav="projects">Projects</a>
       <a href="#tools" class="nav-link" data-nav="tools">Toolbox</a>
@@ -639,7 +642,7 @@
   <audio id="audioEl" preload="none"></audio>
 
   <main>
-    <div class="hero-wrap" data-section="HOME">
+    <div class="hero-wrap" id="home" data-section="HOME">
       <div class="hero-sticky">
         <div class="hero-tag"><span class="stamp" id="lastUpdated">Last updated &#8212;</span></div>
         <h1>My digital<span class="line2">portfolio.</span></h1>
@@ -1279,12 +1282,11 @@
 
   // rootMargin collapses the viewport to a thin band near its vertical center, so whichever
   // section is crossing that band is treated as "current" — standard scrollspy technique.
-  // The hero is observed too: without it, scrolling back up to the hero leaves the last section
-  // highlighted, since no section intersects the band up there and nothing clears the old state.
-  const spySections = ['journal','projects','tools','listen']
+  // The hero (#home) is observed alongside the four sections: it both highlights the Home link
+  // and, by being a spy target at all, clears the previously-active link on scroll back up —
+  // nothing else intersects the band up there to do it.
+  const spySections = ['home','journal','projects','tools','listen']
     .map(id => document.getElementById(id)).filter(Boolean);
-  const heroWrap = document.querySelector('.hero-wrap');
-  if(heroWrap) spySections.push(heroWrap);
   const spyObserver = new IntersectionObserver((entries) => {
     entries.forEach(en => {
       if(en.isIntersecting){
