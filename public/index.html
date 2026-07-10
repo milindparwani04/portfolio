@@ -1182,6 +1182,31 @@
   if(isNaN(volume) || volume < 0 || volume > 1) volume = 0.8;
   audio.volume = volume;
 
+  // iOS Safari ignores audio.volume entirely (hardware-buttons-only by design), so volume is
+  // additionally routed through a Web Audio GainNode, which iOS does honor. The graph has to be
+  // built lazily inside a user-gesture handler (first play), not at page load, or iOS leaves the
+  // AudioContext suspended forever.
+  let audioCtx = null, gainNode = null;
+  function ensureAudioGraph(){
+    if(audioCtx) return;
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if(!AC) return;
+    try{
+      audioCtx = new AC();
+      const sourceNode = audioCtx.createMediaElementSource(audio);
+      gainNode = audioCtx.createGain();
+      gainNode.gain.value = volume;
+      sourceNode.connect(gainNode).connect(audioCtx.destination);
+      audio.volume = 1;
+    }catch(err){ audioCtx = null; gainNode = null; }
+  }
+  function playAudio(){
+    ensureAudioGraph();
+    if(audioCtx && audioCtx.state === 'suspended'){ audioCtx.resume(); }
+    const p = audio.play();
+    if(p && p.catch){ p.catch(() => {}); }
+  }
+
   function updateVolumeFill(){
     const pct = volume * 100;
     npVolume.style.background = `linear-gradient(to right, var(--fg) ${pct}%, var(--line) ${pct}%)`;
@@ -1190,7 +1215,7 @@
   updateVolumeFill();
   npVolume.addEventListener('input', () => {
     volume = parseFloat(npVolume.value);
-    audio.volume = volume;
+    if(gainNode){ gainNode.gain.value = volume; } else { audio.volume = volume; }
     localStorage.setItem('parwani-volume', String(volume));
     updateVolumeFill();
   });
@@ -1254,19 +1279,13 @@
     audio.src = TRACKS[currentIndex].src;
     updateProgress();
     refreshUI(); // show selection immediately, regardless of whether the file loads
-    if(autoplay){
-      const p = audio.play();
-      if(p && p.catch){ p.catch(() => {}); }
-    }
+    if(autoplay){ playAudio(); }
   }
 
   function playPause(){
     if(currentIndex === -1){ loadTrack(0, true); return; }
     if(isPlaying){ audio.pause(); }
-    else{
-      const p = audio.play();
-      if(p && p.catch){ p.catch(() => {}); }
-    }
+    else{ playAudio(); }
   }
 
   // Shuffle picks any other track at random; otherwise the next one in sequence (wrapping is
@@ -1339,8 +1358,7 @@
   audio.addEventListener('ended', () => {
     if(repeatOn){
       audio.currentTime = 0;
-      const p = audio.play();
-      if(p && p.catch){ p.catch(() => {}); }
+      playAudio();
       return;
     }
     loadTrack(nextIndex(), true);
