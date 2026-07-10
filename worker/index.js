@@ -44,6 +44,18 @@ async function handleNewsRequest(request, ctx) {
   }
 }
 
+// version_metadata's timestamp is the actual deploy time of the running Worker version (set by
+// Cloudflare Workers Builds when `git push` triggers the auto-deploy) — no external fetch needed.
+function handleLastUpdatedRequest(env) {
+  const lastUpdated = new Date(env.CF_VERSION_METADATA.timestamp).toISOString();
+  return new Response(JSON.stringify({ lastUpdated }), {
+    headers: {
+      'Content-Type': 'application/json',
+      'Cache-Control': `public, max-age=${CACHE_TTL_SECONDS}`,
+    },
+  });
+}
+
 // Cloudflare's static-asset serving answers HTTP Range requests with a full 200 instead of a
 // 206, and omits Accept-Ranges. Browsers therefore can't seek into audio that isn't fully
 // buffered yet — clicking the seek bar restarts the track. We route /audio/ through the Worker
@@ -103,6 +115,9 @@ export default {
     const url = new URL(request.url);
     if (url.pathname === '/api/news') {
       return handleNewsRequest(request, ctx);
+    }
+    if (url.pathname === '/api/last-updated') {
+      return handleLastUpdatedRequest(env);
     }
     if (url.pathname.startsWith('/audio/')) {
       return handleAsset(request, env);
