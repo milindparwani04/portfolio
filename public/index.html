@@ -618,8 +618,8 @@
   <main>
     <div class="hero-wrap" data-section="HOME">
       <div class="hero-sticky">
-        <div class="hero-tag"><span class="stamp">Welcome to my digital playground</span></div>
-        <h1>A record of<span class="line2">what I'm into.</span></h1>
+        <div class="hero-tag"><span class="stamp" id="lastUpdated">Last updated &#8212;</span></div>
+        <h1>My digital<span class="line2">portfolio.</span></h1>
         <p class="hero-sub">Economics &amp; finance journaling, tools I made because I needed them, and side projects in music, travel, and games — all in one place.</p>
         <div class="hero-cta">
           <a href="#journal" class="cmd-btn solid">Read the journal</a>
@@ -1185,6 +1185,26 @@
   }
   loadTicker();
   setInterval(loadTicker, 5 * 60 * 1000);
+
+  // Hero "last updated" pill. Served by the Worker, which means it 404s under live-server exactly
+  // like /api/news does — the em-dash placeholder baked into the markup is the correct local
+  // appearance, not a bug. Any failure (404, bad JSON, unparseable date) simply leaves that
+  // placeholder in place rather than showing a broken or invented date.
+  async function loadLastUpdated(){
+    const el = document.getElementById('lastUpdated');
+    if(!el) return;
+    try{
+      const res = await fetch('/api/last-updated');
+      if(!res.ok) throw new Error('bad response');
+      const data = await res.json();
+      const d = new Date(data.lastUpdated);
+      if(isNaN(d.getTime())) throw new Error('unparseable date');
+      el.textContent = `Last updated ${ordinal(d.getDate())} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+    }catch(err){
+      /* leave the placeholder as-is */
+    }
+  }
+  loadLastUpdated();
 
   // Rotation was the accidental fix users found; make it (and any viewport resize) a deliberate
   // one by restarting the animation against the new layout. Debounced so a drag-resize doesn't
