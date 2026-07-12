@@ -323,6 +323,156 @@
   .tool-modal-close:hover{ border-color:var(--fg); color:var(--fg); }
   .tool-modal-sub{ font-family:var(--sans); color:var(--dim); font-size:.88rem; line-height:1.5; margin:.9rem 0 1.6rem; }
 
+  /* tool modal — pdf editor. Wider/taller than the shared 640px/88vh default (that panel scrolls
+     as one block; this one needs a pinned toolbar with independently-scrolling thumbs/stage), so
+     this overrides width/height/overflow on a modifier class rather than touching the shared rule. */
+  .tool-modal-panel.pdf-editor-panel{
+    --pdfed-accent:#5AC8FA;
+    width:min(1100px, 96vw); max-height:92vh;
+    overflow:hidden; display:flex; flex-direction:column;
+  }
+  .pdf-editor-panel .pdfed-warning{
+    font-family:var(--mono); font-size:.68rem; color:var(--dim); border:1px solid var(--line);
+    padding:.45rem .7rem; margin:0 0 .7rem;
+  }
+  .pdf-editor-panel .pdfed-editor{ display:flex; flex-direction:column; flex:1 1 auto; min-height:0; }
+  .pdf-editor-panel .pdfed-editor[hidden]{ display:none; }
+  /* compact toolbar so the page preview gets the room; extra top gap separates it from the drop box */
+  .pdfed-toolbar{ display:flex; flex-wrap:wrap; align-items:center; gap:.45rem; margin:1.2rem 0 .7rem; }
+  .pdfed-toolbar-spacer{ flex:1 1 auto; }
+  .pdfed-hint{ font-family:var(--mono); font-size:.62rem; letter-spacing:.03em; color:var(--dimmer); margin:0 0 .6rem; }
+  .pdfed-filename-wrap{ display:flex; align-items:center; gap:.35rem; }
+  .pdfed-filename{
+    font-family:var(--mono); font-size:.68rem; color:var(--fg); background:var(--bg);
+    border:1px solid var(--line); padding:.35rem .45rem; width:118px;
+  }
+  .pdfed-filename:focus{ outline:none; border-color:var(--fg); }
+  .pdfed-filename-ext{ font-family:var(--mono); font-size:.68rem; color:var(--dimmer); }
+  .pdfed-pagejump{ display:flex; align-items:center; gap:.4rem; }
+  .pdfed-pagejump-label{
+    font-family:var(--mono); font-size:.68rem; text-transform:uppercase; letter-spacing:.08em;
+    color:var(--fg); font-weight:600;
+  }
+  .pdfed-page-input{
+    font-family:var(--mono); font-size:.72rem; font-weight:700; color:var(--fg); background:var(--bg);
+    border:1px solid var(--pdfed-accent); padding:.35rem .3rem; width:44px; text-align:center;
+  }
+  .pdfed-page-input:focus{ outline:none; border-color:var(--fg); }
+  .pdfed-page-total{ font-family:var(--mono); font-size:.68rem; font-weight:600; color:var(--fg); }
+  .pdfed-btn{
+    font-family:var(--mono); font-size:.64rem; text-transform:uppercase; letter-spacing:.05em;
+    color:var(--fg); background:none; border:1px solid var(--line); padding:.35rem .6rem; cursor:pointer;
+    transition:border-color .2s, color .2s, opacity .2s;
+  }
+  .pdfed-btn:hover:not(:disabled){ border-color:var(--fg); }
+  .pdfed-btn.active{ color:var(--bg); background:var(--pdfed-accent); border-color:var(--pdfed-accent); }
+  .pdfed-btn:disabled{ color:var(--dimmer); cursor:not-allowed; opacity:.6; }
+  .pdfed-btn-primary{ color:var(--bg); background:var(--fg); border-color:var(--fg); }
+  .pdfed-btn-primary:hover:not(:disabled){ opacity:.85; }
+  .pdfed-btn-danger:hover:not(:disabled){ border-color:#ff6b6b; color:#ff6b6b; }
+  /* the initial drop box shrinks to a slim bar once a document is loaded, freeing vertical space */
+  .pdf-editor-panel.has-doc .conv-drop{ padding:.7rem 1rem; }
+  .pdf-editor-panel.has-doc .conv-drop-icon, .pdf-editor-panel.has-doc .conv-drop-hint{ display:none; }
+  .pdfed-body{ flex:1 1 auto; min-height:0; display:flex; gap:1rem; }
+  .pdfed-thumbs{
+    flex:0 0 140px; overflow-y:auto; display:flex; flex-direction:column; gap:.6rem; padding-right:.4rem;
+  }
+  .pdfed-thumb{
+    position:relative; border:1px solid var(--line); cursor:grab; background:var(--panel);
+    padding:.4rem; display:flex; flex-direction:column; align-items:center; gap:.3rem; touch-action:none;
+  }
+  .pdfed-thumb.active{ border-color:var(--pdfed-accent); }
+  .pdfed-thumb.dragging{ opacity:.35; cursor:grabbing; }
+  /* marks the first page of a merged-in document, so an inserted PDF reads as a distinct block */
+  .pdfed-thumb.source-start{ border-top:2px solid var(--pdfed-accent); margin-top:.5rem; }
+  /* insertion indicator on the thumb the dragged page will land next to (column layout) */
+  .pdfed-thumb.drop-before{ box-shadow:0 -3px 0 0 var(--pdfed-accent); }
+  .pdfed-thumb.drop-after{ box-shadow:0 3px 0 0 var(--pdfed-accent); }
+  /* floating clone that follows the cursor while dragging, so the drag reads clearly */
+  .pdfed-thumb-ghost{
+    position:fixed; z-index:300; margin:0; pointer-events:none; opacity:.92;
+    border:1px solid var(--pdfed-accent); background:var(--panel); padding:.4rem;
+    box-shadow:0 10px 28px rgba(0,0,0,.55);
+  }
+  .pdfed-thumb canvas{ max-width:100%; display:block; pointer-events:none; }
+  .pdfed-thumb-label{ font-family:var(--mono); font-size:.62rem; color:var(--dimmer); }
+  .pdfed-thumb-delete{
+    position:absolute; top:.3rem; right:.3rem; width:18px; height:18px; display:flex; align-items:center;
+    justify-content:center; background:var(--bg); border:1px solid var(--line); color:var(--dim);
+    font-size:.6rem; cursor:pointer; line-height:1;
+  }
+  .pdfed-thumb-delete:hover{ border-color:var(--fg); color:var(--fg); }
+  .pdfed-stage{
+    flex:1 1 auto; overflow:auto; position:relative; display:flex; align-items:flex-start;
+    justify-content:center; background:var(--panel); border:1px solid var(--line);
+  }
+  .pdfed-page{ position:relative; flex:0 0 auto; }
+  .pdfed-stage canvas{ display:block; max-width:100%; height:auto; }
+  /* text-layer + erasure covers sit in an overlay pinned exactly over the page canvas.
+     Two hit layers coexist: run (line) hits for select/move, word hits for the eraser —
+     the overlay's mode class decides which layer takes pointer events. */
+  /* Overlay is a purely INVISIBLE interaction layer now — covers and replacement text are baked
+     onto the canvas itself (WYSIWYG with export, no drift). These divs are transparent hit targets. */
+  .pdfed-overlay{ position:absolute; inset:0; pointer-events:none; user-select:none; }
+  .pdfed-run-hit, .pdfed-edit-hit{ position:absolute; pointer-events:auto; cursor:text; }
+  .pdfed-run-hit:hover, .pdfed-edit-hit:hover{ background:rgba(90,200,250,.14); outline:1px solid rgba(90,200,250,.5); }
+  .pdfed-overlay.erasing .pdfed-run-hit{ pointer-events:none; }
+  .pdfed-overlay.moving .pdfed-run-hit, .pdfed-overlay.moving .pdfed-edit-hit{ cursor:move; touch-action:none; }
+  .pdfed-overlay.moving .pdfed-run-hit:hover, .pdfed-overlay.moving .pdfed-edit-hit:hover{ background:rgba(90,200,250,.10); outline:1px dashed var(--pdfed-accent); }
+  .pdfed-overlay.erasing .pdfed-edit-hit{ cursor:crosshair; }
+  .pdfed-overlay.erasing .pdfed-edit-hit:hover{ background:rgba(255,64,64,.28); outline:1px solid rgba(255,64,64,.85); }
+  .pdfed-text-hit{ position:absolute; pointer-events:auto; cursor:crosshair; }
+  .pdfed-overlay:not(.erasing) .pdfed-text-hit{ pointer-events:none; }
+  .pdfed-overlay.erasing .pdfed-text-hit{ touch-action:none; }
+  .pdfed-overlay.erasing .pdfed-text-hit:hover{ background:rgba(255,64,64,.28); outline:1px solid rgba(255,64,64,.85); }
+  .pdfed-move-ghost{
+    position:absolute; pointer-events:none; z-index:4;
+    border:1px dashed var(--pdfed-accent); background:rgba(90,200,250,.12);
+  }
+  /* inserted images: baked onto the canvas like everything else; this box is the move/resize
+     handle layer that sits over the active image. */
+  .pdfed-image-box{ position:absolute; pointer-events:auto; cursor:move; touch-action:none; z-index:5; }
+  .pdfed-image-box.active{ border:1px solid var(--pdfed-accent); box-shadow:0 0 0 1px rgba(0,0,0,.3); }
+  .pdfed-image-live{ position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
+  .pdfed-image-handle{
+    position:absolute; right:-6px; bottom:-6px; width:12px; height:12px; background:var(--pdfed-accent);
+    border:1px solid #fff; cursor:nwse-resize; touch-action:none;
+  }
+  .pdfed-image-del{
+    position:absolute; left:-9px; top:-9px; width:18px; height:18px; display:flex; align-items:center;
+    justify-content:center; background:var(--bg); border:1px solid var(--pdfed-accent); color:var(--fg);
+    font-size:.6rem; line-height:1; cursor:pointer;
+  }
+  /* committed text edits: live-styled preview spans over their covers */
+  .pdfed-text-edit{ position:absolute; pointer-events:auto; cursor:text; white-space:pre; line-height:1; z-index:2; }
+  .pdfed-overlay.erasing .pdfed-text-edit{ cursor:crosshair; }
+  .pdfed-edit-input{
+    position:absolute; z-index:3; pointer-events:auto; background:#fff; color:#000;
+    border:1px dashed var(--pdfed-accent); padding:0 2px; line-height:1.1; outline:none;
+  }
+  /* text formatting bar (visible while a word is being edited) */
+  .pdfed-textbar{ display:flex; flex-wrap:wrap; align-items:center; gap:.6rem; margin-bottom:1rem; }
+  .pdfed-textbar[hidden]{ display:none; }
+  .pdfed-select, .pdfed-size{
+    font-family:var(--mono); font-size:.72rem; color:var(--fg); background:var(--bg);
+    border:1px solid var(--line); padding:.42rem .5rem;
+  }
+  .pdfed-select:focus, .pdfed-size:focus{ outline:none; border-color:var(--fg); }
+  .pdfed-size{ width:74px; }
+  .pdfed-color{ width:34px; height:31px; padding:2px; background:var(--bg); border:1px solid var(--line); cursor:pointer; }
+  .pdfed-btn-compact{ padding:.5rem .8rem; }
+  .pdfed-sizewrap{ display:flex; align-items:center; gap:.4rem; }
+  @media (max-width:880px){
+    .pdf-editor-panel .pdfed-body{ flex-direction:column; }
+    .pdfed-thumbs{ flex:0 0 auto; flex-direction:row; overflow-x:auto; overflow-y:hidden; max-height:120px; }
+    .pdfed-thumb{ flex:0 0 auto; }
+    /* thumbs sit in a row here, so the insertion indicator runs down the left/right edge */
+    .pdfed-thumb.drop-before{ box-shadow:-3px 0 0 0 var(--pdfed-accent); }
+    .pdfed-thumb.drop-after{ box-shadow:3px 0 0 0 var(--pdfed-accent); }
+    /* row layout — the source divider runs down the left edge instead of the top */
+    .pdfed-thumb.source-start{ border-top:1px solid var(--line); border-left:2px solid var(--pdfed-accent); margin-top:0; margin-left:.5rem; }
+  }
+
   .conv-format-row{ display:flex; flex-wrap:wrap; align-items:center; gap:1rem; margin-bottom:1.4rem; }
   .conv-label{ font-family:var(--mono); font-size:.68rem; color:var(--dimmer); text-transform:uppercase; letter-spacing:.08em; }
   .conv-format-opts{ display:flex; gap:.5rem; }
@@ -801,9 +951,9 @@
         </div>
         <div class="tool reveal">
           <span class="n">06</span>
-          <h3>PDF Compressor</h3>
-          <p>Drop a PDF, shrink the file size without losing the content.</p>
-          <span class="soon">Coming soon</span>
+          <h3>PDF Editor</h3>
+          <p>Reorder, rotate, and edit a PDF page by page — right in your browser.</p>
+          <a href="#" class="open" data-open-tool="pdfEditorModal">Open tool</a>
         </div>
         <div class="tool reveal">
           <span class="n">07</span>
@@ -1125,8 +1275,89 @@
   </div>
 </div>
 
+<div class="tool-modal" id="pdfEditorModal" aria-hidden="true">
+  <div class="tool-modal-backdrop" data-close-tool></div>
+  <div class="tool-modal-panel pdf-editor-panel" role="dialog" aria-modal="true" aria-labelledby="pdfEditorTitle">
+    <div class="tool-modal-head">
+      <div>
+        <span class="file-no">REF. 03.06 / TOOL</span>
+        <h3 id="pdfEditorTitle">PDF Editor</h3>
+      </div>
+      <button class="tool-modal-close" data-close-tool aria-label="Close">&#10005;</button>
+    </div>
+    <p class="tool-modal-sub">Reorder, rotate, and edit a PDF page by page. Nothing leaves your browser.</p>
+
+    <div class="conv-drop" id="pdfedDrop" tabindex="0" role="button" aria-label="Add a PDF">
+      <span class="conv-drop-icon">&#8595;</span>
+      <span class="conv-drop-text" id="pdfedDropText">Drag &amp; drop a PDF here, or click to browse</span>
+      <span class="conv-drop-hint">Accepts PDF</span>
+    </div>
+    <!-- Two dedicated inputs (replace vs append) so the behaviour never depends on shared state;
+         kept OUTSIDE the drop zone so programmatic click() can't bubble into its click handler. -->
+    <input type="file" id="pdfedFileInput" accept="application/pdf" hidden>
+    <input type="file" id="pdfedInsertInput" accept="application/pdf" hidden>
+    <input type="file" id="pdfedImageInput" accept="image/png,image/jpeg" hidden>
+
+    <p class="pdfed-warning" id="pdfedWarning" hidden></p>
+
+    <div class="pdfed-editor" id="pdfedEditor" hidden>
+      <div class="pdfed-toolbar" id="pdfedToolbar">
+        <button class="pdfed-btn" id="pdfedInsert" type="button">Insert PDF</button>
+        <button class="pdfed-btn" id="pdfedErase" type="button" disabled aria-pressed="false">Erase text</button>
+        <button class="pdfed-btn" id="pdfedMove" type="button" disabled aria-pressed="false">Move text</button>
+        <button class="pdfed-btn" id="pdfedImage" type="button" disabled>Add image</button>
+        <button class="pdfed-btn" id="pdfedRotate" type="button" disabled>Rotate</button>
+        <button class="pdfed-btn" id="pdfedDelete" type="button" disabled>Delete page</button>
+        <button class="pdfed-btn" id="pdfedUndo" type="button" disabled>Undo</button>
+        <button class="pdfed-btn pdfed-btn-danger" id="pdfedClear" type="button" disabled>Clear</button>
+        <span class="pdfed-toolbar-spacer"></span>
+        <label class="pdfed-pagejump">
+          <span class="pdfed-pagejump-label">Page</span>
+          <input type="number" id="pdfedPageInput" class="pdfed-page-input" min="1" value="1" aria-label="Jump to page">
+          <span class="pdfed-page-total" id="pdfedPageTotal">/ 0</span>
+        </label>
+        <span class="pdfed-toolbar-spacer"></span>
+        <label class="pdfed-filename-wrap">
+          <span class="conv-label">File name</span>
+          <input type="text" id="pdfedFilename" class="pdfed-filename" value="edited" spellcheck="false" autocomplete="off" aria-label="Export file name">
+          <span class="pdfed-filename-ext">.pdf</span>
+        </label>
+        <button class="pdfed-btn pdfed-btn-primary" id="pdfedExport" type="button" disabled>Export PDF</button>
+      </div>
+      <div class="pdfed-textbar" id="pdfedTextbar" hidden>
+        <select id="pdfedFontFamily" class="pdfed-select" aria-label="Font family">
+          <option value="sans">Helvetica</option>
+          <option value="serif">Times</option>
+          <option value="mono">Courier</option>
+        </select>
+        <button class="pdfed-btn pdfed-btn-compact" id="pdfedBoldBtn" type="button" aria-pressed="false" aria-label="Bold"><b>B</b></button>
+        <button class="pdfed-btn pdfed-btn-compact" id="pdfedItalicBtn" type="button" aria-pressed="false" aria-label="Italic"><i>I</i></button>
+        <label class="pdfed-sizewrap"><span class="conv-label">Size</span>
+          <input type="number" id="pdfedFontSize" class="pdfed-size" min="4" max="200" step="0.5" aria-label="Font size">
+        </label>
+        <input type="color" id="pdfedFontColor" class="pdfed-color" aria-label="Text colour">
+        <button class="pdfed-btn" id="pdfedApplyText" type="button">Apply</button>
+        <button class="pdfed-btn" id="pdfedCancelText" type="button">Cancel</button>
+      </div>
+      <p class="pdfed-hint" id="pdfedHint">Tip: click any word on the page to edit its text. Drag pages in the sidebar to reorder.</p>
+      <div class="pdfed-body">
+        <div class="pdfed-thumbs" id="pdfedThumbs"></div>
+        <div class="pdfed-stage" id="pdfedStage">
+          <div class="pdfed-page" id="pdfedPage">
+            <canvas id="pdfedCanvas"></canvas>
+            <div class="pdfed-overlay" id="pdfedOverlay"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- QR Code Generator for JavaScript, (c) 2009 Kazuhiko Arase, MIT licensed. -->
 <script src="lib/qrcode.js"></script>
+<!-- pdf-lib (MIT) — https://pdf-lib.js.org, v1.17.1. pdf.js (Apache-2.0) is loaded lazily via
+     dynamic import() from the PDF Editor's own script, since its dist ships ES modules only. -->
+<script src="lib/pdf-lib.min.js"></script>
 
 <script>
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -2260,6 +2491,1356 @@
 
     document.querySelectorAll('[data-open-tool="audioTrimModal"]').forEach(trigger => {
       trigger.addEventListener('click', stopPlayback);
+    });
+  })();
+
+  /* ============ PDF EDITOR ============ */
+  (() => {
+    if(typeof PDFLib === 'undefined') return;
+    const modal = document.getElementById('pdfEditorModal');
+    const drop = document.getElementById('pdfedDrop');
+    const dropText = document.getElementById('pdfedDropText');
+    const fileInput = document.getElementById('pdfedFileInput');
+    const insertInput = document.getElementById('pdfedInsertInput');
+    const warning = document.getElementById('pdfedWarning');
+    const editor = document.getElementById('pdfedEditor');
+    const thumbsEl = document.getElementById('pdfedThumbs');
+    const stageEl = document.getElementById('pdfedStage');
+    const pageEl = document.getElementById('pdfedPage');
+    const stageCanvas = document.getElementById('pdfedCanvas');
+    const overlayEl = document.getElementById('pdfedOverlay');
+    const rotateBtn = document.getElementById('pdfedRotate');
+    const deleteBtn = document.getElementById('pdfedDelete');
+    const eraseBtn = document.getElementById('pdfedErase');
+    const moveBtn = document.getElementById('pdfedMove');
+    const imageBtn = document.getElementById('pdfedImage');
+    const imageInput = document.getElementById('pdfedImageInput');
+    const undoBtn = document.getElementById('pdfedUndo');
+    const clearBtn = document.getElementById('pdfedClear');
+    const exportBtn = document.getElementById('pdfedExport');
+    const insertBtn = document.getElementById('pdfedInsert');
+    const filenameInput = document.getElementById('pdfedFilename');
+    const pageInput = document.getElementById('pdfedPageInput');
+    const pageTotal = document.getElementById('pdfedPageTotal');
+    const hintEl = document.getElementById('pdfedHint');
+    if(!modal) return;
+
+    const LARGE_PAGE_WARNING = 50;
+    const THUMB_WIDTH = 120;
+    const actionBtns = [eraseBtn, moveBtn, imageBtn, rotateBtn, deleteBtn, clearBtn, exportBtn];
+    const panel = modal.querySelector('.pdf-editor-panel');
+
+    // pdf.js (Apache-2.0) ships ES-module-only dist builds as of v6 — no classic global to guard
+    // synchronously like the other vendored libs, so it's fetched lazily via dynamic import().
+    let pdfjsReady = null;
+    function ensurePdfjs(){
+      if(!pdfjsReady){
+        pdfjsReady = import('./lib/pdf.min.mjs').then(mod => {
+          mod.GlobalWorkerOptions.workerSrc = './lib/pdf.worker.min.mjs';
+          pdfjs = mod;
+          return mod;
+        });
+      }
+      return pdfjsReady;
+    }
+    document.querySelectorAll('[data-open-tool="pdfEditorModal"]').forEach(trigger => {
+      trigger.addEventListener('click', ensurePdfjs);
+    });
+
+    const sourceDocs = new Map(); // sourceId -> { file, pdfLibDoc, pdfjsDoc, name }
+    let pages = []; // [{ id, sourceId, pageIndex, intrinsicRotation, userRotation, edits:{erasures:[],textEdits:[],images:[]} }]
+    let nextSourceId = 0;
+    let nextPageId = 0;
+    let selectedPageId = null;
+    let undoStack = []; // one snapshot per edit — undo steps back one action at a time, to the loaded state
+    let stageRenderToken = 0;
+    let thumbsRenderToken = 0; // guards against interleaved async thumb rebuilds scrambling the rail order
+    let thumbsBuilding = false;
+    let dragJustHappened = false; // suppresses the click that fires right after a drag-reorder
+    let moveJustHappened = false; // same, for the click that trails a move-drag on the overlay
+    let pdfjs = null; // the resolved pdf.js module, captured once loaded
+    let mode = 'select'; // 'select' | 'erase' | 'move'
+    let currentRender = null; // { entry, viewport, dpr, ctx, styles, items:[{item,pdfBox,css}] } for the shown stage page
+    let editing = null; // active inline text edit — { entry, isNew, rec | teId, input, ... }
+    let nextEditId = 0; // unique per committed textEdit; removal is id-based so double-fires no-op
+    let activeImageId = null; // the inserted image currently showing move/resize handles
+    let draggingImageId = null; // an image mid drag/resize — skipped from the bake, shown live instead
+    let nextImageId = 0;
+    const stageTask = { task: null }; // in-flight pdf.js render on the stage canvas, cancellable
+
+    function totalRotationOf(entry){
+      return ((entry.intrinsicRotation + entry.userRotation) % 360 + 360) % 360;
+    }
+
+    function clonePages(list){
+      return list.map(p => ({ ...p, edits: { erasures:[...p.edits.erasures], textEdits:[...p.edits.textEdits], images:[...p.edits.images] } }));
+    }
+    function snapshotForUndo(){
+      undoStack.push(clonePages(pages));
+      if(undoStack.length > 100) undoStack.shift(); // cap memory; 100 steps is plenty
+      undoBtn.disabled = false;
+    }
+    function setEditorEnabled(on){
+      actionBtns.forEach(b => b.disabled = !on);
+      editor.hidden = !on;
+    }
+    // ordering + per-page rotation — when unchanged by an undo, the (expensive, async) thumb
+    // rebuild is skipped and only the stage re-renders (covers/edits live in the overlay).
+    function structuralSig(list){ return list.map(p => `${p.id}:${p.userRotation}`).join('|'); }
+    function performUndo(){
+      if(!undoStack.length) return;
+      cancelTextEdit();
+      const before = structuralSig(pages);
+      pages = undoStack.pop();
+      undoBtn.disabled = undoStack.length === 0;
+      if(!pages.find(p => p.id === selectedPageId)) selectedPageId = pages.length ? pages[0].id : null;
+      setEditorEnabled(pages.length > 0);
+      if(structuralSig(pages) !== before){
+        renderThumbs();
+        renderStage();
+      } else {
+        thumbsEl.querySelectorAll('.pdfed-thumb').forEach(t => t.classList.toggle('active', Number(t.dataset.pageId) === selectedPageId));
+        // only overlay edits changed — rebind to the restored page object and repaint the overlay
+        // without re-rendering the canvas, which used to flash the unedited document each undo
+        const cur = currentRender && pages.find(p => p.id === currentRender.entry.id);
+        if(cur && cur.id === selectedPageId){
+          currentRender.entry = cur;
+          paintOverlay();
+        } else {
+          renderStage();
+        }
+      }
+    }
+    undoBtn.addEventListener('click', performUndo);
+
+    async function getPdfjsPage(entry){
+      const src = sourceDocs.get(entry.sourceId);
+      return src.pdfjsDoc.getPage(entry.pageIndex + 1);
+    }
+
+    // pdf.js's render() defaults to requestAnimationFrame-paced scheduling for intent:"display",
+    // which never advances in a backgrounded/hidden tab (rAF is throttled to near-zero there) —
+    // intent:"print" switches it to microtask scheduling so a render can't silently hang forever.
+    // `holder` (optional) tracks the in-flight render task so a newer render on the SAME canvas
+    // can cancel the old one first — pdf.js throws if two renders target one canvas concurrently.
+    async function renderPageToCanvas(pdfjsPage, canvas, targetWidth, rotation, holder){
+      if(holder && holder.task){ try{ holder.task.cancel(); }catch(e){} holder.task = null; }
+      const dpr = window.devicePixelRatio || 1;
+      const unscaled = pdfjsPage.getViewport({ scale: 1, rotation });
+      const scale = targetWidth / unscaled.width;
+      const viewport = pdfjsPage.getViewport({ scale, rotation });
+      canvas.width = Math.ceil(viewport.width * dpr);
+      canvas.height = Math.ceil(viewport.height * dpr);
+      canvas.style.width = Math.ceil(viewport.width) + 'px';
+      canvas.style.height = Math.ceil(viewport.height) + 'px';
+      const ctx = canvas.getContext('2d');
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      const task = pdfjsPage.render({ canvasContext: ctx, viewport, intent: 'print' });
+      if(holder) holder.task = task;
+      try{
+        await task.promise;
+      }catch(err){
+        if(err && err.name === 'RenderingCancelledException') return null; // superseded, not a failure
+        throw err;
+      }finally{
+        if(holder && holder.task === task) holder.task = null;
+      }
+      return viewport;
+    }
+
+    /* ---- text-layer geometry + colour sampling (Phase 2) ---- */
+    // 2D affine apply — [a,b,c,d,e,f] · (x,y). pdf.js exports Util.applyTransform but this keeps
+    // the mapping self-contained and independent of the vendored module's surface.
+    function applyTransform(p, m){ return [ m[0]*p[0] + m[2]*p[1] + m[4], m[1]*p[0] + m[3]*p[1] + m[5] ]; }
+    // linear part of the inverse — enough to map CSS-pixel drag deltas back into PDF points
+    function inverseLinear(m){
+      const det = m[0] * m[3] - m[1] * m[2] || 1;
+      return [ m[3] / det, -m[1] / det, -m[2] / det, m[0] / det ];
+    }
+    // full affine inverse — maps a screen point back to a PDF-space point (used for image placement)
+    function invertTransform(m){
+      const det = m[0] * m[3] - m[1] * m[2] || 1;
+      const ia = m[3] / det, ib = -m[1] / det, ic = -m[2] / det, id = m[0] / det;
+      return [ia, ib, ic, id, -(ia * m[4] + ic * m[5]), -(ib * m[4] + id * m[5])];
+    }
+    // a screen-space (CSS px) rect -> an axis-aligned PDF box (bottom-left origin, y-up)
+    function screenRectToPdfBox(rect, viewport){
+      const inv = invertTransform(viewport.transform);
+      const a = applyTransform([rect.left, rect.top], inv);
+      const b = applyTransform([rect.left + rect.width, rect.top + rect.height], inv);
+      return { x: Math.min(a[0], b[0]), y: Math.min(a[1], b[1]), w: Math.abs(b[0] - a[0]), h: Math.abs(b[1] - a[1]) };
+    }
+
+    // pdf.js groups text into runs that are often whole lines, not words. The eraser works a word
+    // at a time, so each run is split on whitespace into per-word boxes in the PDF's unrotated user
+    // space (origin bottom-left, y-up). Word x-offsets come from canvas measureText, then normalised
+    // so their total matches the run's real advance width — correcting for font-metric mismatch.
+    // Height uses the font's measured ascent/descent from getTextContent's styles map, not a guess.
+    const measureCtx = document.createElement('canvas').getContext('2d');
+    function itemWords(item, styles, loadedName){
+      const t = item.transform;
+      const size = Math.hypot(t[2], t[3]) || Math.abs(t[3]) || 10;
+      const st = (styles && styles[item.fontName]) || {};
+      const ascent = (typeof st.ascent === 'number' ? st.ascent : 0.75) * size;
+      const descent = (typeof st.descent === 'number' ? Math.abs(st.descent) : 0.25) * size;
+      const padX = size * 0.04;
+      const blen = Math.hypot(t[0], t[1]) || 1;
+      const ux = t[0] / blen, uy = t[1] / blen; // baseline direction (handles rotated runs positionally)
+      // Measure with the document's own embedded font when pdf.js has loaded it as a FontFace
+      // (its `loadedName`) — generic-font metrics drift a few points per word, which is exactly
+      // what made covers trespass into neighbouring words on real documents.
+      measureCtx.font = `${Math.max(1, size)}px ${loadedName ? `"${loadedName}", ` : ''}${st.fontFamily || 'sans-serif'}`;
+      const total = measureCtx.measureText(item.str).width || 1;
+      const k = item.width / total;
+      const words = [];
+      const re = /\S+/g; let m;
+      while((m = re.exec(item.str))){
+        const x0 = measureCtx.measureText(item.str.slice(0, m.index)).width * k;
+        const x1 = measureCtx.measureText(item.str.slice(0, m.index + m[0].length)).width * k;
+        words.push({
+          str: m[0],
+          size,
+          baseline: { x: t[4] + x0 * ux, y: t[5] + x0 * uy }, // where replacement text gets drawn
+          pdfBox: { x: t[4] + x0 * ux - padX, y: t[5] + x0 * uy - descent, w: (x1 - x0) + padX * 2, h: ascent + descent }
+        });
+      }
+      return words;
+    }
+
+    // The whole run (visual line/fragment) as one record — the unit of text editing and moving.
+    // Same box math as itemWords, spanning the run's full advance width.
+    function runRecFor(item, styles){
+      const t = item.transform;
+      const size = Math.hypot(t[2], t[3]) || Math.abs(t[3]) || 10;
+      const st = (styles && styles[item.fontName]) || {};
+      const ascent = (typeof st.ascent === 'number' ? st.ascent : 0.75) * size;
+      const descent = (typeof st.descent === 'number' ? Math.abs(st.descent) : 0.25) * size;
+      const padX = size * 0.04;
+      return {
+        str: item.str, size,
+        baseline: { x: t[4], y: t[5] },
+        pdfBox: { x: t[4] - padX, y: t[5] - descent, w: item.width + padX * 2, h: ascent + descent },
+        asc: typeof st.ascent === 'number' ? st.ascent : 0.8
+      };
+    }
+
+    // Map a PDF-space box through the current viewport to an axis-aligned CSS-pixel rect.
+    function pdfBoxToCssRect(box, viewport){
+      const c = [[box.x, box.y], [box.x + box.w, box.y], [box.x, box.y + box.h], [box.x + box.w, box.y + box.h]]
+        .map(p => applyTransform(p, viewport.transform));
+      const xs = c.map(p => p[0]), ys = c.map(p => p[1]);
+      const left = Math.min(...xs), top = Math.min(...ys);
+      return { left, top, width: Math.max(...xs) - left, height: Math.max(...ys) - top };
+    }
+
+    function readPixel(ctx, dpr, x, y){
+      const dx = Math.round(x * dpr), dy = Math.round(y * dpr);
+      if(dx < 0 || dy < 0 || dx >= ctx.canvas.width || dy >= ctx.canvas.height) return null;
+      try{ const d = ctx.getImageData(dx, dy, 1, 1).data; return [d[0], d[1], d[2]]; }catch(e){ return null; }
+    }
+
+    // Sample the ring just outside a glyph box; return the median colour if the background reads
+    // solid, else fall back to white — the honest limit of covering text over textured art.
+    function sampleBackgroundColor(ctx, dpr, r){
+      const pad = 4;
+      const pts = [
+        [r.left - pad, r.top + r.height / 2], [r.left + r.width + pad, r.top + r.height / 2],
+        [r.left + r.width / 2, r.top - pad], [r.left + r.width / 2, r.top + r.height + pad],
+        [r.left - pad, r.top - pad], [r.left + r.width + pad, r.top - pad],
+        [r.left - pad, r.top + r.height + pad], [r.left + r.width + pad, r.top + r.height + pad]
+      ];
+      const s = pts.map(p => readPixel(ctx, dpr, p[0], p[1])).filter(Boolean);
+      if(!s.length) return { r: 255, g: 255, b: 255 };
+      const med = ch => { const v = s.map(p => p[ch]).sort((a, b) => a - b); return v[Math.floor(v.length / 2)]; };
+      const m = [med(0), med(1), med(2)];
+      const dev = Math.max(...s.map(p => Math.max(Math.abs(p[0] - m[0]), Math.abs(p[1] - m[1]), Math.abs(p[2] - m[2]))));
+      if(dev > 40) return { r: 255, g: 255, b: 255 }; // ambiguous background
+      return { r: m[0], g: m[1], b: m[2] };
+    }
+
+    function toHex(c){ return '#' + [c.r, c.g, c.b].map(v => Math.max(0, Math.min(255, v)).toString(16).padStart(2, '0')).join(''); }
+
+    // Measure a text item's own colour from the pixels: the glyph pixel that deviates most from
+    // the background. Returns a hex string, never a guess.
+    function detectTextColor(ctx, dpr, r, bg){
+      let best = null, bestDist = -1;
+      const gx = 14, gy = 8;
+      for(let i = 1; i < gx; i++) for(let j = 1; j < gy; j++){
+        const c = readPixel(ctx, dpr, r.left + r.width * i / gx, r.top + r.height * j / gy);
+        if(!c) continue;
+        const dist = Math.abs(c[0] - bg.r) + Math.abs(c[1] - bg.g) + Math.abs(c[2] - bg.b);
+        if(dist > bestDist){ bestDist = dist; best = c; }
+      }
+      return best ? { r: best[0], g: best[1], b: best[2] } : { r: 0, g: 0, b: 0 };
+    }
+
+    // The real font behind a text item, via pdf.js's commonObjs (resolved once the page has
+    // rendered): `name` is the true PostScript name (e.g. "AAAAAE+Aptos-Bold" — subset prefix +
+    // family + weight), `loadedName` the FontFace family pdf.js registered the embedded font
+    // under, `fallbackName` pdf.js's own serif/sans/monospace classification from the font flags.
+    // item.fontName itself is an opaque id like "g_d1_f2" on real documents — useless for style.
+    function fontMetaFor(pdfjsPage, fontName){
+      try{
+        const f = pdfjsPage.commonObjs.get(fontName);
+        if(f) return { name: f.name || '', loadedName: f.loadedName || '', fallbackName: f.fallbackName || '' };
+      }catch(e){}
+      return { name: '', loadedName: '', fallbackName: '' };
+    }
+
+    // Full style read for a selected item — size, family/weight/style, colour hex. Feeds Phase 3.
+    function detectItemStyle(item, styles, ctx, dpr, cssRect, meta){
+      const t = item.transform;
+      const size = Math.hypot(t[2], t[3]) || Math.abs(t[3]) || 12;
+      const st = (styles && styles[item.fontName]) || {};
+      const nameL = ((meta && meta.name) || '').toLowerCase();
+      const fb = (((meta && meta.fallbackName) || st.fontFamily) || '').toLowerCase();
+      let family = fb.includes('mono') ? 'mono' : (fb.includes('serif') && !fb.includes('sans')) ? 'serif' : 'sans';
+      if(nameL){ // the real font name is the strongest signal when present
+        if(/courier|consolas|menlo|mono/.test(nameL)) family = 'mono';
+        else if(/times|georgia|garamond|cambria|book|roman|palatino|century|constantia|minion|caslon/.test(nameL)) family = 'serif';
+      }
+      const bold = /bold|black|heavy|semibold|demi/.test(nameL);
+      const italic = /italic|oblique/.test(nameL);
+      const bg = sampleBackgroundColor(ctx, dpr, cssRect);
+      const color = detectTextColor(ctx, dpr, cssRect, bg);
+      return { size: Math.round(size * 10) / 10, family, bold, italic, colorHex: toHex(color), color };
+    }
+
+    function updateThumbLabels(){
+      thumbsEl.querySelectorAll('.pdfed-thumb').forEach((el, i) => {
+        el.querySelector('.pdfed-thumb-label').textContent = `Page ${i + 1}`;
+        const entry = pages[i];
+        if(entry){
+          const src = sourceDocs.get(entry.sourceId);
+          const prev = pages[i - 1];
+          el.classList.toggle('source-start', !!prev && prev.sourceId !== entry.sourceId);
+          el.title = src ? `${src.name} — page ${entry.pageIndex + 1}` : '';
+        }
+      });
+      updatePageIndicator();
+    }
+
+    function setActiveThumb(id){
+      selectedPageId = id;
+      thumbsEl.querySelectorAll('.pdfed-thumb').forEach(el => {
+        el.classList.toggle('active', Number(el.dataset.pageId) === id);
+      });
+      updatePageIndicator();
+      renderStage();
+    }
+
+    // page indicator: total count + the current page's position in the working order
+    function updatePageIndicator(){
+      pageTotal.textContent = '/ ' + pages.length;
+      pageInput.max = pages.length || 1;
+      const idx = pages.findIndex(p => p.id === selectedPageId);
+      if(document.activeElement !== pageInput) pageInput.value = idx === -1 ? '' : (idx + 1);
+    }
+    function jumpToPage(n){
+      if(!pages.length) return;
+      n = Math.max(1, Math.min(pages.length, Math.round(n) || 1));
+      const id = pages[n - 1].id;
+      setActiveThumb(id);
+      const el = thumbsEl.querySelector(`.pdfed-thumb[data-page-id="${id}"]`);
+      if(el) el.scrollIntoView({ block: 'nearest' });
+    }
+    pageInput.addEventListener('change', () => jumpToPage(parseInt(pageInput.value, 10)));
+    pageInput.addEventListener('keydown', (e) => {
+      e.stopPropagation(); // don't let Enter/Escape reach the modal
+      if(e.key === 'Enter'){ jumpToPage(parseInt(pageInput.value, 10)); pageInput.blur(); }
+    });
+
+    function wireThumbDrag(el, id){
+      el.addEventListener('pointerdown', (e) => {
+        if(e.target.closest('.pdfed-thumb-delete')) return;
+        if(e.button !== undefined && e.button !== 0) return;
+        e.preventDefault();
+        const startX = e.clientX, startY = e.clientY;
+        const srcCanvas = el.querySelector('canvas');
+        let ghost = null, moved = false, dropTarget = null;
+
+        function positionGhost(x, y){
+          ghost.style.left = (x + 12) + 'px';
+          ghost.style.top = (y + 12) + 'px';
+        }
+        // a clone of the thumb that trails the cursor; cloneNode doesn't copy canvas pixels,
+        // so the page image is re-blitted onto the clone's canvas by hand.
+        function makeGhost(){
+          const rect = el.getBoundingClientRect();
+          ghost = el.cloneNode(true);
+          ghost.classList.add('pdfed-thumb-ghost');
+          ghost.classList.remove('active');
+          ghost.style.width = rect.width + 'px';
+          const gc = ghost.querySelector('canvas');
+          if(gc && srcCanvas){
+            gc.width = srcCanvas.width; gc.height = srcCanvas.height;
+            gc.style.width = srcCanvas.style.width; gc.style.height = srcCanvas.style.height;
+            gc.getContext('2d').drawImage(srcCanvas, 0, 0);
+          }
+          document.body.appendChild(ghost);
+          positionGhost(e.clientX, e.clientY);
+        }
+        function clearIndicators(){
+          thumbsEl.querySelectorAll('.drop-before, .drop-after').forEach(t => t.classList.remove('drop-before', 'drop-after'));
+        }
+        // recompute which thumb the drop indicator sits on, from a viewport point
+        let lastX = e.clientX, lastY = e.clientY, rafId = null;
+        function updateDropTarget(x, y){
+          const target = document.elementFromPoint(x, y); // ghost is pointer-events:none, so it won't shadow this
+          const overThumb = target && target.closest('.pdfed-thumb');
+          clearIndicators();
+          if(overThumb && overThumb !== el && overThumb.parentElement === thumbsEl){
+            const rect = overThumb.getBoundingClientRect();
+            const column = getComputedStyle(thumbsEl).flexDirection === 'column';
+            const before = column ? (y < rect.top + rect.height / 2) : (x < rect.left + rect.width / 2);
+            overThumb.classList.add(before ? 'drop-before' : 'drop-after');
+            dropTarget = { thumb: overThumb, before };
+          } else {
+            dropTarget = null;
+          }
+        }
+        // while the cursor sits near an edge of the (scrollable) rail, keep scrolling it so
+        // pages that started off-screen can be reached without letting go of the drag. Uses a
+        // timer rather than requestAnimationFrame: rAF is throttled to near-zero in a background
+        // tab, which would silently freeze the auto-scroll — the same trap that hangs pdf.js.
+        const EDGE = 44, SPEED = 10;
+        function autoScrollTick(){
+          const rect = thumbsEl.getBoundingClientRect();
+          const column = getComputedStyle(thumbsEl).flexDirection === 'column';
+          let delta = 0;
+          if(column){
+            if(lastY < rect.top + EDGE) delta = -SPEED;
+            else if(lastY > rect.bottom - EDGE) delta = SPEED;
+            if(delta) thumbsEl.scrollTop += delta;
+          } else {
+            if(lastX < rect.left + EDGE) delta = -SPEED;
+            else if(lastX > rect.right - EDGE) delta = SPEED;
+            if(delta) thumbsEl.scrollLeft += delta;
+          }
+          if(delta) updateDropTarget(lastX, lastY); // content moved under a possibly-stationary cursor
+        }
+        function onMove(ev){
+          if(!moved){
+            if(Math.hypot(ev.clientX - startX, ev.clientY - startY) < 5) return; // ignore jitter; this is still a click
+            moved = true;
+            el.classList.add('dragging');
+            makeGhost();
+            rafId = setInterval(autoScrollTick, 16);
+          }
+          lastX = ev.clientX; lastY = ev.clientY;
+          positionGhost(ev.clientX, ev.clientY);
+          updateDropTarget(ev.clientX, ev.clientY);
+        }
+        function onUp(){
+          window.removeEventListener('pointermove', onMove);
+          window.removeEventListener('pointerup', onUp);
+          if(rafId) clearInterval(rafId);
+          el.classList.remove('dragging');
+          if(ghost){ ghost.remove(); ghost = null; }
+          clearIndicators();
+          if(moved && dropTarget){
+            snapshotForUndo();
+            thumbsEl.insertBefore(el, dropTarget.before ? dropTarget.thumb : dropTarget.thumb.nextSibling);
+            const newOrder = Array.from(thumbsEl.querySelectorAll('.pdfed-thumb')).map(n => Number(n.dataset.pageId));
+            pages.sort((a, b) => newOrder.indexOf(a.id) - newOrder.indexOf(b.id));
+            updateThumbLabels();
+          }
+          if(moved){ dragJustHappened = true; setTimeout(() => { dragJustHappened = false; }, 0); }
+        }
+        window.addEventListener('pointermove', onMove);
+        window.addEventListener('pointerup', onUp);
+      });
+    }
+
+    // Token-guarded: rebuilding is async (one page render at a time), so without the guard two
+    // overlapping rebuilds interleave their appends and scramble the rail's visible order — this
+    // was the "page 32 became page 4" bug. A stale loop stops the moment a newer rebuild starts.
+    async function renderThumbs(){
+      const myToken = ++thumbsRenderToken;
+      thumbsBuilding = true;
+      thumbsEl.innerHTML = '';
+      for(const entry of pages){
+        if(myToken !== thumbsRenderToken) return; // superseded — the newer rebuild owns the rail now
+        const wrap = document.createElement('div');
+        wrap.className = 'pdfed-thumb' + (entry.id === selectedPageId ? ' active' : '');
+        wrap.dataset.pageId = entry.id;
+        wrap.innerHTML = `
+          <canvas></canvas>
+          <span class="pdfed-thumb-label"></span>
+          <button class="pdfed-thumb-delete" type="button" aria-label="Delete page">&#10005;</button>
+        `;
+        thumbsEl.appendChild(wrap);
+        wrap.addEventListener('click', (e) => {
+          if(e.target.closest('.pdfed-thumb-delete')) return;
+          if(dragJustHappened) return; // this click is the tail end of a drag, not a select
+          setActiveThumb(entry.id);
+        });
+        wrap.querySelector('.pdfed-thumb-delete').addEventListener('click', (e) => {
+          e.stopPropagation();
+          deletePage(entry.id);
+        });
+        wireThumbDrag(wrap, entry.id);
+
+        const canvas = wrap.querySelector('canvas');
+        const pdfjsPage = await getPdfjsPage(entry);
+        if(myToken !== thumbsRenderToken) return;
+        await renderPageToCanvas(pdfjsPage, canvas, THUMB_WIDTH, totalRotationOf(entry));
+      }
+      if(myToken === thumbsRenderToken){
+        thumbsBuilding = false;
+        updateThumbLabels();
+      }
+    }
+
+    async function renderStage(){
+      cancelTextEdit(); // the overlay is about to be rebuilt; an open inline editor can't survive it
+      const entry = pages.find(p => p.id === selectedPageId);
+      const myToken = ++stageRenderToken;
+      overlayEl.innerHTML = '';
+      currentRender = null;
+      if(!entry){
+        stageCanvas.width = 0; stageCanvas.height = 0;
+        pageEl.style.width = ''; pageEl.style.height = '';
+        return;
+      }
+      const pdfjsPage = await getPdfjsPage(entry);
+      if(myToken !== stageRenderToken) return; // superseded by a newer selection/edit
+      const targetWidth = Math.max(280, stageEl.clientWidth - 32);
+      const viewport = await renderPageToCanvas(pdfjsPage, stageCanvas, targetWidth, totalRotationOf(entry), stageTask);
+      if(!viewport || myToken !== stageRenderToken) return; // null = render was cancelled mid-flight
+      pageEl.style.width = stageCanvas.style.width;
+      pageEl.style.height = stageCanvas.style.height;
+      await buildOverlay(entry, pdfjsPage, viewport, myToken);
+    }
+
+    // Build the per-word/per-run text index for the shown page (async: getTextContent + font
+    // resolution), keep a pristine copy of the render, then paint.
+    async function buildOverlay(entry, pdfjsPage, viewport, token){
+      let textContent;
+      try{ textContent = await pdfjsPage.getTextContent(); }catch(e){ return; }
+      if(token !== stageRenderToken) return;
+      const dpr = window.devicePixelRatio || 1;
+      const ctx = stageCanvas.getContext('2d');
+      // pristine copy of the pdf.js render, so covers/edits can be re-baked onto the canvas
+      // without an expensive (and flash-prone) pdf.js re-render.
+      const clean = document.createElement('canvas');
+      clean.width = stageCanvas.width; clean.height = stageCanvas.height;
+      clean.getContext('2d').drawImage(stageCanvas, 0, 0);
+      const fontMeta = new Map(); // fontName -> { name, loadedName, fallbackName }, resolved once
+      currentRender = { entry, viewport, dpr, ctx, clean, styles: textContent.styles, fontMeta, items: [], runs: [] };
+
+      textContent.items.forEach(item => {
+        if(!item.str || !item.str.trim()) return;
+        if(!fontMeta.has(item.fontName)) fontMeta.set(item.fontName, fontMetaFor(pdfjsPage, item.fontName));
+        const meta = fontMeta.get(item.fontName);
+        const st = textContent.styles[item.fontName] || {};
+        // run-level record: the unit for editing (select) and moving (move mode)
+        const run = runRecFor(item, textContent.styles);
+        const key = runKey(run);
+        currentRender.runs.push({ ...run, item, loadedName: meta.loadedName, css: pdfBoxToCssRect(run.pdfBox, viewport), key });
+        // word-level records: the unit for the eraser
+        itemWords(item, textContent.styles, meta.loadedName).forEach(word => {
+          currentRender.items.push({
+            item, str: word.str, size: word.size, baseline: word.baseline, pdfBox: word.pdfBox,
+            css: pdfBoxToCssRect(word.pdfBox, viewport),
+            loadedName: meta.loadedName, runKey: key,
+            asc: typeof st.ascent === 'number' ? st.ascent : 0.8
+          });
+        });
+      });
+      paintOverlay();
+    }
+
+    // stable identity for an original run across re-renders — lets us tell which runs have been
+    // consumed by an edit/move (so we stop offering the original as an independent target).
+    function runKey(run){ return Math.round(run.baseline.x) + ':' + Math.round(run.baseline.y) + ':' + run.str; }
+
+    // Preview text in the document's own embedded font while the chosen family still matches the
+    // original — the closest possible match. Changing family switches to the mapped export font.
+    function previewFontStack(family, origFamily, loadedName){
+      const mapped = FONT_CSS[family] || FONT_CSS.sans;
+      return (loadedName && family === origFamily) ? `"${loadedName}", ${mapped}` : mapped;
+    }
+    function teFontStr(te, scale){
+      return `${te.italic ? 'italic ' : ''}${te.bold ? '700 ' : '400 '}${te.size * scale}px ${previewFontStack(te.family, te.origFamily, te.loadedName)}`;
+    }
+
+    // covers + replacement text are BAKED onto the stage canvas — pixel-identical to the export
+    // pipeline, so the preview can't drift out of alignment the way separate overlay elements can.
+    function bakeCover(ctx, er, viewport){
+      const c = pdfBoxToCssRect(er, viewport);
+      ctx.fillStyle = `rgb(${er.color.r},${er.color.g},${er.color.b})`;
+      ctx.fillRect(c.left, c.top, c.width, c.height);
+    }
+    function bakeText(ctx, te, viewport, scale){
+      const base = applyTransform([te.x, te.y], viewport.transform);
+      ctx.save();
+      ctx.fillStyle = `rgb(${te.color.r},${te.color.g},${te.color.b})`;
+      ctx.font = teFontStr(te, scale);
+      ctx.textBaseline = 'alphabetic';
+      ctx.fillText(te.text, base[0], base[1]);
+      ctx.restore();
+    }
+    // interactive box over a committed edit's CURRENT text position (moves with the text, unlike
+    // its cover which stays put over the original)
+    function editHitBox(te, viewport, scale){
+      const base = applyTransform([te.x, te.y], viewport.transform);
+      measureCtx.font = teFontStr(te, scale);
+      const w = measureCtx.measureText(te.text).width;
+      const asc = (te.asc || 0.8) * te.size * scale, desc = 0.28 * te.size * scale;
+      return { left: base[0], top: base[1] - asc, width: Math.max(w, 8), height: asc + desc };
+    }
+    function mkHit(cls, box){
+      const d = document.createElement('div');
+      d.className = cls;
+      d.style.left = box.left + 'px'; d.style.top = box.top + 'px';
+      d.style.width = box.width + 'px'; d.style.height = box.height + 'px';
+      return d;
+    }
+
+    // Repaint: bake the canvas (pristine render + covers + text) then rebuild the invisible hit
+    // layer. No pdf.js re-render, so edits/erases/moves/undo never flash the original document.
+    function paintOverlay(){
+      if(!currentRender) return;
+      const { entry, viewport, dpr, ctx, clean } = currentRender;
+      const scale = cssScaleOf(viewport);
+
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.drawImage(clean, 0, 0);                 // restore pristine render (device pixels)
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);      // draw covers/text in CSS/viewport pixels
+      entry.edits.erasures.forEach(er => bakeCover(ctx, er, viewport));
+      entry.edits.textEdits.forEach(te => {
+        bakeCover(ctx, te.cover, viewport);
+        if(!te.text) return;
+        if(editing && !editing.isNew && editing.teId === te.id) return; // being edited — the input shows it
+        bakeText(ctx, te, viewport, scale);
+      });
+      bakeImages(ctx, entry, viewport); // inserted images sit on top of the page + text edits
+
+      overlayEl.innerHTML = '';
+      overlayEl.classList.toggle('erasing', mode === 'erase');
+      overlayEl.classList.toggle('moving', mode === 'move');
+      const consumed = new Set(entry.edits.textEdits.filter(te => te.srcKey).map(te => te.srcKey));
+
+      // run (line) hits — edit in select mode, drag in move mode; skipped once consumed by an edit
+      currentRender.runs.forEach(run => {
+        if(consumed.has(run.key)) return;
+        const rh = mkHit('pdfed-run-hit', run.css);
+        rh.addEventListener('click', () => { if(mode === 'select' && !moveJustHappened) beginTextEdit(run, rh); });
+        rh.addEventListener('pointerdown', (e) => { if(mode === 'move') startMoveDrag(e, run.css, (dx, dy) => moveOriginalRun(run, dx, dy)); });
+        overlayEl.appendChild(rh);
+      });
+      // word hits — eraser targets
+      currentRender.items.forEach((rec, idx) => {
+        if(consumed.has(rec.runKey)) return;
+        const hit = mkHit('pdfed-text-hit', rec.css);
+        hit.dataset.idx = idx;
+        hit.addEventListener('click', () => onTextHitClick(rec, hit));
+        overlayEl.appendChild(hit);
+      });
+      // edit hits — over each committed edit's current text position (re-edit / move / erase)
+      entry.edits.textEdits.forEach(te => {
+        if(!te.text) return;
+        const box = editHitBox(te, viewport, scale);
+        const eh = mkHit('pdfed-edit-hit', box);
+        eh.dataset.teId = te.id;
+        eh.addEventListener('click', () => {
+          if(moveJustHappened) return;
+          if(mode === 'erase'){ eraseCommittedEdit(entry, te.id); return; }
+          if(mode !== 'select') return;
+          openTextEditor({
+            entry, isNew: false, teId: te.id,
+            text: te.text, size: te.size, family: te.family, bold: te.bold, italic: te.italic,
+            colorHex: toHex(te.color), origFamily: te.origFamily, loadedName: te.loadedName, css: box
+          });
+        });
+        eh.addEventListener('pointerdown', (e) => { if(mode === 'move') startMoveDrag(e, box, (dx, dy) => moveCommittedEdit(entry, te.id, dx, dy)); });
+        overlayEl.appendChild(eh);
+      });
+      paintImageBoxes(entry, viewport); // image move/resize handles sit above every other layer
+    }
+
+    // word hits only respond in erase mode — line-level run hits own selecting/moving
+    function onTextHitClick(rec){
+      if(mode === 'erase') eraseItem(rec);
+    }
+
+    /* ---- move tool: drag a line (or a committed edit) to reposition it ---- */
+    function startMoveDrag(e, cssRect, onDrop){
+      if(e.button !== 0 || !currentRender) return;
+      e.preventDefault();
+      const startX = e.clientX, startY = e.clientY;
+      let ghost = null;
+      function onMove(ev){
+        if(!ghost){
+          if(Math.hypot(ev.clientX - startX, ev.clientY - startY) < 4) return; // still a click
+          ghost = document.createElement('div');
+          ghost.className = 'pdfed-move-ghost';
+          ghost.style.left = cssRect.left + 'px'; ghost.style.top = cssRect.top + 'px';
+          ghost.style.width = cssRect.width + 'px'; ghost.style.height = cssRect.height + 'px';
+          overlayEl.appendChild(ghost);
+        }
+        ghost.style.transform = `translate(${ev.clientX - startX}px, ${ev.clientY - startY}px)`;
+      }
+      function onUp(ev){
+        window.removeEventListener('pointermove', onMove);
+        window.removeEventListener('pointerup', onUp);
+        if(!ghost) return; // never left the click threshold
+        ghost.remove();
+        // map the CSS-pixel delta back to PDF points through the viewport's inverse — the
+        // translation terms cancel for deltas, so the linear part is all that's needed
+        const inv = inverseLinear(currentRender.viewport.transform);
+        const dxCss = ev.clientX - startX, dyCss = ev.clientY - startY;
+        const dx = inv[0] * dxCss + inv[2] * dyCss;
+        const dy = inv[1] * dxCss + inv[3] * dyCss;
+        moveJustHappened = true; setTimeout(() => { moveJustHappened = false; }, 0);
+        if(dxCss || dyCss) onDrop(dx, dy);
+      }
+      window.addEventListener('pointermove', onMove);
+      window.addEventListener('pointerup', onUp);
+    }
+
+    // Moving an original line = cover it where it was, redraw the same text (measured style) at
+    // the destination — one undoable step, same rasterize+patch mechanics as editing.
+    function moveOriginalRun(run, dx, dy){
+      const entry = currentRender.entry;
+      snapshotForUndo();
+      const meta = currentRender.fontMeta.get(run.item.fontName);
+      const sctx = currentRender.clean.getContext('2d'); // sample the pristine render, not baked pixels
+      const style = detectItemStyle(run.item, currentRender.styles, sctx, currentRender.dpr, run.css, meta);
+      const bg = sampleBackgroundColor(sctx, currentRender.dpr, run.css);
+      entry.edits.textEdits.push({
+        id: nextEditId++, srcKey: run.key, // marks the original run consumed
+        cover: { ...grownBoxFor(run), color: bg },
+        x: run.baseline.x + dx, y: run.baseline.y + dy,
+        text: toWinAnsi(fixLigatures(run.str)), size: style.size, family: style.family, bold: style.bold, italic: style.italic,
+        color: style.color, asc: run.asc, loadedName: run.loadedName, origFamily: style.family
+      });
+      paintOverlay();
+    }
+
+    function moveCommittedEdit(entry, teId, dx, dy){
+      const i = entry.edits.textEdits.findIndex(t => t.id === teId);
+      if(i === -1) return;
+      snapshotForUndo();
+      const te = entry.edits.textEdits[i];
+      entry.edits.textEdits[i] = { ...te, x: te.x + dx, y: te.y + dy }; // replace, never mutate — undo holds the old ref
+      paintOverlay();
+    }
+
+    /* ---- image insertion (Phase 4): drop a PNG/JPG (signatures, stamps), drag to place, resize ---- */
+    imageBtn.addEventListener('click', () => { if(!imageBtn.disabled) imageInput.click(); });
+    imageInput.addEventListener('change', () => { if(imageInput.files[0]) insertImage(imageInput.files[0]); imageInput.value = ''; });
+
+    async function insertImage(file){
+      if(!currentRender) return;
+      const isPng = /png$/i.test(file.type) || /\.png$/i.test(file.name);
+      const isJpg = /jpe?g$/i.test(file.type) || /\.jpe?g$/i.test(file.name);
+      if(!isPng && !isJpg){ hintEl.textContent = 'Images must be PNG or JPG.'; return; }
+      const bytes = new Uint8Array(await file.arrayBuffer());
+      const url = URL.createObjectURL(new Blob([bytes], { type: isPng ? 'image/png' : 'image/jpeg' }));
+      const img = new Image();
+      try{ await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = url; }); }
+      catch(e){ hintEl.textContent = 'Could not read that image.'; return; }
+
+      const vp = currentRender.viewport, scale = cssScaleOf(vp);
+      const pageWpts = vp.width / scale, pageHpts = vp.height / scale;
+      // default: ~35% of the page width, aspect-preserved, centred on the page
+      const wPts = pageWpts * 0.35;
+      const hPts = wPts * (img.naturalHeight / img.naturalWidth);
+      const box = { x: (pageWpts - wPts) / 2, y: (pageHpts - hPts) / 2, w: wPts, h: hPts };
+
+      snapshotForUndo();
+      const id = nextImageId++;
+      currentRender.entry.edits.images.push({ id, fmt: isPng ? 'png' : 'jpg', bytes, img, ...box });
+      activeImageId = id;
+      setMode('select'); // images are handled independently of the text modes
+      paintOverlay();
+    }
+
+    function bakeImages(ctx, entry, viewport){
+      entry.edits.images.forEach(im => {
+        if(im.id === draggingImageId) return; // shown live via the drag box instead
+        const c = pdfBoxToCssRect(im, viewport);
+        try{ ctx.drawImage(im.img, c.left, c.top, c.width, c.height); }catch(e){}
+      });
+    }
+
+    function paintImageBoxes(entry, viewport){
+      entry.edits.images.forEach(im => {
+        const c = pdfBoxToCssRect(im, viewport);
+        const boxEl = document.createElement('div');
+        boxEl.className = 'pdfed-image-box' + (im.id === activeImageId ? ' active' : '');
+        boxEl.style.left = c.left + 'px'; boxEl.style.top = c.top + 'px';
+        boxEl.style.width = c.width + 'px'; boxEl.style.height = c.height + 'px';
+        if(im.id === draggingImageId){ // live preview follows the pointer during a drag/resize
+          const live = document.createElement('img');
+          live.className = 'pdfed-image-live'; live.src = im.img.src;
+          boxEl.appendChild(live);
+        }
+        boxEl.addEventListener('pointerdown', (e) => {
+          if(e.target.closest('.pdfed-image-del')) return;
+          if(activeImageId !== im.id){ activeImageId = im.id; paintOverlay(); return; }
+          const kind = e.target.closest('.pdfed-image-handle') ? 'resize' : 'move';
+          startImageDrag(e, im, kind, c);
+        });
+        if(im.id === activeImageId){
+          const handle = document.createElement('div'); handle.className = 'pdfed-image-handle';
+          const del = document.createElement('button'); del.className = 'pdfed-image-del'; del.type = 'button';
+          del.innerHTML = '&#10005;'; del.setAttribute('aria-label', 'Delete image');
+          del.addEventListener('click', (e) => { e.stopPropagation(); deleteImage(im.id); });
+          boxEl.appendChild(handle); boxEl.appendChild(del);
+        }
+        overlayEl.appendChild(boxEl);
+      });
+    }
+
+    // Screen-space drag so placement/resize stays correct regardless of scale; the resulting screen
+    // rect is converted back to a PDF box once, on drop, via the viewport's full inverse transform.
+    function startImageDrag(e, im, kind, startRect){
+      if(e.button !== 0 || !currentRender) return;
+      e.preventDefault();
+      const startX = e.clientX, startY = e.clientY;
+      const aspect = startRect.width / startRect.height;
+      draggingImageId = im.id;
+      paintOverlay(); // re-render so the dragging image is skipped from the bake, shown live
+      const boxEl = overlayEl.querySelector('.pdfed-image-box'); // the (only) active box is the dragging one
+      let moved = false, curRect = { ...startRect };
+      function onMove(ev){
+        const dx = ev.clientX - startX, dy = ev.clientY - startY;
+        if(!moved && Math.hypot(dx, dy) < 3) return;
+        moved = true;
+        if(kind === 'move'){
+          curRect = { left: startRect.left + dx, top: startRect.top + dy, width: startRect.width, height: startRect.height };
+        } else {
+          const w = Math.max(16, startRect.width + dx);
+          curRect = { left: startRect.left, top: startRect.top, width: w, height: w / aspect }; // keep aspect
+        }
+        if(boxEl){ boxEl.style.left = curRect.left + 'px'; boxEl.style.top = curRect.top + 'px'; boxEl.style.width = curRect.width + 'px'; boxEl.style.height = curRect.height + 'px'; }
+      }
+      function onUp(){
+        window.removeEventListener('pointermove', onMove);
+        window.removeEventListener('pointerup', onUp);
+        draggingImageId = null;
+        if(moved){
+          snapshotForUndo();
+          const i = currentRender.entry.edits.images.findIndex(x => x.id === im.id);
+          if(i !== -1){
+            const box = screenRectToPdfBox(curRect, currentRender.viewport);
+            currentRender.entry.edits.images[i] = { ...currentRender.entry.edits.images[i], ...box };
+          }
+        }
+        paintOverlay();
+      }
+      window.addEventListener('pointermove', onMove);
+      window.addEventListener('pointerup', onUp);
+    }
+
+    function deleteImage(id){
+      const entry = currentRender && currentRender.entry;
+      if(!entry) return;
+      const i = entry.edits.images.findIndex(x => x.id === id);
+      if(i === -1) return;
+      snapshotForUndo();
+      entry.edits.images.splice(i, 1);
+      if(activeImageId === id) activeImageId = null;
+      paintOverlay();
+    }
+
+    // Shared by the eraser and text edits: the cover box grown a little past the measured glyph
+    // box on every side — the font's nominal ascent/descent doesn't include anti-aliased edge
+    // pixels or the odd tall mark (apostrophes, bars), which otherwise survive as faint traces.
+    function grownBoxFor(rec){
+      const s = rec.size || 12;
+      // horizontal margin stays small — with real-font word boundaries, a fat margin is what
+      // trespassed into neighbouring words; vertical stays generous for ascenders/descenders.
+      const mx = s * 0.06, mTop = s * 0.14, mBot = s * 0.10;
+      const b = rec.pdfBox;
+      return { x: b.x - mx, y: b.y - mBot, w: b.w + mx * 2, h: b.h + mTop + mBot };
+    }
+
+    function eraseItem(rec){
+      const entry = pages.find(p => p.id === selectedPageId);
+      if(!entry || !currentRender) return;
+      const box = grownBoxFor(rec);
+      // don't stack a second cover on a word that's already erased or replaced
+      const sameBox = o => Math.abs(o.x - box.x) < 0.5 && Math.abs(o.y - box.y) < 0.5 && Math.abs(o.w - box.w) < 0.5;
+      if(entry.edits.erasures.some(sameBox) || entry.edits.textEdits.some(te => sameBox(te.cover))) return;
+      snapshotForUndo(); // one snapshot per word, so undo restores word by word even after a drag
+      // sample the pristine render, not the live canvas — a prior bake may have painted a cover there
+      const sctx = currentRender.clean.getContext('2d');
+      const color = sampleBackgroundColor(sctx, currentRender.dpr, rec.css);
+      entry.edits.erasures.push({ ...box, color });
+      paintOverlay();
+    }
+
+    // Hold-and-drag erasing: while erase mode is on and the left button is down, every word the
+    // cursor passes over gets erased. elementFromPoint keeps it robust regardless of which layer
+    // the pointer events land on.
+    function eraseAtPoint(x, y){
+      const el = document.elementFromPoint(x, y);
+      if(!el || !el.classList) return;
+      if(el.classList.contains('pdfed-text-edit')){ // committed edits are erasable too
+        const entry = pages.find(p => p.id === selectedPageId);
+        if(entry) eraseCommittedEdit(entry, Number(el.dataset.teId));
+        return;
+      }
+      if(!el.classList.contains('pdfed-text-hit')) return;
+      const rec = currentRender && currentRender.items[Number(el.dataset.idx)];
+      if(rec) eraseItem(rec);
+    }
+    stageEl.addEventListener('pointerdown', (e) => {
+      if(mode !== 'erase' || e.button !== 0) return;
+      eraseAtPoint(e.clientX, e.clientY);
+      const move = (ev) => { if(ev.buttons & 1) eraseAtPoint(ev.clientX, ev.clientY); };
+      const up = () => { window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); };
+      window.addEventListener('pointermove', move);
+      window.addEventListener('pointerup', up);
+    });
+    // clicking bare canvas (no hit div / image box intercepted it) deselects the active image
+    stageCanvas.addEventListener('pointerdown', () => { if(activeImageId != null){ activeImageId = null; paintOverlay(); } });
+
+    // id-based and idempotent: the click that follows a pointerdown drag-erase resolves to the
+    // same edit, so the second call must find nothing and no-op rather than splice a neighbour.
+    function eraseCommittedEdit(entry, teId){
+      const i = entry.edits.textEdits.findIndex(t => t.id === teId);
+      if(i === -1) return;
+      snapshotForUndo();
+      const te = entry.edits.textEdits[i];
+      entry.edits.textEdits.splice(i, 1);
+      entry.edits.erasures.push({ x: te.cover.x, y: te.cover.y, w: te.cover.w, h: te.cover.h, color: te.cover.color }); // original stays hidden
+      paintOverlay();
+    }
+
+    /* ---- inline text editing (Phase 3) ---- */
+    const FONT_VARIANTS = { // pdf-lib StandardFonts keys, grep-verified against the vendored dist
+      sans:  { regular: 'Helvetica',  bold: 'HelveticaBold',  italic: 'HelveticaOblique',  boldItalic: 'HelveticaBoldOblique' },
+      serif: { regular: 'TimesRoman', bold: 'TimesRomanBold', italic: 'TimesRomanItalic',  boldItalic: 'TimesRomanBoldItalic' },
+      mono:  { regular: 'Courier',    bold: 'CourierBold',    italic: 'CourierOblique',    boldItalic: 'CourierBoldOblique' }
+    };
+    const FONT_CSS = { sans: 'Helvetica, Arial, sans-serif', serif: '"Times New Roman", Times, serif', mono: '"Courier New", monospace' };
+
+    const textbar = document.getElementById('pdfedTextbar');
+    const familySel = document.getElementById('pdfedFontFamily');
+    const boldBtn = document.getElementById('pdfedBoldBtn');
+    const italicBtn = document.getElementById('pdfedItalicBtn');
+    const sizeInput = document.getElementById('pdfedFontSize');
+    const colorInput = document.getElementById('pdfedFontColor');
+    const applyBtn = document.getElementById('pdfedApplyText');
+    const cancelBtn = document.getElementById('pdfedCancelText');
+
+    function cssScaleOf(viewport){ return Math.hypot(viewport.transform[0], viewport.transform[1]) || 1; }
+    function hexToRgb(h){
+      const m = /^#?([0-9a-f]{6})$/i.exec(h || '');
+      if(!m) return { r: 0, g: 0, b: 0 };
+      const n = parseInt(m[1], 16);
+      return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
+    }
+    // pdf-lib's built-in standard fonts only encode WinAnsi — swap anything outside it for '?'
+    // at commit time rather than throwing (or silently corrupting) at export time.
+    function toWinAnsi(s){
+      return s.replace(/[^ -~ -ÿ–—‘’‚“”„†‡•…‰‹›€™]/g, '?');
+    }
+    // Word subset fonts often ship a broken ToUnicode map: real f-ligatures come through either as
+    // their Unicode ligature codepoint (fixable losslessly) or, worse, as a stray digit — "Affect"
+    // extracts as "A6ect". The digit case is only substituted when unmistakably mid-word (letter
+    // before, lowercase letter after) so acronyms/formulas like H2O, MP3, B2B, COVID19 are spared.
+    // Best-guess "ff" (the most common f-ligature) — may be wrong for a fi/fl word, but it's a
+    // prefill the user is already editing. No regex lookbehind — that throws on older Safari.
+    function fixLigatures(s){
+      s = s.replace(/ﬀ/g, 'ff').replace(/ﬁ/g, 'fi').replace(/ﬂ/g, 'fl')
+           .replace(/ﬃ/g, 'ffi').replace(/ﬄ/g, 'ffl').replace(/ﬅ/g, 'ft').replace(/ﬆ/g, 'st');
+      s = s.replace(/([A-Za-z])[0-9]([a-z])/g, '$1ff$2');
+      return s;
+    }
+    const toggleOn = btn => btn.getAttribute('aria-pressed') === 'true';
+    function setToggle(btn, on){
+      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+      btn.classList.toggle('active', on);
+    }
+    boldBtn.addEventListener('click', () => { setToggle(boldBtn, !toggleOn(boldBtn)); refreshEditingPreview(); });
+    italicBtn.addEventListener('click', () => { setToggle(italicBtn, !toggleOn(italicBtn)); refreshEditingPreview(); });
+    familySel.addEventListener('change', refreshEditingPreview);
+    sizeInput.addEventListener('input', refreshEditingPreview);
+    colorInput.addEventListener('input', refreshEditingPreview);
+    applyBtn.addEventListener('click', () => commitTextEdit());
+    cancelBtn.addEventListener('click', () => cancelTextEdit());
+    // keep keystrokes in the format bar from reaching the document-level Escape-closes-modal handler
+    textbar.addEventListener('keydown', (e) => { e.stopPropagation(); if(e.key === 'Escape') cancelTextEdit(); });
+
+    // Editing an existing word measures its style first (size from the transform, colour sampled
+    // from the rendered pixels as hex) so the controls start from what's actually on the page.
+    function beginTextEdit(rec, hitEl){
+      if(!currentRender) return;
+      activeImageId = null; // clicking text deselects any active image
+      if(editing){ commitTextEdit(); return; } // commit the pending edit; its rebuild invalidates this click's overlay
+      const meta = currentRender.fontMeta.get(rec.item.fontName);
+      const sctx = currentRender.clean.getContext('2d'); // measure style from the pristine render
+      const style = detectItemStyle(rec.item, currentRender.styles, sctx, currentRender.dpr, rec.css, meta);
+      openTextEditor({
+        entry: currentRender.entry, isNew: true, rec, srcKey: rec.key,
+        text: fixLigatures(rec.str), size: style.size, family: style.family, bold: style.bold, italic: style.italic,
+        colorHex: style.colorHex, css: rec.css,
+        origFamily: style.family, loadedName: rec.loadedName
+      });
+    }
+
+    function openTextEditor(o){
+      if(editing) cancelTextEdit();
+      familySel.value = o.family in FONT_VARIANTS ? o.family : 'sans';
+      setToggle(boldBtn, !!o.bold);
+      setToggle(italicBtn, !!o.italic);
+      sizeInput.value = o.size;
+      colorInput.value = o.colorHex;
+      editing = { ...o };
+      paintOverlay(); // rebake so the edit being replaced is hidden behind the input, not doubled
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'pdfed-edit-input';
+      input.value = o.text;
+      input.style.left = o.css.left + 'px';
+      input.style.top = o.css.top + 'px';
+      input.style.minWidth = Math.max(o.css.width + 30, 90) + 'px';
+      input.addEventListener('keydown', (e) => {
+        e.stopPropagation(); // Escape cancels the edit, not the whole modal
+        if(e.key === 'Enter') commitTextEdit();
+        else if(e.key === 'Escape') cancelTextEdit();
+      });
+      overlayEl.appendChild(input); // added after paintOverlay's innerHTML reset
+      editing.input = input;
+      refreshEditingPreview();
+      textbar.hidden = false;
+      input.focus();
+      input.select();
+    }
+
+    // live preview: the inline input mirrors the controls so what you type looks like the result
+    function refreshEditingPreview(){
+      if(!editing || !currentRender) return;
+      const scale = cssScaleOf(currentRender.viewport);
+      const i = editing.input;
+      i.style.fontFamily = previewFontStack(familySel.value, editing.origFamily, editing.loadedName);
+      i.style.fontSize = ((parseFloat(sizeInput.value) || editing.size) * scale) + 'px';
+      i.style.fontWeight = toggleOn(boldBtn) ? '700' : '400';
+      i.style.fontStyle = toggleOn(italicBtn) ? 'italic' : 'normal';
+      i.style.color = colorInput.value;
+    }
+
+    function teardownTextEditor(){
+      if(editing && editing.input) editing.input.remove();
+      editing = null;
+      textbar.hidden = true;
+      overlayEl.querySelectorAll('.pdfed-run-hit.selected, .pdfed-text-hit.selected').forEach(el => el.classList.remove('selected'));
+    }
+    function cancelTextEdit(){ const had = !!editing; teardownTextEditor(); if(had && currentRender) paintOverlay(); }
+
+    function commitTextEdit(){
+      if(!editing || !currentRender) return;
+      const entry = editing.entry;
+      const vals = {
+        text: toWinAnsi(editing.input.value),
+        size: parseFloat(sizeInput.value) || editing.size,
+        family: familySel.value in FONT_VARIANTS ? familySel.value : 'sans',
+        bold: toggleOn(boldBtn),
+        italic: toggleOn(italicBtn),
+        color: hexToRgb(colorInput.value)
+      };
+      snapshotForUndo();
+      if(editing.isNew){
+        const box = grownBoxFor(editing.rec);
+        const bg = sampleBackgroundColor(currentRender.clean.getContext('2d'), currentRender.dpr, editing.rec.css);
+        entry.edits.textEdits.push({
+          id: nextEditId++, srcKey: editing.srcKey, cover: { ...box, color: bg },
+          x: editing.rec.baseline.x, y: editing.rec.baseline.y,
+          asc: editing.rec.asc, loadedName: editing.rec.loadedName, origFamily: editing.origFamily,
+          ...vals
+        });
+      } else {
+        // replace rather than mutate: undo snapshots hold references to the old object
+        const i = entry.edits.textEdits.findIndex(t => t.id === editing.teId);
+        if(i !== -1) entry.edits.textEdits[i] = { ...entry.edits.textEdits[i], ...vals };
+      }
+      teardownTextEditor();
+      paintOverlay(); // overlay-only — no canvas re-render, no flash
+    }
+
+    function setMode(m){
+      mode = m;
+      if(m !== 'select'){ cancelTextEdit(); activeImageId = null; } // erase/move don't act on images
+      eraseBtn.classList.toggle('active', m === 'erase');
+      eraseBtn.setAttribute('aria-pressed', m === 'erase' ? 'true' : 'false');
+      eraseBtn.textContent = m === 'erase' ? 'Erasing…' : 'Erase text';
+      moveBtn.classList.toggle('active', m === 'move');
+      moveBtn.setAttribute('aria-pressed', m === 'move' ? 'true' : 'false');
+      moveBtn.textContent = m === 'move' ? 'Moving…' : 'Move text';
+      overlayEl.classList.toggle('erasing', m === 'erase');
+      overlayEl.classList.toggle('moving', m === 'move');
+      hintEl.textContent = m === 'erase'
+        ? 'Erase mode on: click a word — or hold and drag across several — to cover them. Click "Erasing…" again to stop.'
+        : m === 'move'
+        ? 'Move mode on: drag any line of text (or previously edited text) to reposition it. Click "Moving…" again to stop.'
+        : 'Tip: click a line of text to edit it. Drag pages in the sidebar to reorder.';
+    }
+    eraseBtn.addEventListener('click', () => { if(!eraseBtn.disabled) setMode(mode === 'erase' ? 'select' : 'erase'); });
+    moveBtn.addEventListener('click', () => { if(!moveBtn.disabled) setMode(mode === 'move' ? 'select' : 'move'); });
+
+    rotateBtn.addEventListener('click', async () => {
+      const entry = pages.find(p => p.id === selectedPageId);
+      if(!entry) return;
+      snapshotForUndo();
+      entry.userRotation = (entry.userRotation + 90) % 360;
+      renderStage();
+      // only the affected thumb re-renders — a full rail rebuild here is what used to let
+      // overlapping async rebuilds scramble the page order
+      rotateBtn.disabled = true;
+      try{
+        const el = thumbsEl.querySelector(`.pdfed-thumb[data-page-id="${entry.id}"]`);
+        if(el && !thumbsBuilding){
+          const pdfjsPage = await getPdfjsPage(entry);
+          await renderPageToCanvas(pdfjsPage, el.querySelector('canvas'), THUMB_WIDTH, totalRotationOf(entry));
+        } else {
+          renderThumbs(); // rail still building (or thumb missing) — restart the rebuild cleanly
+        }
+      }catch(e){}
+      rotateBtn.disabled = pages.length === 0;
+    });
+
+    function deletePage(id){
+      const idx = pages.findIndex(p => p.id === id);
+      if(idx === -1) return;
+      snapshotForUndo();
+      pages.splice(idx, 1);
+      if(selectedPageId === id){
+        selectedPageId = pages.length ? pages[Math.min(idx, pages.length - 1)].id : null;
+      }
+      setEditorEnabled(pages.length > 0);
+      if(!pages.length){
+        panel.classList.remove('has-doc'); // last page gone — restore the full drop box
+        dropText.textContent = 'Drag & drop a PDF here, or click to browse';
+        warning.hidden = true;
+      }
+      if(thumbsBuilding){
+        renderThumbs(); // a rebuild is mid-flight; surgical removal would race it
+      } else {
+        const el = thumbsEl.querySelector(`.pdfed-thumb[data-page-id="${id}"]`);
+        if(el) el.remove();
+        thumbsEl.querySelectorAll('.pdfed-thumb').forEach(t => t.classList.toggle('active', Number(t.dataset.pageId) === selectedPageId));
+        updateThumbLabels();
+      }
+      renderStage();
+    }
+    deleteBtn.addEventListener('click', () => { if(selectedPageId != null) deletePage(selectedPageId); });
+
+    // `append` distinguishes the two entry points: loading via the drop zone REPLACES whatever's
+    // open (a fresh document), while the Insert PDF button appends to merge — so a second file only
+    // ever coexists with the first when it was explicitly inserted.
+    async function loadPdfFile(file, append){
+      // some Windows apps drag-drop PDFs with an empty MIME type, so accept by extension too
+      if(!file || !(file.type === 'application/pdf' || /\.pdf$/i.test(file.name || ''))){
+        dropText.textContent = 'Could not read that file — try a PDF.';
+        return;
+      }
+      dropText.textContent = `Loading ${file.name}…`;
+      try{
+        const pdfjsLib = await ensurePdfjs();
+        const arrayBuffer = await file.arrayBuffer();
+        const bytesForPdfLib = new Uint8Array(arrayBuffer.slice(0));
+        const bytesForPdfjs = new Uint8Array(arrayBuffer.slice(0));
+
+        const pdfLibDoc = await PDFLib.PDFDocument.load(bytesForPdfLib);
+        const pdfjsDoc = await pdfjsLib.getDocument({ data: bytesForPdfjs }).promise;
+
+        if(!append){
+          // replace: drop the current document entirely before loading the new one
+          sourceDocs.clear();
+          pages = [];
+          undoStack = [];
+          undoBtn.disabled = true;
+        }
+        const wasEmpty = pages.length === 0;
+
+        const sourceId = nextSourceId++;
+        sourceDocs.set(sourceId, { file, pdfLibDoc, pdfjsDoc, name: file.name });
+
+        const newPages = [];
+        for(let i = 0; i < pdfjsDoc.numPages; i++){
+          const pdfjsPage = await pdfjsDoc.getPage(i + 1);
+          newPages.push({
+            id: nextPageId++,
+            sourceId,
+            pageIndex: i,
+            intrinsicRotation: pdfjsPage.rotate || 0,
+            userRotation: 0,
+            edits: { erasures: [], textEdits: [], images: [] }
+          });
+        }
+
+        // Appending into an existing doc is undoable; a replace/first load instead seeds the editor
+        // (default filename, initial selection, clean undo).
+        if(append && !wasEmpty) snapshotForUndo();
+        if(append && !wasEmpty){
+          // insert after the page the user has open, not always at the very end — matches where
+          // they're looking when they hit Insert PDF
+          const afterIdx = Math.max(0, pages.findIndex(p => p.id === selectedPageId) + 1) || pages.length;
+          pages.splice(afterIdx, 0, ...newPages);
+        } else {
+          pages = pages.concat(newPages);
+        }
+        if(wasEmpty){
+          selectedPageId = pages.length ? pages[0].id : null;
+          filenameInput.value = file.name.replace(/\.pdf$/i, '') || 'edited';
+          setMode('select');
+        } else if(append){
+          // jump to the first newly-merged page so the result of the merge is immediately visible
+          selectedPageId = newPages[0].id;
+        }
+
+        if(append && !wasEmpty){
+          dropText.textContent = `Inserted ${newPages.length} page${newPages.length === 1 ? '' : 's'} from ${file.name} · drop another PDF here to replace it`;
+        } else {
+          dropText.textContent = `Loaded: ${file.name} · drop another PDF here to replace it`;
+        }
+        panel.classList.add('has-doc'); // slims the drop box, frees space for the preview
+        setEditorEnabled(pages.length > 0);
+        warning.hidden = pages.length <= LARGE_PAGE_WARNING;
+        if(!warning.hidden) warning.textContent = `${pages.length} pages loaded — large files may render slower, since everything runs in your browser.`;
+
+        await renderThumbs();
+        await renderStage();
+      }catch(err){
+        dropText.textContent = 'Could not read that PDF — it may be corrupted or password-protected.';
+      }
+    }
+
+    // Clear everything and return the editor to its just-opened state.
+    function resetEditor(){
+      cancelTextEdit();
+      if(stageTask.task){ try{ stageTask.task.cancel(); }catch(e){} stageTask.task = null; }
+      stageRenderToken++; thumbsRenderToken++;
+      sourceDocs.clear();
+      pages = [];
+      undoStack = [];
+      selectedPageId = null;
+      currentRender = null;
+      nextSourceId = 0; nextPageId = 0; nextEditId = 0; nextImageId = 0;
+      activeImageId = null; draggingImageId = null;
+      setMode('select');
+      undoBtn.disabled = true;
+      setEditorEnabled(false);
+      panel.classList.remove('has-doc');
+      thumbsEl.innerHTML = '';
+      overlayEl.innerHTML = '';
+      stageCanvas.width = 0; stageCanvas.height = 0;
+      pageEl.style.width = ''; pageEl.style.height = '';
+      warning.hidden = true;
+      filenameInput.value = 'edited';
+      updatePageIndicator();
+      dropText.textContent = 'Drag & drop a PDF here, or click to browse';
+    }
+    clearBtn.addEventListener('click', resetEditor);
+
+    async function buildOutputPdf(pageList){
+      const out = await PDFLib.PDFDocument.create();
+      const fontCache = new Map(); // one embed per StandardFont variant per export
+      async function fontFor(family, bold, italic){
+        const variant = bold && italic ? 'boldItalic' : bold ? 'bold' : italic ? 'italic' : 'regular';
+        const key = family + ':' + variant;
+        if(!fontCache.has(key)){
+          const name = (FONT_VARIANTS[family] || FONT_VARIANTS.sans)[variant];
+          fontCache.set(key, await out.embedFont(PDFLib.StandardFonts[name]));
+        }
+        return fontCache.get(key);
+      }
+      for(const entry of pageList){
+        const src = sourceDocs.get(entry.sourceId);
+        const [copied] = await out.copyPages(src.pdfLibDoc, [entry.pageIndex]);
+        // erasure covers: opaque rectangles drawn over the original glyphs (in unrotated content
+        // space, so they rotate with the page). The underlying text token isn't removed — this is
+        // the disclosed limit of every browser PDF editor — but it's visually gone in the output.
+        for(const er of entry.edits.erasures){
+          copied.drawRectangle({ x: er.x, y: er.y, width: er.w, height: er.h, color: PDFLib.rgb(er.color.r / 255, er.color.g / 255, er.color.b / 255) });
+        }
+        // text edits: cover the original word, then draw the replacement at the same baseline
+        for(const te of entry.edits.textEdits){
+          copied.drawRectangle({ x: te.cover.x, y: te.cover.y, width: te.cover.w, height: te.cover.h, color: PDFLib.rgb(te.cover.color.r / 255, te.cover.color.g / 255, te.cover.color.b / 255) });
+          if(te.text){
+            copied.drawText(te.text, {
+              x: te.x, y: te.y, size: te.size,
+              font: await fontFor(te.family, te.bold, te.italic),
+              color: PDFLib.rgb(te.color.r / 255, te.color.g / 255, te.color.b / 255)
+            });
+          }
+        }
+        // inserted images: embed once, draw at the stored PDF box (bottom-left origin, y-up)
+        for(const im of entry.edits.images){
+          const embedded = im.fmt === 'png' ? await out.embedPng(im.bytes) : await out.embedJpg(im.bytes);
+          copied.drawImage(embedded, { x: im.x, y: im.y, width: im.w, height: im.h });
+        }
+        copied.setRotation(PDFLib.degrees(totalRotationOf(entry)));
+        out.addPage(copied);
+      }
+      return out.save();
+    }
+
+    exportBtn.addEventListener('click', async () => {
+      if(!pages.length) return;
+      exportBtn.disabled = true;
+      const label = exportBtn.textContent;
+      exportBtn.textContent = 'Exporting…';
+      try{
+        const bytes = await buildOutputPdf(pages);
+        const blob = new Blob([bytes], { type: 'application/pdf' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        const safeName = (filenameInput.value || 'edited').trim().replace(/\.pdf$/i, '').replace(/[\\/:*?"<>|]+/g, '').trim() || 'edited';
+        a.download = safeName + '.pdf';
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(url), 2000);
+      }catch(err){
+        warning.hidden = false;
+        warning.textContent = 'Export failed — please try again.';
+      }finally{
+        exportBtn.disabled = false;
+        exportBtn.textContent = label;
+      }
+    });
+
+    // Two dedicated file inputs, not one shared input with a mode flag: a flag can go stale (e.g.
+    // an Insert picker cancelled leaves it set) and makes replace-vs-append nondeterministic.
+    // Each input has exactly one meaning — #pdfedFileInput replaces, #pdfedInsertInput appends.
+    drop.addEventListener('click', () => fileInput.click());
+    drop.addEventListener('keydown', (e) => { if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); fileInput.click(); } });
+    insertBtn.addEventListener('click', () => insertInput.click());
+    fileInput.addEventListener('change', () => {
+      if(fileInput.files[0]) loadPdfFile(fileInput.files[0], false);
+      fileInput.value = '';
+    });
+    insertInput.addEventListener('change', () => {
+      if(insertInput.files[0]) loadPdfFile(insertInput.files[0], true);
+      insertInput.value = '';
+    });
+
+    ['dragenter', 'dragover'].forEach(evt => {
+      drop.addEventListener(evt, (e) => { e.preventDefault(); drop.classList.add('dragover'); });
+    });
+    ['dragleave', 'dragend'].forEach(evt => {
+      drop.addEventListener(evt, (e) => { e.preventDefault(); drop.classList.remove('dragover'); });
+    });
+    drop.addEventListener('drop', (e) => {
+      e.preventDefault();
+      drop.classList.remove('dragover');
+      if(e.dataTransfer && e.dataTransfer.files[0]) loadPdfFile(e.dataTransfer.files[0], false); // dropping on the zone replaces
+    });
+    ['dragover', 'drop'].forEach(evt => {
+      window.addEventListener(evt, (e) => { if(e.target !== drop) e.preventDefault(); });
+    });
+
+    modal.addEventListener('toolmodalclose', () => {
+      stageRenderToken++;
+      if(stageTask.task){ try{ stageTask.task.cancel(); }catch(e){} stageTask.task = null; }
+      cancelTextEdit();
+      if(mode !== 'select') setMode('select'); // reopening mid-erase/move-mode would be confusing
     });
   })();
 
