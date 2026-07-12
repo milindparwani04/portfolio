@@ -337,6 +337,17 @@
   }
   .pdf-editor-panel .pdfed-editor{ display:flex; flex-direction:column; flex:1 1 auto; min-height:0; }
   .pdf-editor-panel .pdfed-editor[hidden]{ display:none; }
+  /* the editor needs precise drag/click (reorder, erase, move, resize) that touch can't deliver
+     reliably — rather than ship a half-broken touch experience, point mobile users to desktop */
+  .pdfed-mobile-notice{ display:none; }
+  @media (max-width:880px){
+    .pdf-editor-panel .conv-drop, .pdf-editor-panel .pdfed-warning, .pdf-editor-panel .pdfed-editor{ display:none !important; }
+    .pdfed-mobile-notice{
+      display:block; font-family:var(--sans); color:var(--dim); font-size:.88rem; line-height:1.6;
+      border:1px solid var(--line); background:var(--panel); padding:1.4rem;
+    }
+    .pdfed-mobile-notice strong{ display:block; color:var(--fg); font-family:var(--mono); font-size:.72rem; letter-spacing:.03em; margin-bottom:.6rem; }
+  }
   /* compact toolbar so the page preview gets the room; extra top gap separates it from the drop box */
   .pdfed-toolbar{ display:flex; flex-wrap:wrap; align-items:center; gap:.45rem; margin:1.2rem 0 .7rem; }
   .pdfed-toolbar-spacer{ flex:1 1 auto; }
@@ -1286,6 +1297,11 @@
       <button class="tool-modal-close" data-close-tool aria-label="Close">&#10005;</button>
     </div>
     <p class="tool-modal-sub">Reorder, rotate, and edit a PDF page by page. Nothing leaves your browser.</p>
+
+    <div class="pdfed-mobile-notice">
+      <strong>Desktop only, for now</strong>
+      Reordering, erasing, and moving text needs a mouse or trackpad for precise control — touch isn't accurate enough yet. Open this page on a laptop or desktop to use the PDF Editor.
+    </div>
 
     <div class="conv-drop" id="pdfedDrop" tabindex="0" role="button" aria-label="Add a PDF">
       <span class="conv-drop-icon">&#8595;</span>
