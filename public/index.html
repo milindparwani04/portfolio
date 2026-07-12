@@ -1348,6 +1348,7 @@
         </select>
         <button class="pdfed-btn pdfed-btn-compact" id="pdfedBoldBtn" type="button" aria-pressed="false" aria-label="Bold"><b>B</b></button>
         <button class="pdfed-btn pdfed-btn-compact" id="pdfedItalicBtn" type="button" aria-pressed="false" aria-label="Italic"><i>I</i></button>
+        <button class="pdfed-btn pdfed-btn-compact" id="pdfedUnderlineBtn" type="button" aria-pressed="false" aria-label="Underline"><u>U</u></button>
         <label class="pdfed-sizewrap"><span class="conv-label">Size</span>
           <input type="number" id="pdfedFontSize" class="pdfed-size" min="4" max="200" step="0.5" aria-label="Font size">
         </label>
@@ -2803,7 +2804,30 @@
       return { name: '', loadedName: '', fallbackName: '' };
     }
 
-    // Full style read for a selected item — size, family/weight/style, colour hex. Feeds Phase 3.
+    // Underline is drawn ink (a rule/rectangle in the content stream), not a font attribute, so it
+    // can't be read from pdf.js's font metadata the way bold/italic can — it has to be measured from
+    // pixels, same as colour. A real underline sits in a narrow band just below the baseline (within
+    // the box's own descent allowance) and runs near-continuously across the word/line; an individual
+    // glyph's own descender (g, y, p) is narrow and only covers a slice of that width. Sample several
+    // x-positions in that band and require most of them to be inked before calling it underlined —
+    // this is a best-effort measurement, not a certainty, same spirit as the colour/background sampling.
+    function detectUnderline(ctx, dpr, cssRect, bg){
+      const n = 10;
+      const ys = [0.78, 0.86].map(f => cssRect.top + cssRect.height * f); // within the descent zone, above the very bottom edge
+      let hit = 0;
+      for(let i = 0; i < n; i++){
+        const x = cssRect.left + cssRect.width * (i + 0.5) / n;
+        const inked = ys.some(y => {
+          const c = readPixel(ctx, dpr, x, y);
+          if(!c) return false;
+          return Math.abs(c[0] - bg.r) + Math.abs(c[1] - bg.g) + Math.abs(c[2] - bg.b) > 60;
+        });
+        if(inked) hit++;
+      }
+      return hit >= n * 0.75;
+    }
+
+    // Full style read for a selected item — size, family/weight/style, colour hex, underline. Feeds Phase 3.
     function detectItemStyle(item, styles, ctx, dpr, cssRect, meta){
       const t = item.transform;
       const size = Math.hypot(t[2], t[3]) || Math.abs(t[3]) || 12;
@@ -2819,7 +2843,8 @@
       const italic = /italic|oblique/.test(nameL);
       const bg = sampleBackgroundColor(ctx, dpr, cssRect);
       const color = detectTextColor(ctx, dpr, cssRect, bg);
-      return { size: Math.round(size * 10) / 10, family, bold, italic, colorHex: toHex(color), color };
+      const underline = detectUnderline(ctx, dpr, cssRect, bg);
+      return { size: Math.round(size * 10) / 10, family, bold, italic, colorHex: toHex(color), color, underline };
     }
 
     function updateThumbLabels(){
@@ -3095,6 +3120,15 @@
       ctx.font = teFontStr(te, scale);
       ctx.textBaseline = 'alphabetic';
       ctx.fillText(te.text, base[0], base[1]);
+      if(te.underline){
+        // matches the export's rectangle exactly: same 0.12·size gap below baseline, same 0.06·size
+        // thickness — canvas measureText and pdf-lib's widthOfTextAtSize can differ by a hair, but
+        // that's imperceptible for a stroke, unlike it would be for cover-box alignment.
+        const w = ctx.measureText(te.text).width;
+        const sizeCss = te.size * scale;
+        const thickness = Math.max(1, sizeCss * 0.06);
+        ctx.fillRect(base[0], base[1] + sizeCss * 0.12, w, thickness);
+      }
       ctx.restore();
     }
     // interactive box over a committed edit's CURRENT text position (moves with the text, unlike
@@ -3166,7 +3200,7 @@
           if(mode !== 'select') return;
           openTextEditor({
             entry, isNew: false, teId: te.id,
-            text: te.text, size: te.size, family: te.family, bold: te.bold, italic: te.italic,
+            text: te.text, size: te.size, family: te.family, bold: te.bold, italic: te.italic, underline: te.underline,
             colorHex: toHex(te.color), origFamily: te.origFamily, loadedName: te.loadedName, css: box
           });
         });
@@ -3230,7 +3264,7 @@
         cover: { ...grownBoxFor(run), color: bg },
         x: run.baseline.x + dx, y: run.baseline.y + dy,
         text: toWinAnsi(fixLigatures(run.str)), size: style.size, family: style.family, bold: style.bold, italic: style.italic,
-        color: style.color, asc: run.asc, loadedName: run.loadedName, origFamily: style.family
+        underline: style.underline, color: style.color, asc: run.asc, loadedName: run.loadedName, origFamily: style.family
       });
       paintOverlay();
     }
@@ -3440,6 +3474,7 @@
     const familySel = document.getElementById('pdfedFontFamily');
     const boldBtn = document.getElementById('pdfedBoldBtn');
     const italicBtn = document.getElementById('pdfedItalicBtn');
+    const underlineBtn = document.getElementById('pdfedUnderlineBtn');
     const sizeInput = document.getElementById('pdfedFontSize');
     const colorInput = document.getElementById('pdfedFontColor');
     const applyBtn = document.getElementById('pdfedApplyText');
@@ -3476,6 +3511,7 @@
     }
     boldBtn.addEventListener('click', () => { setToggle(boldBtn, !toggleOn(boldBtn)); refreshEditingPreview(); });
     italicBtn.addEventListener('click', () => { setToggle(italicBtn, !toggleOn(italicBtn)); refreshEditingPreview(); });
+    underlineBtn.addEventListener('click', () => { setToggle(underlineBtn, !toggleOn(underlineBtn)); refreshEditingPreview(); });
     familySel.addEventListener('change', refreshEditingPreview);
     sizeInput.addEventListener('input', refreshEditingPreview);
     colorInput.addEventListener('input', refreshEditingPreview);
@@ -3496,7 +3532,7 @@
       openTextEditor({
         entry: currentRender.entry, isNew: true, rec, srcKey: rec.key,
         text: fixLigatures(rec.str), size: style.size, family: style.family, bold: style.bold, italic: style.italic,
-        colorHex: style.colorHex, css: rec.css,
+        underline: style.underline, colorHex: style.colorHex, css: rec.css,
         origFamily: style.family, loadedName: rec.loadedName
       });
     }
@@ -3506,6 +3542,7 @@
       familySel.value = o.family in FONT_VARIANTS ? o.family : 'sans';
       setToggle(boldBtn, !!o.bold);
       setToggle(italicBtn, !!o.italic);
+      setToggle(underlineBtn, !!o.underline);
       sizeInput.value = o.size;
       colorInput.value = o.colorHex;
       editing = { ...o };
@@ -3539,6 +3576,7 @@
       i.style.fontSize = ((parseFloat(sizeInput.value) || editing.size) * scale) + 'px';
       i.style.fontWeight = toggleOn(boldBtn) ? '700' : '400';
       i.style.fontStyle = toggleOn(italicBtn) ? 'italic' : 'normal';
+      i.style.textDecoration = toggleOn(underlineBtn) ? 'underline' : 'none';
       i.style.color = colorInput.value;
     }
 
@@ -3559,6 +3597,7 @@
         family: familySel.value in FONT_VARIANTS ? familySel.value : 'sans',
         bold: toggleOn(boldBtn),
         italic: toggleOn(italicBtn),
+        underline: toggleOn(underlineBtn),
         color: hexToRgb(colorInput.value)
       };
       snapshotForUndo();
@@ -3780,11 +3819,20 @@
         for(const te of entry.edits.textEdits){
           copied.drawRectangle({ x: te.cover.x, y: te.cover.y, width: te.cover.w, height: te.cover.h, color: PDFLib.rgb(te.cover.color.r / 255, te.cover.color.g / 255, te.cover.color.b / 255) });
           if(te.text){
-            copied.drawText(te.text, {
-              x: te.x, y: te.y, size: te.size,
-              font: await fontFor(te.family, te.bold, te.italic),
-              color: PDFLib.rgb(te.color.r / 255, te.color.g / 255, te.color.b / 255)
-            });
+            const rgb = PDFLib.rgb(te.color.r / 255, te.color.g / 255, te.color.b / 255);
+            const font = await fontFor(te.family, te.bold, te.italic);
+            copied.drawText(te.text, { x: te.x, y: te.y, size: te.size, font, color: rgb });
+            // underline is drawn ink, not a font property — pdf-lib/StandardFonts have no
+            // underline flag, so match the canvas preview's approach: a filled bar under the
+            // baseline, matching text colour and width (font.widthOfTextAtSize is exact, unlike
+            // canvas measureText, since it's the same metrics drawText itself used).
+            if(te.underline){
+              const w = font.widthOfTextAtSize(te.text, te.size);
+              const thickness = Math.max(0.75, te.size * 0.06);
+              // pdf-lib's (x,y) is the rect's bottom-left corner — offset down from the baseline by
+              // the same 0.12·size gap the canvas preview uses, so preview and export line up.
+              copied.drawRectangle({ x: te.x, y: te.y - te.size * 0.12 - thickness, width: w, height: thickness, color: rgb });
+            }
           }
         }
         // inserted images: embed once, draw at the stored PDF box (bottom-left origin, y-up)
