@@ -28,14 +28,16 @@ function chunk(arr, size) {
   return out;
 }
 
-// Spotify's batch /v1/tracks endpoint takes up to 50 comma-separated ids per call.
-async function fetchSpotifyTracksBatch(ids, token) {
-  const res = await fetch(`https://api.spotify.com/v1/tracks?ids=${ids.join(',')}`, {
+// Spotify's batch /v1/tracks?ids=... 403s under this app's Client Credentials grant (confirmed
+// via curl — singular /v1/tracks/{id} and /v1/search both 200 with the same token, only the
+// batch "several tracks" endpoint is blocked). Fetch one id at a time instead.
+async function fetchSpotifyTrack(id, token) {
+  const res = await fetch(`https://api.spotify.com/v1/tracks/${id}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
-  if (!res.ok) throw new Error(`Spotify /v1/tracks returned ${res.status}: ${(await res.text()).slice(0, 200)}`);
-  const data = await res.json();
-  return data.tracks || [];
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`Spotify /v1/tracks/${id} returned ${res.status}: ${(await res.text()).slice(0, 200)}`);
+  return res.json();
 }
 
 // ReccoBeats' batch limit isn't documented; adapt by halving on failure rather than guessing wrong
@@ -75,14 +77,12 @@ async function main() {
 
   const token = await getSpotifyToken(env);
 
-  // Step 1: resolve title/artist for every id via Spotify's batch endpoint (50/call).
+  // Step 1: resolve title/artist for every id, one Spotify call each (batch endpoint is 403'd).
   const spotifyTrackById = new Map();
-  for (const idsChunk of chunk(ids, 50)) {
-    const tracks = await fetchSpotifyTracksBatch(idsChunk, token);
-    tracks.forEach((t, i) => {
-      if (t) spotifyTrackById.set(t.id, t);
-      else console.warn(`  Spotify has no track for id ${idsChunk[i]}`);
-    });
+  for (const id of ids) {
+    const t = await fetchSpotifyTrack(id, token);
+    if (t) spotifyTrackById.set(t.id, t);
+    else console.warn(`  Spotify has no track for id ${id}`);
     await sleep(200);
   }
 

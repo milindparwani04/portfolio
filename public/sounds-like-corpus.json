@@ -1,0 +1,4330 @@
+{
+  "version": 1,
+  "norm": {
+    "tempo": {
+      "min": 64.177,
+      "max": 203.908
+    },
+    "loudness": {
+      "min": -18.09,
+      "max": -1.802
+    }
+  },
+  "features": [
+    "danceability",
+    "energy",
+    "valence",
+    "acousticness",
+    "instrumentalness",
+    "liveness",
+    "speechiness",
+    "loudness",
+    "tempo"
+  ],
+  "songs": [
+    {
+      "title": "The Weekend - Extended Vocal Mix",
+      "artist": "Michael Gray",
+      "spotifyId": "01ZJgF5oIz42tPFSmHgMkG",
+      "vec": [
+        0.753,
+        0.783,
+        0.787,
+        0.000255,
+        0.135,
+        0.0562,
+        0.0662,
+        0.7062868369351669,
+        0.4497713463726732
+      ]
+    },
+    {
+      "title": "Glad You Came",
+      "artist": "The Wanted",
+      "spotifyId": "01v2iOCnr4HDb1nUJLZods",
+      "vec": [
+        0.722,
+        0.851,
+        0.452,
+        0.0319,
+        0,
+        0.108,
+        0.0639,
+        0.8728511787819253,
+        0.4487765778531607
+      ]
+    },
+    {
+      "title": "Dramatic Girl (feat. Che Ecru)",
+      "artist": "Baby Keem, Che Ecru",
+      "spotifyId": "05gychGDaYtqT3sWQhZydb",
+      "vec": [
+        0.776,
+        0.653,
+        0.718,
+        0.188,
+        0.0000284,
+        0.275,
+        0.0375,
+        0.8159995088408645,
+        0.3422790934008917
+      ]
+    },
+    {
+      "title": "Walking On Sunshine",
+      "artist": "Katrina & The Waves",
+      "spotifyId": "05wIrZSwuaVWhcv5FfqeH0",
+      "vec": [
+        0.597,
+        0.87,
+        0.944,
+        0.0119,
+        0.166,
+        0.0678,
+        0.0371,
+        0.37573673870333985,
+        0.32722874666323143
+      ]
+    },
+    {
+      "title": "Blame (feat. John Newman)",
+      "artist": "Calvin Harris, John Newman",
+      "spotifyId": "07nH4ifBxUB4lZcsf44Brn",
+      "vec": [
+        0.414,
+        0.857,
+        0.348,
+        0.0287,
+        0.00574,
+        0.343,
+        0.0808,
+        0.8602652259332024,
+        0.4569279544267199
+      ]
+    },
+    {
+      "title": "Kimpton",
+      "artist": "Barry Can't Swim, O'Flynn",
+      "spotifyId": "09oYN0uq4LOoifmgk8bHeP",
+      "vec": [
+        0.531,
+        0.667,
+        0.127,
+        0.0569,
+        0.939,
+        0.3,
+        0.0377,
+        0.5516331041257367,
+        0.41362331909168326
+      ]
+    },
+    {
+      "title": "A Sky Full of Stars",
+      "artist": "Coldplay",
+      "spotifyId": "0FDzzruyVECATHXKHFs9eJ",
+      "vec": [
+        0.545,
+        0.675,
+        0.162,
+        0.00617,
+        0.00197,
+        0.209,
+        0.0279,
+        0.7131630648330058,
+        0.43507167342966124
+      ]
+    },
+    {
+      "title": "back to friends",
+      "artist": "sombr",
+      "spotifyId": "0FTmksd2dxiE5e3rWyJXs6",
+      "vec": [
+        0.436,
+        0.723,
+        0.235,
+        0.0000937,
+        0.0000882,
+        0.0929,
+        0.0301,
+        0.9699778978388998,
+        0.20523720577395135
+      ]
+    },
+    {
+      "title": "I'm God",
+      "artist": "Clams Casino, Imogen Heap",
+      "spotifyId": "0FVuyC9RP5MACjp4lgU3qZ",
+      "vec": [
+        0.529,
+        0.641,
+        0.089,
+        0.0711,
+        0.76,
+        0.102,
+        0.0336,
+        0.6943762278978388,
+        0.5564549026343475
+      ]
+    },
+    {
+      "title": "Drive By",
+      "artist": "Train",
+      "spotifyId": "0KAiuUOrLTIkzkpfpn9jb9",
+      "vec": [
+        0.765,
+        0.837,
+        0.721,
+        0.00107,
+        0.0000106,
+        0.0801,
+        0.032,
+        0.9195112966601179,
+        0.4140169325346559
+      ]
+    },
+    {
+      "title": "Everything I Am",
+      "artist": "Kanye West, DJ Premier",
+      "spotifyId": "0NrtwAmRAdLxua31SzHvXr",
+      "vec": [
+        0.631,
+        0.623,
+        0.765,
+        0.466,
+        0.00000161,
+        0.151,
+        0.264,
+        0.6826498035363457,
+        0.11488502909161172
+      ]
+    },
+    {
+      "title": "Fashion Killa",
+      "artist": "A$AP Rocky",
+      "spotifyId": "0O3TAouZE4vL9dM5SyxgvH",
+      "vec": [
+        0.801,
+        0.819,
+        0.811,
+        0.292,
+        0,
+        0.515,
+        0.158,
+        0.7920555009823183,
+        0.5424136376323078
+      ]
+    },
+    {
+      "title": "Maniac",
+      "artist": "Michael Sembello",
+      "spotifyId": "0QKfiqpEU4h9ycPSzIFwYe",
+      "vec": [
+        0.617,
+        0.533,
+        0.835,
+        0.0891,
+        0.00000401,
+        0.0415,
+        0.0651,
+        0.4036100196463654,
+        0.677616276989358
+      ]
+    },
+    {
+      "title": "Titanium (feat. Sia)",
+      "artist": "David Guetta, Sia",
+      "spotifyId": "0TDLuuLlV54CkRRUOahJb4",
+      "vec": [
+        0.604,
+        0.787,
+        0.301,
+        0.0679,
+        0.15,
+        0.127,
+        0.103,
+        0.8850687622789783,
+        0.44288668942468024
+      ]
+    },
+    {
+      "title": "Not over Yet - Perfecto Mix",
+      "artist": "Grace",
+      "spotifyId": "0VuA1Ei9pgMoyUwDwBhMQZ",
+      "vec": [
+        0.56,
+        0.71,
+        0.454,
+        0.00575,
+        0.00539,
+        0.0433,
+        0.0413,
+        0.3636419449901768,
+        0.4748481009940528
+      ]
+    },
+    {
+      "title": "Gold - 2003 Remaster",
+      "artist": "Spandau Ballet",
+      "spotifyId": "0Z9UkcT1pnrmLciUJPcMMS",
+      "vec": [
+        0.724,
+        0.802,
+        0.729,
+        0.25,
+        0.0016,
+        0.342,
+        0.0337,
+        0.7350810412573673,
+        0.5649354831783928
+      ]
+    },
+    {
+      "title": "This Is What You Came For",
+      "artist": "Calvin Harris, Rihanna",
+      "spotifyId": "0azC730Exh71aQlOt9Zj3y",
+      "vec": [
+        0.631,
+        0.927,
+        0.465,
+        0.199,
+        0.119,
+        0.148,
+        0.0332,
+        0.9395260314341847,
+        0.4278578125111822
+      ]
+    },
+    {
+      "title": "Ocean Drive",
+      "artist": "Duke Dumont",
+      "spotifyId": "0b6wdul3A5sQNpIOv03OxP",
+      "vec": [
+        0.686,
+        0.718,
+        0.557,
+        0.00637,
+        0.000703,
+        0.119,
+        0.0431,
+        0.8003438113948919,
+        0.3639063629402208
+      ]
+    },
+    {
+      "title": "Tondo",
+      "artist": "Disclosure, Eko Roosevelt",
+      "spotifyId": "0csz09qS2n8Jo7LogHKu7j",
+      "vec": [
+        0.675,
+        0.92,
+        0.842,
+        0.0126,
+        0.117,
+        0.329,
+        0.0539,
+        0.6714759332023577,
+        0.48538978465766364
+      ]
+    },
+    {
+      "title": "Renegades",
+      "artist": "X Ambassadors",
+      "spotifyId": "0fYVliAYKHuPmECRs1pbRf",
+      "vec": [
+        0.526,
+        0.862,
+        0.528,
+        0.0144,
+        0.0597,
+        0.229,
+        0.0905,
+        0.7420800589390962,
+        0.18517723339845849
+      ]
+    },
+    {
+      "title": "Stereo Love",
+      "artist": "Edward Maya, Vika Jigulina",
+      "spotifyId": "0gBfLS4aqbrr1ZvVv8dqWB",
+      "vec": [
+        0.778,
+        0.777,
+        0.362,
+        0.0338,
+        0.0218,
+        0.0772,
+        0.0362,
+        0.78161836935167,
+        0.44996457479013247
+      ]
+    },
+    {
+      "title": "Linger",
+      "artist": "The Cranberries",
+      "spotifyId": "0gEyKnHvgkrkBM6fbeHdwK",
+      "vec": [
+        0.439,
+        0.434,
+        0.204,
+        0.0783,
+        0.0000518,
+        0.14,
+        0.0265,
+        0.19474459724950888,
+        0.21946454258539622
+      ]
+    },
+    {
+      "title": "One More Time - Radio Edit",
+      "artist": "Daft Punk",
+      "spotifyId": "0ijhkvBpA7OBlY4clWSUZw",
+      "vec": [
+        0.649,
+        0.671,
+        0.533,
+        0.0348,
+        0,
+        0.376,
+        0.103,
+        0.5893909626719057,
+        0.4201215192047577
+      ]
+    },
+    {
+      "title": "Stronger",
+      "artist": "Kanye West",
+      "spotifyId": "0j2T0R9dR9qdJYsB7ciXhf",
+      "vec": [
+        0.617,
+        0.716,
+        0.496,
+        0.0056,
+        0,
+        0.408,
+        0.136,
+        0.6281925343811394,
+        0.28509779504905847
+      ]
+    },
+    {
+      "title": "Just Like Heaven",
+      "artist": "The Cure",
+      "spotifyId": "0lNudhCTfcGBQVvSO22g4r",
+      "vec": [
+        0.439,
+        0.837,
+        0.511,
+        0.0808,
+        0.0024,
+        0.115,
+        0.0336,
+        0.40164538310412573,
+        0.6284718494822193
+      ]
+    },
+    {
+      "title": "Let Me Love You",
+      "artist": "DJ Snake, Justin Bieber",
+      "spotifyId": "0lYBSQXN6rCTvUZvg9S0lU",
+      "vec": [
+        0.475,
+        0.715,
+        0.159,
+        0.0863,
+        0.0000267,
+        0.135,
+        0.058,
+        0.78088163064833,
+        0.9712590620549483
+      ]
+    },
+    {
+      "title": "20 Min",
+      "artist": "Lil Uzi Vert",
+      "spotifyId": "0uxSUdBrJy9Un0EYoBowng",
+      "vec": [
+        0.773,
+        0.75,
+        0.783,
+        0.109,
+        0,
+        0.174,
+        0.117,
+        0.8645014734774067,
+        0.42402187059421315
+      ]
+    },
+    {
+      "title": "Bitch, Don’t Kill My Vibe",
+      "artist": "Kendrick Lamar",
+      "spotifyId": "0yhMmqax6HRAZxI7udEask",
+      "vec": [
+        0.586,
+        0.698,
+        0.098,
+        0.0151,
+        0,
+        0.443,
+        0.0943,
+        0.5612721021611001,
+        0.4993666401872169
+      ]
+    },
+    {
+      "title": "Location",
+      "artist": "Khalid",
+      "spotifyId": "152lZdxL1OR0ZMW6KquMif",
+      "vec": [
+        0.736,
+        0.449,
+        0.326,
+        0.33,
+        0.000162,
+        0.0898,
+        0.425,
+        0.4069253438113949,
+        0.11414074185399087
+      ]
+    },
+    {
+      "title": "In the Air Tonight - 2015 Remaster",
+      "artist": "Phil Collins",
+      "spotifyId": "18AXbzPzBS8Y3AkgSxzJPb",
+      "vec": [
+        0.446,
+        0.239,
+        0.298,
+        0.551,
+        0.0000041,
+        0.0697,
+        0.0316,
+        0.25448182711198425,
+        0.8969376874136734
+      ]
+    },
+    {
+      "title": "Beauty And A Beat",
+      "artist": "Justin Bieber, Nicki Minaj",
+      "spotifyId": "190jyVPHYjAqEaOGmMzdyk",
+      "vec": [
+        0.602,
+        0.843,
+        0.526,
+        0.000688,
+        0.0000527,
+        0.0682,
+        0.0593,
+        0.8140348722986248,
+        0.4567776656575848
+      ]
+    },
+    {
+      "title": "Gypsy",
+      "artist": "Fleetwood Mac",
+      "spotifyId": "19Ym5Sg0YyOCa6ao21bdoG",
+      "vec": [
+        0.622,
+        0.54,
+        0.847,
+        0.017,
+        0.00771,
+        0.265,
+        0.0261,
+        0.2517190569744597,
+        0.47736007042102313
+      ]
+    },
+    {
+      "title": "This Girl (Kungs Vs. Cookin' On 3 Burners)",
+      "artist": "Kungs, Cookin' On 3 Burners",
+      "spotifyId": "1A8j067qyiNwQnZT0bzUpZ",
+      "vec": [
+        0.793,
+        0.717,
+        0.466,
+        0.0927,
+        0.000036,
+        0.226,
+        0.0393,
+        0.818455304518664,
+        0.4137091983883318
+      ]
+    },
+    {
+      "title": "P.Y.T. (Pretty Young Thing)",
+      "artist": "Michael Jackson",
+      "spotifyId": "1CgmY8fVN7kstVDZmsdM5k",
+      "vec": [
+        0.894,
+        0.67,
+        0.961,
+        0.172,
+        0.000363,
+        0.0691,
+        0.0474,
+        0.5331532416502947,
+        0.45109531886267185
+      ]
+    },
+    {
+      "title": "You Get What You Give",
+      "artist": "New Radicals",
+      "spotifyId": "1Cwsd5xI8CajJz795oy4XF",
+      "vec": [
+        0.621,
+        0.901,
+        0.744,
+        0.17,
+        0,
+        0.0875,
+        0.0302,
+        0.7793467583497052,
+        0.35632751501098536
+      ]
+    },
+    {
+      "title": "Still Riding",
+      "artist": "Barry Can't Swim",
+      "spotifyId": "1DQYCwZG5DOXXSTXluYQam",
+      "vec": [
+        0.678,
+        0.619,
+        0.646,
+        0.000347,
+        0.37,
+        0.284,
+        0.0991,
+        0.5271979371316307,
+        0.4924318869828457
+      ]
+    },
+    {
+      "title": "Seventeen Going Under",
+      "artist": "Sam Fender",
+      "spotifyId": "1Dp7ASSZVVOPJ85VdLpjOX",
+      "vec": [
+        0.477,
+        0.873,
+        0.611,
+        0.00471,
+        0.00589,
+        0.0813,
+        0.0355,
+        0.8069744597249509,
+        0.6997087260522004
+      ]
+    },
+    {
+      "title": "Praise You",
+      "artist": "Fatboy Slim",
+      "spotifyId": "1FS21kclHQ2vVi3U1ZxETc",
+      "vec": [
+        0.603,
+        0.893,
+        0.516,
+        0.0901,
+        0.268,
+        0.194,
+        0.0484,
+        0.5791380157170923,
+        0.3258689911329626
+      ]
+    },
+    {
+      "title": "Song 2 - 2012 Remaster",
+      "artist": "Blur",
+      "spotifyId": "1FTSo4v6BOZH9QxKc3MbVM",
+      "vec": [
+        0.674,
+        0.789,
+        0.918,
+        0.00178,
+        0.00708,
+        0.0753,
+        0.0676,
+        0.6868246561886052,
+        0.46965240354681487
+      ]
+    },
+    {
+      "title": "Never Tear Us Apart",
+      "artist": "INXS",
+      "spotifyId": "1GjbTNFImFrjFsNdleDe78",
+      "vec": [
+        0.664,
+        0.613,
+        0.193,
+        0.00294,
+        0.000129,
+        0.175,
+        0.0273,
+        0.6464882121807466,
+        0.2320387029363562
+      ]
+    },
+    {
+      "title": "Waves - Robin Schulz Radio Edit",
+      "artist": "Mr. Probz, Robin Schulz",
+      "spotifyId": "1HFfMOxCAT4GAwaPfCdmUs",
+      "vec": [
+        0.829,
+        0.51,
+        0.45,
+        0.00821,
+        0.00143,
+        0.0829,
+        0.0369,
+        0.537573673870334,
+        0.39946039175272485
+      ]
+    },
+    {
+      "title": "Fade Into You",
+      "artist": "Mazzy Star",
+      "spotifyId": "1LzNfuep1bnAUR9skqdHCK",
+      "vec": [
+        0.417,
+        0.33,
+        0.175,
+        0.247,
+        0.000689,
+        0.0677,
+        0.0275,
+        0.255709724950884,
+        0.6651065261108845
+      ]
+    },
+    {
+      "title": "Beat It",
+      "artist": "Michael Jackson",
+      "spotifyId": "1OOtq8tRnDM8kG2gqUPjAj",
+      "vec": [
+        0.776,
+        0.867,
+        0.918,
+        0.0495,
+        0.00000792,
+        0.197,
+        0.0479,
+        0.8832269155206286,
+        0.5342407912345865
+      ]
+    },
+    {
+      "title": "We Are One (Ole Ola) [The Official 2014 FIFA World Cup Song] (feat. Jennifer Lopez & Claudia Leitte)",
+      "artist": "Pitbull, Jennifer Lopez, Claudia Leitte",
+      "spotifyId": "1PCvKFPWnTXAe2oaReVUcr",
+      "vec": [
+        0.592,
+        0.935,
+        0.567,
+        0.00879,
+        0.0154,
+        0.132,
+        0.0581,
+        0.8455918467583496,
+        0.4353794075759853
+      ]
+    },
+    {
+      "title": "More Than a Feeling",
+      "artist": "Boston",
+      "spotifyId": "1QEEqeFIZktqIpPI4jSVSF",
+      "vec": [
+        0.377,
+        0.681,
+        0.285,
+        0.00088,
+        0.0023,
+        0.0504,
+        0.0298,
+        0.6170800589390962,
+        0.3192705985071315
+      ]
+    },
+    {
+      "title": "Gypsy Woman (She's Homeless) (La Da Dee La Da Da) - Basement Boy Strip To The Bone Mix",
+      "artist": "Crystal Waters, The Basement Boys",
+      "spotifyId": "1SShxVVBeZBCY7WddnksPz",
+      "vec": [
+        0.484,
+        0.641,
+        0.181,
+        0.000779,
+        0.278,
+        0.0738,
+        0.0377,
+        0.33632121807465615,
+        0.3993673558480222
+      ]
+    },
+    {
+      "title": "Good Lies",
+      "artist": "Overmono",
+      "spotifyId": "1ZnghCVtXCrtmKJH32z4UK",
+      "vec": [
+        0.688,
+        0.809,
+        0.615,
+        0.0694,
+        0.88,
+        0.602,
+        0.0474,
+        0.8171046168958743,
+        0.4425789552783563
+      ]
+    },
+    {
+      "title": "JOY (Up The Street)",
+      "artist": "Joy Anonymous",
+      "spotifyId": "1d9NF9D6HgLWvGQyPrYE98",
+      "vec": [
+        0.762,
+        0.674,
+        0.599,
+        0.0528,
+        0.00362,
+        0.141,
+        0.207,
+        0.787450884086444,
+        0.4496783104679705
+      ]
+    },
+    {
+      "title": "Feel So Close - Radio Edit",
+      "artist": "Calvin Harris",
+      "spotifyId": "1gihuPhrLraKYrJMAEONyc",
+      "vec": [
+        0.707,
+        0.924,
+        0.919,
+        0.000972,
+        0.00703,
+        0.204,
+        0.031,
+        0.9361493123772101,
+        0.4563053295260178
+      ]
+    },
+    {
+      "title": "Wanna Be Startin' Somethin'",
+      "artist": "Michael Jackson",
+      "spotifyId": "1hu2s7qkm5bo03eODpRQO3",
+      "vec": [
+        0.842,
+        0.872,
+        0.906,
+        0.0259,
+        0.419,
+        0.0573,
+        0.0455,
+        0.6051080550098231,
+        0.4146109310031417
+      ]
+    },
+    {
+      "title": "TELEKINESIS (feat. SZA & Future)",
+      "artist": "Travis Scott, SZA, Future",
+      "spotifyId": "1i9lZvlaDdWDPyXEE95aiq",
+      "vec": [
+        0.458,
+        0.535,
+        0.216,
+        0.575,
+        0,
+        0.168,
+        0.0281,
+        0.81262278978389,
+        0.1334635835999169
+      ]
+    },
+    {
+      "title": "Kids",
+      "artist": "MGMT",
+      "spotifyId": "1jJci4qxiYcOHhQR247rEU",
+      "vec": [
+        0.451,
+        0.931,
+        0.172,
+        0.00076,
+        0.0049,
+        0.361,
+        0.0719,
+        0.8729739685658153,
+        0.42069404784908143
+      ]
+    },
+    {
+      "title": "We Are The Champions - Remastered 2011",
+      "artist": "Queen",
+      "spotifyId": "1lCRw5FEZ1gPDNPzy1K4zW",
+      "vec": [
+        0.268,
+        0.459,
+        0.175,
+        0.378,
+        0,
+        0.118,
+        0.0346,
+        0.6845530451866404,
+        0
+      ]
+    },
+    {
+      "title": "Too Good At Goodbyes",
+      "artist": "Sam Smith",
+      "spotifyId": "1mXVgsBdtIVeCLJnSnmtdV",
+      "vec": [
+        0.715,
+        0.372,
+        0.474,
+        0.638,
+        0,
+        0.169,
+        0.0443,
+        0.6049238703339882,
+        0.19862449993201217
+      ]
+    },
+    {
+      "title": "MUTT",
+      "artist": "Leon Thomas",
+      "spotifyId": "1mh9eHVRdNhzryG43PXdW1",
+      "vec": [
+        0.635,
+        0.462,
+        0.601,
+        0.174,
+        0.0000226,
+        0.0697,
+        0.12,
+        0.6138261296660117,
+        0.828534827633095
+      ]
+    },
+    {
+      "title": "Radio Ga Ga - Remastered 2011",
+      "artist": "Queen",
+      "spotifyId": "1nQRg9q9uwALGzouOX5OyQ",
+      "vec": [
+        0.744,
+        0.502,
+        0.66,
+        0.183,
+        0.000228,
+        0.189,
+        0.0359,
+        0.6367264243614931,
+        0.3447123401392675
+      ]
+    },
+    {
+      "title": "Somebody That I Used To Know",
+      "artist": "Gotye, Kimbra",
+      "spotifyId": "1qDrWA6lyx8cLECdZE7TV7",
+      "vec": [
+        0.865,
+        0.521,
+        0.748,
+        0.548,
+        0.000115,
+        0.0989,
+        0.0371,
+        0.6850442043222004,
+        0.4643350437626582
+      ]
+    },
+    {
+      "title": "Man I Need",
+      "artist": "Olivia Dean",
+      "spotifyId": "1qbmS6ep2hbBRaEZFpn7BX",
+      "vec": [
+        0.808,
+        0.593,
+        0.688,
+        0.488,
+        0.000451,
+        0.0933,
+        0.0714,
+        0.6642927308447937,
+        0.39240397621143475
+      ]
+    },
+    {
+      "title": "I Want Your Soul",
+      "artist": "Armand Van Helden",
+      "spotifyId": "1uqnKeoy55KA6LqoOiW4Pm",
+      "vec": [
+        0.668,
+        0.912,
+        0.782,
+        0.00546,
+        0.00939,
+        0.22,
+        0.0485,
+        0.7838285854616895,
+        0.4565486541998554
+      ]
+    },
+    {
+      "title": "Billie (loving arms)",
+      "artist": "Fred again..",
+      "spotifyId": "1vW12BfxjOQKYElBm9ttW9",
+      "vec": [
+        0.648,
+        0.775,
+        0.371,
+        0.0561,
+        0,
+        0.444,
+        0.0694,
+        0.8160609037328094,
+        0.45727147161331416
+      ]
+    },
+    {
+      "title": "My Way",
+      "artist": "Calvin Harris",
+      "spotifyId": "1vvNmPOiUuyCbgWmtc6yfm",
+      "vec": [
+        0.818,
+        0.913,
+        0.536,
+        0.093,
+        0.0000369,
+        0.161,
+        0.0426,
+        0.9227652259332023,
+        0.3994031388882925
+      ]
+    },
+    {
+      "title": "Call on Me - Radio Mix",
+      "artist": "Eric Prydz",
+      "spotifyId": "1xNcBAoUw8Hz6LqK2jt4Ff",
+      "vec": [
+        0.597,
+        0.837,
+        0.447,
+        0.00427,
+        0.00115,
+        0.839,
+        0.375,
+        0.7104616895874263,
+        0.4448905396798133
+      ]
+    },
+    {
+      "title": "Miss Independent",
+      "artist": "Ne-Yo",
+      "spotifyId": "1yJ5fyqBusR7Verj8JGsKV",
+      "vec": [
+        0.668,
+        0.673,
+        0.727,
+        0.48,
+        0,
+        0.194,
+        0.145,
+        0.7598231827111984,
+        0.7703015078973171
+      ]
+    },
+    {
+      "title": "Dermot (see yourself in my eyes)",
+      "artist": "Fred again.., Dermot Kennedy",
+      "spotifyId": "1zAIRb8mTj8CcAUXW2FoMd",
+      "vec": [
+        0.573,
+        0.727,
+        0.22,
+        0.132,
+        0.0584,
+        0.192,
+        0.0664,
+        0.6430500982318271,
+        0.6144448976962877
+      ]
+    },
+    {
+      "title": "Save The World",
+      "artist": "Swedish House Mafia",
+      "spotifyId": "1zIEwDU2IZyHjy17ssOvyr",
+      "vec": [
+        0.654,
+        0.737,
+        0.223,
+        0.00355,
+        0.000273,
+        0.0807,
+        0.108,
+        0.7155574656188606,
+        0.44960674438743015
+      ]
+    },
+    {
+      "title": "I Need Your Love (feat. Ellie Goulding)",
+      "artist": "Calvin Harris, Ellie Goulding",
+      "spotifyId": "21OlSKwKmQXKpQZJwwdqNv",
+      "vec": [
+        0.691,
+        0.882,
+        0.529,
+        0.398,
+        0,
+        0.113,
+        0.0604,
+        0.8130525540275048,
+        0.43546528687263386
+      ]
+    },
+    {
+      "title": "Can't Feel My Face",
+      "artist": "The Weeknd",
+      "spotifyId": "22VdIZQfgXJea34mQxlt81",
+      "vec": [
+        0.705,
+        0.769,
+        0.583,
+        0.113,
+        0,
+        0.105,
+        0.0425,
+        0.7713654223968566,
+        0.3132590477417323
+      ]
+    },
+    {
+      "title": "How Deep Is Your Love",
+      "artist": "Calvin Harris, Disciples",
+      "spotifyId": "22mek4IiqubGD9ctzxc69s",
+      "vec": [
+        0.738,
+        0.868,
+        0.336,
+        0.0392,
+        0.00169,
+        0.388,
+        0.0731,
+        0.8421537328094302,
+        0.41383801733330466
+      ]
+    },
+    {
+      "title": "In the Name of Love",
+      "artist": "Martin Garrix, Bebe Rexha",
+      "spotifyId": "23L5CiUhw2jV1OIMwthR3S",
+      "vec": [
+        0.501,
+        0.519,
+        0.168,
+        0.109,
+        0,
+        0.454,
+        0.0409,
+        0.74963163064833,
+        0.4996242780771626
+      ]
+    },
+    {
+      "title": "She’s Gone, Dance On",
+      "artist": "Disclosure",
+      "spotifyId": "29I9dv9Nq704w0Oc5yFGsR",
+      "vec": [
+        0.534,
+        0.943,
+        0.375,
+        0.000215,
+        0.794,
+        0.0929,
+        0.0496,
+        0.8152013752455795,
+        0.4997244705899191
+      ]
+    },
+    {
+      "title": "Out of My League",
+      "artist": "Fitz and The Tantrums",
+      "spotifyId": "2AYEOC02WLhUiOoaig2SEH",
+      "vec": [
+        0.545,
+        0.968,
+        0.527,
+        0.0387,
+        0.00325,
+        0.331,
+        0.0853,
+        0.8924975442043221,
+        0.7570832528214927
+      ]
+    },
+    {
+      "title": "My Song",
+      "artist": "Labi Siffre",
+      "spotifyId": "2EQWbkcNoKPOXQtJM7nqRV",
+      "vec": [
+        0.416,
+        0.319,
+        0.28,
+        0.861,
+        0.000554,
+        0.107,
+        0.0299,
+        0.31434184675834964,
+        0.22278520872247387
+      ]
+    },
+    {
+      "title": "Say What",
+      "artist": "Rampa, Adam Port, &ME, chuala, Keinemusik",
+      "spotifyId": "2GwsSbo6IbNDVvcm9rtmal",
+      "vec": [
+        0.756,
+        0.721,
+        0.571,
+        0.0965,
+        0.251,
+        0.225,
+        0.0405,
+        0.5302676817288802,
+        0.3994675483607789
+      ]
+    },
+    {
+      "title": "Love Will Tear Us Apart",
+      "artist": "Joy Division",
+      "spotifyId": "2JO3HwMRPeya8bXbtbyPcf",
+      "vec": [
+        0.443,
+        0.956,
+        0.909,
+        0.0000524,
+        0.825,
+        0.135,
+        0.0511,
+        0.7301080550098231,
+        0.5909712232790146
+      ]
+    },
+    {
+      "title": "Little Lion Man",
+      "artist": "Mumford & Sons",
+      "spotifyId": "2KrN3MCNztKcSleZgHEj83",
+      "vec": [
+        0.517,
+        0.492,
+        0.455,
+        0.0275,
+        0.0000319,
+        0.0873,
+        0.0272,
+        0.6164047151277013,
+        0.5325088920855072
+      ]
+    },
+    {
+      "title": "Touch Me",
+      "artist": "Rui Da Silva",
+      "spotifyId": "2LGrLtvYEHrd3Nnot4Hxuw",
+      "vec": [
+        0.78,
+        0.925,
+        0.564,
+        0.0598,
+        0.36,
+        0.129,
+        0.046,
+        0.6983668958742633,
+        0.4565271843756933
+      ]
+    },
+    {
+      "title": "Thriller",
+      "artist": "Michael Jackson",
+      "spotifyId": "2LlQb7Uoj1kKyGhlkBf9aC",
+      "vec": [
+        0.771,
+        0.687,
+        0.783,
+        0.0318,
+        0.000225,
+        0.89,
+        0.0693,
+        0.5081041257367387,
+        0.387995505650142
+      ]
+    },
+    {
+      "title": "50 Ways to Say Goodbye",
+      "artist": "Train",
+      "spotifyId": "2NniAhAtkRACaMeYt48xlD",
+      "vec": [
+        0.591,
+        0.935,
+        0.736,
+        0.000284,
+        0.000278,
+        0.142,
+        0.0478,
+        0.9470776031434185,
+        0.5429432266283073
+      ]
+    },
+    {
+      "title": "Hysteria",
+      "artist": "Def Leppard",
+      "spotifyId": "2PFIZFcGry0po3ZfRZkzKc",
+      "vec": [
+        0.659,
+        0.846,
+        0.659,
+        0.0318,
+        0.0144,
+        0.203,
+        0.0274,
+        0.7724705304518664,
+        0.3065389927789825
+      ]
+    },
+    {
+      "title": "Johnny B. Goode",
+      "artist": "Chuck Berry",
+      "spotifyId": "2QfiRTz5Yc8DdShCxG1tB2",
+      "vec": [
+        0.534,
+        0.803,
+        0.969,
+        0.741,
+        0.0000607,
+        0.307,
+        0.0743,
+        0.5501596267190569,
+        0.7428988556583722
+      ]
+    },
+    {
+      "title": "Every Teardrop Is a Waterfall",
+      "artist": "Coldplay",
+      "spotifyId": "2U8g9wVcUu9wsg6i7sFSv8",
+      "vec": [
+        0.425,
+        0.732,
+        0.333,
+        0.00194,
+        0.0103,
+        0.171,
+        0.0396,
+        0.688052554027505,
+        0.3850469831318748
+      ]
+    },
+    {
+      "title": "Cooler Than Me - Single Mix",
+      "artist": "Mike Posner, Gigamesh",
+      "spotifyId": "2V4bv1fNWfTcyRJKmej6Sj",
+      "vec": [
+        0.768,
+        0.82,
+        0.625,
+        0.179,
+        0,
+        0.689,
+        0.0474,
+        0.8263752455795679,
+        0.47081893065962455
+      ]
+    },
+    {
+      "title": "Don't You Worry Child - Radio Edit",
+      "artist": "Swedish House Mafia, John Martin",
+      "spotifyId": "2V65y3PX4DkRhy1djlxd9p",
+      "vec": [
+        0.612,
+        0.84,
+        0.438,
+        0.112,
+        0,
+        0.116,
+        0.0509,
+        0.9175466601178782,
+        0.4642133814257394
+      ]
+    },
+    {
+      "title": "Raging (feat. Kodaline)",
+      "artist": "Kygo, Kodaline",
+      "spotifyId": "2Vhd5uZB4brKHmM0MNxkZo",
+      "vec": [
+        0.55,
+        0.689,
+        0.408,
+        0.0498,
+        0,
+        0.207,
+        0.094,
+        0.6342092337917485,
+        0.2556841359469265
+      ]
+    },
+    {
+      "title": "Rock That Body",
+      "artist": "Black Eyed Peas",
+      "spotifyId": "2WQ09wqQBIOor7Q0VpIDBK",
+      "vec": [
+        0.715,
+        0.907,
+        0.841,
+        0.0172,
+        0.0000839,
+        0.426,
+        0.0993,
+        0.7407293713163065,
+        0.4352219621987962
+      ]
+    },
+    {
+      "title": "Let It Happen",
+      "artist": "Tame Impala",
+      "spotifyId": "2X485T9Z5Ly0xyaghN73ed",
+      "vec": [
+        0.602,
+        0.881,
+        0.577,
+        0.00462,
+        0.0266,
+        0.111,
+        0.0443,
+        0.749938605108055,
+        0.4353722509679312
+      ]
+    },
+    {
+      "title": "3005",
+      "artist": "Childish Gambino",
+      "spotifyId": "2X6b7zLdIxCejd6GqVcQ9M",
+      "vec": [
+        0.472,
+        0.449,
+        0.634,
+        0.113,
+        0,
+        0.0891,
+        0.326,
+        0.6641699410609037,
+        0.7291724814107106
+      ]
+    },
+    {
+      "title": "Let's Go (feat. Ne-Yo) - Radio Edit",
+      "artist": "Calvin Harris, Ne-Yo",
+      "spotifyId": "2XERAvP5rto44nAuJE2Rni",
+      "vec": [
+        0.672,
+        0.905,
+        0.727,
+        0.00661,
+        0.000422,
+        0.22,
+        0.0611,
+        0.9516208251473477,
+        0.45690648460255767
+      ]
+    },
+    {
+      "title": "Therapy",
+      "artist": "salute",
+      "spotifyId": "2ZT87sTizofihiECifOJnm",
+      "vec": [
+        0.622,
+        0.937,
+        0.579,
+        0.00156,
+        0.00491,
+        0.0869,
+        0.0337,
+        0.8050098231827112,
+        0.506916861684236
+      ]
+    },
+    {
+      "title": "Sundress",
+      "artist": "A$AP Rocky",
+      "spotifyId": "2aPTvyE09vUCRwVvj0I8WK",
+      "vec": [
+        0.721,
+        0.707,
+        0.743,
+        0.181,
+        0.00000368,
+        0.143,
+        0.0595,
+        0.7199165029469548,
+        0.43532215471155283
+      ]
+    },
+    {
+      "title": "Boys In the Better Land",
+      "artist": "Fontaines D.C.",
+      "spotifyId": "2dxXKqqpSV4eCgPxC6t8mn",
+      "vec": [
+        0.39,
+        0.971,
+        0.607,
+        0.000285,
+        0.0000222,
+        0.348,
+        0.0754,
+        0.8023698428290765,
+        0.8073942074414411
+      ]
+    },
+    {
+      "title": "Everybody Talks",
+      "artist": "Neon Trees",
+      "spotifyId": "2iUmqdfGZcHIhS3b9E9EWq",
+      "vec": [
+        0.471,
+        0.924,
+        0.716,
+        0.00301,
+        0,
+        0.313,
+        0.0584,
+        0.8708251473477406,
+        0.6497126621866299
+      ]
+    },
+    {
+      "title": "Little Talks",
+      "artist": "Of Monsters and Men",
+      "spotifyId": "2ihCaVdNZmnHZWt0fvAM7B",
+      "vec": [
+        0.457,
+        0.757,
+        0.417,
+        0.0206,
+        0,
+        0.146,
+        0.032,
+        0.7927922396856582,
+        0.2775618867681473
+      ]
+    },
+    {
+      "title": "Nobody To Love - Radio Edit",
+      "artist": "Sigma",
+      "spotifyId": "2jsmSLoX8y0h6k4YzDCFH1",
+      "vec": [
+        0.441,
+        0.921,
+        0.182,
+        0.000526,
+        0.00000634,
+        0.177,
+        0.0436,
+        0.9068025540275049,
+        0.793123930981672
+      ]
+    },
+    {
+      "title": "The Power Of Love",
+      "artist": "Huey Lewis & The News",
+      "spotifyId": "2olVm1lHicpveMAo4AUDRB",
+      "vec": [
+        0.768,
+        0.828,
+        0.961,
+        0.0964,
+        0.0000285,
+        0.097,
+        0.0313,
+        0.7969670923379175,
+        0.39075079975095
+      ]
+    },
+    {
+      "title": "Blue Monday '88",
+      "artist": "New Order",
+      "spotifyId": "31MOjWj3CT3dCQsMV2b8Wu",
+      "vec": [
+        0.681,
+        0.893,
+        0.951,
+        0.0000647,
+        0.383,
+        0.0626,
+        0.0378,
+        0.5896979371316307,
+        0.47446880076718834
+      ]
+    },
+    {
+      "title": "Uptown Funk (feat. Bruno Mars)",
+      "artist": "Mark Ronson, Bruno Mars",
+      "spotifyId": "32OlwWuMpZ6b0aN2RZOeMS",
+      "vec": [
+        0.856,
+        0.609,
+        0.928,
+        0.00801,
+        0.0000815,
+        0.0344,
+        0.0824,
+        0.6671782907662083,
+        0.36363441183416706
+      ]
+    },
+    {
+      "title": "Sunsleeper",
+      "artist": "Barry Can't Swim",
+      "spotifyId": "35lxsi9U65JKT03Voj2Dl5",
+      "vec": [
+        0.64,
+        0.909,
+        0.58,
+        0.00729,
+        0.928,
+        0.108,
+        0.0351,
+        0.7551571709233792,
+        0.42817270326556023
+      ]
+    },
+    {
+      "title": "Superheroes",
+      "artist": "The Script",
+      "spotifyId": "37sINbJZcFdHFAsVNsPq1i",
+      "vec": [
+        0.49,
+        0.885,
+        0.64,
+        0.00218,
+        0,
+        0.0741,
+        0.0396,
+        0.8576252455795678,
+        0.7358352835090282
+      ]
+    },
+    {
+      "title": "Your Song",
+      "artist": "Elton John",
+      "spotifyId": "38zsOOcu31XbbYj9BIPUF1",
+      "vec": [
+        0.552,
+        0.315,
+        0.324,
+        0.828,
+        0.00000552,
+        0.101,
+        0.0299,
+        0.43357072691552057,
+        0.4580944815395296
+      ]
+    },
+    {
+      "title": "Annihilate (Spider-Man: Across the Spider-Verse) (Metro Boomin & Swae Lee, Lil Wayne, Offset)",
+      "artist": "Metro Boomin, Swae Lee, Lil Wayne, Offset",
+      "spotifyId": "39MK3d3fonIP8Mz9oHCTBB",
+      "vec": [
+        0.591,
+        0.5,
+        0.201,
+        0.22,
+        0,
+        0.175,
+        0.0529,
+        0.7296168958742633,
+        0.5842797947484809
+      ]
+    },
+    {
+      "title": "Yellow",
+      "artist": "Coldplay",
+      "spotifyId": "3AJwUDP919kvQ9QcozQPxg",
+      "vec": [
+        0.429,
+        0.661,
+        0.285,
+        0.00239,
+        0.000121,
+        0.234,
+        0.0281,
+        0.6669327111984282,
+        0.7814658164616299
+      ]
+    },
+    {
+      "title": "King",
+      "artist": "Olly Alexander (Years & Years)",
+      "spotifyId": "3AeicLnm55RqcXGBKYQolM",
+      "vec": [
+        0.56,
+        0.857,
+        0.432,
+        0.0594,
+        0,
+        0.381,
+        0.0384,
+        0.8561517681728881,
+        0.39932441619969794
+      ]
+    },
+    {
+      "title": "We Didn't Start the Fire",
+      "artist": "Billy Joel",
+      "spotifyId": "3Cx4yrFaX8CeHwBMReOWXI",
+      "vec": [
+        0.712,
+        0.967,
+        0.895,
+        0.0771,
+        0,
+        0.356,
+        0.047,
+        0.7910117878192534,
+        0.5785902913455139
+      ]
+    },
+    {
+      "title": "Meet Me Halfway",
+      "artist": "Black Eyed Peas",
+      "spotifyId": "3F9ByoUqu31xU0I3G5xfVg",
+      "vec": [
+        0.798,
+        0.629,
+        0.4,
+        0.00474,
+        0.0000229,
+        0.324,
+        0.0735,
+        0.6896488212180747,
+        0.4710837251576243
+      ]
+    },
+    {
+      "title": "Electric Feel",
+      "artist": "MGMT",
+      "spotifyId": "3FtYbEfBqAlGO46NUDQSAt",
+      "vec": [
+        0.763,
+        0.803,
+        0.561,
+        0.0709,
+        0.285,
+        0.348,
+        0.0351,
+        0.8826743614931237,
+        0.2781272588044171
+      ]
+    },
+    {
+      "title": "Dancing in the Moonlight",
+      "artist": "Toploader",
+      "spotifyId": "3Fzlg5r1IjhLk2qRw667od",
+      "vec": [
+        0.632,
+        0.856,
+        0.867,
+        0.0624,
+        0,
+        0.347,
+        0.0348,
+        0.8980230844793712,
+        0.395187896744459
+      ]
+    },
+    {
+      "title": "All The Stars (with SZA) - From \"Black Panther: The Album\"",
+      "artist": "Kendrick Lamar, SZA",
+      "spotifyId": "3GCdLUSnKSMJhs4Tj6CV3s",
+      "vec": [
+        0.695,
+        0.633,
+        0.557,
+        0.0612,
+        0.000195,
+        0.0926,
+        0.0599,
+        0.8069744597249509,
+        0.2333412056021927
+      ]
+    },
+    {
+      "title": "Lost",
+      "artist": "Frank Ocean",
+      "spotifyId": "3GZD6HmiNUhxXYf8Gch723",
+      "vec": [
+        0.913,
+        0.603,
+        0.497,
+        0.0272,
+        0.000503,
+        0.167,
+        0.226,
+        0.8102897838899804,
+        0.4214097086544861
+      ]
+    },
+    {
+      "title": "Just Can’t Get Enough",
+      "artist": "Black Eyed Peas",
+      "spotifyId": "3JA9Jsuxr4xgHXEawAdCp4",
+      "vec": [
+        0.659,
+        0.629,
+        0.262,
+        0.19,
+        0,
+        0.105,
+        0.18,
+        0.5774189587426326,
+        0.21378219579048316
+      ]
+    },
+    {
+      "title": "Sunflower - Spider-Man: Into the Spider-Verse",
+      "artist": "Post Malone, Swae Lee",
+      "spotifyId": "3KkXRkHbMCARz0aVfEt68P",
+      "vec": [
+        0.76,
+        0.478,
+        0.913,
+        0.552,
+        0,
+        0.0703,
+        0.0467,
+        0.7684184675834971,
+        0.18414668183867572
+      ]
+    },
+    {
+      "title": "The Rhythm of the Night",
+      "artist": "Corona",
+      "spotifyId": "3L9RIFcNF9IDGPRE96EO7N",
+      "vec": [
+        0.69,
+        0.805,
+        0.799,
+        0.000232,
+        0.739,
+        0.095,
+        0.0336,
+        0.40324165029469544,
+        0.45538212708704584
+      ]
+    },
+    {
+      "title": "Young Hearts Run Free",
+      "artist": "Candi Staton",
+      "spotifyId": "3MFa9idQuY4iJLWsZl3tIQ",
+      "vec": [
+        0.654,
+        0.652,
+        0.846,
+        0.13,
+        0.0000149,
+        0.202,
+        0.0426,
+        0.5394155206286837,
+        0.36650421166383973
+      ]
+    },
+    {
+      "title": "Forever",
+      "artist": "Chris Brown",
+      "spotifyId": "3NZJlJemX3mzjf56MqC5ML",
+      "vec": [
+        0.672,
+        0.82,
+        0.438,
+        0.0368,
+        0.000188,
+        0.184,
+        0.0459,
+        0.8370579567779961,
+        0.39953911444131934
+      ]
+    },
+    {
+      "title": "How It Feels",
+      "artist": "Barry Can't Swim",
+      "spotifyId": "3NZz7DWeVQesSOn6mO39F7",
+      "vec": [
+        0.678,
+        0.675,
+        0.663,
+        0.0263,
+        0.625,
+        0.128,
+        0.0308,
+        0.6474705304518663,
+        0.4281512334413981
+      ]
+    },
+    {
+      "title": "Perfect Strangers",
+      "artist": "Jonas Blue, JP Cooper",
+      "spotifyId": "3P3pw6C19j31Rnzgo3JG7o",
+      "vec": [
+        0.73,
+        0.861,
+        0.704,
+        0.39,
+        0,
+        0.213,
+        0.0451,
+        0.8589145383104125,
+        0.3849396340110641
+      ]
+    },
+    {
+      "title": "family ties (with Kendrick Lamar)",
+      "artist": "Baby Keem, Kendrick Lamar",
+      "spotifyId": "3QFInJAm9eyaho5vBzxInN",
+      "vec": [
+        0.711,
+        0.611,
+        0.144,
+        0.00588,
+        0,
+        0.23,
+        0.33,
+        0.7758472495088409,
+        0.5003614087067293
+      ]
+    },
+    {
+      "title": "Heaven Up There",
+      "artist": "Palace",
+      "spotifyId": "3Rl26h1HiMCV0HFHHVb2IM",
+      "vec": [
+        0.424,
+        0.42,
+        0.176,
+        0.168,
+        0.124,
+        0.107,
+        0.0373,
+        0.4637770137524558,
+        0.5288876484101596
+      ]
+    },
+    {
+      "title": "Metalingus",
+      "artist": "Alter Bridge",
+      "spotifyId": "3UULkHdmLDqBDPmBYltoRE",
+      "vec": [
+        0.496,
+        0.981,
+        0.163,
+        0.00000933,
+        0,
+        0.0958,
+        0.108,
+        0.9099950884086443,
+        0.32725737309544767
+      ]
+    },
+    {
+      "title": "Von dutch",
+      "artist": "Charli xcx",
+      "spotifyId": "3Y1EvIgEVw51XtgNEgpz5c",
+      "vec": [
+        0.706,
+        0.698,
+        0.648,
+        0.00298,
+        0.00375,
+        0.116,
+        0.0537,
+        0.761972003929273,
+        0.4711624478462188
+      ]
+    },
+    {
+      "title": "Kiss from a Rose",
+      "artist": "Seal",
+      "spotifyId": "3YKptz29AsOlm7WAVnztBh",
+      "vec": [
+        0.584,
+        0.533,
+        0.224,
+        0.684,
+        0,
+        0.306,
+        0.0305,
+        0.6741159135559922,
+        0.4835576929958277
+      ]
+    },
+    {
+      "title": "We Are The World",
+      "artist": "U.S.A. For Africa",
+      "spotifyId": "3Z2tPWiNiIpg8UMMoowHIk",
+      "vec": [
+        0.528,
+        0.447,
+        0.292,
+        0.189,
+        0,
+        0.0745,
+        0.0435,
+        0.1740545186640471,
+        0.0601369774781544
+      ]
+    },
+    {
+      "title": "Rocketeer",
+      "artist": "Far East Movement, Ryan Tedder, Ruff Loaderz",
+      "spotifyId": "3ZuiIFm9nRnkRz8AZAekjJ",
+      "vec": [
+        0.664,
+        0.845,
+        0.357,
+        0.181,
+        0,
+        0.267,
+        0.0462,
+        0.7352038310412573,
+        0.22778052114419842
+      ]
+    },
+    {
+      "title": "Can't Hold Us (feat. Ray Dalton)",
+      "artist": "Macklemore, Ryan Lewis, Macklemore & Ryan Lewis, Ray Dalton",
+      "spotifyId": "3bidbhpOYeV4knp8AIu8Xn",
+      "vec": [
+        0.641,
+        0.922,
+        0.847,
+        0.0291,
+        0,
+        0.0862,
+        0.0786,
+        0.836996561886051,
+        0.5861333562344792
+      ]
+    },
+    {
+      "title": "Man in the Mirror - 2012 Remaster",
+      "artist": "Michael Jackson",
+      "spotifyId": "3c7Ctlw9MKlIQPxRH3fOTt",
+      "vec": [
+        0.808,
+        0.812,
+        0.269,
+        0.52,
+        0.0000791,
+        0.134,
+        0.0381,
+        0.8029223968565815,
+        0.2587400075860045
+      ]
+    },
+    {
+      "title": "Spinning Around",
+      "artist": "Kylie Minogue",
+      "spotifyId": "3eXI3pYpiY1nRwhvW0c8Qi",
+      "vec": [
+        0.761,
+        0.662,
+        0.631,
+        0.292,
+        0.0000619,
+        0.0956,
+        0.0548,
+        0.6412696463654224,
+        0.39981106554737317
+      ]
+    },
+    {
+      "title": "Scared to Be Lonely",
+      "artist": "Martin Garrix, Dua Lipa",
+      "spotifyId": "3ebXMykcMXOcLeJ9xZ17XH",
+      "vec": [
+        0.584,
+        0.54,
+        0.195,
+        0.0895,
+        0,
+        0.261,
+        0.0576,
+        0.6326129666011788,
+        0.5281218913483765
+      ]
+    },
+    {
+      "title": "A New Kind Of Love - Demo",
+      "artist": "Frou Frou, Imogen Heap, Guy Sigsworth",
+      "spotifyId": "3fuyYaLhZ2RoP9eWpvfP1H",
+      "vec": [
+        0.674,
+        0.487,
+        0.329,
+        0.169,
+        0.00411,
+        0.127,
+        0.0331,
+        0.29365176817288796,
+        0.4923245378620349
+      ]
+    },
+    {
+      "title": "Chest Pain (I Love)",
+      "artist": "Malcolm Todd",
+      "spotifyId": "3gPYoFtn70aTgl546XVSET",
+      "vec": [
+        0.583,
+        0.615,
+        0.403,
+        0.0235,
+        0,
+        0.237,
+        0.0361,
+        0.7912573673870333,
+        0.6148241979231522
+      ]
+    },
+    {
+      "title": "Return of the Mack",
+      "artist": "Mark Morrison",
+      "spotifyId": "3jDdpx9PMlfMBS5tOBHFm9",
+      "vec": [
+        0.715,
+        0.833,
+        0.612,
+        0.00631,
+        0,
+        0.164,
+        0.108,
+        0.7803904715127702,
+        0.22407339817220223
+      ]
+    },
+    {
+      "title": "September",
+      "artist": "Earth, Wind & Fire",
+      "spotifyId": "3kXoKlD84c6OmIcOLfrfEs",
+      "vec": [
+        0.674,
+        0.832,
+        0.981,
+        0.146,
+        0.00000506,
+        0.138,
+        0.0308,
+        0.6261051080550099,
+        0.4424143532931131
+      ]
+    },
+    {
+      "title": "Let's Groove",
+      "artist": "Earth, Wind & Fire",
+      "spotifyId": "3koCCeSaVUyrRo3N2gHrd8",
+      "vec": [
+        0.869,
+        0.648,
+        0.9,
+        0.121,
+        0.0000217,
+        0.126,
+        0.0633,
+        0.5766208251473477,
+        0.43553685295317424
+      ]
+    },
+    {
+      "title": "Radio",
+      "artist": "Bershy",
+      "spotifyId": "3l8ACerUtJfRd0rxJJ4Gkx",
+      "vec": [
+        0.67,
+        0.787,
+        0.721,
+        0.169,
+        0.00000168,
+        0.112,
+        0.0397,
+        0.7859774066797642,
+        0.48520371284825836
+      ]
+    },
+    {
+      "title": "Stayin' Alive - From \"Saturday Night Fever\" Soundtrack",
+      "artist": "Bee Gees",
+      "spotifyId": "3mRM4NM8iO7UBqrSigCQFH",
+      "vec": [
+        0.703,
+        0.827,
+        0.944,
+        0.032,
+        0.00636,
+        0.179,
+        0.0343,
+        0.6698796660117878,
+        0.2818773214247374
+      ]
+    },
+    {
+      "title": "Raindance (feat. Tems)",
+      "artist": "Dave, Tems",
+      "spotifyId": "3oTuTpF1F3A7rEC6RKsMRz",
+      "vec": [
+        0.796,
+        0.741,
+        0.249,
+        0.236,
+        0.0619,
+        0.103,
+        0.0789,
+        0.6922274066797641,
+        0.30646742669844196
+      ]
+    },
+    {
+      "title": "Sunny",
+      "artist": "Boney M.",
+      "spotifyId": "3pf96IFggfQuT6Gafqx2rt",
+      "vec": [
+        0.647,
+        0.868,
+        0.804,
+        0.088,
+        0.124,
+        0.129,
+        0.106,
+        0.7160486247544204,
+        0.41252835805941407
+      ]
+    },
+    {
+      "title": "Violent Crimes",
+      "artist": "Kanye West",
+      "spotifyId": "3s7MCdXyWmwjdcWh7GWXas",
+      "vec": [
+        0.669,
+        0.419,
+        0.0397,
+        0.376,
+        0,
+        0.187,
+        0.522,
+        0.6978143418467583,
+        0.32659896515447534
+      ]
+    },
+    {
+      "title": "My Way",
+      "artist": "Frank Sinatra",
+      "spotifyId": "3spdoTYpuCpmq19tuD0bOe",
+      "vec": [
+        0.401,
+        0.381,
+        0.229,
+        0.7,
+        0,
+        0.122,
+        0.0274,
+        0.6527504911591355,
+        0.08070506902548459
+      ]
+    },
+    {
+      "title": "Call It What You Want",
+      "artist": "Foster The People",
+      "spotifyId": "3u1Er1rkjn1oSz1xdZH3ZD",
+      "vec": [
+        0.641,
+        0.967,
+        0.725,
+        0.0483,
+        0.000276,
+        0.442,
+        0.0601,
+        0.8473109037328094,
+        0.34952873735964096
+      ]
+    },
+    {
+      "title": "Locked out of Heaven",
+      "artist": "Bruno Mars",
+      "spotifyId": "3w3y8KPTfNeOKPiqUTakBh",
+      "vec": [
+        0.726,
+        0.698,
+        0.867,
+        0.049,
+        0,
+        0.309,
+        0.0431,
+        0.8549238703339882,
+        0.5712189850498457
+      ]
+    },
+    {
+      "title": "La La La",
+      "artist": "Naughty Boy, Sam Smith",
+      "spotifyId": "3wPPWcVuinAU7dXcJXtCID",
+      "vec": [
+        0.772,
+        0.65,
+        0.262,
+        0.107,
+        0.00000113,
+        0.0905,
+        0.0306,
+        0.7912573673870333,
+        0.4358803701397685
+      ]
+    },
+    {
+      "title": "Dancing With A Stranger (with Normani)",
+      "artist": "Sam Smith, Normani",
+      "spotifyId": "3xgT3xIlFGqZjYW9QlhJWp",
+      "vec": [
+        0.741,
+        0.52,
+        0.347,
+        0.447,
+        0.00000197,
+        0.222,
+        0.0656,
+        0.6493737721021611,
+        0.27782668126614707
+      ]
+    },
+    {
+      "title": "We Are The People",
+      "artist": "Empire Of The Sun",
+      "spotifyId": "3zEN0ii6s4DHHBpnTp3RP7",
+      "vec": [
+        0.675,
+        0.781,
+        0.534,
+        0.0801,
+        0.0143,
+        0.422,
+        0.0306,
+        0.7788555992141454,
+        0.42089443287459477
+      ]
+    },
+    {
+      "title": "Hotel California - 2013 Remaster",
+      "artist": "Eagles",
+      "spotifyId": "40riOy7x9W7GXjyGp4pjAv",
+      "vec": [
+        0.579,
+        0.508,
+        0.609,
+        0.00574,
+        0.000494,
+        0.0575,
+        0.027,
+        0.5283644400785854,
+        0.593626324867066
+      ]
+    },
+    {
+      "title": "Can't Help Falling in Love",
+      "artist": "Elvis Presley",
+      "spotifyId": "44AyOl4qVkzS48vBsbNXaC",
+      "vec": [
+        0.396,
+        0.293,
+        0.343,
+        0.941,
+        0.000196,
+        0.105,
+        0.0275,
+        0.24729862475442047,
+        0.2585682489927074
+      ]
+    },
+    {
+      "title": "Don't Stop 'Til You Get Enough",
+      "artist": "Michael Jackson",
+      "spotifyId": "46eu3SBuFCXWsPT39Yg3tJ",
+      "vec": [
+        0.878,
+        0.821,
+        0.947,
+        0.126,
+        0.0461,
+        0.183,
+        0.089,
+        0.5043590373280943,
+        0.3914950869885709
+      ]
+    },
+    {
+      "title": "Runaway (U & I)",
+      "artist": "Galantis",
+      "spotifyId": "46lFttIf5hnUZMGvjK0Wxo",
+      "vec": [
+        0.506,
+        0.805,
+        0.383,
+        0.00711,
+        0.00193,
+        0.0856,
+        0.0469,
+        0.8577480353634578,
+        0.4425002325897617
+      ]
+    },
+    {
+      "title": "Oh, Pretty Woman",
+      "artist": "Roy Orbison",
+      "spotifyId": "48i055G1OT5KxGGftwFxWy",
+      "vec": [
+        0.619,
+        0.603,
+        0.958,
+        0.712,
+        0,
+        0.0721,
+        0.0342,
+        0.5285486247544204,
+        0.45269839906677833
+      ]
+    },
+    {
+      "title": "Lady - Hear Me Tonight",
+      "artist": "Modjo",
+      "spotifyId": "49X0LAl6faAusYq02PRAY6",
+      "vec": [
+        0.72,
+        0.808,
+        0.869,
+        0.00793,
+        0.0293,
+        0.0634,
+        0.0379,
+        0.7651645383104126,
+        0.44273640065554526
+      ]
+    },
+    {
+      "title": "Stay",
+      "artist": "Post Malone",
+      "spotifyId": "4H7WNRErSbONkM06blBoGc",
+      "vec": [
+        0.506,
+        0.48,
+        0.351,
+        0.449,
+        0,
+        0.147,
+        0.0266,
+        0.7779960707269156,
+        0.15647923510173115
+      ]
+    },
+    {
+      "title": "Princess of China",
+      "artist": "Coldplay, Rihanna",
+      "spotifyId": "4HXOBjwv2RnLpGG4xWOO6N",
+      "vec": [
+        0.42,
+        0.69,
+        0.237,
+        0.00385,
+        0.015,
+        0.287,
+        0.0347,
+        0.7286959724950883,
+        0.1491222420221711
+      ]
+    },
+    {
+      "title": "Under Control (feat. Hurts)",
+      "artist": "Calvin Harris, Alesso, Hurts",
+      "spotifyId": "4J7CKHCF3mdL4diUsmW8lq",
+      "vec": [
+        0.544,
+        0.915,
+        0.51,
+        0.129,
+        0.000914,
+        0.115,
+        0.0841,
+        0.9015839882121808,
+        0.4431157008824097
+      ]
+    },
+    {
+      "title": "Dreams",
+      "artist": "The Cranberries",
+      "spotifyId": "4JGKZS7h4Qa16gOU3oNETV",
+      "vec": [
+        0.551,
+        0.645,
+        0.508,
+        0.0031,
+        0.00376,
+        0.421,
+        0.0354,
+        0.3067902750491159,
+        0.46151534018936374
+      ]
+    },
+    {
+      "title": "What You Know",
+      "artist": "Two Door Cinema Club",
+      "spotifyId": "4JHg4nNYUJQ5HULcCmI18R",
+      "vec": [
+        0.549,
+        0.758,
+        0.822,
+        0.000673,
+        0.00000679,
+        0.0926,
+        0.0406,
+        0.8656065815324165,
+        0.5358510280467469
+      ]
+    },
+    {
+      "title": "I Follow Rivers - The Magician Remix",
+      "artist": "Lykke Li, The Magician",
+      "spotifyId": "4Jv7lweGIUOFQ7Oq2AtAh9",
+      "vec": [
+        0.786,
+        0.696,
+        0.306,
+        0.0234,
+        0.0019,
+        0.0839,
+        0.0428,
+        0.7547888015717092,
+        0.4136304756997373
+      ]
+    },
+    {
+      "title": "Rock and Roll - Remaster",
+      "artist": "Led Zeppelin",
+      "spotifyId": "4PRGxHpCpF2yoOHYKQIEwD",
+      "vec": [
+        0.317,
+        0.887,
+        0.871,
+        0.000582,
+        0.00258,
+        0.0891,
+        0.0375,
+        0.6629420432220039,
+        0.7545641267864682
+      ]
+    },
+    {
+      "title": "Give Me Everything (feat. Nayer)",
+      "artist": "Pitbull, AFROJACK, Ne-Yo, Nayer",
+      "spotifyId": "4QNpBfC0zvjKqPJcyqBy9W",
+      "vec": [
+        0.671,
+        0.939,
+        0.53,
+        0.191,
+        0,
+        0.298,
+        0.161,
+        0.9138015717092338,
+        0.46408456248076657
+      ]
+    },
+    {
+      "title": "Friday I'm In Love",
+      "artist": "The Cure",
+      "spotifyId": "4QlzkaRHtU8gAdwqjWmO8n",
+      "vec": [
+        0.526,
+        0.763,
+        0.514,
+        0.00126,
+        0.0000675,
+        0.359,
+        0.0341,
+        0.3331900785854617,
+        0.5154761649168761
+      ]
+    },
+    {
+      "title": "Everybody Wants To Rule The World",
+      "artist": "Tears For Fears",
+      "spotifyId": "4RvWPyQ5RL0ao9LPZeSouE",
+      "vec": [
+        0.645,
+        0.795,
+        0.535,
+        0.347,
+        0.00389,
+        0.104,
+        0.0527,
+        0.36806237721021606,
+        0.34272995970829656
+      ]
+    },
+    {
+      "title": "Space Cowboy (Classic Radio)",
+      "artist": "Jamiroquai, David Morales",
+      "spotifyId": "4SauVG68Oqmznmm04IQ0rm",
+      "vec": [
+        0.711,
+        0.903,
+        0.672,
+        0.1,
+        0.0305,
+        0.149,
+        0.0823,
+        0.6590741650294695,
+        0.39142352090803034
+      ]
+    },
+    {
+      "title": "Helena Beat",
+      "artist": "Foster The People",
+      "spotifyId": "4VbDJMkAX3dWNBdn3KH6Wx",
+      "vec": [
+        0.67,
+        0.876,
+        0.736,
+        0.0127,
+        0.00302,
+        0.109,
+        0.0536,
+        0.8094916502946954,
+        0.44937057632164656
+      ]
+    },
+    {
+      "title": "You Are In My System - Faster Horses Sport Mix",
+      "artist": "Kerri Chandler, Dennis Quin, Troy Denari, Faster Horses",
+      "spotifyId": "4cxpgHXbVh4sGwb1C7TAG2",
+      "vec": [
+        0.577,
+        0.964,
+        0.892,
+        0.00634,
+        0.0753,
+        0.106,
+        0.0689,
+        0.6989808447937131,
+        0.5421703129584702
+      ]
+    },
+    {
+      "title": "Young Folks",
+      "artist": "Peter Bjorn and John",
+      "spotifyId": "4dyx5SzxPPaD8xQIid5Wjj",
+      "vec": [
+        0.699,
+        0.812,
+        0.662,
+        0.0164,
+        0.000763,
+        0.105,
+        0.0377,
+        0.7419572691552063,
+        0.5296462488638884
+      ]
+    },
+    {
+      "title": "I THINK",
+      "artist": "Tyler, The Creator",
+      "spotifyId": "4f8Mh5wuWHOsfXtzjrJB3t",
+      "vec": [
+        0.826,
+        0.579,
+        0.431,
+        0.00881,
+        0,
+        0.129,
+        0.0801,
+        0.6046782907662083,
+        0.40719668505914935
+      ]
+    },
+    {
+      "title": "Mixed Emotions",
+      "artist": "Chase & Status, Clementine Douglas",
+      "spotifyId": "4kVpdy4mnZ8FLPw0hGV8hk",
+      "vec": [
+        0.488,
+        0.815,
+        0.0654,
+        0.0148,
+        0.00207,
+        0.0744,
+        0.0438,
+        0.8433202357563852,
+        0.7930738347252936
+      ]
+    },
+    {
+      "title": "Shut Up and Dance",
+      "artist": "WALK THE MOON",
+      "spotifyId": "4kbj5MwxO1bq9wjT5g9HaA",
+      "vec": [
+        0.578,
+        0.866,
+        0.619,
+        0.00701,
+        0,
+        0.257,
+        0.0619,
+        0.8770874263261297,
+        0.45702814693947663
+      ]
+    },
+    {
+      "title": "Ma Meilleure Ennemie (from the series Arcane League of Legends)",
+      "artist": "Stromae, Pomme, Arcane",
+      "spotifyId": "4lriIG2vNqwDWzOj2I9rtj",
+      "vec": [
+        0.678,
+        0.604,
+        0.374,
+        0.00465,
+        0.000936,
+        0.278,
+        0.0962,
+        0.6240176817288802,
+        0.17049187367155458
+      ]
+    },
+    {
+      "title": "Silver Springs - 2004 Remaster",
+      "artist": "Fleetwood Mac",
+      "spotifyId": "4nZi6XNe36Ut4Nij3IQ1yC",
+      "vec": [
+        0.348,
+        0.576,
+        0.428,
+        0.00766,
+        0.0462,
+        0.276,
+        0.0289,
+        0.5956532416502947,
+        0.8218433991025614
+      ]
+    },
+    {
+      "title": "Gospel For A New Century",
+      "artist": "Yves Tumor",
+      "spotifyId": "4qYvkWQqCcIWEBWekegE4y",
+      "vec": [
+        0.567,
+        0.726,
+        0.715,
+        0.00181,
+        0.00000306,
+        0.103,
+        0.0548,
+        0.6983668958742633,
+        0.8152306932606223
+      ]
+    },
+    {
+      "title": "Final Song",
+      "artist": "MØ",
+      "spotifyId": "4qqArAiTPueDxIp7cf87h7",
+      "vec": [
+        0.695,
+        0.672,
+        0.245,
+        0.014,
+        0.0000795,
+        0.0756,
+        0.0345,
+        0.7355722003929273,
+        0.2920683312937
+      ]
+    },
+    {
+      "title": "Show Me Love",
+      "artist": "Robin S",
+      "spotifyId": "4t0UsYzmmmZRMTWn77jiGF",
+      "vec": [
+        0.811,
+        0.833,
+        0.567,
+        0.014,
+        0.0000206,
+        0.0769,
+        0.153,
+        0.8491527504911591,
+        0.4013497362789931
+      ]
+    },
+    {
+      "title": "Material Girl - 2024 Remaster",
+      "artist": "Madonna",
+      "spotifyId": "4tcauy2xyIv1q0ckvQmc4H",
+      "vec": [
+        0.741,
+        0.892,
+        0.979,
+        0.166,
+        0.00189,
+        0.0783,
+        0.031,
+        0.9530329076620825,
+        0.5168931733115771
+      ]
+    },
+    {
+      "title": "Talk",
+      "artist": "Coldplay",
+      "spotifyId": "4wzt5Rrk3W98pHXAqutuJw",
+      "vec": [
+        0.415,
+        0.554,
+        0.163,
+        0.00541,
+        0.00202,
+        0.155,
+        0.0334,
+        0.4451743614931237,
+        0.401779132762236
+      ]
+    },
+    {
+      "title": "Take It Easy - 2013 Remaster",
+      "artist": "Eagles",
+      "spotifyId": "4yugZvBYaoREkJKtbG08Qr",
+      "vec": [
+        0.575,
+        0.67,
+        0.74,
+        0.343,
+        0.00000495,
+        0.129,
+        0.0318,
+        0.47274066797642433,
+        0.5368457965662594
+      ]
+    },
+    {
+      "title": "Everytime",
+      "artist": "boy pablo",
+      "spotifyId": "4zvHZWOGyL7WcmqHOgtGCW",
+      "vec": [
+        0.431,
+        0.663,
+        0.855,
+        0.0249,
+        0.0397,
+        0.117,
+        0.0351,
+        0.4926326129666011,
+        1
+      ]
+    },
+    {
+      "title": "Treasure",
+      "artist": "Bruno Mars",
+      "spotifyId": "55h7vJchibLdUkxdlX3fK7",
+      "vec": [
+        0.874,
+        0.692,
+        0.937,
+        0.0412,
+        0.0000724,
+        0.324,
+        0.0431,
+        0.7864685658153241,
+        0.37099856152178107
+      ]
+    },
+    {
+      "title": "You Make Loving Fun - 2004 Remaster",
+      "artist": "Fleetwood Mac",
+      "spotifyId": "55mQhobuwtY7lfLAXylg1k",
+      "vec": [
+        0.62,
+        0.604,
+        0.857,
+        0.0133,
+        0.102,
+        0.104,
+        0.0261,
+        0.5526768172888016,
+        0.4465651859644602
+      ]
+    },
+    {
+      "title": "places to be",
+      "artist": "Fred again.., Anderson .Paak, CHIKA",
+      "spotifyId": "561pBFcFL2Pwb9HPO9tU8J",
+      "vec": [
+        0.548,
+        0.878,
+        0.826,
+        0.0253,
+        0.000934,
+        0.0909,
+        0.0598,
+        0.7942043222003929,
+        0.7862679004658952
+      ]
+    },
+    {
+      "title": "Rock the Casbah - Remastered",
+      "artist": "The Clash",
+      "spotifyId": "56KqaFSGTb7ifpt16t5Y1N",
+      "vec": [
+        0.797,
+        0.872,
+        0.866,
+        0.291,
+        0,
+        0.284,
+        0.0575,
+        0.6976301571709234,
+        0.4702464020153007
+      ]
+    },
+    {
+      "title": "Make Me - Franky Rizardo Remix",
+      "artist": "Borai & Denham Audio, Franky Rizardo",
+      "spotifyId": "57508shL0obX0KUOUL8CJk",
+      "vec": [
+        0.686,
+        0.727,
+        0.606,
+        0.00026,
+        0.00659,
+        0.0622,
+        0.0417,
+        0.6151154223968566,
+        0.470876183524057
+      ]
+    },
+    {
+      "title": "Bitter Sweet Symphony - Remastered 2016",
+      "artist": "The Verve",
+      "spotifyId": "57iDDD9N9tTWe75x6qhStw",
+      "vec": [
+        0.356,
+        0.917,
+        0.518,
+        0.0335,
+        0,
+        0.406,
+        0.0479,
+        0.7418958742632613,
+        0.7657499051749431
+      ]
+    },
+    {
+      "title": "Stairway to Heaven - Remaster",
+      "artist": "Led Zeppelin",
+      "spotifyId": "5CQ30WqJwcep0pYcV4AMNc",
+      "vec": [
+        0.338,
+        0.34,
+        0.197,
+        0.58,
+        0.0032,
+        0.116,
+        0.0339,
+        0.3708865422396857,
+        0.13065103663467664
+      ]
+    },
+    {
+      "title": "Billie Jean",
+      "artist": "Michael Jackson",
+      "spotifyId": "5ChkMS8OtdzJeqyybCc9R5",
+      "vec": [
+        0.92,
+        0.654,
+        0.847,
+        0.0236,
+        0.0153,
+        0.036,
+        0.0401,
+        0.9233177799607072,
+        0.3783627112093952
+      ]
+    },
+    {
+      "title": "iluv - vip",
+      "artist": "Effy, Mall Grab",
+      "spotifyId": "5EK0NIxl44MbInwNNOZCNP",
+      "vec": [
+        0.684,
+        0.84,
+        0.424,
+        0.00416,
+        0.52,
+        0.334,
+        0.131,
+        0.7695849705304518,
+        0.7861533947370303
+      ]
+    },
+    {
+      "title": "White Noise",
+      "artist": "Disclosure, AlunaGeorge",
+      "spotifyId": "5EWFuo4ObEnfndc57sTuIo",
+      "vec": [
+        0.664,
+        0.844,
+        0.902,
+        0.00963,
+        0.000215,
+        0.311,
+        0.0502,
+        0.7321954813359528,
+        0.3993673558480222
+      ]
+    },
+    {
+      "title": "Free Bird",
+      "artist": "Lynyrd Skynyrd",
+      "spotifyId": "5EWPGh7jbTNO2wakv8LjUI",
+      "vec": [
+        0.249,
+        0.834,
+        0.337,
+        0.0742,
+        0.0000969,
+        0.0924,
+        0.0574,
+        0.6065815324165029,
+        0.38677888228095403
+      ]
+    },
+    {
+      "title": "Do I Wanna Know?",
+      "artist": "Arctic Monkeys",
+      "spotifyId": "5FVd6KXrgO9B3JPmC8OPst",
+      "vec": [
+        0.548,
+        0.532,
+        0.405,
+        0.186,
+        0.000263,
+        0.217,
+        0.0323,
+        0.6442779960707269,
+        0.14923674775103588
+      ]
+    },
+    {
+      "title": "Comfortably Numb",
+      "artist": "Pink Floyd",
+      "spotifyId": "5HNCy40Ni5BZJFw1TKzRsC",
+      "vec": [
+        0.472,
+        0.366,
+        0.171,
+        0.15,
+        0.312,
+        0.0837,
+        0.0286,
+        0.337364931237721,
+        0.45076611489218565
+      ]
+    },
+    {
+      "title": "Best Day Of My Life",
+      "artist": "American Authors",
+      "spotifyId": "5Hroj5K7vLpIG4FNCRIjbP",
+      "vec": [
+        0.673,
+        0.902,
+        0.536,
+        0.0591,
+        0.000227,
+        0.0558,
+        0.0346,
+        0.9637770137524558,
+        0.2564570496167636
+      ]
+    },
+    {
+      "title": "Holding Out for a Hero - From \"Footloose\" Soundtrack",
+      "artist": "Bonnie Tyler",
+      "spotifyId": "5Hyr47BBGpvOfcykSCcaw9",
+      "vec": [
+        0.616,
+        0.685,
+        0.895,
+        0.0245,
+        0.0000113,
+        0.0491,
+        0.04,
+        0.1719670923379175,
+        0.6145951864654229
+      ]
+    },
+    {
+      "title": "Don't",
+      "artist": "Ed Sheeran",
+      "spotifyId": "5LTzAKRZ2Xct8d6vVrErha",
+      "vec": [
+        0.806,
+        0.608,
+        0.849,
+        0.0113,
+        0,
+        0.635,
+        0.0659,
+        0.6803781925343811,
+        0.22093880384452985
+      ]
+    },
+    {
+      "title": "I Want You Back",
+      "artist": "The Jackson 5",
+      "spotifyId": "5LxvwujISqiB8vpRYv887S",
+      "vec": [
+        0.469,
+        0.538,
+        0.885,
+        0.305,
+        0.000114,
+        0.37,
+        0.0575,
+        0.27818025540275054,
+        0.9477424479893508
+      ]
+    },
+    {
+      "title": "Stay With Me",
+      "artist": "Sam Smith",
+      "spotifyId": "5Nm9ERjJZ5oyfXZTECKmRt",
+      "vec": [
+        0.413,
+        0.42,
+        0.185,
+        0.588,
+        0.0000639,
+        0.11,
+        0.0416,
+        0.7150049115913556,
+        0.1427671740701777
+      ]
+    },
+    {
+      "title": "Could You Be Loved",
+      "artist": "Bob Marley & The Wailers",
+      "spotifyId": "5O4erNlJ74PIF6kGol1ZrC",
+      "vec": [
+        0.916,
+        0.72,
+        0.761,
+        0.36,
+        0.00016,
+        0.0958,
+        0.1,
+        0.5858300589390962,
+        0.2800881694112258
+      ]
+    },
+    {
+      "title": "Dreams - 2004 Remaster",
+      "artist": "Fleetwood Mac",
+      "spotifyId": "5TDZyWDfbQFQJabbPwImVY",
+      "vec": [
+        0.829,
+        0.487,
+        0.776,
+        0.0671,
+        0.00263,
+        0.127,
+        0.0278,
+        0.5119720039292731,
+        0.4007414245943992
+      ]
+    },
+    {
+      "title": "Flashing Lights",
+      "artist": "Kanye West, Dwele",
+      "spotifyId": "5TRPicyLGbAF2LGBFbHGvO",
+      "vec": [
+        0.639,
+        0.628,
+        0.43,
+        0.0381,
+        0,
+        0.386,
+        0.0398,
+        0.6453831041257367,
+        0.1882545748616985
+      ]
+    },
+    {
+      "title": "Love Me Again",
+      "artist": "John Newman",
+      "spotifyId": "5TbzAWWc5eJaANpA9kfGCd",
+      "vec": [
+        0.495,
+        0.894,
+        0.213,
+        0.00453,
+        0.000596,
+        0.103,
+        0.0441,
+        0.8150785854616895,
+        0.44265767796695077
+      ]
+    },
+    {
+      "title": "Man Of The Year",
+      "artist": "Logic",
+      "spotifyId": "5U6HACLkmJFWvC75pnxPdw",
+      "vec": [
+        0.611,
+        0.737,
+        0.492,
+        0.148,
+        0.00193,
+        0.106,
+        0.0381,
+        0.7176448919449901,
+        0.6573129799400276
+      ]
+    },
+    {
+      "title": "Better Off Alone",
+      "artist": "Alice Deejay",
+      "spotifyId": "5XVjNRubJUW0iPhhSWpLCj",
+      "vec": [
+        0.671,
+        0.882,
+        0.787,
+        0.00181,
+        0.667,
+        0.285,
+        0.0552,
+        0.7331164047151276,
+        0.5208436209574111
+      ]
+    },
+    {
+      "title": "Strong",
+      "artist": "Romy, Fred again..",
+      "spotifyId": "5bF00VrMY3FwnQDgoP4Gnk",
+      "vec": [
+        0.576,
+        0.825,
+        0.311,
+        0.0707,
+        0.259,
+        0.337,
+        0.047,
+        0.6967092337917484,
+        0.4995312421724599
+      ]
+    },
+    {
+      "title": "Feels (feat. Pharrell Williams, Katy Perry & Big Sean)",
+      "artist": "Calvin Harris, Pharrell Williams, Katy Perry, Big Sean, Funk Wav",
+      "spotifyId": "5bcTCxgc7xVfSaMV3RuVke",
+      "vec": [
+        0.893,
+        0.745,
+        0.872,
+        0.0642,
+        0,
+        0.0943,
+        0.0571,
+        0.9200024557956777,
+        0.2636565973191346
+      ]
+    },
+    {
+      "title": "We Come Running",
+      "artist": "Youngblood Hawke",
+      "spotifyId": "5eoNzwCvkKQCQczWVl5N7f",
+      "vec": [
+        0.559,
+        0.754,
+        0.249,
+        0.000253,
+        0.00188,
+        0.116,
+        0.0429,
+        0.6846758349705305,
+        0.43520764898268816
+      ]
+    },
+    {
+      "title": "Great Balls Of Fire",
+      "artist": "Jerry Lee Lewis",
+      "spotifyId": "5jw1zzcYFivmuJK52JrnMK",
+      "vec": [
+        0.388,
+        0.903,
+        0.865,
+        0.123,
+        0.0124,
+        0.224,
+        0.0624,
+        0.4444376227897838,
+        0.8013325604196635
+      ]
+    },
+    {
+      "title": "Passionfruit",
+      "artist": "Drake",
+      "spotifyId": "5mCPDVBb16L4XQwDdbRUpz",
+      "vec": [
+        0.809,
+        0.463,
+        0.364,
+        0.256,
+        0.085,
+        0.109,
+        0.0396,
+        0.412143909626719,
+        0.3421073348075946
+      ]
+    },
+    {
+      "title": "Be Honest (feat. Burna Boy)",
+      "artist": "Jorja Smith, Burna Boy",
+      "spotifyId": "5pAbCxt9e3f81lOmjIXwzd",
+      "vec": [
+        0.757,
+        0.737,
+        0.635,
+        0.311,
+        0,
+        0.113,
+        0.114,
+        0.6975687622789783,
+        0.2424658808711023
+      ]
+    },
+    {
+      "title": "Sugar (feat. Francesco Yates)",
+      "artist": "Robin Schulz, Francesco Yates",
+      "spotifyId": "5tf1VVWniHgryyumXyJM7w",
+      "vec": [
+        0.636,
+        0.815,
+        0.636,
+        0.0185,
+        0,
+        0.163,
+        0.0581,
+        0.7976424361493124,
+        0.4214240218705942
+      ]
+    },
+    {
+      "title": "Say You Won't Let Go",
+      "artist": "James Arthur",
+      "spotifyId": "5uCax9HTNlzGybIStD3vDh",
+      "vec": [
+        0.358,
+        0.557,
+        0.494,
+        0.695,
+        0,
+        0.0902,
+        0.059,
+        0.6564341846758349,
+        0.14932978365573854
+      ]
+    },
+    {
+      "title": "Smalltown Boy",
+      "artist": "Bronski Beat",
+      "spotifyId": "5vmRQ3zELMLUQPo2FLQ76x",
+      "vec": [
+        0.685,
+        0.584,
+        0.94,
+        0.29,
+        0.01,
+        0.124,
+        0.0276,
+        0.45886542239685657,
+        0.5036033521552125
+      ]
+    },
+    {
+      "title": "Delilah (pull me out of this)",
+      "artist": "Fred again.., Delilah Montagu",
+      "spotifyId": "5w9upngVRHNjdZcRC7Xxr2",
+      "vec": [
+        0.685,
+        0.827,
+        0.586,
+        0.138,
+        0.00207,
+        0.374,
+        0.224,
+        0.6351301571709232,
+        0.4991948815939198
+      ]
+    },
+    {
+      "title": "Clarity",
+      "artist": "Zedd, Foxes",
+      "spotifyId": "60wwxj6Dd9NJlirf84wr2c",
+      "vec": [
+        0.509,
+        0.781,
+        0.176,
+        0.0398,
+        0,
+        0.0749,
+        0.072,
+        0.8969793713163065,
+        0.45675619583342275
+      ]
+    },
+    {
+      "title": "BACKBONE",
+      "artist": "NOTION, Olivia Rose",
+      "spotifyId": "61GRkmntFubXtGNVooKSY8",
+      "vec": [
+        0.45,
+        0.714,
+        0.275,
+        0.303,
+        0,
+        0.702,
+        0.0678,
+        0.8909012770137524,
+        0.6790046589518433
+      ]
+    },
+    {
+      "title": "Kiss of Life",
+      "artist": "Sade",
+      "spotifyId": "65krtHkaYLPr0mEbjL61UP",
+      "vec": [
+        0.723,
+        0.47,
+        0.783,
+        0.633,
+        0.0373,
+        0.0968,
+        0.028,
+        0.4167485265225933,
+        0.23566710321975792
+      ]
+    },
+    {
+      "title": "It's a Fine Day",
+      "artist": "Opus III",
+      "spotifyId": "67Hp634KZbo9B5WMsJOalE",
+      "vec": [
+        0.606,
+        0.955,
+        0.285,
+        0.115,
+        0.0547,
+        0.15,
+        0.0462,
+        0.5054641453831041,
+        0.435336467927661
+      ]
+    },
+    {
+      "title": "Get Lucky (feat. Pharrell Williams and Nile Rodgers)",
+      "artist": "Daft Punk, Pharrell Williams, Nile Rodgers",
+      "spotifyId": "69kOkLUCkxIZYexIgSG8rq",
+      "vec": [
+        0.81,
+        0.793,
+        0.863,
+        0.0378,
+        0.00000177,
+        0.072,
+        0.0403,
+        0.5332760314341847,
+        0.37123472958756465
+      ]
+    },
+    {
+      "title": "With Or Without You",
+      "artist": "U2",
+      "spotifyId": "6ADSaE87h8Y3lccZlBJdXH",
+      "vec": [
+        0.54,
+        0.429,
+        0.113,
+        0.000202,
+        0.355,
+        0.141,
+        0.0285,
+        0.3848231827111985,
+        0.3291610308378241
+      ]
+    },
+    {
+      "title": "Because Of You",
+      "artist": "Ne-Yo",
+      "spotifyId": "6CFPFnS9EcLs2I0nWqtWci",
+      "vec": [
+        0.81,
+        0.538,
+        0.832,
+        0.53,
+        0,
+        0.0951,
+        0.0357,
+        0.755586935166994,
+        0.32772255261896066
+      ]
+    },
+    {
+      "title": "If You Wanna",
+      "artist": "The Vaccines",
+      "spotifyId": "6Ca3uEAuun3HusTUiIXKs1",
+      "vec": [
+        0.353,
+        0.866,
+        0.544,
+        0.0000303,
+        0.00003,
+        0.295,
+        0.0392,
+        0.9096267190569743,
+        0.7230893645647709
+      ]
+    },
+    {
+      "title": "Hypersonic Missiles",
+      "artist": "Sam Fender",
+      "spotifyId": "6CltzquypraYIlWFp48m1O",
+      "vec": [
+        0.551,
+        0.814,
+        0.469,
+        0.00089,
+        0.00000116,
+        0.18,
+        0.0425,
+        0.8845162082514735,
+        0.47801847836199557
+      ]
+    },
+    {
+      "title": "Am I Dreaming (Metro Boomin & A$AP Rocky, Roisee)",
+      "artist": "Metro Boomin, A$AP Rocky, Roisee",
+      "spotifyId": "6Ec5LeRzkisa5KJtwLfOoW",
+      "vec": [
+        0.6,
+        0.537,
+        0.126,
+        0.0468,
+        0.0038,
+        0.206,
+        0.0362,
+        0.6331655206286836,
+        0.18524164287094488
+      ]
+    },
+    {
+      "title": "I Knew You Were Trouble.",
+      "artist": "Taylor Swift",
+      "spotifyId": "6FB3v4YcR57y4tXFcdxI1E",
+      "vec": [
+        0.622,
+        0.469,
+        0.679,
+        0.00454,
+        0.00000225,
+        0.0335,
+        0.0363,
+        0.6932711198428291,
+        0.09190516063006776
+      ]
+    },
+    {
+      "title": "Knockin' On Heaven's Door",
+      "artist": "Bob Dylan",
+      "spotifyId": "6HSXNV0b4M4cLJ7ljgVVeh",
+      "vec": [
+        0.513,
+        0.396,
+        0.229,
+        0.251,
+        0.177,
+        0.11,
+        0.0299,
+        0.3087549115913556,
+        0.5441240669572249
+      ]
+    },
+    {
+      "title": "Wicked Games (feat. Anna Naklab) - Radio Edit",
+      "artist": "Parra for Cuva, Anna Naklab",
+      "spotifyId": "6JrAEmBFd61eYIGVOSPnT4",
+      "vec": [
+        0.801,
+        0.641,
+        0.701,
+        0.0667,
+        0.0244,
+        0.172,
+        0.0455,
+        0.5836198428290766,
+        0.43513608290214767
+      ]
+    },
+    {
+      "title": "The Less I Know The Better",
+      "artist": "Tame Impala",
+      "spotifyId": "6K4t31amVTZDgR3sKmwUJJ",
+      "vec": [
+        0.64,
+        0.74,
+        0.785,
+        0.0115,
+        0.00678,
+        0.167,
+        0.0284,
+        0.8599582514734774,
+        0.3771675576643694
+      ]
+    },
+    {
+      "title": "We Built This City",
+      "artist": "Starship",
+      "spotifyId": "6OnfBiiSc9RGKiBKKtZXgQ",
+      "vec": [
+        0.661,
+        0.908,
+        0.656,
+        0.052,
+        0,
+        0.0708,
+        0.039,
+        0.8099828094302554,
+        0.5719131760310884
+      ]
+    },
+    {
+      "title": "Without You (feat. Sandro Cavazza)",
+      "artist": "Avicii, Sandro Cavazza",
+      "spotifyId": "6Pgkp4qUoTmJIPn7ReaGxL",
+      "vec": [
+        0.662,
+        0.858,
+        0.295,
+        0.00163,
+        0,
+        0.0456,
+        0.0428,
+        0.8132367387033398,
+        0.4996457479013246
+      ]
+    },
+    {
+      "title": "Feel It Still",
+      "artist": "Portugal. The Man",
+      "spotifyId": "6QgjcU0zLnzq5OrUoSZ3OK",
+      "vec": [
+        0.801,
+        0.795,
+        0.754,
+        0.0417,
+        0.000113,
+        0.0717,
+        0.0504,
+        0.7965987229862476,
+        0.1062827862106476
+      ]
+    },
+    {
+      "title": "Little Lies",
+      "artist": "ODIE",
+      "spotifyId": "6QpZXzHcOgXK41Y3YCx203",
+      "vec": [
+        0.342,
+        0.294,
+        0.132,
+        0.592,
+        0.674,
+        0.0944,
+        0.0426,
+        0.1289906679764243,
+        0.1419656339681244
+      ]
+    },
+    {
+      "title": "Something Just Like This",
+      "artist": "The Chainsmokers, Coldplay",
+      "spotifyId": "6RUKPb4LETWmmr3iAEQktW",
+      "vec": [
+        0.617,
+        0.635,
+        0.446,
+        0.0498,
+        0.0000144,
+        0.164,
+        0.0317,
+        0.6950515717092338,
+        0.2779769700352821
+      ]
+    },
+    {
+      "title": "Skyfall",
+      "artist": "Adele",
+      "spotifyId": "6VObnIkLVruX4UVyxWhlqm",
+      "vec": [
+        0.346,
+        0.552,
+        0.0789,
+        0.417,
+        0,
+        0.114,
+        0.0282,
+        0.6892190569744596,
+        0.08376094066456258
+      ]
+    },
+    {
+      "title": "Footloose",
+      "artist": "Kenny Loggins",
+      "spotifyId": "6W2VbtvMrDXm5vYeB7amkO",
+      "vec": [
+        0.546,
+        0.895,
+        0.494,
+        0.0819,
+        0.0000142,
+        0.0768,
+        0.0579,
+        0.6692657170923378,
+        0.7865971044363813
+      ]
+    },
+    {
+      "title": "Feel So Close - Radio Edit",
+      "artist": "Calvin Harris",
+      "spotifyId": "6Wtc1K3dvTIEsWU3rSIZXn",
+      "vec": [
+        0.7,
+        0.923,
+        0.904,
+        0.000927,
+        0.00826,
+        0.0966,
+        0.0324,
+        0.9356581532416502,
+        0.4564126786468285
+      ]
+    },
+    {
+      "title": "Summer",
+      "artist": "Calvin Harris",
+      "spotifyId": "6YUTL4dYpB9xZO5qExPf05",
+      "vec": [
+        0.596,
+        0.856,
+        0.743,
+        0.0211,
+        0.0178,
+        0.141,
+        0.0346,
+        0.8923133595284871,
+        0.45639120882266637
+      ]
+    },
+    {
+      "title": "Wait For It",
+      "artist": "salute",
+      "spotifyId": "6YjVrP2g7gJYh3aXkgnspC",
+      "vec": [
+        0.732,
+        0.885,
+        0.809,
+        0.000639,
+        0.00127,
+        0.032,
+        0.129,
+        0.8320235756385068,
+        0.49266805504862915
+      ]
+    },
+    {
+      "title": "24K Magic",
+      "artist": "Bruno Mars",
+      "spotifyId": "6b8Be6ljOzmkOmFslEb23P",
+      "vec": [
+        0.818,
+        0.803,
+        0.632,
+        0.034,
+        0,
+        0.153,
+        0.0797,
+        0.8477406679764243,
+        0.30625272845682056
+      ]
+    },
+    {
+      "title": "So Sick",
+      "artist": "Ne-Yo",
+      "spotifyId": "6brl7bwOHmGFkNw3MBqssT",
+      "vec": [
+        0.452,
+        0.574,
+        0.578,
+        0.245,
+        0,
+        0.189,
+        0.311,
+        0.5988457760314342,
+        0.20480780929070855
+      ]
+    },
+    {
+      "title": "Ocean Drive - Extended Mix",
+      "artist": "Duke Dumont",
+      "spotifyId": "6eVwaToHDpGJGlLdeu5fVB",
+      "vec": [
+        0.672,
+        0.685,
+        0.368,
+        0.00751,
+        0.000124,
+        0.172,
+        0.0384,
+        0.7671291748526523,
+        0.36378470060330204
+      ]
+    },
+    {
+      "title": "Pompeii",
+      "artist": "Bastille",
+      "spotifyId": "6fNhZRFEkBfgW39W3wKARJ",
+      "vec": [
+        0.679,
+        0.715,
+        0.571,
+        0.0755,
+        0,
+        0.271,
+        0.0407,
+        0.71875,
+        0.4527127122828864
+      ]
+    },
+    {
+      "title": "Slide (feat. Frank Ocean & Migos)",
+      "artist": "Calvin Harris, Frank Ocean, Migos",
+      "spotifyId": "6gpcs5eMhJwax4mIfKDYQk",
+      "vec": [
+        0.736,
+        0.795,
+        0.511,
+        0.498,
+        0.00000121,
+        0.254,
+        0.0545,
+        0.9080918467583498,
+        0.28546993866786896
+      ]
+    },
+    {
+      "title": "drive ME crazy!",
+      "artist": "Lil Yachty, Diana Gordon",
+      "spotifyId": "6luBKkFUt5wTwz7hpLhp12",
+      "vec": [
+        0.497,
+        0.825,
+        0.44,
+        0.172,
+        0.00319,
+        0.377,
+        0.0925,
+        0.8883226915520628,
+        0.3069898590863873
+      ]
+    },
+    {
+      "title": "Lately",
+      "artist": "RÜFÜS DU SOL",
+      "spotifyId": "6nqBOGRwYdwOOHTie3fx1K",
+      "vec": [
+        0.562,
+        0.898,
+        0.397,
+        0.0291,
+        0.282,
+        0.4,
+        0.0277,
+        0.7765225933202358,
+        0.4424286665092213
+      ]
+    },
+    {
+      "title": "So Easy (To Fall In Love)",
+      "artist": "Olivia Dean",
+      "spotifyId": "6sGIMrtIzQjdzNndVxe397",
+      "vec": [
+        0.749,
+        0.633,
+        0.572,
+        0.665,
+        0,
+        0.0817,
+        0.0373,
+        0.7473600196463654,
+        0.5419055184604704
+      ]
+    },
+    {
+      "title": "I'm Not Alone - 2019 Edit",
+      "artist": "Calvin Harris",
+      "spotifyId": "6zAUCritANdhceCMLVB8xR",
+      "vec": [
+        0.6,
+        0.982,
+        0.213,
+        0.00349,
+        0.48,
+        0.124,
+        0.0337,
+        0.8699042239685658,
+        0.4567347260092606
+      ]
+    },
+    {
+      "title": "Mona Lisa",
+      "artist": "Dominic Fike",
+      "spotifyId": "71DSaeKtXQaMAqnvMT7Uoc",
+      "vec": [
+        0.759,
+        0.646,
+        0.445,
+        0.231,
+        0,
+        0.161,
+        0.12,
+        0.6438482318271119,
+        0.33540159306095285
+      ]
+    },
+    {
+      "title": "Cake By The Ocean",
+      "artist": "DNCE",
+      "spotifyId": "76hfruVvmfQbw0eYn1nmeC",
+      "vec": [
+        0.774,
+        0.753,
+        0.896,
+        0.152,
+        0,
+        0.0371,
+        0.0517,
+        0.7762770137524558,
+        0.3923610365631105
+      ]
+    },
+    {
+      "title": "I'm Not The Only One",
+      "artist": "Sam Smith",
+      "spotifyId": "7795WJLVKJoAyVoOtCWqXN",
+      "vec": [
+        0.678,
+        0.484,
+        0.493,
+        0.529,
+        0.0000201,
+        0.0766,
+        0.0361,
+        0.7548501964636543,
+        0.12758085177949058
+      ]
+    },
+    {
+      "title": "We'll Be Coming Back (feat. Example)",
+      "artist": "Calvin Harris, Example",
+      "spotifyId": "7B1Dl3tXqySkB8OPEwVvSu",
+      "vec": [
+        0.596,
+        0.952,
+        0.571,
+        0.00131,
+        0,
+        0.598,
+        0.0873,
+        0.842706286836935,
+        0.45636258239045013
+      ]
+    },
+    {
+      "title": "Of The Night",
+      "artist": "Bastille",
+      "spotifyId": "7BNDyzwDboNRR2wmd7GSew",
+      "vec": [
+        0.67,
+        0.829,
+        0.349,
+        0.0192,
+        0.000225,
+        0.089,
+        0.0427,
+        0.6685903732809431,
+        0.43535793775182313
+      ]
+    },
+    {
+      "title": "BURN",
+      "artist": "¥$, Kanye West, Ty Dolla $ign",
+      "spotifyId": "7BPadP3q9qwMkho3IMPU99",
+      "vec": [
+        0.602,
+        0.877,
+        0.724,
+        0.0166,
+        0.00000651,
+        0.858,
+        0.385,
+        0.7256876227897839,
+        0.29216852380645664
+      ]
+    },
+    {
+      "title": "CHIHIRO",
+      "artist": "Billie Eilish",
+      "spotifyId": "7BRD7x5pt8Lqa1eGYC4dzj",
+      "vec": [
+        0.7,
+        0.425,
+        0.521,
+        0.144,
+        0.879,
+        0.083,
+        0.0529,
+        0.34129420432220037,
+        0.3280445999813928
+      ]
+    },
+    {
+      "title": "You Don't Know Me (feat. Duane Harden) - Radio Edit",
+      "artist": "Armand Van Helden, Duane Harden",
+      "spotifyId": "7BpyfQEmvi0sUmOq29plEE",
+      "vec": [
+        0.772,
+        0.682,
+        0.868,
+        0.0461,
+        0.00285,
+        0.0672,
+        0.0701,
+        0.6858423379174852,
+        0.4709119665643272
+      ]
+    },
+    {
+      "title": "Heaven",
+      "artist": "Bryan Adams",
+      "spotifyId": "7Ewz6bJ97vUqk5HdkvguFQ",
+      "vec": [
+        0.379,
+        0.589,
+        0.334,
+        0.0473,
+        0,
+        0.122,
+        0.027,
+        0.6615299607072691,
+        0.5431221418296585
+      ]
+    },
+    {
+      "title": "Don't Go Breaking My Heart",
+      "artist": "Elton John, Kiki Dee",
+      "spotifyId": "7HW5WIw7ZgZORCzUxv5gW5",
+      "vec": [
+        0.729,
+        0.844,
+        0.777,
+        0.149,
+        0.00000287,
+        0.0604,
+        0.0344,
+        0.568885068762279,
+        0.4815109030923703
+      ]
+    },
+    {
+      "title": "There's Nothing Holdin' Me Back",
+      "artist": "Shawn Mendes",
+      "spotifyId": "7JJmb5XwzOO8jgpou264Ml",
+      "vec": [
+        0.866,
+        0.811,
+        0.969,
+        0.375,
+        0,
+        0.078,
+        0.0553,
+        0.8611861493123772,
+        0.41378076446887235
+      ]
+    },
+    {
+      "title": "\"Heroes\" - 2017 Remaster",
+      "artist": "David Bowie",
+      "spotifyId": "7Jh1bpe76CNTCgdgAdBw4Z",
+      "vec": [
+        0.489,
+        0.758,
+        0.435,
+        0.000678,
+        0.49,
+        0.092,
+        0.0297,
+        0.7121193516699411,
+        0.34305916367878275
+      ]
+    },
+    {
+      "title": "Run This Town",
+      "artist": "JAŸ-Z, Rihanna, Kanye West",
+      "spotifyId": "7LR85XLWw2yXqKBSI5brbG",
+      "vec": [
+        0.632,
+        0.924,
+        0.441,
+        0.281,
+        0,
+        0.263,
+        0.29,
+        1,
+        0.16221883476107657
+      ]
+    },
+    {
+      "title": "Fix You",
+      "artist": "Coldplay",
+      "spotifyId": "7LVHVU3tWfcxj5aiPFEW4Q",
+      "vec": [
+        0.209,
+        0.417,
+        0.124,
+        0.164,
+        0.00196,
+        0.113,
+        0.0338,
+        0.5740422396856582,
+        0.5295961526075101
+      ]
+    },
+    {
+      "title": "Outside (feat. Ellie Goulding)",
+      "artist": "Calvin Harris, Ellie Goulding",
+      "spotifyId": "7MmG8p0F9N3C4AXdK6o6Eb",
+      "vec": [
+        0.646,
+        0.823,
+        0.418,
+        0.213,
+        0,
+        0.322,
+        0.0394,
+        0.8575024557956777,
+        0.4570066771153144
+      ]
+    },
+    {
+      "title": "At Night",
+      "artist": "Shakedown",
+      "spotifyId": "7bvyn8QyVbuJ9GIjUG4z7M",
+      "vec": [
+        0.809,
+        0.881,
+        0.965,
+        0.0138,
+        0.645,
+        0.045,
+        0.0717,
+        0.8287696463654223,
+        0.44957096134715985
+      ]
+    },
+    {
+      "title": "All Out of Love",
+      "artist": "Air Supply",
+      "spotifyId": "7dQC53NiYOY9gKg3Qsu2Bs",
+      "vec": [
+        0.513,
+        0.262,
+        0.357,
+        0.313,
+        0.00000551,
+        0.456,
+        0.0276,
+        0.07459479371316305,
+        0.31636501563718855
+      ]
+    },
+    {
+      "title": "Miami 2 Ibiza - Swedish House Mafia vs. Tinie Tempah",
+      "artist": "Swedish House Mafia, Tinie Tempah",
+      "spotifyId": "7gWSWDBriMK7YKefAe4NMP",
+      "vec": [
+        0.736,
+        0.929,
+        0.658,
+        0.00237,
+        0.0000111,
+        0.402,
+        0.0674,
+        0.7490176817288801,
+        0.43550106991290405
+      ]
+    },
+    {
+      "title": "Maps",
+      "artist": "Maroon 5",
+      "spotifyId": "7oUHzZKNKUTrlU7DYxhQ7v",
+      "vec": [
+        0.742,
+        0.713,
+        0.879,
+        0.0205,
+        0,
+        0.059,
+        0.0303,
+        0.7716110019646365,
+        0.3997323428587786
+      ]
+    },
+    {
+      "title": "Feels Like Summer",
+      "artist": "Childish Gambino",
+      "spotifyId": "7p4vHnYXkxlzvfePJVpcTr",
+      "vec": [
+        0.55,
+        0.596,
+        0.253,
+        0.162,
+        0.00481,
+        0.0805,
+        0.134,
+        0.606335952848723,
+        0.7268179573609291
+      ]
+    },
+    {
+      "title": "Bounce (feat. Kelis) - Radio Edit",
+      "artist": "Calvin Harris, Kelis",
+      "spotifyId": "7qCsypEBairW1WF0pgu92o",
+      "vec": [
+        0.777,
+        0.962,
+        0.762,
+        0.0364,
+        0.214,
+        0.663,
+        0.0399,
+        0.980906188605108,
+        0.45634826917434207
+      ]
+    },
+    {
+      "title": "Shape of You",
+      "artist": "Ed Sheeran",
+      "spotifyId": "7qiZfU4dY1lWllzX7mPBI3",
+      "vec": [
+        0.825,
+        0.652,
+        0.931,
+        0.581,
+        0,
+        0.0931,
+        0.0802,
+        0.9152136542239685,
+        0.2275801361186852
+      ]
+    },
+    {
+      "title": "I Wonder",
+      "artist": "Kanye West",
+      "spotifyId": "7rbECVPkY5UODxoOUVKZnA",
+      "vec": [
+        0.542,
+        0.466,
+        0.127,
+        0.141,
+        0.000444,
+        0.125,
+        0.0824,
+        0.5784626719056974,
+        0.9103849539472272
+      ]
+    },
+    {
+      "title": "Ain't No Mountain High Enough",
+      "artist": "Marvin Gaye, Tammi Terrell",
+      "spotifyId": "7tqhbajSfrz2F7E1Z75ASX",
+      "vec": [
+        0.663,
+        0.6,
+        0.797,
+        0.43,
+        0,
+        0.184,
+        0.032,
+        0.44327111984282913,
+        0.4709763760368135
+      ]
+    },
+    {
+      "title": "Wicked Game",
+      "artist": "Chris Isaak",
+      "spotifyId": "7w5AOd6HrDIHewHfpABEss",
+      "vec": [
+        0.663,
+        0.296,
+        0.359,
+        0.68,
+        0.00837,
+        0.0879,
+        0.0294,
+        0,
+        0.3444403890332138
+      ]
+    },
+    {
+      "title": "Blame",
+      "artist": "Bastille",
+      "spotifyId": "7yrx5A6zDOsd7Bn02WvbLH",
+      "vec": [
+        0.47,
+        0.749,
+        0.346,
+        0.00101,
+        0,
+        0.308,
+        0.0324,
+        0.8654837917485265,
+        0.14935125347990066
+      ]
+    },
+    {
+      "title": "Sick Feeling",
+      "artist": "boy pablo",
+      "spotifyId": "7zxLkZbUxITHabPzGN8Xgc",
+      "vec": [
+        0.415,
+        0.504,
+        0.401,
+        0.022,
+        0.00000384,
+        0.363,
+        0.0318,
+        0.4965004911591355,
+        0.7277053767596311
+      ]
+    }
+  ]
+}
