@@ -94,9 +94,9 @@ async function handleBpmLookup(request, env, ctx) {
   if (cached) return cached;
 
   try {
-    const apiUrl = `${BPM_API_BASE}/search/?type=song&limit=8&lookup=${encodeURIComponent(q)}`;
-    const apiRes = await fetch(apiUrl, { headers: { 'X-API-KEY': env.GETSONGBPM_API_KEY } });
-    if (!apiRes.ok) throw new Error(`GetSongBPM returned ${apiRes.status}`);
+    const apiUrl = `${BPM_API_BASE}/search/?type=song&limit=8&lookup=${encodeURIComponent(q)}&api_key=${encodeURIComponent(env.GETSONGBPM_API_KEY)}`;
+    const apiRes = await fetch(apiUrl);
+    if (!apiRes.ok) throw new Error(`GetSongBPM returned ${apiRes.status}: ${(await apiRes.text()).slice(0, 200)}`);
     const data = await apiRes.json();
 
     const results = (data.search || []).map(song => ({
