@@ -73,7 +73,9 @@ function pitchClassToCamelot(key, mode) {
 // Spotify's Client Credentials flow (app-only, no user login) — still fully open post the Nov
 // 2024 API changes, unlike Recommendations/Audio Features/Related Artists which now require
 // Extended Quota Mode. Only used for /v1/search, which was never restricted.
-async function getSpotifyToken(env) {
+// Exported so scripts/build-corpus.mjs (offline, Node) can reuse it verbatim against a locally
+// supplied SPOTIFY_CLIENT_ID/SECRET instead of duplicating the token exchange.
+export async function getSpotifyToken(env) {
   const res = await fetch('https://accounts.spotify.com/api/token', {
     method: 'POST',
     headers: {
@@ -85,6 +87,37 @@ async function getSpotifyToken(env) {
   if (!res.ok) throw new Error(`Spotify auth returned ${res.status}: ${(await res.text()).slice(0, 200)}`);
   const data = await res.json();
   return data.access_token;
+}
+
+// Shared ReccoBeats join, used by handleBpmLookup, handleAudioFeatures, and (via import)
+// scripts/build-corpus.mjs. ReccoBeats' own id is opaque; it echoes back the source Spotify URL
+// in `href`, which is how we map its rows back to the Spotify track each one came from.
+// Exported for reuse — do not duplicate this mapping elsewhere.
+export async function reccobeatsBatchLookup(spotifyIds) {
+  if (!spotifyIds.length) return new Map();
+  const idsParam = spotifyIds.map(id => `ids=${encodeURIComponent(id)}`).join('&');
+  const rbRes = await fetch(`${RECCOBEATS_API_BASE}/track?${idsParam}`, {
+    headers: { Accept: 'application/json' },
+  });
+  if (!rbRes.ok) throw new Error(`ReccoBeats track lookup returned ${rbRes.status}`);
+  const rbData = await rbRes.json();
+  const rbTracks = (rbData && rbData.content) || [];
+  const rbBySpotifyId = new Map();
+  for (const rb of rbTracks) {
+    const m = /\/track\/([A-Za-z0-9]+)/.exec(rb.href || '');
+    if (m) rbBySpotifyId.set(m[1], rb);
+  }
+  return rbBySpotifyId;
+}
+
+// Single-track ReccoBeats audio-features fetch (no batch endpoint exists for this one). Returns
+// the raw ReccoBeats JSON, or null on any non-2xx/parse failure — caller decides how to degrade.
+export async function reccobeatsAudioFeatures(rbId) {
+  const featRes = await fetch(`${RECCOBEATS_API_BASE}/track/${rbId}/audio-features`, {
+    headers: { Accept: 'application/json' },
+  });
+  if (!featRes.ok) return null;
+  return featRes.json();
 }
 
 // Spotify deprecated Audio Features for new apps in Nov 2024, so tempo/key comes from ReccoBeats
@@ -129,21 +162,7 @@ async function handleBpmLookup(request, env, ctx) {
 
     let results = [];
     if (tracks.length) {
-      const idsParam = tracks.map(t => `ids=${encodeURIComponent(t.id)}`).join('&');
-      const rbRes = await fetch(`${RECCOBEATS_API_BASE}/track?${idsParam}`, {
-        headers: { Accept: 'application/json' },
-      });
-      if (!rbRes.ok) throw new Error(`ReccoBeats track lookup returned ${rbRes.status}`);
-      const rbData = await rbRes.json();
-      const rbTracks = (rbData && rbData.content) || [];
-
-      // ReccoBeats' own id is opaque; it echoes back the source Spotify URL in `href`, which is
-      // how we map its rows back to the Spotify track each one came from.
-      const rbBySpotifyId = new Map();
-      for (const rb of rbTracks) {
-        const m = /\/track\/([A-Za-z0-9]+)/.exec(rb.href || '');
-        if (m) rbBySpotifyId.set(m[1], rb);
-      }
+      const rbBySpotifyId = await reccobeatsBatchLookup(tracks.map(t => t.id));
 
       results = await Promise.all(tracks.map(async track => {
         const base = {
@@ -155,11 +174,8 @@ async function handleBpmLookup(request, env, ctx) {
         const rb = rbBySpotifyId.get(track.id);
         if (!rb) return base;
         try {
-          const featRes = await fetch(`${RECCOBEATS_API_BASE}/track/${rb.id}/audio-features`, {
-            headers: { Accept: 'application/json' },
-          });
-          if (!featRes.ok) return base;
-          const feat = await featRes.json();
+          const feat = await reccobeatsAudioFeatures(rb.id);
+          if (!feat) return base;
           return {
             ...base,
             tempo: typeof feat.tempo === 'number' ? Math.round(feat.tempo) : null,
@@ -234,12 +250,7 @@ async function handleAudioFeatures(request, env, ctx) {
       return response;
     }
 
-    const rbRes = await fetch(`${RECCOBEATS_API_BASE}/track?ids=${encodeURIComponent(top.id)}`, {
-      headers: { Accept: 'application/json' },
-    });
-    if (!rbRes.ok) throw new Error(`ReccoBeats track lookup returned ${rbRes.status}`);
-    const rbData = await rbRes.json();
-    const rbTracks = (rbData && rbData.content) || [];
+    const rbBySpotifyId = await reccobeatsBatchLookup([top.id]);
 
     const match = {
       title: top.name || null,
@@ -247,18 +258,12 @@ async function handleAudioFeatures(request, env, ctx) {
       spotifyId: top.id,
     };
 
-    const rb = rbTracks.find(t => {
-      const m = /\/track\/([A-Za-z0-9]+)/.exec(t.href || '');
-      return m && m[1] === top.id;
-    });
+    const rb = rbBySpotifyId.get(top.id);
 
     let features = null;
     if (rb) {
-      const featRes = await fetch(`${RECCOBEATS_API_BASE}/track/${rb.id}/audio-features`, {
-        headers: { Accept: 'application/json' },
-      });
-      if (featRes.ok) {
-        const feat = await featRes.json();
+      const feat = await reccobeatsAudioFeatures(rb.id);
+      if (feat) {
         features = {
           danceability: feat.danceability ?? null,
           energy: feat.energy ?? null,
