@@ -240,7 +240,7 @@ async function handleSampleSearch(request, env, ctx) {
   if (cached) return cached;
 
   try {
-    let filter = `tag:${SAMPLE_MODE_TAGS[mode]}`;
+    let filter = `category:Music tag:${SAMPLE_MODE_TAGS[mode]}`;
     if (bpmMin || bpmMax) filter += ` bpm:[${bpmMin || '*'} TO ${bpmMax || '*'}]`;
 
     const params = new URLSearchParams({
