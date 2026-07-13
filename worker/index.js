@@ -187,6 +187,110 @@ async function handleBpmLookup(request, env, ctx) {
   }
 }
 
+// Same Spotify->ReccoBeats chain as handleBpmLookup, but returns the full audio-features vector
+// (all 9 primitives) for the best-match track instead of just tempo/key across 8 candidates —
+// feeds both the Sounds Like seed lookup and the offline corpus builder (scripts/build-corpus.mjs).
+// Raw ReccoBeats values, no normalization here — norm params live in the corpus JSON so seed and
+// corpus normalize identically at runtime.
+async function handleAudioFeatures(request, env, ctx) {
+  const url = new URL(request.url);
+  const q = (url.searchParams.get('q') || '').trim();
+  if (!q) {
+    return new Response(JSON.stringify({ error: 'Missing query' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+  if (!env.SPOTIFY_CLIENT_ID || !env.SPOTIFY_CLIENT_SECRET) {
+    return new Response(JSON.stringify({ error: 'Lookup is not configured' }), {
+      status: 503,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  const cache = caches.default;
+  const cacheKey = new Request(url.toString(), request);
+  const cached = await cache.match(cacheKey);
+  if (cached) return cached;
+
+  try {
+    const token = await getSpotifyToken(env);
+    const searchRes = await fetch(
+      `https://api.spotify.com/v1/search?type=track&limit=8&q=${encodeURIComponent(q)}`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    if (!searchRes.ok) {
+      throw new Error(`Spotify search returned ${searchRes.status}: ${(await searchRes.text()).slice(0, 200)}`);
+    }
+    const searchData = await searchRes.json();
+    const tracks = (searchData.tracks && searchData.tracks.items) || [];
+    const top = tracks[0];
+
+    if (!top) {
+      const response = new Response(JSON.stringify({ match: null, features: null }), {
+        headers: { 'Content-Type': 'application/json', 'Cache-Control': `public, max-age=${BPM_CACHE_TTL_SECONDS}` },
+      });
+      ctx.waitUntil(cache.put(cacheKey, response.clone()));
+      return response;
+    }
+
+    const rbRes = await fetch(`${RECCOBEATS_API_BASE}/track?ids=${encodeURIComponent(top.id)}`, {
+      headers: { Accept: 'application/json' },
+    });
+    if (!rbRes.ok) throw new Error(`ReccoBeats track lookup returned ${rbRes.status}`);
+    const rbData = await rbRes.json();
+    const rbTracks = (rbData && rbData.content) || [];
+
+    const match = {
+      title: top.name || null,
+      artist: (top.artists || []).map(a => a.name).join(', ') || null,
+      spotifyId: top.id,
+    };
+
+    const rb = rbTracks.find(t => {
+      const m = /\/track\/([A-Za-z0-9]+)/.exec(t.href || '');
+      return m && m[1] === top.id;
+    });
+
+    let features = null;
+    if (rb) {
+      const featRes = await fetch(`${RECCOBEATS_API_BASE}/track/${rb.id}/audio-features`, {
+        headers: { Accept: 'application/json' },
+      });
+      if (featRes.ok) {
+        const feat = await featRes.json();
+        features = {
+          danceability: feat.danceability ?? null,
+          energy: feat.energy ?? null,
+          valence: feat.valence ?? null,
+          acousticness: feat.acousticness ?? null,
+          instrumentalness: feat.instrumentalness ?? null,
+          liveness: feat.liveness ?? null,
+          speechiness: feat.speechiness ?? null,
+          loudness: feat.loudness ?? null,
+          tempo: feat.tempo ?? null,
+          key: feat.key ?? null,
+          mode: feat.mode ?? null,
+        };
+      }
+    }
+
+    const response = new Response(JSON.stringify({ match, features }), {
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': `public, max-age=${BPM_CACHE_TTL_SECONDS}`,
+      },
+    });
+    ctx.waitUntil(cache.put(cacheKey, response.clone()));
+    return response;
+  } catch (err) {
+    return new Response(JSON.stringify({ error: err.message }), {
+      status: 502,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+}
+
 const FREESOUND_API_BASE = 'https://freesound.org/apiv2';
 const SAMPLE_CACHE_TTL_SECONDS = 3600;
 
@@ -346,6 +450,9 @@ export default {
     }
     if (url.pathname === '/api/bpm-lookup') {
       return handleBpmLookup(request, env, ctx);
+    }
+    if (url.pathname === '/api/audio-features') {
+      return handleAudioFeatures(request, env, ctx);
     }
     if (url.pathname === '/api/sample-search') {
       return handleSampleSearch(request, env, ctx);
