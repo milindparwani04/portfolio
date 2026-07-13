@@ -56,22 +56,44 @@ function handleLastUpdatedRequest(env) {
   });
 }
 
-const BPM_API_BASE = 'https://api.getsong.co';
+const RECCOBEATS_API_BASE = 'https://api.reccobeats.com/v1';
 const BPM_CACHE_TTL_SECONDS = 3600;
 
-// GetSongBPM returns Traktor "open key" notation (a number plus d/m). Camelot notation uses the
-// same wheel position with different suffix letters — B for major ("d"), A for minor ("m") — so
-// converting is a straight letter swap, not a lookup table.
-function openKeyToCamelot(openKey) {
-  if (!openKey) return null;
-  const m = /^(\d{1,2})([dm])$/.exec(String(openKey).trim());
-  if (!m) return null;
-  return `${m[1]}${m[2] === 'd' ? 'B' : 'A'}`;
+// Camelot notation shares the same wheel position as standard pitch-class + mode, just
+// relabelled — index by Spotify/ReccoBeats's pitch class (0=C .. 11=B), major vs minor picks
+// the table. Relative major/minor pairs intentionally share a number (e.g. C major=8B, A minor=8A).
+const CAMELOT_MAJOR = ['8B', '3B', '10B', '5B', '12B', '7B', '2B', '9B', '4B', '11B', '6B', '1B'];
+const CAMELOT_MINOR = ['5A', '12A', '7A', '2A', '9A', '4A', '11A', '6A', '1A', '8A', '3A', '10A'];
+
+function pitchClassToCamelot(key, mode) {
+  if (key == null || key < 0 || key > 11) return null;
+  return mode === 1 ? CAMELOT_MAJOR[key] : CAMELOT_MINOR[key];
 }
 
-// The API key is tied to a 3000-req/hour quota and GetSongBPM's terms require it never be
-// distributed publicly, so it stays server-side as a Worker secret (wrangler secret put
-// GETSONGBPM_API_KEY) rather than being called directly from the browser.
+// Spotify's Client Credentials flow (app-only, no user login) — still fully open post the Nov
+// 2024 API changes, unlike Recommendations/Audio Features/Related Artists which now require
+// Extended Quota Mode. Only used for /v1/search, which was never restricted.
+async function getSpotifyToken(env) {
+  const res = await fetch('https://accounts.spotify.com/api/token', {
+    method: 'POST',
+    headers: {
+      Authorization: `Basic ${btoa(`${env.SPOTIFY_CLIENT_ID}:${env.SPOTIFY_CLIENT_SECRET}`)}`,
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: 'grant_type=client_credentials',
+  });
+  if (!res.ok) throw new Error(`Spotify auth returned ${res.status}: ${(await res.text()).slice(0, 200)}`);
+  const data = await res.json();
+  return data.access_token;
+}
+
+// Spotify deprecated Audio Features for new apps in Nov 2024, so tempo/key comes from ReccoBeats
+// instead — it re-derives the same audio-analysis metrics and accepts Spotify track IDs directly,
+// which keeps this tool on Spotify's live catalog rather than a stale crowd-sourced database.
+// Chain: Spotify Search (title/artist -> Spotify track id) -> ReccoBeats /track (Spotify id ->
+// ReccoBeats id) -> ReccoBeats /track/:id/audio-features (tempo + key + mode).
+// Both Spotify credentials stay server-side: the client secret can't be exposed, and Client
+// Credentials tokens are app-authenticated, not something to hand to the browser.
 async function handleBpmLookup(request, env, ctx) {
   const url = new URL(request.url);
   const q = (url.searchParams.get('q') || '').trim();
@@ -81,7 +103,7 @@ async function handleBpmLookup(request, env, ctx) {
       headers: { 'Content-Type': 'application/json' },
     });
   }
-  if (!env.GETSONGBPM_API_KEY) {
+  if (!env.SPOTIFY_CLIENT_ID || !env.SPOTIFY_CLIENT_SECRET) {
     return new Response(JSON.stringify({ error: 'Lookup is not configured' }), {
       status: 503,
       headers: { 'Content-Type': 'application/json' },
@@ -94,17 +116,60 @@ async function handleBpmLookup(request, env, ctx) {
   if (cached) return cached;
 
   try {
-    const apiUrl = `${BPM_API_BASE}/search/?type=song&limit=8&lookup=${encodeURIComponent(q)}&api_key=${encodeURIComponent(env.GETSONGBPM_API_KEY)}`;
-    const apiRes = await fetch(apiUrl);
-    if (!apiRes.ok) throw new Error(`GetSongBPM returned ${apiRes.status}: ${(await apiRes.text()).slice(0, 200)}`);
-    const data = await apiRes.json();
+    const token = await getSpotifyToken(env);
+    const searchRes = await fetch(
+      `https://api.spotify.com/v1/search?type=track&limit=8&q=${encodeURIComponent(q)}`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    if (!searchRes.ok) {
+      throw new Error(`Spotify search returned ${searchRes.status}: ${(await searchRes.text()).slice(0, 200)}`);
+    }
+    const searchData = await searchRes.json();
+    const tracks = (searchData.tracks && searchData.tracks.items) || [];
 
-    const results = (data.search || []).map(song => ({
-      title: song.title || null,
-      artist: (song.artist && song.artist.name) || null,
-      tempo: song.tempo ? Number(song.tempo) : null,
-      key: openKeyToCamelot(song.open_key),
-    }));
+    let results = [];
+    if (tracks.length) {
+      const idsParam = tracks.map(t => `ids=${encodeURIComponent(t.id)}`).join('&');
+      const rbRes = await fetch(`${RECCOBEATS_API_BASE}/track?${idsParam}`, {
+        headers: { Accept: 'application/json' },
+      });
+      if (!rbRes.ok) throw new Error(`ReccoBeats track lookup returned ${rbRes.status}`);
+      const rbData = await rbRes.json();
+      const rbTracks = (rbData && rbData.content) || [];
+
+      // ReccoBeats' own id is opaque; it echoes back the source Spotify URL in `href`, which is
+      // how we map its rows back to the Spotify track each one came from.
+      const rbBySpotifyId = new Map();
+      for (const rb of rbTracks) {
+        const m = /\/track\/([A-Za-z0-9]+)/.exec(rb.href || '');
+        if (m) rbBySpotifyId.set(m[1], rb);
+      }
+
+      results = await Promise.all(tracks.map(async track => {
+        const base = {
+          title: track.name || null,
+          artist: (track.artists || []).map(a => a.name).join(', ') || null,
+          tempo: null,
+          key: null,
+        };
+        const rb = rbBySpotifyId.get(track.id);
+        if (!rb) return base;
+        try {
+          const featRes = await fetch(`${RECCOBEATS_API_BASE}/track/${rb.id}/audio-features`, {
+            headers: { Accept: 'application/json' },
+          });
+          if (!featRes.ok) return base;
+          const feat = await featRes.json();
+          return {
+            ...base,
+            tempo: typeof feat.tempo === 'number' ? Math.round(feat.tempo) : null,
+            key: pitchClassToCamelot(feat.key, feat.mode),
+          };
+        } catch {
+          return base;
+        }
+      }));
+    }
 
     const response = new Response(JSON.stringify({ results }), {
       headers: {
