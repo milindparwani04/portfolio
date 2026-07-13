@@ -187,6 +187,100 @@ async function handleBpmLookup(request, env, ctx) {
   }
 }
 
+const FREESOUND_API_BASE = 'https://freesound.org/apiv2';
+const SAMPLE_CACHE_TTL_SECONDS = 3600;
+
+// Freesound has no dedicated "vocal"/"melody" facet, so each mode is a curated OR-group of
+// established community tags — a heuristic, not a guarantee, same as everywhere else in this
+// tool we favor an honest best-effort over a false sense of precision.
+const SAMPLE_MODE_TAGS = {
+  vocals: '(vocals OR vocal OR acapella OR acappella OR singing OR choir OR "vocal-chop")',
+  melody: '(melody OR melodic OR lead OR tune OR arpeggio OR "melody-loop")',
+};
+
+function freesoundLicenseLabel(licenseUrl) {
+  if (!licenseUrl) return null;
+  const url = licenseUrl.toLowerCase();
+  if (url.includes('publicdomain/zero') || url.includes('cc0')) return 'CC0';
+  if (url.includes('sampling+')) return 'Sampling+';
+  if (url.includes('by-nc-sa')) return 'CC BY-NC-SA';
+  if (url.includes('by-nc')) return 'CC BY-NC';
+  if (url.includes('by-sa')) return 'CC BY-SA';
+  if (url.includes('/by/')) return 'CC BY';
+  return 'CC';
+}
+
+function formatDuration(seconds) {
+  if (typeof seconds !== 'number' || !isFinite(seconds)) return null;
+  const m = Math.floor(seconds / 60);
+  const s = Math.round(seconds % 60);
+  return `${m}:${String(s).padStart(2, '0')}`;
+}
+
+// Freesound's API key is a single query-param token (no OAuth needed for search/previews) but
+// still has to stay server-side: it's rate-limited per key (60/min, 2000/day) and a client-side
+// key would let anyone burn that quota or scrape it out of the page source.
+async function handleSampleSearch(request, env, ctx) {
+  const url = new URL(request.url);
+  const mode = SAMPLE_MODE_TAGS[url.searchParams.get('mode')] ? url.searchParams.get('mode') : 'vocals';
+  const q = (url.searchParams.get('q') || '').trim();
+  const bpmMin = url.searchParams.get('bpm_min');
+  const bpmMax = url.searchParams.get('bpm_max');
+
+  if (!env.FREESOUND_API_KEY) {
+    return new Response(JSON.stringify({ error: 'Lookup is not configured' }), {
+      status: 503,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  const cache = caches.default;
+  const cacheKey = new Request(url.toString(), request);
+  const cached = await cache.match(cacheKey);
+  if (cached) return cached;
+
+  try {
+    let filter = `tag:${SAMPLE_MODE_TAGS[mode]}`;
+    if (bpmMin || bpmMax) filter += ` bpm:[${bpmMin || '*'} TO ${bpmMax || '*'}]`;
+
+    const params = new URLSearchParams({
+      query: q,
+      filter,
+      fields: 'id,name,username,tags,license,duration,previews,url,bpm',
+      page_size: '12',
+      token: env.FREESOUND_API_KEY,
+    });
+    const apiRes = await fetch(`${FREESOUND_API_BASE}/search/?${params.toString()}`);
+    if (!apiRes.ok) throw new Error(`Freesound returned ${apiRes.status}: ${(await apiRes.text()).slice(0, 200)}`);
+    const data = await apiRes.json();
+
+    const results = (data.results || []).map(s => ({
+      name: s.name || null,
+      username: s.username || null,
+      tags: (s.tags || []).slice(0, 5),
+      duration: formatDuration(s.duration),
+      bpm: typeof s.bpm === 'number' && s.bpm > 0 ? Math.round(s.bpm) : null,
+      license: freesoundLicenseLabel(s.license),
+      previewUrl: (s.previews && (s.previews['preview-hq-mp3'] || s.previews['preview-lq-mp3'])) || null,
+      pageUrl: s.url || null,
+    }));
+
+    const response = new Response(JSON.stringify({ results }), {
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': `public, max-age=${SAMPLE_CACHE_TTL_SECONDS}`,
+      },
+    });
+    ctx.waitUntil(cache.put(cacheKey, response.clone()));
+    return response;
+  } catch (err) {
+    return new Response(JSON.stringify({ error: err.message }), {
+      status: 502,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+}
+
 // Cloudflare's static-asset serving answers HTTP Range requests with a full 200 instead of a
 // 206, and omits Accept-Ranges. Browsers therefore can't seek into audio that isn't fully
 // buffered yet — clicking the seek bar restarts the track. We route /audio/ through the Worker
@@ -252,6 +346,9 @@ export default {
     }
     if (url.pathname === '/api/bpm-lookup') {
       return handleBpmLookup(request, env, ctx);
+    }
+    if (url.pathname === '/api/sample-search') {
+      return handleSampleSearch(request, env, ctx);
     }
     if (url.pathname.startsWith('/audio/')) {
       return handleAsset(request, env);

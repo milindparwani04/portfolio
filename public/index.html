@@ -646,6 +646,48 @@
     .bpm-item-stats{ width:100%; justify-content:flex-start; }
   }
 
+  /* tool modal — sample finder */
+  .sample-mode{ display:flex; gap:.6rem; margin-bottom:1rem; }
+  .sample-mode-btn{
+    flex:1; font-family:var(--mono); font-size:.72rem; text-transform:uppercase; letter-spacing:.05em;
+    padding:.65rem; border:1px solid var(--line); background:none; color:var(--dim); cursor:pointer;
+    transition:background .2s, color .2s, border-color .2s;
+  }
+  .sample-mode-btn.active{ background:var(--fg); color:var(--bg); border-color:var(--fg); }
+  .sample-mode-btn:not(.active):hover{ border-color:var(--fg); color:var(--fg); }
+
+  .sample-bpm-row{ display:flex; align-items:center; gap:.6rem; margin:.8rem 0; }
+  .sample-bpm-row label{
+    font-family:var(--mono); font-size:.68rem; color:var(--dimmer); text-transform:uppercase; letter-spacing:.05em;
+  }
+  .sample-bpm-row input{
+    width:70px; font-family:var(--mono); font-size:.85rem; color:var(--fg); background:var(--panel);
+    border:1px solid var(--line); padding:.5rem; text-align:center; outline:none; transition:border-color .2s;
+  }
+  .sample-bpm-row input:focus{ border-color:var(--fg); }
+  .sample-bpm-row span{ color:var(--dimmer); }
+
+  .sample-item{ padding:1rem 0; border-top:1px solid var(--line); }
+  .sample-item:first-child{ border-top:none; }
+  .sample-item-head{ display:flex; justify-content:space-between; align-items:baseline; gap:1rem; }
+  .sample-item-name{ font-family:var(--sans); font-size:.9rem; color:var(--fg); }
+  .sample-item-user{
+    font-family:var(--mono); font-size:.66rem; color:var(--dimmer); text-transform:uppercase;
+    letter-spacing:.05em; flex-shrink:0;
+  }
+  .sample-item-tags{ font-family:var(--sans); font-size:.75rem; color:var(--dim); margin-top:.3rem; }
+  .sample-item-meta{ display:flex; gap:.5rem; align-items:center; flex-wrap:wrap; margin-top:.6rem; }
+  .sample-badge{
+    font-family:var(--mono); font-size:.62rem; color:var(--dim); border:1px solid var(--line);
+    padding:.2rem .5rem; text-transform:uppercase; letter-spacing:.04em;
+  }
+  .sample-item audio{ width:100%; height:32px; margin-top:.7rem; display:block; }
+  .sample-item-link{
+    display:inline-block; margin-top:.6rem; font-family:var(--mono); font-size:.66rem; color:var(--dim);
+    text-decoration:none; border-bottom:1px solid var(--line); transition:color .2s, border-color .2s;
+  }
+  .sample-item-link:hover{ color:var(--fg); border-color:var(--fg); }
+
   /* tool modal — audio trimmer */
   .trim-wave-wrap{
     position:relative; width:100%; height:120px; background:var(--panel); border:1px solid var(--line);
@@ -986,7 +1028,7 @@
           <span class="n">05</span>
           <h3>Sample Finder</h3>
           <p>Search by genre, mood, or BPM to dig up royalty-free samples.</p>
-          <span class="soon">Coming soon</span>
+          <a href="#" class="open" data-open-tool="sampleFinderModal">Open tool</a>
         </div>
         <div class="tool reveal">
           <span class="n">06</span>
@@ -1282,6 +1324,40 @@
 
     <div class="bpm-results" id="bpmResults">
       <span class="bpm-empty" id="bpmEmptyState">Search for a track above</span>
+    </div>
+  </div>
+</div>
+
+<div class="tool-modal" id="sampleFinderModal" aria-hidden="true">
+  <div class="tool-modal-backdrop" data-close-tool></div>
+  <div class="tool-modal-panel" role="dialog" aria-modal="true" aria-labelledby="sampleFinderTitle">
+    <div class="tool-modal-head">
+      <div>
+        <span class="file-no">REF. 03.05 / TOOL</span>
+        <h3 id="sampleFinderTitle">Sample Finder</h3>
+      </div>
+      <button class="tool-modal-close" data-close-tool aria-label="Close">&#10005;</button>
+    </div>
+    <p class="tool-modal-sub">Search vocal or melody samples by mood and BPM — free to use. Sourced from <a href="https://freesound.org" target="_blank" rel="noopener">Freesound</a>.</p>
+
+    <div class="sample-mode" role="group" aria-label="Sample type">
+      <button class="sample-mode-btn active" type="button" data-mode="vocals" aria-pressed="true">Vocals</button>
+      <button class="sample-mode-btn" type="button" data-mode="melody" aria-pressed="false">Melody</button>
+    </div>
+
+    <form id="sampleSearchForm">
+      <input type="text" id="sampleQueryInput" class="qr-input" placeholder="Mood, genre, or keyword (optional)" autocomplete="off" spellcheck="false">
+      <div class="sample-bpm-row">
+        <label for="sampleBpmMin">BPM</label>
+        <input type="number" id="sampleBpmMin" min="20" max="300" placeholder="Min">
+        <span>&ndash;</span>
+        <input type="number" id="sampleBpmMax" min="20" max="300" placeholder="Max">
+      </div>
+      <button class="bpm-search-btn" id="sampleSearchBtn" type="submit">Search</button>
+    </form>
+
+    <div class="bpm-results" id="sampleResults">
+      <span class="bpm-empty" id="sampleEmptyState">Pick a type and search above</span>
     </div>
   </div>
 </div>
@@ -2287,6 +2363,140 @@
     });
 
     document.querySelectorAll('[data-open-tool="bpmLookupModal"]').forEach(trigger => {
+      trigger.addEventListener('click', () => setTimeout(() => input.focus(), 50));
+    });
+  })();
+
+  /* ============ SAMPLE FINDER ============ */
+  (() => {
+    const modal = document.getElementById('sampleFinderModal');
+    const form = document.getElementById('sampleSearchForm');
+    const input = document.getElementById('sampleQueryInput');
+    const bpmMin = document.getElementById('sampleBpmMin');
+    const bpmMax = document.getElementById('sampleBpmMax');
+    const searchBtn = document.getElementById('sampleSearchBtn');
+    const results = document.getElementById('sampleResults');
+    const modeBtns = modal ? modal.querySelectorAll('.sample-mode-btn') : [];
+    if(!modal) return;
+
+    let mode = 'vocals';
+
+    modeBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        mode = btn.dataset.mode;
+        modeBtns.forEach(b => {
+          const active = b === btn;
+          b.classList.toggle('active', active);
+          b.setAttribute('aria-pressed', String(active));
+        });
+      });
+    });
+
+    function setMessage(text){
+      results.innerHTML = '';
+      const span = document.createElement('span');
+      span.className = 'bpm-empty';
+      span.textContent = text;
+      results.appendChild(span);
+    }
+
+    function renderResults(samples){
+      results.innerHTML = '';
+      if(!samples.length){
+        setMessage('No matches — try a different keyword or BPM range');
+        return;
+      }
+      samples.forEach(sample => {
+        const row = document.createElement('div');
+        row.className = 'sample-item';
+
+        const head = document.createElement('div');
+        head.className = 'sample-item-head';
+        const name = document.createElement('div');
+        name.className = 'sample-item-name';
+        name.textContent = sample.name || 'Untitled';
+        const user = document.createElement('div');
+        user.className = 'sample-item-user';
+        user.textContent = sample.username || '';
+        head.append(name, user);
+        row.appendChild(head);
+
+        if(sample.tags && sample.tags.length){
+          const tags = document.createElement('div');
+          tags.className = 'sample-item-tags';
+          tags.textContent = sample.tags.join(', ');
+          row.appendChild(tags);
+        }
+
+        const meta = document.createElement('div');
+        meta.className = 'sample-item-meta';
+        if(sample.duration){
+          const d = document.createElement('span');
+          d.className = 'sample-badge';
+          d.textContent = sample.duration;
+          meta.appendChild(d);
+        }
+        if(sample.bpm){
+          const b = document.createElement('span');
+          b.className = 'sample-badge';
+          b.textContent = `${sample.bpm} BPM`;
+          meta.appendChild(b);
+        }
+        if(sample.license){
+          const l = document.createElement('span');
+          l.className = 'sample-badge';
+          l.textContent = sample.license;
+          meta.appendChild(l);
+        }
+        row.appendChild(meta);
+
+        if(sample.previewUrl){
+          const audio = document.createElement('audio');
+          audio.controls = true;
+          audio.preload = 'none';
+          audio.src = sample.previewUrl;
+          row.appendChild(audio);
+        }
+
+        if(sample.pageUrl){
+          const link = document.createElement('a');
+          link.className = 'sample-item-link';
+          link.href = sample.pageUrl;
+          link.target = '_blank';
+          link.rel = 'noopener';
+          link.textContent = 'View on Freesound →';
+          row.appendChild(link);
+        }
+
+        results.appendChild(row);
+      });
+    }
+
+    async function search(){
+      searchBtn.disabled = true;
+      setMessage('Searching…');
+
+      try{
+        const params = new URLSearchParams({ mode, q: input.value.trim() });
+        if(bpmMin.value) params.set('bpm_min', bpmMin.value);
+        if(bpmMax.value) params.set('bpm_max', bpmMax.value);
+        const res = await fetch(`/api/sample-search?${params.toString()}`);
+        const data = await res.json();
+        if(!res.ok) throw new Error(data.error || `Lookup failed (${res.status})`);
+        renderResults(data.results || []);
+      }catch(e){
+        setMessage('Lookup unavailable right now — try again in a moment');
+      }finally{
+        searchBtn.disabled = false;
+      }
+    }
+
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      search();
+    });
+
+    document.querySelectorAll('[data-open-tool="sampleFinderModal"]').forEach(trigger => {
       trigger.addEventListener('click', () => setTimeout(() => input.focus(), 50));
     });
   })();
