@@ -151,6 +151,7 @@ async function handleBpmLookup(request, env, ctx) {
           artist: (track.artists || []).map(a => a.name).join(', ') || null,
           tempo: null,
           key: null,
+          _debugPreviewUrl: track.preview_url || null,
         };
         const rb = rbBySpotifyId.get(track.id);
         if (!rb) return base;
