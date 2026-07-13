@@ -56,6 +56,72 @@ function handleLastUpdatedRequest(env) {
   });
 }
 
+const BPM_API_BASE = 'https://api.getsong.co';
+const BPM_CACHE_TTL_SECONDS = 3600;
+
+// GetSongBPM returns Traktor "open key" notation (a number plus d/m). Camelot notation uses the
+// same wheel position with different suffix letters — B for major ("d"), A for minor ("m") — so
+// converting is a straight letter swap, not a lookup table.
+function openKeyToCamelot(openKey) {
+  if (!openKey) return null;
+  const m = /^(\d{1,2})([dm])$/.exec(String(openKey).trim());
+  if (!m) return null;
+  return `${m[1]}${m[2] === 'd' ? 'B' : 'A'}`;
+}
+
+// The API key is tied to a 3000-req/hour quota and GetSongBPM's terms require it never be
+// distributed publicly, so it stays server-side as a Worker secret (wrangler secret put
+// GETSONGBPM_API_KEY) rather than being called directly from the browser.
+async function handleBpmLookup(request, env, ctx) {
+  const url = new URL(request.url);
+  const q = (url.searchParams.get('q') || '').trim();
+  if (!q) {
+    return new Response(JSON.stringify({ error: 'Missing query' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+  if (!env.GETSONGBPM_API_KEY) {
+    return new Response(JSON.stringify({ error: 'Lookup is not configured' }), {
+      status: 503,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  const cache = caches.default;
+  const cacheKey = new Request(url.toString(), request);
+  const cached = await cache.match(cacheKey);
+  if (cached) return cached;
+
+  try {
+    const apiUrl = `${BPM_API_BASE}/search/?type=song&limit=8&lookup=${encodeURIComponent(q)}`;
+    const apiRes = await fetch(apiUrl, { headers: { 'X-API-KEY': env.GETSONGBPM_API_KEY } });
+    if (!apiRes.ok) throw new Error(`GetSongBPM returned ${apiRes.status}`);
+    const data = await apiRes.json();
+
+    const results = (data.search || []).map(song => ({
+      title: song.title || null,
+      artist: (song.artist && song.artist.name) || null,
+      tempo: song.tempo ? Number(song.tempo) : null,
+      key: openKeyToCamelot(song.open_key),
+    }));
+
+    const response = new Response(JSON.stringify({ results }), {
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': `public, max-age=${BPM_CACHE_TTL_SECONDS}`,
+      },
+    });
+    ctx.waitUntil(cache.put(cacheKey, response.clone()));
+    return response;
+  } catch (err) {
+    return new Response(JSON.stringify({ error: err.message }), {
+      status: 502,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+}
+
 // Cloudflare's static-asset serving answers HTTP Range requests with a full 200 instead of a
 // 206, and omits Accept-Ranges. Browsers therefore can't seek into audio that isn't fully
 // buffered yet — clicking the seek bar restarts the track. We route /audio/ through the Worker
@@ -118,6 +184,9 @@ export default {
     }
     if (url.pathname === '/api/last-updated') {
       return handleLastUpdatedRequest(env);
+    }
+    if (url.pathname === '/api/bpm-lookup') {
+      return handleBpmLookup(request, env, ctx);
     }
     if (url.pathname.startsWith('/audio/')) {
       return handleAsset(request, env);
