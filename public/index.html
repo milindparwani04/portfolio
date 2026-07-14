@@ -189,8 +189,13 @@
     font-family:var(--display); font-weight:400; text-transform:uppercase; color:var(--fg);
     font-size:clamp(1.7rem, 4.2vw, 2.4rem); line-height:.92; margin:0 0 .1rem; text-wrap:balance;
   }
-  .gig-meta{ font-family:var(--mono); font-size:.76rem; color:var(--dim); display:flex; flex-wrap:wrap; gap:.15rem .7rem; }
+  /* Plain text flow, not flex: a flex row gives the venue span a full flex-line's width even when
+     it wraps internally, shoving the date item onto its own line below — normal inline text flow
+     lets the date sit right after wherever the venue's last line ends, or wrap only if it truly
+     doesn't fit. Long venue names (real Ticketmaster data, not the old placeholder) exposed this. */
+  .gig-meta{ font-family:var(--mono); font-size:.76rem; line-height:1.5; color:var(--dim); }
   .gig-meta .gig-venue{ color:var(--fg); }
+  .gig-meta span + span::before{ content:'  \00b7  '; }
   .gig-foot{ margin-top:auto; display:flex; align-items:center; justify-content:space-between; gap:1.1rem; padding-top:.9rem; }
   .gig-badge{
     font-family:var(--mono); font-weight:700; font-size:.72rem; letter-spacing:.05em; text-transform:uppercase;
