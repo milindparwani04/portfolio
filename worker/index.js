@@ -398,6 +398,15 @@ const SPOTIFY_REDIRECT_URI = 'https://milindparwani.com/api/spotify/callback';
 // playlists. Last.fm's chart.gettopartists (public, free API key, no OAuth) is the replacement
 // trending source — a genuine global top-artists chart, not a workaround.
 const LASTFM_API_BASE = 'https://ws.audioscrobbler.com/2.0/';
+// Last.fm's chart is streaming-driven, not touring-driven — deceased legends still chart
+// (Michael Jackson, Elvis Presley routinely place). Every real Ticketmaster result for them is
+// necessarily an impersonator/tribute show, and the isTributeEvent() keyword heuristic can't
+// catch every naming convention (seen live: French "hommage", "Club 90's: Michael Jackson
+// Night", "ELVIS PRESLEY by Steve Ryckier & The Graceland Orchestra" — none contain
+// "tribute"/"impersonat"). This is a small, stable fact (death doesn't reverse) rather than a
+// heuristic, so it's cheaper and more exact to exclude these names from the pool entirely than
+// to keep expanding a regex arms race against creative event titles.
+const DECEASED_ARTISTS = new Set(['michael jackson', 'elvis presley']);
 const GIG_POOL_MAX = 25;
 const GIGS_CACHE_TTL_SECONDS = 3600;
 
@@ -492,13 +501,28 @@ async function refreshSpotifyUserAccessToken(env) {
 // self-serve API key, instant approval, actively maintained. Returns the soonest upcoming show
 // for one artist, or null if none found — most artists in a top-artists list aren't touring
 // right now, that's normal, not an error.
+// Keyword search matches tribute acts as readily as the real artist (seen live: "Michael
+// Jackson" surfaced "MJ LIVE – Michael Jackson Tribute Concert", "Fleetwood Mac" surfaced
+// "Rumours of Fleetwood Mac" with classification subType "Tribute Band"). Ticketmaster doesn't
+// expose an "is this the real artist" flag, so this is a heuristic, not exact — but "tribute" /
+// "impersonator" reliably shows up in the event name, attraction name, or subType across every
+// case seen so far, and real headline events (checked against "Bruno Mars") never false-positive.
+const TRIBUTE_PATTERN = /tribute|impersonat/i;
+function isTributeEvent(ev) {
+  if (TRIBUTE_PATTERN.test(ev.name || '')) return true;
+  const cls = ev.classifications && ev.classifications[0];
+  if (cls && TRIBUTE_PATTERN.test((cls.subType && cls.subType.name) || '')) return true;
+  const attractions = (ev._embedded && ev._embedded.attractions) || [];
+  return attractions.some(a => TRIBUTE_PATTERN.test(a.name || ''));
+}
+
 async function fetchTicketmasterSoonestShow(artistName, env) {
   try {
     const params = new URLSearchParams({
       keyword: artistName,
       classificationName: 'music',
       sort: 'date,asc',
-      size: '1',
+      size: '5',
       // Without a lower bound, Ticketmaster's index can surface stale/past-dated listings
       // (seen live: a "Michael Jackson" event dated in the past) even sorted ascending —
       // explicitly exclude anything before right now.
@@ -508,7 +532,8 @@ async function fetchTicketmasterSoonestShow(artistName, env) {
     const res = await fetch(`https://app.ticketmaster.com/discovery/v2/events.json?${params.toString()}`);
     if (!res.ok) return null;
     const data = await res.json();
-    const ev = data._embedded && data._embedded.events && data._embedded.events[0];
+    const events = (data._embedded && data._embedded.events) || [];
+    const ev = events.find(e => !isTributeEvent(e));
     if (!ev) return null;
 
     const localDate = ev.dates && ev.dates.start && ev.dates.start.localDate;
@@ -564,7 +589,7 @@ async function handleGigs(request, env, ctx) {
     const pool = [];
     for (const name of [...personalArtists, ...trendingArtists]) {
       const key = name.toLowerCase();
-      if (seen.has(key)) continue;
+      if (seen.has(key) || DECEASED_ARTISTS.has(key)) continue;
       seen.add(key);
       pool.push(name);
       if (pool.length >= GIG_POOL_MAX) break;
