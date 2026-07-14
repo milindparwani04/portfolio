@@ -398,9 +398,6 @@ const SPOTIFY_REDIRECT_URI = 'https://milindparwani.com/api/spotify/callback';
 // playlists. Last.fm's chart.gettopartists (public, free API key, no OAuth) is the replacement
 // trending source — a genuine global top-artists chart, not a workaround.
 const LASTFM_API_BASE = 'https://ws.audioscrobbler.com/2.0/';
-// Bandsintown's app_id is just a self-reported identifier, not a real credential — no signup,
-// no key, no partner approval, unlike Songkick/Ticketmaster.
-const BANDSINTOWN_APP_ID = 'parwani-portfolio';
 const GIG_POOL_MAX = 25;
 const GIGS_CACHE_TTL_SECONDS = 3600;
 
@@ -489,30 +486,32 @@ async function refreshSpotifyUserAccessToken(env) {
   return data.access_token;
 }
 
-// Bandsintown's REST API needs no key beyond the self-reported app_id. Returns the soonest
-// upcoming show for one artist, or null if the artist has none listed / isn't found — both are
-// normal (most artists in a top-artists list aren't touring right now), not errors.
-async function fetchBandsintownSoonestShow(artistName) {
+// Bandsintown's public REST API turned out to be dead (blanket 403, "explicit deny in an
+// identity-based policy" — confirmed even against their own documented example app_id, so this
+// isn't a config issue, they've locked it to partners). Ticketmaster's Discovery API replaced it:
+// self-serve API key, instant approval, actively maintained. Returns the soonest upcoming show
+// for one artist, or null if none found — most artists in a top-artists list aren't touring
+// right now, that's normal, not an error.
+async function fetchTicketmasterSoonestShow(artistName, env) {
   try {
-    const res = await fetch(
-      `https://rest.bandsintown.com/artists/${encodeURIComponent(artistName)}/events?app_id=${BANDSINTOWN_APP_ID}&date=upcoming`
-    );
+    const params = new URLSearchParams({
+      keyword: artistName,
+      classificationName: 'music',
+      sort: 'date,asc',
+      size: '1',
+      apikey: env.TICKETMASTER_API_KEY,
+    });
+    const res = await fetch(`https://app.ticketmaster.com/discovery/v2/events.json?${params.toString()}`);
     if (!res.ok) return null;
-    const events = await res.json();
-    if (!Array.isArray(events) || !events.length) return null;
+    const data = await res.json();
+    const ev = data._embedded && data._embedded.events && data._embedded.events[0];
+    if (!ev) return null;
 
-    // Don't trust Bandsintown's own ordering — sort by parsed date ourselves.
-    const dated = events
-      .map(e => ({ e, t: Date.parse(e.datetime) }))
-      .filter(x => !isNaN(x.t))
-      .sort((a, b) => a.t - b.t);
-    if (!dated.length) return null;
-
-    const ev = dated[0].e;
-    const venue = ev.venue || {};
-    const venueLabel = [venue.name, venue.city].filter(Boolean).join(', ');
-    if (!venueLabel) return null;
-    return { venue: venueLabel, date: ev.datetime.slice(0, 10) };
+    const localDate = ev.dates && ev.dates.start && ev.dates.start.localDate;
+    const venueObj = ev._embedded && ev._embedded.venues && ev._embedded.venues[0];
+    const venueLabel = venueObj && [venueObj.name, venueObj.city && venueObj.city.name].filter(Boolean).join(', ');
+    if (!localDate || !venueLabel) return null;
+    return { venue: venueLabel, date: localDate };
   } catch {
     return null;
   }
@@ -522,12 +521,12 @@ async function fetchBandsintownSoonestShow(artistName) {
 // artists via the user-auth flow above, plus Last.fm's global top-artists chart for the
 // trending half), dedupes case-insensitively, caps at GIG_POOL_MAX to stay well under the
 // Workers Free-plan 50-subrequest-per-invocation limit (pool + the handful of Spotify/Last.fm
-// calls stays under 30), then looks up each artist's soonest show on Bandsintown.
+// calls stays under 30), then looks up each artist's soonest show via Ticketmaster.
 // Response is a bare array (not {results:...}/{headlines:...} like the other routes) — the
 // client already consumes GIGS as a plain [{artist,venue,date}] array, this matches that shape
 // exactly rather than making the frontend unwrap a wrapper key.
 async function handleGigs(request, env, ctx) {
-  if (!env.LASTFM_API_KEY) {
+  if (!env.LASTFM_API_KEY || !env.TICKETMASTER_API_KEY) {
     return new Response(JSON.stringify({ error: 'Lookup is not configured' }), {
       status: 503,
       headers: { 'Content-Type': 'application/json' },
@@ -568,7 +567,7 @@ async function handleGigs(request, env, ctx) {
     }
 
     const withShows = await Promise.all(pool.map(async artist => {
-      const show = await fetchBandsintownSoonestShow(artist);
+      const show = await fetchTicketmasterSoonestShow(artist, env);
       return show ? { artist, venue: show.venue, date: show.date } : null;
     }));
     const gigs = withShows.filter(Boolean).sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
