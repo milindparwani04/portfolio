@@ -499,6 +499,10 @@ async function fetchTicketmasterSoonestShow(artistName, env) {
       classificationName: 'music',
       sort: 'date,asc',
       size: '1',
+      // Without a lower bound, Ticketmaster's index can surface stale/past-dated listings
+      // (seen live: a "Michael Jackson" event dated in the past) even sorted ascending —
+      // explicitly exclude anything before right now.
+      startDateTime: new Date().toISOString().split('.')[0] + 'Z',
       apikey: env.TICKETMASTER_API_KEY,
     });
     const res = await fetch(`https://app.ticketmaster.com/discovery/v2/events.json?${params.toString()}`);
