@@ -9,5 +9,14 @@
   },
   "version_metadata": {
     "binding": "CF_VERSION_METADATA"
-  }
+  },
+  "kv_namespaces": [
+    {
+      "binding": "GIG_KV",   // stores the Spotify user refresh token (from the one-time OAuth
+                               // consent at /api/spotify/authorize) under key
+                               // "spotify_refresh_token". Only /api/gigs and the
+                               // authorize/callback routes touch this.
+      "id": "2cd78c74bfaf487fbb1c15c2055de305"
+    }
+  ]
 }

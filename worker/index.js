@@ -390,6 +390,197 @@ async function handleSampleSearch(request, env, ctx) {
   }
 }
 
+const SPOTIFY_REDIRECT_URI = 'https://milindparwani.com/api/spotify/callback';
+// Spotify killed its public Charts API — Global Top 50 is the standard workaround for "what's
+// trending right now": a Spotify-curated editorial playlist, readable via the existing
+// Client Credentials app token (no user auth needed for this half of the artist pool).
+const SPOTIFY_TOP50_PLAYLIST_ID = '37i9dQZEVXbMDoHDwVN2tF';
+// Bandsintown's app_id is just a self-reported identifier, not a real credential — no signup,
+// no key, no partner approval, unlike Songkick/Ticketmaster.
+const BANDSINTOWN_APP_ID = 'parwani-portfolio';
+const GIG_POOL_MAX = 25;
+const GIGS_CACHE_TTL_SECONDS = 3600;
+
+async function exchangeSpotifyToken(env, params) {
+  const res = await fetch('https://accounts.spotify.com/api/token', {
+    method: 'POST',
+    headers: {
+      Authorization: `Basic ${btoa(`${env.SPOTIFY_CLIENT_ID}:${env.SPOTIFY_CLIENT_SECRET}`)}`,
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: params.toString(),
+  });
+  if (!res.ok) throw new Error(`Spotify token endpoint returned ${res.status}: ${(await res.text()).slice(0, 200)}`);
+  return res.json();
+}
+
+// Step 1 of the one-time Spotify user-auth flow (Authorization Code, scope user-top-read) that
+// lets /api/gigs read the site owner's actual top artists — the existing Client Credentials flow
+// (getSpotifyToken) is app-only and can never see personal data, no matter what scope is asked
+// for. Gated by a random secret query param: this route sends whoever loads it to Spotify's real
+// consent screen and whatever account approves becomes "the" stored top-artists source, so an
+// unauthenticated public URL would let any bot/scanner that stumbles onto it silently hijack the
+// gig rail's data. `state` is stored in KV (10 min TTL) and re-checked in the callback as CSRF
+// protection, standard for this OAuth flow regardless of the extra key gate.
+async function handleSpotifyAuthorize(request, env) {
+  const url = new URL(request.url);
+  if (!env.SPOTIFY_AUTH_KEY || url.searchParams.get('key') !== env.SPOTIFY_AUTH_KEY) {
+    return new Response('Forbidden', { status: 403 });
+  }
+  const state = crypto.randomUUID();
+  await env.GIG_KV.put(`oauth_state:${state}`, '1', { expirationTtl: 600 });
+
+  const authUrl = new URL('https://accounts.spotify.com/authorize');
+  authUrl.searchParams.set('client_id', env.SPOTIFY_CLIENT_ID);
+  authUrl.searchParams.set('response_type', 'code');
+  authUrl.searchParams.set('redirect_uri', SPOTIFY_REDIRECT_URI);
+  authUrl.searchParams.set('scope', 'user-top-read');
+  authUrl.searchParams.set('state', state);
+  return Response.redirect(authUrl.toString(), 302);
+}
+
+// Step 2: Spotify redirects back here with a code (or an error, if consent was declined).
+// Exchanges the code for a refresh token and persists it in KV — that refresh token is the only
+// long-lived credential /api/gigs needs; access tokens are minted fresh from it on every call.
+async function handleSpotifyCallback(request, env) {
+  const url = new URL(request.url);
+  const html = body => new Response(body, { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+
+  if (url.searchParams.get('error')) {
+    return html(`<p>Spotify authorization failed: ${url.searchParams.get('error')}</p>`);
+  }
+  const code = url.searchParams.get('code');
+  const state = url.searchParams.get('state');
+  if (!code || !state) return html('<p>Missing code or state.</p>');
+
+  const stateKey = `oauth_state:${state}`;
+  const stateOk = await env.GIG_KV.get(stateKey);
+  if (!stateOk) return html('<p>Invalid or expired authorization attempt — start again at /api/spotify/authorize.</p>');
+  await env.GIG_KV.delete(stateKey);
+
+  try {
+    const data = await exchangeSpotifyToken(env, new URLSearchParams({
+      grant_type: 'authorization_code',
+      code,
+      redirect_uri: SPOTIFY_REDIRECT_URI,
+    }));
+    if (!data.refresh_token) throw new Error('Spotify did not return a refresh token');
+    await env.GIG_KV.put('spotify_refresh_token', data.refresh_token);
+    return html('<p>Connected. You can close this tab.</p>');
+  } catch (err) {
+    return html(`<p>Token exchange failed: ${err.message}</p>`);
+  }
+}
+
+// Mints a fresh user access token from the stored refresh token. Spotify occasionally rotates
+// the refresh token itself on a refresh grant — if it sends a new one, persist it, or the next
+// call would refresh against a now-invalid token.
+async function refreshSpotifyUserAccessToken(env) {
+  const refreshToken = await env.GIG_KV.get('spotify_refresh_token');
+  if (!refreshToken) throw new Error('Spotify account not connected — visit /api/spotify/authorize first');
+  const data = await exchangeSpotifyToken(env, new URLSearchParams({
+    grant_type: 'refresh_token',
+    refresh_token: refreshToken,
+  }));
+  if (data.refresh_token) await env.GIG_KV.put('spotify_refresh_token', data.refresh_token);
+  return data.access_token;
+}
+
+// Bandsintown's REST API needs no key beyond the self-reported app_id. Returns the soonest
+// upcoming show for one artist, or null if the artist has none listed / isn't found — both are
+// normal (most artists in a top-artists list aren't touring right now), not errors.
+async function fetchBandsintownSoonestShow(artistName) {
+  try {
+    const res = await fetch(
+      `https://rest.bandsintown.com/artists/${encodeURIComponent(artistName)}/events?app_id=${BANDSINTOWN_APP_ID}&date=upcoming`
+    );
+    if (!res.ok) return null;
+    const events = await res.json();
+    if (!Array.isArray(events) || !events.length) return null;
+
+    // Don't trust Bandsintown's own ordering — sort by parsed date ourselves.
+    const dated = events
+      .map(e => ({ e, t: Date.parse(e.datetime) }))
+      .filter(x => !isNaN(x.t))
+      .sort((a, b) => a.t - b.t);
+    if (!dated.length) return null;
+
+    const ev = dated[0].e;
+    const venue = ev.venue || {};
+    const venueLabel = [venue.name, venue.city].filter(Boolean).join(', ');
+    if (!venueLabel) return null;
+    return { venue: venueLabel, date: ev.datetime.slice(0, 10) };
+  } catch {
+    return null;
+  }
+}
+
+// Backs the Gig Finder rail. Mixes two artist sources into one pool (personal Spotify top
+// artists via the user-auth flow above, plus Spotify's Global Top 50 editorial playlist via the
+// existing app-only Client Credentials flow), dedupes case-insensitively, caps at GIG_POOL_MAX to
+// stay well under the Workers Free-plan 50-subrequest-per-invocation limit (pool + the handful of
+// Spotify calls stays under 30), then looks up each artist's soonest show on Bandsintown.
+// Response is a bare array (not {results:...}/{headlines:...} like the other routes) — the
+// client already consumes GIGS as a plain [{artist,venue,date}] array, this matches that shape
+// exactly rather than making the frontend unwrap a wrapper key.
+async function handleGigs(request, env, ctx) {
+  const cache = caches.default;
+  const cacheKey = new Request(new URL(request.url).toString(), request);
+  const cached = await cache.match(cacheKey);
+  if (cached) return cached;
+
+  try {
+    const userToken = await refreshSpotifyUserAccessToken(env);
+    const topRes = await fetch('https://api.spotify.com/v1/me/top/artists?limit=25&time_range=medium_term', {
+      headers: { Authorization: `Bearer ${userToken}` },
+    });
+    if (!topRes.ok) throw new Error(`Spotify top artists returned ${topRes.status}`);
+    const topData = await topRes.json();
+    const personalArtists = (topData.items || []).map(a => a.name).filter(Boolean);
+
+    const appToken = await getSpotifyToken(env);
+    const playlistRes = await fetch(
+      `https://api.spotify.com/v1/playlists/${SPOTIFY_TOP50_PLAYLIST_ID}/tracks?limit=50`,
+      { headers: { Authorization: `Bearer ${appToken}` } }
+    );
+    if (!playlistRes.ok) throw new Error(`Spotify playlist tracks returned ${playlistRes.status}`);
+    const playlistData = await playlistRes.json();
+    const trendingArtists = (playlistData.items || [])
+      .map(it => it.track && it.track.artists && it.track.artists[0] && it.track.artists[0].name)
+      .filter(Boolean);
+
+    const seen = new Set();
+    const pool = [];
+    for (const name of [...personalArtists, ...trendingArtists]) {
+      const key = name.toLowerCase();
+      if (seen.has(key)) continue;
+      seen.add(key);
+      pool.push(name);
+      if (pool.length >= GIG_POOL_MAX) break;
+    }
+
+    const withShows = await Promise.all(pool.map(async artist => {
+      const show = await fetchBandsintownSoonestShow(artist);
+      return show ? { artist, venue: show.venue, date: show.date } : null;
+    }));
+    const gigs = withShows.filter(Boolean).sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
+
+    const response = new Response(JSON.stringify(gigs), {
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': `public, max-age=${GIGS_CACHE_TTL_SECONDS}`,
+      },
+    });
+    ctx.waitUntil(cache.put(cacheKey, response.clone()));
+    return response;
+  } catch (err) {
+    return new Response(JSON.stringify({ error: err.message }), {
+      status: 502,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+}
+
 // Cloudflare's static-asset serving answers HTTP Range requests with a full 200 instead of a
 // 206, and omits Accept-Ranges. Browsers therefore can't seek into audio that isn't fully
 // buffered yet — clicking the seek bar restarts the track. We route /audio/ through the Worker
@@ -461,6 +652,15 @@ export default {
     }
     if (url.pathname === '/api/sample-search') {
       return handleSampleSearch(request, env, ctx);
+    }
+    if (url.pathname === '/api/spotify/authorize') {
+      return handleSpotifyAuthorize(request, env);
+    }
+    if (url.pathname === '/api/spotify/callback') {
+      return handleSpotifyCallback(request, env);
+    }
+    if (url.pathname === '/api/gigs') {
+      return handleGigs(request, env, ctx);
     }
     if (url.pathname.startsWith('/audio/')) {
       return handleAsset(request, env);
