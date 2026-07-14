@@ -1792,9 +1792,9 @@
     document.documentElement.style.setProperty('--grain', `url(${c.toDataURL()})`);
   })();
 
-  // PLACEHOLDER data — the visual build only. Real wiring later: pull the top-25 tracked artists,
-  // dedup to each artist's soonest upcoming show, sort by date. Shape kept as the eventual seam.
-  const GIGS = [
+  // Fallback only — shown if /api/gigs fails (network error, 502, empty pool). Same shape as the
+  // live response so renderGigs() doesn't need a separate code path for either source.
+  const GIGS_FALLBACK = [
     { artist:'Palace',          venue:'O2 Academy Brixton, London', date:'2026-07-18' },
     { artist:'Parcels',         venue:'Roundhouse, London',         date:'2026-07-22' },
     { artist:'Men I Trust',     venue:'Troxy, London',              date:'2026-07-29' },
@@ -1828,8 +1828,9 @@
   }
 
   const gigList = document.getElementById('gigList');
-  if(gigList){
-    const rows = [...GIGS].sort((a,b) => new Date(a.date) - new Date(b.date));
+  function renderGigs(gigs){
+    if(!gigList) return;
+    const rows = [...gigs].sort((a,b) => new Date(a.date) - new Date(b.date));
     gigList.innerHTML = rows.map(g => `
       <article class="gig-stub">
         <div class="gig-stub-field">Admit One</div>
@@ -1843,6 +1844,19 @@
         </div>
       </article>`).join('');
   }
+  async function loadGigs(){
+    renderGigs(GIGS_FALLBACK);
+    try{
+      const res = await fetch('/api/gigs');
+      if(!res.ok) throw new Error('bad response');
+      const data = await res.json();
+      if(!Array.isArray(data) || !data.length) throw new Error('empty gigs');
+      renderGigs(data);
+    }catch(err){
+      /* leave the fallback list rendered */
+    }
+  }
+  loadGigs();
 
   // Drawer control, all widths — closed by default. One icon opens AND closes — no separate X.
   // Scrim click + Escape are secondary closes.
