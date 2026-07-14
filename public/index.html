@@ -40,7 +40,6 @@
     /* NEW palette token (only addition): warm-biased dark for Gig Finder ticket stubs, so they
        read as "aged stock" against pure --bg. Distinct from --panel (#141414, neutral grey). */
     --rail-panel:#17120E;
-    --rail-w:212px;   /* docked-rail width; 1560 column + 212 ≈ 1772, hence the 1760 breakpoint */
   }
   *{ box-sizing:border-box; }
   html{ scroll-behavior:smooth; }
@@ -139,19 +138,24 @@
   .nav-link.active{ color:#EDC001; }
 
   /* ============ GIG FINDER RAIL ============ */
-  /* Docked ≥1760px: fixed to the right edge, below the sticky header, z BELOW header(40)/nav(45)
-     so it never overlaps the ticker/nav. Below 1760px it becomes an off-canvas drawer toggled by
-     .gig-fab. ONE markup for both — CSS switches docked vs drawer, no duplicated stub list. */
+  /* Drawer at ALL widths now — no permanent docked strip (was cramped, awkward always-on margin).
+     Closed by default, .gig-fab opens it. z BELOW header(40)/nav(45) so open state never competes
+     with them. Narrow width on small screens, wider on desktop once there's room to actually
+     expand into — that width jump lives in the min-width:880px override below. */
   .gig-rail{
-    position:fixed; top:var(--header-h); right:0; z-index:20;
-    width:var(--rail-w); height:calc(100vh - var(--header-h));
+    position:fixed; top:var(--header-h); right:0; z-index:35;
+    width:min(280px, 86vw); height:calc(100vh - var(--header-h));
     background:var(--rail-panel); border-left:1px solid var(--line);
     display:flex; flex-direction:column; font-family:var(--mono);
+    transform:translateX(100%); transition:transform .28s ease;
+  }
+  .gig-rail.open{ transform:translateX(0); }
+  @media (min-width:880px){
+    .gig-rail{ width:min(460px, 34vw); }
   }
   .gig-rail-head{ padding:1.05rem 1rem .85rem; border-bottom:1px solid var(--line); flex-shrink:0; }
   .gig-rail-head .file-no{ font-family:var(--mono); font-size:.62rem; color:var(--dimmer); letter-spacing:.1em; }
-  .gig-rail-head h2{ font-family:var(--display); font-weight:400; text-transform:uppercase; font-size:1.5rem; line-height:.95; margin:.28rem 0 .4rem; }
-  .gig-rail-head p{ font-family:var(--mono); font-size:.58rem; color:var(--dim); letter-spacing:.08em; text-transform:uppercase; margin:0; }
+  .gig-rail-head h2{ font-family:var(--display); font-weight:400; text-transform:uppercase; font-size:1.5rem; line-height:.95; margin:.28rem 0 0; }
   .gig-rail-list{ flex:1; overflow-y:auto; padding:.85rem; display:flex; flex-direction:column; gap:.85rem; }
 
   /* Ticket stub: axis-aligned rectangle (site's no-rotation rule). Ticket cue = dashed perforation
@@ -180,10 +184,10 @@
     opacity:.45;
   }
 
-  /* Toggle FAB + scrim: exist in DOM always, shown only in drawer mode (<1760px). Same 38x38
-     bordered-box style family as .nav-toggle, docked to the RIGHT gap instead of the left. */
+  /* Toggle FAB + scrim: same 38x38 bordered-box style family as .nav-toggle, docked to the RIGHT
+     gap instead of the left. Visible at all widths now — the rail is always a drawer. */
   .gig-fab{
-    position:fixed; z-index:45; display:none;
+    position:fixed; z-index:45; display:flex;
     top:calc(var(--header-h) + var(--nav-gap)); right:var(--nav-gap);
     width:38px; height:38px; padding:0; border:1px solid var(--line); background:var(--bg); color:var(--fg);
     font-family:var(--mono); font-size:1.1rem; line-height:1; cursor:pointer;
@@ -195,15 +199,6 @@
   .gig-scrim{ position:fixed; inset:0; z-index:30; background:rgba(0,0,0,.6); display:none; opacity:0; transition:opacity .25s ease; }
   .gig-scrim.open{ display:block; opacity:1; }
 
-  @media (max-width:1760px){
-    .gig-fab{ display:flex; }
-    /* rail becomes an off-canvas drawer sliding from the right */
-    .gig-rail{
-      z-index:35; width:min(280px, 86vw);
-      transform:translateX(100%); transition:transform .28s ease;
-    }
-    .gig-rail.open{ transform:translateX(0); }
-  }
   @media (prefers-reduced-motion: reduce){
     .gig-rail{ transition:none; } .gig-scrim{ transition:none; }
   }
@@ -951,7 +946,6 @@
     <div class="gig-rail-head">
       <span class="file-no">REF. 05 / GIG FINDER</span>
       <h2>Upcoming</h2>
-      <p>Top 25 tracked</p>
     </div>
     <div class="gig-rail-list" id="gigList"></div>
   </aside>
@@ -1812,8 +1806,8 @@
       </article>`).join('');
   }
 
-  // Drawer control (<1760px). One icon opens AND closes — no separate X. Scrim click + Escape are
-  // secondary closes. Above 1760px the rail is docked by CSS and these do nothing visible.
+  // Drawer control, all widths — closed by default. One icon opens AND closes — no separate X.
+  // Scrim click + Escape are secondary closes.
   const gigFab = document.getElementById('gigFab');
   const gigRail = document.getElementById('gigRail');
   const gigScrim = document.getElementById('gigScrim');
@@ -1827,8 +1821,6 @@
   gigFab.addEventListener('click', () => setGig(!gigRail.classList.contains('open')));
   gigScrim.addEventListener('click', () => setGig(false));
   document.addEventListener('keydown', (e) => { if(e.key === 'Escape') setGig(false); });
-  // Crossing to docked width: clear any drawer state so aria/scrim don't go stale.
-  window.matchMedia('(min-width:1761px)').addEventListener('change', (e) => { if(e.matches) setGig(false); });
 
   const scrollHint = document.querySelector('.scroll-hint');
   if(scrollHint){
