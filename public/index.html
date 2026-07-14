@@ -165,8 +165,11 @@
      drawer. Doubled engraved-line border (inset box-shadow rings) + a real die-cut perforation
      (radial-gradient mask, not a plain dashed line) + a canvas-drawn grain tile push the vintage
      cue much harder than the first pass. No rotation anywhere — that rule still holds. */
+  /* Fixed height, not min-height: every ticket is the same size no matter how long its artist
+     name or venue is — only the text differs, never the box. Long content truncates (ellipsis)
+     instead of wrapping/growing, so badge/barcode land in the same spot on every stub. */
   .gig-stub{
-    position:relative; display:flex; min-height:150px;
+    position:relative; display:flex; height:156px;
     background-color:var(--rail-panel);
     background-image:var(--grain, none); background-repeat:repeat; background-blend-mode:overlay;
     border:1px solid rgba(242,242,240,.32);
@@ -184,19 +187,28 @@
     background-size:100% 18px; background-position:center -9px; background-repeat:repeat-y;
     box-shadow:1px 0 0 rgba(242,242,240,.32);
   }
-  .gig-stub-body{ flex:1; min-width:0; padding:1.1rem 1.3rem 1.2rem; display:flex; flex-direction:column; gap:.3rem; }
+  .gig-stub-body{
+    flex:1; min-width:0; min-height:0; overflow:hidden;
+    padding:1.1rem 1.3rem 1.2rem; display:flex; flex-direction:column; gap:.3rem;
+  }
+  /* flex-shrink:0 + explicit line-height on every truncated flex-column child: overflow:hidden
+     alone removes a flex item's automatic min-height floor, which can crush the line box shorter
+     than the text needs (see project_known_bugs_and_gotchas.md) — flex-shrink:0 stops the
+     algorithm claiming less space than intended, generous line-height stops the glyphs clipping
+     inside whatever space it does get. */
   .gig-artist{
     font-family:var(--display); font-weight:400; text-transform:uppercase; color:var(--fg);
-    font-size:clamp(1.7rem, 4.2vw, 2.4rem); line-height:.92; margin:0 0 .1rem; text-wrap:balance;
+    font-size:clamp(1.7rem, 4.2vw, 2.4rem); line-height:1.15; margin:0 0 .1rem;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex-shrink:0;
   }
-  /* Plain text flow, not flex: a flex row gives the venue span a full flex-line's width even when
-     it wraps internally, shoving the date item onto its own line below — normal inline text flow
-     lets the date sit right after wherever the venue's last line ends, or wrap only if it truly
-     doesn't fit. Long venue names (real Ticketmaster data, not the old placeholder) exposed this. */
-  .gig-meta{ font-family:var(--mono); font-size:.76rem; line-height:1.5; color:var(--dim); }
-  .gig-meta .gig-venue{ color:var(--fg); }
-  .gig-meta span + span::before{ content:'  \00b7  '; }
-  .gig-foot{ margin-top:auto; display:flex; align-items:center; justify-content:space-between; gap:1.1rem; padding-top:.9rem; }
+  .gig-meta{
+    display:flex; align-items:baseline; gap:.5rem; font-family:var(--mono); font-size:.76rem;
+    line-height:1.4; color:var(--dim); flex-shrink:0; overflow:hidden;
+  }
+  .gig-meta .gig-venue{ color:var(--fg); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; }
+  .gig-meta span + span{ flex-shrink:0; white-space:nowrap; }
+  .gig-meta span + span::before{ content:'\00b7'; margin-right:.4em; }
+  .gig-foot{ margin-top:auto; flex-shrink:0; display:flex; align-items:center; justify-content:space-between; gap:1.1rem; padding-top:.9rem; }
   .gig-badge{
     font-family:var(--mono); font-weight:700; font-size:.72rem; letter-spacing:.05em; text-transform:uppercase;
     background:#EDC001; color:#000; border:1px solid #EDC001; padding:.35rem .7rem;   /* amber stamp-ink accent */
