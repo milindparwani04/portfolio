@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sounds Like — PARWANI</title>
+<meta name="description" content="Input a song, weight nine audio features by ear, and re-rank a corpus by how much each trait counts toward 'similar'. You author the metric.">
+<link rel="canonical" href="https://milindparwani.com/sounds-like">
+<meta property="og:url" content="https://milindparwani.com/sounds-like">
+<meta property="og:title" content="Sounds Like — a song-similarity metric you tune by ear">
+<meta property="og:description" content="Input a song, weight nine audio features by ear, and re-rank a corpus by how much each trait counts toward 'similar'. You author the metric.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Milind Parwani">
+<meta property="og:image" content="https://milindparwani.com/og.png?v=2">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0A0A0A;
+    --panel:#141414;
+    --fg:#F2F2F0;
+    --dim:#8A8A85;
+    --dimmer:#4A4A46;
+    --line: rgba(242,242,240,0.14);
+    --amber:#EDC001;
+
+    --display:'Anton', sans-serif;
+    --mono:'IBM Plex Mono', monospace;
+    --sans:'Inter', sans-serif;
+  }
+  *{ box-sizing:border-box; }
+  body{
+    margin:0; background:var(--bg); color:var(--fg);
+    font-family:var(--sans); -webkit-font-smoothing:antialiased;
+  }
+
+  .sl-topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:1.2rem clamp(1.2rem,4vw,3rem); border-bottom:1px solid var(--line);
+  }
+  .sl-back{
+    display:inline-flex; align-items:center; gap:.5rem; font-family:var(--mono); font-size:.78rem;
+    text-transform:uppercase; letter-spacing:.06em; color:var(--dim); text-decoration:none;
+    transition:color .2s;
+  }
+  .sl-back:hover{ color:var(--fg); }
+  .sl-topbar .file-no{ font-family:var(--mono); font-size:.7rem; color:var(--dimmer); letter-spacing:.1em; text-transform:uppercase; }
+
+  .sl-page{ max-width:1160px; margin:0 auto; padding:clamp(2rem,5vw,3.6rem) clamp(1.2rem,4vw,3rem) 5rem; }
+  .sl-page h1{ font-family:var(--display); font-weight:400; text-transform:uppercase; font-size:clamp(2.2rem,6vw,3.6rem); line-height:.95; margin:.6rem 0 1.1rem; }
+  .sl-intro{ font-family:var(--sans); color:var(--dim); font-size:1rem; line-height:1.65; max-width:70ch; margin:0 0 2.4rem; }
+  .sl-intro b{ color:var(--fg); font-weight:600; }
+  .sl-label{ font-family:var(--mono); font-size:.7rem; color:var(--dimmer); letter-spacing:.1em; text-transform:uppercase; }
+
+  /* seed search */
+  .sl-search{ display:flex; gap:.7rem; flex-wrap:wrap; margin-bottom:.7rem; }
+  .sl-input{
+    flex:1; min-width:220px; font-family:var(--mono); font-size:.92rem; color:var(--fg); background:var(--panel);
+    border:1px solid var(--line); padding:.8rem .9rem; outline:none; transition:border-color .2s;
+  }
+  .sl-input:focus{ border-color:var(--fg); }
+  .sl-btn{
+    font-family:var(--mono); font-size:.78rem; text-transform:uppercase; letter-spacing:.08em;
+    padding:.8rem 1.8rem; border:1px solid var(--line); color:var(--dim); background:none; cursor:pointer;
+    transition:border-color .2s, color .2s;
+  }
+  .sl-btn:hover{ border-color:var(--fg); color:var(--fg); }
+  .sl-btn.solid{ background:var(--fg); color:var(--bg); border-color:var(--fg); }
+  .sl-btn.solid:hover{ background:var(--dim); border-color:var(--dim); }
+  .sl-btn:disabled{ opacity:.5; cursor:default; }
+  .sl-seedline{ font-family:var(--mono); font-size:.78rem; color:var(--dim); min-height:1.2em; margin-bottom:2rem; letter-spacing:.02em; }
+  .sl-seedline b{ color:var(--amber); font-weight:500; }
+
+  /* layout: weights left, results right */
+  .sl-grid{ display:grid; grid-template-columns:340px 1fr; gap:1px; background:var(--line); border:1px solid var(--line); }
+  .sl-col{ background:var(--bg); padding:clamp(1.3rem,3vw,2rem); }
+  @media (max-width:820px){ .sl-grid{ grid-template-columns:1fr; } }
+
+  .sl-col-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:1.3rem; }
+
+  /* sliders */
+  .sl-weight{ margin-bottom:1.1rem; }
+  .sl-weight-top{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:.4rem; }
+  .sl-weight-name{ font-family:var(--mono); font-size:.74rem; color:var(--fg); text-transform:uppercase; letter-spacing:.04em; }
+  .sl-weight-val{ font-family:var(--mono); font-size:.72rem; color:var(--amber); }
+  .sl-weight-val.zero{ color:var(--dimmer); }
+  .sl-range{ -webkit-appearance:none; appearance:none; width:100%; height:2px; background:var(--line); outline:none; margin:0; }
+  .sl-range::-webkit-slider-thumb{ -webkit-appearance:none; appearance:none; width:14px; height:14px; background:var(--fg); border:none; cursor:pointer; }
+  .sl-range::-moz-range-thumb{ width:14px; height:14px; background:var(--fg); border:none; border-radius:0; cursor:pointer; }
+
+  /* results */
+  .sl-result{
+    display:flex; justify-content:space-between; align-items:flex-start; gap:1rem;
+    padding:1rem 0; border-bottom:1px solid var(--line);
+  }
+  .sl-result:last-child{ border-bottom:none; }
+  .sl-rank{ font-family:var(--mono); font-size:.8rem; color:var(--dimmer); width:2rem; flex-shrink:0; padding-top:.15rem; }
+  .sl-r-info{ flex:1; min-width:0; }
+  .sl-r-title{ font-family:var(--sans); font-weight:600; font-size:.98rem; color:var(--fg); }
+  .sl-r-artist{ font-family:var(--sans); font-size:.84rem; color:var(--dim); margin-top:.1rem; }
+  .sl-why{ display:flex; gap:.4rem; flex-wrap:wrap; margin-top:.5rem; }
+  .sl-tag{
+    font-family:var(--mono); font-size:.6rem; text-transform:uppercase; letter-spacing:.05em;
+    color:var(--dim); border:1px solid var(--line); padding:.2rem .45rem;
+  }
+  .sl-score{ font-family:var(--mono); font-size:.78rem; color:var(--dim); flex-shrink:0; padding-top:.15rem; }
+  .sl-empty{ font-family:var(--mono); font-size:.78rem; color:var(--dimmer); letter-spacing:.03em; }
+
+  .sl-note{ font-family:var(--mono); font-size:.66rem; color:var(--dimmer); letter-spacing:.03em; margin-top:1.4rem; line-height:1.7; }
+</style>
+</head>
+<body>
+
+<div class="sl-topbar">
+  <a href="index.html" class="sl-back">&#8592; Back to site</a>
+  <span class="file-no">REF. 02.01 / SOUNDS LIKE</span>
+</div>
+
+<div class="sl-page">
+  <span class="sl-label">Music project</span>
+  <h1>Sounds Like</h1>
+  <p class="sl-intro">Name a song, then decide <b>how much each trait counts</b>. Nine audio features &mdash; danceability, energy, mood, and the rest &mdash; each on a weight slider. Drag one up and the ranking re-sorts live: you author what &ldquo;similar&rdquo; means, the machine measures the distance. Matched against a <b id="sl-corpus-n">&hellip;</b>-track corpus.</p>
+
+  <form class="sl-search" id="sl-form">
+    <input class="sl-input" id="sl-query" type="text" placeholder="e.g. wicked game chris isaak" autocomplete="off">
+    <button class="sl-btn solid" id="sl-search" type="submit">Find seed</button>
+  </form>
+  <div class="sl-seedline" id="sl-seedline">Enter a song to set the seed.</div>
+
+  <div class="sl-grid">
+    <div class="sl-col">
+      <div class="sl-col-head">
+        <span class="sl-label">Feature weights</span>
+        <button class="sl-btn" id="sl-reset" type="button">Reset</button>
+      </div>
+      <div id="sl-weights"></div>
+      <div class="sl-note">All equal = rank by overall closeness. Zero a slider to ignore that trait entirely. Weights persist on this device.</div>
+    </div>
+    <div class="sl-col">
+      <div class="sl-col-head">
+        <span class="sl-label">Closest matches</span>
+        <span class="sl-label" id="sl-count"></span>
+      </div>
+      <div id="sl-results"><span class="sl-empty">Set a seed to rank the corpus.</span></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var FEATURES = ["danceability","energy","valence","acousticness","instrumentalness","liveness","speechiness","loudness","tempo"];
+  var LABELS = {
+    danceability:"Danceability", energy:"Energy", valence:"Mood", acousticness:"Acoustic",
+    instrumentalness:"Instrumental", liveness:"Liveness", speechiness:"Speechiness",
+    loudness:"Loudness", tempo:"Tempo"
+  };
+  var TOPN = 20, WKEY = 'soundslike_weights';
+
+  var elWeights = document.getElementById('sl-weights');
+  var elResults = document.getElementById('sl-results');
+  var elCount = document.getElementById('sl-count');
+  var elSeedline = document.getElementById('sl-seedline');
+  var elForm = document.getElementById('sl-form');
+  var elQuery = document.getElementById('sl-query');
+  var elSearch = document.getElementById('sl-search');
+  var elReset = document.getElementById('sl-reset');
+  var elCorpusN = document.getElementById('sl-corpus-n');
+
+  var corpus = null;     // {norm, features, songs}
+  var seed = null;       // {title, artist, spotifyId, vec[9]}
+  var weights = FEATURES.map(function(){ return 1; });
+
+  // ---- weights persistence ----
+  try {
+    var saved = JSON.parse(localStorage.getItem(WKEY));
+    if (Array.isArray(saved) && saved.length === FEATURES.length) {
+      weights = saved.map(function(w){ var n = Number(w); return (isFinite(n) && n >= 0 && n <= 1) ? n : 1; });
+    }
+  } catch(e){}
+  function saveWeights(){ try { localStorage.setItem(WKEY, JSON.stringify(weights)); } catch(e){} }
+
+  // ---- normalize a raw feature value using corpus norm params ----
+  function normFeature(name, raw){
+    if (name === 'tempo' || name === 'loudness'){
+      var p = corpus.norm[name];
+      if (!p || p.max === p.min) return 0;
+      var v = (raw - p.min) / (p.max - p.min);
+      return v < 0 ? 0 : (v > 1 ? 1 : v);
+    }
+    // already 0..1
+    return raw < 0 ? 0 : (raw > 1 ? 1 : raw);
+  }
+  function seedVec(features){
+    return FEATURES.map(function(f){ return normFeature(f, features[f]); });
+  }
+
+  // ---- build slider UI ----
+  var valEls = [];
+  function buildWeights(){
+    elWeights.innerHTML = '';
+    valEls = [];
+    FEATURES.forEach(function(f, i){
+      var wrap = document.createElement('div');
+      wrap.className = 'sl-weight';
+
+      var top = document.createElement('div');
+      top.className = 'sl-weight-top';
+      var name = document.createElement('span');
+      name.className = 'sl-weight-name';
+      name.textContent = LABELS[f];
+      var val = document.createElement('span');
+      val.className = 'sl-weight-val';
+      top.append(name, val);
+
+      var range = document.createElement('input');
+      range.className = 'sl-range';
+      range.type = 'range';
+      range.min = '0'; range.max = '1'; range.step = '0.05';
+      range.value = String(weights[i]);
+      range.setAttribute('aria-label', LABELS[f] + ' weight');
+      range.addEventListener('input', function(){
+        weights[i] = Number(range.value);
+        updateWeightLabel(i);
+        saveWeights();
+        rank();
+      });
+
+      wrap.append(top, range);
+      elWeights.appendChild(wrap);
+      valEls.push(val);
+      updateWeightLabel(i);
+    });
+  }
+  function updateWeightLabel(i){
+    var v = weights[i];
+    valEls[i].textContent = v.toFixed(2);
+    valEls[i].className = 'sl-weight-val' + (v === 0 ? ' zero' : '');
+  }
+
+  // ---- ranking ----
+  function rank(){
+    if (!corpus || !seed){ return; }
+    var wsum = weights.reduce(function(a,b){ return a + b; }, 0);
+    if (wsum === 0){
+      elResults.innerHTML = '<span class="sl-empty">All weights are zero — raise at least one to rank.</span>';
+      elCount.textContent = '';
+      return;
+    }
+    // typical per-feature gap to the seed across the whole corpus — a match that beats
+    // this is distinctively close, vs. a feature that's near-constant for every song
+    var typ = FEATURES.map(function(){ return 0; });
+    for (var s = 0; s < corpus.songs.length; s++){
+      for (var f = 0; f < FEATURES.length; f++){
+        typ[f] += Math.abs(seed.vec[f] - corpus.songs[s].vec[f]);
+      }
+    }
+    for (var f2 = 0; f2 < FEATURES.length; f2++){ typ[f2] /= corpus.songs.length; }
+
+    var scored = [];
+    for (var s2 = 0; s2 < corpus.songs.length; s2++){
+      var song = corpus.songs[s2];
+      if (seed.spotifyId && song.spotifyId === seed.spotifyId) continue; // exclude seed itself
+      var sum = 0, contrib = [];
+      for (var f3 = 0; f3 < FEATURES.length; f3++){
+        var diff = seed.vec[f3] - song.vec[f3];
+        sum += weights[f3] * diff * diff;
+        // advantage > 0 means this song is closer than average on this feature
+        contrib.push({ f: f3, advantage: weights[f3] * (typ[f3] - Math.abs(diff)), active: weights[f3] > 0 });
+      }
+      scored.push({ song: song, dist: Math.sqrt(sum), contrib: contrib });
+    }
+    scored.sort(function(a,b){ return a.dist - b.dist; });
+    render(scored.slice(0, TOPN));
+    elCount.textContent = Math.min(TOPN, scored.length) + ' / ' + corpus.songs.length;
+  }
+
+  // strongest-match tags: active features where this song beats the typical gap most
+  function whyTags(entry){
+    var active = entry.contrib.filter(function(c){ return c.active && c.advantage > 0; });
+    active.sort(function(a,b){ return b.advantage - a.advantage; });
+    return active.slice(0, 3).map(function(c){ return LABELS[FEATURES[c.f]]; });
+  }
+
+  function render(list){
+    elResults.innerHTML = '';
+    if (!list.length){
+      elResults.innerHTML = '<span class="sl-empty">No matches.</span>';
+      return;
+    }
+    list.forEach(function(entry, idx){
+      var row = document.createElement('div');
+      row.className = 'sl-result';
+
+      var rank = document.createElement('div');
+      rank.className = 'sl-rank';
+      rank.textContent = String(idx + 1).padStart(2, '0');
+
+      var info = document.createElement('div');
+      info.className = 'sl-r-info';
+      var title = document.createElement('div');
+      title.className = 'sl-r-title';
+      title.textContent = entry.song.title || 'Untitled';
+      var artist = document.createElement('div');
+      artist.className = 'sl-r-artist';
+      artist.textContent = entry.song.artist || '';
+      info.append(title, artist);
+
+      var why = document.createElement('div');
+      why.className = 'sl-why';
+      whyTags(entry).forEach(function(name){
+        var tag = document.createElement('span');
+        tag.className = 'sl-tag';
+        tag.textContent = name;
+        why.appendChild(tag);
+      });
+      info.appendChild(why);
+
+      var score = document.createElement('div');
+      score.className = 'sl-score';
+      score.textContent = entry.dist.toFixed(3);
+
+      row.append(rank, info, score);
+      elResults.appendChild(row);
+    });
+  }
+
+  // ---- seed lookup ----
+  function setSeedline(html){ elSeedline.innerHTML = html; }
+  async function findSeed(){
+    var q = elQuery.value.trim();
+    if (!q) return;
+    if (!corpus){ setSeedline('Corpus still loading — try again in a moment.'); return; }
+    elSearch.disabled = true;
+    setSeedline('Looking up &ldquo;' + q.replace(/</g,'&lt;') + '&rdquo;&hellip;');
+    try {
+      var res = await fetch('/api/audio-features?q=' + encodeURIComponent(q));
+      var data = await res.json();
+      if (!res.ok || !data.features) throw new Error(data.error || ('Lookup failed (' + res.status + ')'));
+      seed = {
+        title: data.match.title, artist: data.match.artist, spotifyId: data.match.spotifyId,
+        vec: seedVec(data.features)
+      };
+      setSeedline('Seed: <b>' + (seed.title || '?') + '</b> — ' + (seed.artist || '') );
+      rank();
+    } catch(e){
+      setSeedline('Lookup unavailable right now — try again in a moment.');
+    } finally {
+      elSearch.disabled = false;
+    }
+  }
+
+  elForm.addEventListener('submit', function(e){ e.preventDefault(); findSeed(); });
+  elReset.addEventListener('click', function(){
+    weights = FEATURES.map(function(){ return 1; });
+    saveWeights();
+    buildWeights();
+    rank();
+  });
+
+  // ---- boot ----
+  buildWeights();
+  fetch('sounds-like-corpus.json')
+    .then(function(r){ if(!r.ok) throw new Error('corpus ' + r.status); return r.json(); })
+    .then(function(json){
+      corpus = json;
+      if (elCorpusN) elCorpusN.textContent = String(json.songs.length);
+    })
+    .catch(function(){
+      elResults.innerHTML = '<span class="sl-empty">Couldn’t load the song corpus. Reload to retry.</span>';
+      if (elCorpusN) elCorpusN.textContent = '?';
+    });
+})();
+</script>
+
+</body>
+</html>
