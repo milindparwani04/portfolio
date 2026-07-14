@@ -138,50 +138,68 @@
   .nav-link.active{ color:#EDC001; }
 
   /* ============ GIG FINDER RAIL ============ */
-  /* Drawer at ALL widths now — no permanent docked strip (was cramped, awkward always-on margin).
-     Closed by default, .gig-fab opens it. z BELOW header(40)/nav(45) so open state never competes
-     with them. Narrow width on small screens, wider on desktop once there's room to actually
-     expand into — that width jump lives in the min-width:880px override below. */
+  /* Drawer at ALL widths — no permanent docked strip. Closed by default, .gig-fab opens it. z
+     BELOW header(40)/nav(45) so open state never competes with them. "Wide Format" stub direction
+     (mockup-approved 2026-07-14) needs real room to breathe, so this is a wider drawer than the
+     first cut: narrow-but-workable on small screens, a genuine wide panel once there's room —
+     that jump lives in the min-width:880px override below. */
   .gig-rail{
     position:fixed; top:var(--header-h); right:0; z-index:35;
-    width:min(280px, 86vw); height:calc(100vh - var(--header-h));
-    background:var(--rail-panel); border-left:1px solid var(--line);
+    width:min(340px, 90vw); height:calc(100vh - var(--header-h));
+    background:var(--bg); border-left:1px solid var(--line);
     display:flex; flex-direction:column; font-family:var(--mono);
     transform:translateX(100%); transition:transform .28s ease;
   }
   .gig-rail.open{ transform:translateX(0); }
   @media (min-width:880px){
-    .gig-rail{ width:min(460px, 34vw); }
+    .gig-rail{ width:min(640px, 42vw); }
   }
-  .gig-rail-head{ padding:1.05rem 1rem .85rem; border-bottom:1px solid var(--line); flex-shrink:0; }
-  .gig-rail-head .file-no{ font-family:var(--mono); font-size:.62rem; color:var(--dimmer); letter-spacing:.1em; }
-  .gig-rail-head h2{ font-family:var(--display); font-weight:400; text-transform:uppercase; font-size:1.5rem; line-height:.95; margin:.28rem 0 0; }
-  .gig-rail-list{ flex:1; overflow-y:auto; padding:.85rem; display:flex; flex-direction:column; gap:.85rem; }
+  .gig-rail-head{ padding:1.4rem 1.4rem 1.1rem; border-bottom:1px solid var(--line); flex-shrink:0; }
+  .gig-rail-head .file-no{ font-family:var(--mono); font-size:.66rem; color:var(--dimmer); letter-spacing:.1em; }
+  .gig-rail-head h2{ font-family:var(--display); font-weight:400; text-transform:uppercase; font-size:1.9rem; line-height:.95; margin:.32rem 0 0; }
+  .gig-rail-list{ flex:1; overflow-y:auto; padding:1.4rem; display:flex; flex-direction:column; gap:1.3rem; }
 
-  /* Ticket stub: axis-aligned rectangle (site's no-rotation rule). Ticket cue = dashed perforation
-     between the vertical field strip and the body + a decorative barcode strip, NOT card rotation. */
-  .gig-stub{ position:relative; display:flex; min-height:82px; background:var(--bg); border:1px solid var(--line); }
-  .gig-stub-field{
-    writing-mode:vertical-rl; text-orientation:mixed;
-    font-size:.5rem; letter-spacing:.24em; text-transform:uppercase; color:var(--dimmer);
-    display:flex; align-items:center; justify-content:center; padding:.35rem .1rem; flex-shrink:0;
-    border-right:1px dashed var(--line);   /* the perforated tear-line */
+  /* Ticket stub, "Wide Format": axis-aligned rectangle (site's no-rotation rule) sitting on the
+     rail's black void — the stub itself carries --rail-panel now (was the other way round), so
+     each ticket reads as a distinct warm object rather than a same-color cell in a same-color
+     drawer. Doubled engraved-line border (inset box-shadow rings) + a real die-cut perforation
+     (radial-gradient mask, not a plain dashed line) + a canvas-drawn grain tile push the vintage
+     cue much harder than the first pass. No rotation anywhere — that rule still holds. */
+  .gig-stub{
+    position:relative; display:flex; min-height:150px;
+    background-color:var(--rail-panel);
+    background-image:var(--grain, none); background-repeat:repeat; background-blend-mode:overlay;
+    border:1px solid rgba(242,242,240,.32);
+    box-shadow:inset 0 0 0 4px var(--bg), inset 0 0 0 5px rgba(242,242,240,.32);
   }
-  .gig-stub-body{ flex:1; min-width:0; padding:.5rem .6rem .5rem; display:flex; flex-direction:column; gap:.12rem; }
-  /* flex-shrink:0 on all: overflow:hidden (for ellipsis) removes a flex item's automatic
-     min-height floor in a column container, so without this it can shrink below one line of
-     text and clip it — not just truncate at the ellipsis, actually crush the line box. */
-  .gig-artist{ font-family:var(--sans); font-weight:600; font-size:.82rem; line-height:1.3; color:var(--fg); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex-shrink:0; }
-  .gig-venue,.gig-date{ font-family:var(--mono); font-size:.58rem; line-height:1.5; color:var(--dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex-shrink:0; }
+  .gig-stub-field{
+    writing-mode:vertical-rl; text-orientation:mixed; flex-shrink:0; position:relative;
+    font-family:var(--mono); font-size:.68rem; font-weight:700; letter-spacing:.34em; text-transform:uppercase;
+    color:var(--dimmer); display:flex; align-items:center; justify-content:center; padding:0 .3rem;
+  }
+  .gig-stub-field::after{
+    /* the perforated tear-line: a column of punched-out circles, not a dashed rule */
+    content:''; position:absolute; top:0; right:0; bottom:0; width:1px;
+    background-image:radial-gradient(circle 4px, var(--bg) 4px, transparent 4.5px);
+    background-size:100% 18px; background-position:center -9px; background-repeat:repeat-y;
+    box-shadow:1px 0 0 rgba(242,242,240,.32);
+  }
+  .gig-stub-body{ flex:1; min-width:0; padding:1.1rem 1.3rem 1.2rem; display:flex; flex-direction:column; gap:.3rem; }
+  .gig-artist{
+    font-family:var(--display); font-weight:400; text-transform:uppercase; color:var(--fg);
+    font-size:clamp(1.7rem, 4.2vw, 2.4rem); line-height:.92; margin:0 0 .1rem; text-wrap:balance;
+  }
+  .gig-meta{ font-family:var(--mono); font-size:.76rem; color:var(--dim); display:flex; flex-wrap:wrap; gap:.15rem .7rem; }
+  .gig-meta .gig-venue{ color:var(--fg); }
+  .gig-foot{ margin-top:auto; display:flex; align-items:flex-end; justify-content:space-between; gap:1.1rem; padding-top:.9rem; }
   .gig-badge{
-    align-self:flex-start; margin-top:.3rem;
-    font-family:var(--mono); font-size:.54rem; font-weight:700; letter-spacing:.05em; text-transform:uppercase;
-    background:#EDC001; color:#000; padding:.1rem .4rem;   /* amber stamp-ink accent */
+    font-family:var(--mono); font-weight:700; font-size:.72rem; letter-spacing:.05em; text-transform:uppercase;
+    background:#EDC001; color:#000; border:1px solid #EDC001; padding:.35rem .7rem;   /* amber stamp-ink accent */
   }
   .gig-barcode{
-    height:13px; margin-top:.45rem;
-    background:repeating-linear-gradient(90deg, var(--fg) 0 1px, transparent 1px, transparent 3px);
-    opacity:.45;
+    flex:1; max-width:160px; height:24px;
+    background:repeating-linear-gradient(90deg, var(--fg) 0 2px, transparent 2px, transparent 3px, var(--fg) 3px, transparent 4px, transparent 5px, var(--fg) 5px, transparent 5px, transparent 8px);
+    opacity:.5;
   }
 
   /* Toggle FAB + scrim: same 38x38 bordered-box style family as .nav-toggle, docked to the RIGHT
@@ -1755,6 +1773,25 @@
   spySections.forEach(sec => spyObserver.observe(sec));
 
   /* ============ GIG FINDER RAIL ============ */
+  // Small tileable noise texture, drawn once to a canvas and read back as a data URL, then exposed
+  // as --grain for .gig-stub's background-image (blend-mode:overlay tints it with --rail-panel
+  // underneath). Reads as aged ticket stock instead of a flat fill. Cheap — one 96x96 draw, not a
+  // per-stub cost. --grain falls back to `none` in CSS if this never runs for any reason.
+  (function initGigGrain(){
+    const size = 96;
+    const c = document.createElement('canvas');
+    c.width = size; c.height = size;
+    const ctx = c.getContext('2d');
+    if(!ctx) return;
+    const img = ctx.createImageData(size, size);
+    for(let i = 0; i < img.data.length; i += 4){
+      const a = Math.random() * 14; // low alpha: subtle grain, not static
+      img.data[i] = 255; img.data[i+1] = 255; img.data[i+2] = 255; img.data[i+3] = a;
+    }
+    ctx.putImageData(img, 0, 0);
+    document.documentElement.style.setProperty('--grain', `url(${c.toDataURL()})`);
+  })();
+
   // PLACEHOLDER data — the visual build only. Real wiring later: pull the top-25 tracked artists,
   // dedup to each artist's soonest upcoming show, sort by date. Shape kept as the eventual seam.
   const GIGS = [
@@ -1797,11 +1834,12 @@
       <article class="gig-stub">
         <div class="gig-stub-field">Admit One</div>
         <div class="gig-stub-body">
-          <span class="gig-artist">${escapeHtml(g.artist)}</span>
-          <span class="gig-venue">${escapeHtml(g.venue)}</span>
-          <span class="gig-date">${fmtDate(g.date)}</span>
-          <span class="gig-badge">${badgeText(daysAway(g.date))}</span>
-          <span class="gig-barcode"></span>
+          <h3 class="gig-artist">${escapeHtml(g.artist)}</h3>
+          <div class="gig-meta"><span class="gig-venue">${escapeHtml(g.venue)}</span><span>${fmtDate(g.date)}</span></div>
+          <div class="gig-foot">
+            <span class="gig-badge">${badgeText(daysAway(g.date))}</span>
+            <span class="gig-barcode"></span>
+          </div>
         </div>
       </article>`).join('');
   }
