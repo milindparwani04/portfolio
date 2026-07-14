@@ -391,10 +391,13 @@ async function handleSampleSearch(request, env, ctx) {
 }
 
 const SPOTIFY_REDIRECT_URI = 'https://milindparwani.com/api/spotify/callback';
-// Spotify killed its public Charts API — Global Top 50 is the standard workaround for "what's
-// trending right now": a Spotify-curated editorial playlist, readable via the existing
-// Client Credentials app token (no user auth needed for this half of the artist pool).
-const SPOTIFY_TOP50_PLAYLIST_ID = '37i9dQZEVXbMDoHDwVN2tF';
+// Spotify killed its public Charts API, and — confirmed against Spotify's own docs, not just
+// trial-and-error — /v1/playlists/{id}/tracks is restricted to playlists owned by or
+// collaborated on by the authenticated user, for ANY auth type. That kills "read a curated
+// editorial playlist via Client Credentials" as an approach entirely, not just for Spotify-owned
+// playlists. Last.fm's chart.gettopartists (public, free API key, no OAuth) is the replacement
+// trending source — a genuine global top-artists chart, not a workaround.
+const LASTFM_API_BASE = 'https://ws.audioscrobbler.com/2.0/';
 // Bandsintown's app_id is just a self-reported identifier, not a real credential — no signup,
 // no key, no partner approval, unlike Songkick/Ticketmaster.
 const BANDSINTOWN_APP_ID = 'parwani-portfolio';
@@ -516,14 +519,21 @@ async function fetchBandsintownSoonestShow(artistName) {
 }
 
 // Backs the Gig Finder rail. Mixes two artist sources into one pool (personal Spotify top
-// artists via the user-auth flow above, plus Spotify's Global Top 50 editorial playlist via the
-// existing app-only Client Credentials flow), dedupes case-insensitively, caps at GIG_POOL_MAX to
-// stay well under the Workers Free-plan 50-subrequest-per-invocation limit (pool + the handful of
-// Spotify calls stays under 30), then looks up each artist's soonest show on Bandsintown.
+// artists via the user-auth flow above, plus Last.fm's global top-artists chart for the
+// trending half), dedupes case-insensitively, caps at GIG_POOL_MAX to stay well under the
+// Workers Free-plan 50-subrequest-per-invocation limit (pool + the handful of Spotify/Last.fm
+// calls stays under 30), then looks up each artist's soonest show on Bandsintown.
 // Response is a bare array (not {results:...}/{headlines:...} like the other routes) — the
 // client already consumes GIGS as a plain [{artist,venue,date}] array, this matches that shape
 // exactly rather than making the frontend unwrap a wrapper key.
 async function handleGigs(request, env, ctx) {
+  if (!env.LASTFM_API_KEY) {
+    return new Response(JSON.stringify({ error: 'Lookup is not configured' }), {
+      status: 503,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
   const cache = caches.default;
   const cacheKey = new Request(new URL(request.url).toString(), request);
   const cached = await cache.match(cacheKey);
@@ -538,15 +548,13 @@ async function handleGigs(request, env, ctx) {
     const topData = await topRes.json();
     const personalArtists = (topData.items || []).map(a => a.name).filter(Boolean);
 
-    const appToken = await getSpotifyToken(env);
-    const playlistRes = await fetch(
-      `https://api.spotify.com/v1/playlists/${SPOTIFY_TOP50_PLAYLIST_ID}/tracks?limit=50`,
-      { headers: { Authorization: `Bearer ${appToken}` } }
+    const lastfmRes = await fetch(
+      `${LASTFM_API_BASE}?method=chart.gettopartists&api_key=${env.LASTFM_API_KEY}&format=json&limit=25`
     );
-    if (!playlistRes.ok) throw new Error(`Spotify playlist tracks returned ${playlistRes.status}`);
-    const playlistData = await playlistRes.json();
-    const trendingArtists = (playlistData.items || [])
-      .map(it => it.track && it.track.artists && it.track.artists[0] && it.track.artists[0].name)
+    if (!lastfmRes.ok) throw new Error(`Last.fm chart.gettopartists returned ${lastfmRes.status}`);
+    const lastfmData = await lastfmRes.json();
+    const trendingArtists = ((lastfmData.artists && lastfmData.artists.artist) || [])
+      .map(a => a.name)
       .filter(Boolean);
 
     const seen = new Set();
