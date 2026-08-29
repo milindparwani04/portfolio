@@ -153,6 +153,25 @@
 
 <script>
 (function(){
+  // Temporarily disabled (2026-08-09) — flip to false to re-enable. Everything
+  // below is untouched; this just short-circuits before any wiring happens.
+  var DISABLED = true;
+  if (DISABLED) {
+    var page = document.querySelector('.sl-page');
+    if (page) {
+      var notice = document.createElement('div');
+      notice.style.cssText = 'font-family:var(--mono);font-size:.85rem;color:var(--dim);border:1px solid var(--line);padding:1.5rem;margin-top:1rem;';
+      notice.textContent = 'Sounds Like is temporarily unavailable. Check back soon.';
+      var grid = document.querySelector('.sl-grid');
+      if (grid) grid.replaceWith(notice); else page.appendChild(notice);
+    }
+    var form = document.getElementById('sl-form');
+    if (form) form.style.display = 'none';
+    var seedline = document.getElementById('sl-seedline');
+    if (seedline) seedline.style.display = 'none';
+    return;
+  }
+
   var FEATURES = ["danceability","energy","valence","acousticness","instrumentalness","liveness","speechiness","loudness","tempo"];
   var LABELS = {
     danceability:"Danceability", energy:"Energy", valence:"Mood", acousticness:"Acoustic",

@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RELAY — PARWANI</title>
+<meta name="description" content="A daily puzzle — place mirrors to guide a beam through crystals and out the exit, within your mirror budget. One new puzzle every day.">
+<link rel="canonical" href="https://milindparwani.com/relay">
+<meta property="og:url" content="https://milindparwani.com/relay">
+<meta property="og:title" content="RELAY — a daily mirror puzzle">
+<meta property="og:description" content="Place mirrors to guide a beam through crystals and out the exit, within your mirror budget. One new puzzle every day.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Milind Parwani">
+<meta property="og:image" content="https://milindparwani.com/og.png?v=2">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0A0A0A;
+    --panel:#141414;
+    --fg:#F2F2F0;
+    --dim:#8A8A85;
+    --dimmer:#4A4A46;
+    --line: rgba(242,242,240,0.14);
+    --amber:#EDC001;
+
+    --display:'Anton', sans-serif;
+    --mono:'IBM Plex Mono', monospace;
+    --sans:'Inter', sans-serif;
+  }
+  *{ box-sizing:border-box; }
+  body{
+    margin:0; background:var(--bg); color:var(--fg);
+    font-family:var(--sans); -webkit-font-smoothing:antialiased;
+  }
+
+  .ry-topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:1.2rem clamp(1.2rem,4vw,3rem); border-bottom:1px solid var(--line);
+  }
+  .ry-back{
+    display:inline-flex; align-items:center; gap:.5rem; font-family:var(--mono); font-size:.78rem;
+    text-transform:uppercase; letter-spacing:.06em; color:var(--dim); text-decoration:none;
+    transition:color .2s;
+  }
+  .ry-back:hover{ color:var(--fg); }
+  .ry-topbar .file-no{ font-family:var(--mono); font-size:.7rem; color:var(--dimmer); letter-spacing:.1em; text-transform:uppercase; }
+
+  .ry-page{ max-width:1160px; margin:0 auto; padding:clamp(2rem,5vw,3.6rem) clamp(1.2rem,4vw,3rem) 5rem; }
+  .ry-page h1{ font-family:var(--display); font-weight:400; text-transform:uppercase; font-size:clamp(2.2rem,6vw,3.6rem); line-height:.95; margin:.6rem 0 1.1rem; }
+  .ry-intro{ font-family:var(--sans); color:var(--dim); font-size:1rem; line-height:1.65; max-width:70ch; margin:0 0 2.4rem; }
+  .ry-intro b{ color:var(--fg); font-weight:600; }
+  .ry-label{ font-family:var(--mono); font-size:.7rem; color:var(--dimmer); letter-spacing:.1em; text-transform:uppercase; }
+
+  /* game board */
+  .ry-board{ display:grid; grid-template-columns:repeat(7,1fr); gap:1px; background:var(--line); border:1px solid var(--line); margin-bottom:2rem; width:fit-content; }
+  .ry-cell{
+    width:60px; height:60px; background:var(--panel); display:flex; align-items:center; justify-content:center;
+    font-family:var(--mono); font-size:1.5rem; color:var(--fg); cursor:pointer; user-select:none;
+    position:relative;
+  }
+  .ry-cell[data-type="blocker"]{ background:var(--dimmer); cursor:default; }
+  .ry-cell[data-type="crystal"]{ color:var(--amber); font-weight:600; }
+  .ry-cell[data-type="entry"]{ color:var(--amber); }
+  /* the exit cell CAN require a mirror (the final turn may land here right before
+     the beam exits off the board) — it stays clickable, marked with a border only */
+  .ry-cell[data-exit-marker]{ box-shadow:inset 0 0 0 2px var(--amber); }
+
+  /* HUD */
+  .ry-hud{ display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--line); border:1px solid var(--line); margin-bottom:1px; }
+  .ry-stat{ background:var(--panel); padding:1rem 1.2rem; }
+  .ry-stat .v{ font-family:var(--mono); font-size:1.35rem; font-weight:600; margin-top:.35rem; letter-spacing:.02em; }
+
+  /* controls */
+  .ry-controls{ display:flex; gap:.7rem; flex-wrap:wrap; margin-bottom:2rem; }
+  .ry-btn{
+    font-family:var(--mono); font-size:.78rem; text-transform:uppercase; letter-spacing:.08em;
+    padding:.8rem 1.8rem; border:1px solid var(--line); color:var(--dim); background:none; cursor:pointer;
+    transition:border-color .2s, color .2s;
+  }
+  .ry-btn:hover{ border-color:var(--fg); color:var(--fg); }
+  .ry-btn.solid{ background:var(--fg); color:var(--bg); border-color:var(--fg); }
+  .ry-btn.solid:hover{ background:var(--dim); border-color:var(--dim); }
+  .ry-btn:disabled{ opacity:.5; cursor:default; }
+
+  /* modal overlay */
+  .ry-overlay{ position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(10,10,10,0.85); display:none; align-items:center; justify-content:center; z-index:1000; }
+  .ry-overlay.show{ display:flex; }
+  .ry-modal{ background:var(--bg); border:1px solid var(--line); padding:2rem; max-width:480px; max-height:80vh; overflow-y:auto; position:relative; }
+  .ry-modal h2{ font-family:var(--display); font-size:1.8rem; margin:0 0 1rem; }
+  .ry-modal p{ font-family:var(--sans); color:var(--dim); line-height:1.7; margin:0 0 1rem; }
+  .ry-modal b{ color:var(--fg); font-weight:600; }
+  .ry-modal-close{ position:absolute; top:1.2rem; right:1.2rem; background:none; border:none; font-size:1.4rem; color:var(--dim); cursor:pointer; }
+  .ry-modal-close:hover{ color:var(--fg); }
+
+  /* locked view */
+  .ry-locked{ text-align:center; }
+  .ry-locked h2{ font-family:var(--display); font-size:2rem; margin-bottom:1.5rem; }
+  .ry-locked .time{ font-family:var(--mono); font-size:2.4rem; color:var(--amber); font-weight:600; margin-bottom:2rem; }
+
+  @media (max-width:600px){
+    .ry-cell{ width:50px; height:50px; font-size:1.2rem; }
+    .ry-hud{ grid-template-columns:repeat(2,1fr); }
+  }
+</style>
+</head>
+<body>
+
+<div class="ry-topbar">
+  <a href="index.html" class="ry-back">&#8592; Back to site</a>
+  <span class="file-no">REF. 02.02 / RELAY</span>
+</div>
+
+<div class="ry-page">
+  <span class="ry-label">Daily puzzle</span>
+  <h1>Relay</h1>
+  <p class="ry-intro">A beam enters marked, travels straight until it hits a mirror (<b>/</b> or <b>\</b>), which turns it 90°. Place mirrors so the beam collects <b>every crystal and exits correctly</b>, using at most your <b>mirror budget</b>. Press <b>Run</b> to trace the path.</p>
+
+  <div class="ry-hud">
+    <div class="ry-stat"><span class="ry-label">Mirror budget</span><div class="v" id="ry-budget">—</div></div>
+    <div class="ry-stat"><span class="ry-label">Mirrors placed</span><div class="v" id="ry-placed">0</div></div>
+    <div class="ry-stat"><span class="ry-label">Crystals</span><div class="v" id="ry-crystals">—</div></div>
+    <div class="ry-stat"><span class="ry-label">Time</span><div class="v" id="ry-time">—</div></div>
+  </div>
+
+  <div class="ry-controls">
+    <button class="ry-btn solid" id="ry-run" type="button">Run</button>
+    <button class="ry-btn" id="ry-reset" type="button">Reset</button>
+    <button class="ry-btn" id="ry-howto" type="button">How to play</button>
+  </div>
+
+  <div id="ry-playfield"></div>
+  <div id="ry-result"></div>
+</div>
+
+<div class="ry-overlay" id="ry-overlay">
+  <div class="ry-modal">
+    <button class="ry-modal-close" id="ry-overlay-close" type="button">✕</button>
+    <div id="ry-overlay-content"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  // ===== Seeded PRNG =====
+  // xmur3: 32-bit integer hash (Mulberry32 seed generator)
+  function xmur3(str){
+    for(var i=0,h=1779033703^str.length;i<str.length;i++){
+      h=Math.imul(h^str.charCodeAt(i),3432918353);
+      h=h<<13|h>>>19;
+    }
+    return function(){
+      h=Math.imul(h^h>>>15,1274126177);
+      return (h^h>>>16)>>>0;
+    };
+  }
+
+  // Mulberry32: fast 32-bit PRNG
+  function mulberry32(seed){
+    return function(){
+      var t=seed+=0x6D2B79F5;
+      t=Math.imul(t^t>>>15,t|1);
+      t^=t+Math.imul(t^t>>>7,t|61);
+      return ((t^t>>>14)>>>0)/4294967296;
+    };
+  }
+
+  // Date-local: use visitor's local date, not UTC
+  function localDateString(){
+    var d=new Date();
+    var y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), da=String(d.getDate()).padStart(2,'0');
+    return y+'-'+m+'-'+da;
+  }
+
+  // Archive support: ?d=YYYY-MM-DD re-derives any past puzzle (pure function of the key)
+  function requestedDate(){
+    var params=new URLSearchParams(window.location.search);
+    var d=params.get('d');
+    if(d && /^\d{4}-\d{2}-\d{2}$/.test(d)) return d;
+    return localDateString();
+  }
+
+  // Get seeded random for a hash key. Retries fold the attempt index into the key
+  // itself (not just redrawing from one stream) so a retried puzzle is still a pure,
+  // deterministic function of (date, attempt) — never Math.random.
+  function makeKeyedRandom(key){
+    var hasher=xmur3(key);
+    var seed=hasher();
+    return mulberry32(seed);
+  }
+
+  // ===== Geometry & Beam =====
+  var DIRS={
+    N:{dx:0,dy:-1, r:'N', t:'↑'},
+    S:{dx:0,dy:1,  r:'S', t:'↓'},
+    E:{dx:1,dy:0,  r:'E', t:'→'},
+    W:{dx:-1,dy:0, r:'W', t:'←'}
+  };
+  var CLOCKWISE={N:'E', E:'S', S:'W', W:'N'};
+  var COUNTER={N:'W', W:'S', S:'E', E:'N'};
+
+  function turnMirror(dir, mirror){
+    // '/' turns N→W, S→E, E→S, W→N (counter-clockwise)
+    // '\' turns N→E, S→W, E→N, W→S (clockwise)
+    if(mirror==='/') return COUNTER[dir];
+    if(mirror==='\\') return CLOCKWISE[dir];
+    return dir;
+  }
+
+  // Beam trace over the PLAYER's board. Uniqueness rule (also enforced by the
+  // generator's solver below): the beam may never re-enter a cell it has already
+  // passed through, full stop — position only, not position+direction. Without
+  // this the state space isn't exact and needs an uncertain search; with it a
+  // beam path visits at most 49 cells once each, so tracing always terminates.
+  function tracePath(board, entry, dir, exit, maxSteps){
+    var path=[{x:entry.x, y:entry.y, dir:dir, crystal:board[entry.y][entry.x]==='*'}];
+    var x=entry.x, y=entry.y;
+    var visited=new Set([x+','+y]);
+    var crystals=new Set();
+    if(path[0].crystal) crystals.add(x+','+y);
+
+    for(var step=0;step<maxSteps;step++){
+      var d=DIRS[dir];
+      // check bounds BEFORE committing the step, so x/y always hold the last
+      // valid in-bounds cell when the loop ends — otherwise the returned "exit"
+      // is one cell off the board and can never match the puzzle's real exit
+      // coordinate (this was live-breaking every correct solve: reachedExit
+      // compared the puzzle's exit against an out-of-bounds x/y and never matched).
+      var nx=x+d.dx, ny=y+d.dy;
+      if(nx<0||nx>=7||ny<0||ny>=7) break; // exits board — x,y stay at the last valid cell
+      if(visited.has(nx+','+ny)) break; // re-entered a visited cell — dead path
+      x=nx; y=ny;
+      visited.add(x+','+y);
+
+      var cell=board[y][x];
+      var isCrystal=(cell==='*');
+      path.push({x:x, y:y, dir:dir, crystal:isCrystal});
+      if(isCrystal) crystals.add(x+','+y);
+
+      if(cell==='/' || cell==='\\'){
+        dir=turnMirror(dir, cell);
+      }
+    }
+    return {path:path, exit:{x:x, y:y}, crystals:crystals};
+  }
+
+  // ===== Uniqueness solver (generation-time only, never runs for the player) =====
+  // DFS over (position, direction, crystal-bitmask, mirrors-used). At every NEW
+  // empty cell the beam reaches there are up to 3 choices (leave empty, '/', '\'),
+  // each of which changes what happens next; crystal cells are pass-through with
+  // no choice. The EXIT cell can also carry a mirror — the final turn frequently
+  // lands exactly there, one step before the beam exits off the board, so
+  // excluding it (as an earlier version did) made a large fraction of
+  // constructions unsolvable by definition. Only the entry cell is excluded from
+  // mirror placement (direction there is a fixed given, never a player choice).
+  // Short-circuits the instant a 2nd solution is found — callers only ever need
+  // to distinguish 0 / 1 / "more than 1" solutions.
+  function countSolutions(board, entry, entryDir, exitCell, crystalCoords, budget){
+    var crystalIndex={};
+    for(var i=0;i<crystalCoords.length;i++) crystalIndex[crystalCoords[i]]=i;
+    var fullMask=crystalCoords.length ? (Math.pow(2,crystalCoords.length)-1) : 0;
+
+    var visited={};
+    visited[entry.x+','+entry.y]=true;
+    var entryKey=entry.x+','+entry.y;
+    var initMask=crystalIndex.hasOwnProperty(entryKey) ? (1<<crystalIndex[entryKey]) : 0;
+
+    var solutionCount=0;
+    var MAX_MIRRORS_EXPLORED=budget; // never worth placing more than the stated budget
+
+    function dfs(x,y,dir,mask,mirrorsUsed){
+      if(solutionCount>=2) return; // ambiguity already proven — stop searching
+      var d=DIRS[dir];
+      var nx=x+d.dx, ny=y+d.dy;
+      if(nx<0||nx>=7||ny<0||ny>=7){
+        if(x===exitCell.x && y===exitCell.y && mask===fullMask) solutionCount++;
+        return;
+      }
+      var nKey=nx+','+ny;
+      if(visited[nKey]) return; // banned re-entry
+      var isCrystalCell=crystalIndex.hasOwnProperty(nKey);
+      var newMask=isCrystalCell ? (mask|(1<<crystalIndex[nKey])) : mask;
+      var isEntry=(nx===entry.x&&ny===entry.y);
+
+      visited[nKey]=true;
+      dfs(nx,ny,dir,newMask,mirrorsUsed); // choice: leave empty, go straight
+      if(!isCrystalCell && !isEntry && mirrorsUsed<MAX_MIRRORS_EXPLORED){
+        dfs(nx,ny,turnMirror(dir,'/'),newMask,mirrorsUsed+1);
+        dfs(nx,ny,turnMirror(dir,'\\'),newMask,mirrorsUsed+1);
+      }
+      delete visited[nKey];
+      if(solutionCount>=2) return;
+    }
+
+    dfs(entry.x,entry.y,entryDir,initMask,0);
+    return solutionCount; // 0 = unsolvable, 1 = unique, 2 = ambiguous (2 means "2+")
+  }
+
+  // ===== Puzzle Generator =====
+  // Builds the solution FIRST (walk + turn via the PRNG, placing mirrors as it
+  // goes), then derives the puzzle's givens by scattering crystals on path cells
+  // and stripping the mirrors back out. This is what makes generation reliable —
+  // it constructs a valid puzzle instead of searching for one.
+  function generatePuzzle(key){
+    var rnd=makeKeyedRandom(key);
+    var board=[
+      [' ',' ',' ',' ',' ',' ',' '],
+      [' ',' ',' ',' ',' ',' ',' '],
+      [' ',' ',' ',' ',' ',' ',' '],
+      [' ',' ',' ',' ',' ',' ',' '],
+      [' ',' ',' ',' ',' ',' ',' '],
+      [' ',' ',' ',' ',' ',' ',' '],
+      [' ',' ',' ',' ',' ',' ',' ']
+    ];
+
+    // 1. Pick random entry (edge cell)
+    var edges=[
+      {x:Math.floor(rnd()*7), y:0, dir:'S'}, // top edge
+      {x:Math.floor(rnd()*7), y:6, dir:'N'}, // bottom edge
+      {x:0, y:Math.floor(rnd()*7), dir:'E'}, // left edge
+      {x:6, y:Math.floor(rnd()*7), dir:'W'}  // right edge
+    ];
+    var entry=edges[Math.floor(rnd()*edges.length)];
+    var entryDirOriginal=entry.dir; // 'dir' below is mutated by every turn — the
+    // ORIGINAL heading must be kept separately, or the puzzle ships with the
+    // beam's final direction masquerading as its starting direction (this was
+    // the actual dominant generation bug: every puzzle told the player/solver
+    // to enter facing the wrong way, corrupting nearly everything downstream).
+    var dir=entryDirOriginal;
+    delete entry.dir;
+
+    // 2. Walk forward, placing mirrors, turn at each. A global visited set spans
+    // the ENTIRE walk (turn loop + the final straight-to-edge stretch below) —
+    // the game's own uniqueness rule bans the beam from re-entering any cell it
+    // already passed through, so a construction that would do that to itself is
+    // not a valid Relay puzzle at all (its "exit" wouldn't be a real board-edge
+    // beam exit). Detecting this and aborting (returning null) is what makes the
+    // outer retry loop's job well-defined — a self-intersecting attempt is simply
+    // a failed attempt, same as an ambiguous or unsolvable one.
+    var path=[{x:entry.x, y:entry.y}];
+    var visitedDuringConstruction={};
+    visitedDuringConstruction[entry.x+','+entry.y]=true;
+    var x=entry.x, y=entry.y;
+    var nTurns=2+Math.floor(rnd()*3); // 2–4 turns
+    var exitedDuringTurns=false;
+    var solutionMirrorCount=0;
+    var selfIntersected=false;
+    for(var t=0;t<nTurns && !selfIntersected;t++){
+      // walk forward — check BEFORE committing the step, so x/y only ever hold
+      // in-bounds cells (an earlier version applied the step then checked,
+      // which left the "exit" sitting one cell off the board entirely)
+      var stepsAhead=1+Math.floor(rnd()*4);
+      var hitEdge=false;
+      for(var s=0;s<stepsAhead;s++){
+        var d=DIRS[dir];
+        var nx=x+d.dx, ny=y+d.dy;
+        if(nx<0||nx>=7||ny<0||ny>=7){ hitEdge=true; break; }
+        var nKey=nx+','+ny;
+        if(visitedDuringConstruction[nKey]){ selfIntersected=true; break; }
+        visitedDuringConstruction[nKey]=true;
+        x=nx; y=ny;
+        path.push({x:x, y:y});
+      }
+      if(selfIntersected) break;
+      if(hitEdge){ exitedDuringTurns=true; break; }
+
+      // place mirror, turn
+      var mirror=(rnd()>0.5)?'/':'\\';
+      board[y][x]=mirror;
+      dir=turnMirror(dir, mirror);
+      solutionMirrorCount++;
+    }
+    if(selfIntersected) return null;
+
+    // if the turn budget ran out without naturally exiting, keep walking straight —
+    // a straight line always exits a bounded grid eventually, UNLESS it crosses
+    // the path's own earlier cells first, which also aborts this attempt.
+    if(!exitedDuringTurns){
+      while(true){
+        var d2=DIRS[dir];
+        var nx2=x+d2.dx, ny2=y+d2.dy;
+        if(nx2<0||nx2>=7||ny2<0||ny2>=7) break;
+        var nKey2=nx2+','+ny2;
+        if(visitedDuringConstruction[nKey2]) return null;
+        visitedDuringConstruction[nKey2]=true;
+        x=nx2; y=ny2;
+        path.push({x:x, y:y});
+      }
+    }
+    var exitPoint={x:x, y:y};
+
+    // 3. Scatter crystals on path cells (not entry, not exit, and NOT a mirror
+    // cell — a crystal marker landing on a turn's mirror cell would silently
+    // overwrite that mirror before it's ever stripped out, corrupting the very
+    // solution the puzzle is built from. This was the dominant generation bug:
+    // path.slice(1,-1) includes every elbow (mirror) cell as a candidate, and on
+    // short paths the elbows ARE the only interior cells, so a crystal almost
+    // always destroyed a required mirror.
+    var candidateCells=path.slice(1,path.length-1).filter(function(cell){
+      return board[cell.y][cell.x]===' ';
+    });
+    var nCrystals=Math.max(1, Math.floor(candidateCells.length*0.4)+Math.floor(rnd()*2));
+    var crystalCoords=[];
+    for(var c=0;c<Math.min(nCrystals, candidateCells.length);c++){
+      var idx=Math.floor(rnd()*candidateCells.length);
+      var cell=candidateCells[idx];
+      board[cell.y][cell.x]='*';
+      crystalCoords.push(cell.x+','+cell.y);
+      candidateCells.splice(idx, 1);
+    }
+
+    // 4. Remove mirrors, keep crystals — the givens are entry/exit/crystals/budget only
+    for(var y2=0;y2<7;y2++){
+      for(var x2=0;x2<7;x2++){
+        if(board[y2][x2]==='/' || board[y2][x2]==='\\') board[y2][x2]=' ';
+      }
+    }
+
+    // Budget = exactly the mirror count the constructed solution used, not an
+    // independent random draw. An independent (looser) budget was the actual
+    // cause of near-universal ambiguity during testing: extra slack mirrors
+    // let the solver find many alternate valid placements. Tying budget to the
+    // real solution still allows alternate solutions using fewer/equal mirrors,
+    // but rules out the (dominant) class that only worked because of slack —
+    // this is also better puzzle design, giving exactly what's needed, no more.
+    var budget=Math.max(1, solutionMirrorCount);
+    return{
+      board:board, entry:entry, entryDir:entryDirOriginal,
+      exit:exitPoint, crystals:crystalCoords,
+      budget:budget
+    };
+  }
+
+  // Bundled deterministic fallback, hand-verified to have exactly one solution.
+  // Used only if every generation attempt for a date fails uniqueness (rare —
+  // the construction already guarantees at least one solution exists).
+  function fallbackPuzzle(){
+    var board=[
+      [' ',' ',' ',' ',' ',' ',' '],
+      [' ',' ',' ',' ',' ',' ',' '],
+      [' ',' ',' ',' ',' ',' ',' '],
+      [' ',' ',' ','*',' ',' ',' '],
+      [' ',' ',' ',' ',' ',' ',' '],
+      [' ',' ',' ',' ',' ',' ',' '],
+      [' ',' ',' ',' ',' ',' ',' ']
+    ];
+    // straight across row 3, entry (0,3) -> exit (6,3), one crystal en route,
+    // budget 0 — no mirror can help or is needed, so it's trivially unique.
+    return{
+      board:board, entry:{x:0,y:3}, entryDir:'E',
+      exit:{x:6,y:3}, crystals:['3,3'],
+      budget:0
+    };
+  }
+
+  // Generate + verify uniqueness, retrying with the attempt index folded into
+  // the hash key (never re-drawing from the same stream) if a candidate is
+  // unsolvable or ambiguous. Falls back to a hand-verified puzzle if every
+  // attempt fails — this should essentially never trigger in practice.
+  function generateVerifiedPuzzle(date){
+    var MAX_ATTEMPTS=16;
+    for(var attempt=0; attempt<MAX_ATTEMPTS; attempt++){
+      var key = attempt===0 ? ('relay|'+date) : ('relay|'+date+'|attempt'+attempt);
+      var candidate=generatePuzzle(key);
+      if(!candidate) continue; // self-intersecting construction — not a valid puzzle, skip
+      var solCount=countSolutions(candidate.board, candidate.entry, candidate.entryDir, candidate.exit, candidate.crystals, candidate.budget);
+      if(solCount===1) return candidate;
+    }
+    return fallbackPuzzle();
+  }
+
+  // ===== UI =====
+  var state={
+    date: requestedDate(),
+    puzzle: null,
+    board: null,
+    placed: 0,
+    timer: null,
+    startTime: null,
+    isSolved: false,
+    isAnimating: false
+  };
+
+  function countMirrors(board){
+    var n=0;
+    for(var y=0;y<7;y++) for(var x=0;x<7;x++) if(board[y][x]==='/'||board[y][x]==='\\') n++;
+    return n;
+  }
+
+  function initGame(){
+    state.puzzle=generateVerifiedPuzzle(state.date);
+    state.board=JSON.parse(JSON.stringify(state.puzzle.board));
+    state.placed=0;
+    state.startTime=null;
+    state.isSolved=false;
+    renderBoard();
+    updateHUD();
+  }
+
+  function renderBoard(){
+    var pf=document.getElementById('ry-playfield');
+    pf.innerHTML='';
+    var board=document.createElement('div');
+    board.className='ry-board';
+    for(var y=0;y<7;y++){
+      for(var x=0;x<7;x++){
+        var cell=document.createElement('div');
+        cell.className='ry-cell';
+        var val=state.board[y][x];
+        var attrs={};
+        var isExit=(state.puzzle.exit.x===x&&state.puzzle.exit.y===y);
+        if(isExit) attrs['data-exit-marker']='1';
+
+        if(state.puzzle.entry.x===x&&state.puzzle.entry.y===y){
+          // entry: fixed given, never interactive — the beam's starting heading
+          // isn't a player choice, and construction never places a mirror here.
+          attrs['data-type']='entry';
+          // arrow points the way the beam actually TRAVELS (N/dy=-1 moves up-screen, etc.)
+          cell.textContent=state.puzzle.entryDir==='N'?'↑':state.puzzle.entryDir==='S'?'↓':state.puzzle.entryDir==='E'?'→':'←';
+        }else if(val==='*'){
+          attrs['data-type']='crystal';
+          cell.textContent='◆';
+        }else{
+          // empty OR exit cell: both are ordinary tap-to-cycle mirror cells.
+          // The exit cell can genuinely require a mirror (see countSolutions'
+          // comment) — it's marked with a border only, its content still cycles.
+          cell.textContent=(val==='/'||val==='\\') ? val : '';
+          if(val==='/'||val==='\\') cell.setAttribute('data-mirror',val);
+          cell.setAttribute('data-x',x);
+          cell.setAttribute('data-y',y);
+          cell.addEventListener('click',function(){cycleCell(this);});
+        }
+        Object.keys(attrs).forEach(k=>cell.setAttribute(k,attrs[k]));
+        board.appendChild(cell);
+      }
+    }
+    pf.appendChild(board);
+  }
+
+  function cycleCell(el){
+    if(state.isSolved||state.isAnimating) return;
+    var x=parseInt(el.getAttribute('data-x')), y=parseInt(el.getAttribute('data-y'));
+    var cur=state.board[y][x];
+    var nxt=(cur===' ')?'/':cur==='/'?'\\':' ';
+    state.board[y][x]=nxt;
+    el.textContent=nxt;
+    if(nxt!==' ') el.setAttribute('data-mirror',nxt);
+    else el.removeAttribute('data-mirror');
+    state.placed=countMirrors(state.board);
+    updateHUD();
+    if(!state.startTime&&nxt!==' ') state.startTime=Date.now();
+  }
+
+  function updateHUD(){
+    document.getElementById('ry-budget').textContent=state.puzzle.budget;
+    document.getElementById('ry-placed').textContent=state.placed;
+    document.getElementById('ry-crystals').textContent=state.puzzle.crystals.length;
+    if(state.startTime){
+      var now=Date.now(), ms=now-state.startTime, sec=Math.floor(ms/1000), min=Math.floor(sec/60);
+      document.getElementById('ry-time').textContent=(min>0?min+'m ':'')+(sec%60)+'s';
+    }else{
+      document.getElementById('ry-time').textContent='—';
+    }
+  }
+
+  function runPuzzle(){
+    if(state.isSolved||state.isAnimating) return;
+    state.isAnimating=true;
+    document.getElementById('ry-run').disabled=true;
+
+    var traced=tracePath(state.board, state.puzzle.entry, state.puzzle.entryDir, state.puzzle.exit, 100);
+    var pathSet=new Set(traced.path.map(p=>p.x+','+p.y));
+    var allCrystalsCollected=state.puzzle.crystals.every(c=>traced.crystals.has(c));
+    var reachedExit=traced.exit.x===state.puzzle.exit.x&&traced.exit.y===state.puzzle.exit.y;
+    var withinBudget=state.placed<=state.puzzle.budget;
+    var solved=allCrystalsCollected&&reachedExit&&withinBudget;
+
+    if(!solved){
+      setTimeout(function(){
+        document.getElementById('ry-result').innerHTML='<p style="font-family:var(--mono);color:var(--dim)">Not quite — check your mirrors and try again.</p>';
+        state.isAnimating=false;
+        document.getElementById('ry-run').disabled=false;
+      }, 400);
+      return;
+    }
+
+    // solved
+    state.isSolved=true;
+    var endTime=Date.now();
+    var timeMs=endTime-state.startTime;
+    try{
+      localStorage.setItem('relay_'+state.date, JSON.stringify({timeMs:timeMs, solved:true}));
+    }catch(e){}
+    clearInterval(state.timer);
+
+    document.getElementById('ry-result').innerHTML='<p style="font-family:var(--mono);color:var(--amber);font-weight:600">Solved! Time: '+formatTime(timeMs)+'</p>';
+    document.getElementById('ry-run').disabled=true;
+    document.getElementById('ry-reset').disabled=true;
+  }
+
+  function resetBoard(){
+    if(state.isSolved) return;
+    state.board=JSON.parse(JSON.stringify(state.puzzle.board));
+    state.placed=0;
+    state.startTime=null;
+    state.timer=null;
+    document.getElementById('ry-result').innerHTML='';
+    renderBoard();
+    updateHUD();
+  }
+
+  function formatTime(ms){
+    var sec=Math.floor(ms/1000), min=Math.floor(sec/60);
+    return (min>0?min+'m ':'')+(sec%60)+'s';
+  }
+
+  function showTutorial(){
+    var overlay=document.getElementById('ry-overlay');
+    var content=document.getElementById('ry-overlay-content');
+    content.innerHTML='<h2>How to play</h2><p>A beam enters from the marked arrow at a fixed direction. It travels straight until it hits a <b>/</b> or <b>\\</b> mirror, which turns it 90°.</p><p><b>Tap any empty cell to cycle</b> through empty, <b>/</b>, and <b>\\</b>. Your goal: place mirrors so the beam <b>collects every crystal (◆) and exits through the exit cell</b>, using <b>at most your mirror budget.</b></p><p>Press <b>Run</b> to trace the beam path and check if you solved it. The timer starts when you place your first mirror.</p>';
+    overlay.classList.add('show');
+  }
+
+  function hideOverlay(){
+    document.getElementById('ry-overlay').classList.remove('show');
+    try{ localStorage.setItem('relay_seen_tutorial','1'); }catch(e){}
+  }
+
+  // ===== Init =====
+  document.getElementById('ry-run').addEventListener('click', runPuzzle);
+  document.getElementById('ry-reset').addEventListener('click', resetBoard);
+  document.getElementById('ry-howto').addEventListener('click', showTutorial);
+  document.getElementById('ry-overlay-close').addEventListener('click', hideOverlay);
+  document.getElementById('ry-overlay').addEventListener('click', function(e){
+    if(e.target===this) hideOverlay();
+  });
+
+  // A solved date is permanently locked — today AND any archive date reached via
+  // ?d=. Reopening shows the recorded time, not a replayable board. An in-progress
+  // (started, unsolved) date is NOT locked and stays playable across reloads.
+  var saved=null;
+  try{
+    saved=JSON.parse(localStorage.getItem('relay_'+state.date));
+  }catch(e){}
+  if(saved&&saved.solved){
+    document.getElementById('ry-playfield').innerHTML='<div class="ry-locked"><h2>Solved — '+state.date+'</h2><div class="time">'+formatTime(saved.timeMs)+'</div><p style="font-family:var(--mono);color:var(--dim)">This date is locked — one attempt per puzzle.</p></div>';
+    document.getElementById('ry-run').disabled=true;
+    document.getElementById('ry-reset').disabled=true;
+  }else{
+    initGame();
+    state.timer=setInterval(function(){
+      if(state.startTime) updateHUD();
+    }, 200);
+
+    // First-visit tutorial: shown automatically before the board is (meaningfully)
+    // interactive. The overlay's own z-index already blocks board clicks while open.
+    var seenTutorial=false;
+    try{ seenTutorial=(localStorage.getItem('relay_seen_tutorial')==='1'); }catch(e){}
+    if(!seenTutorial) showTutorial();
+  }
+})();
+</script>
+
+</body>
+</html>
