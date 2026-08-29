@@ -2790,9 +2790,11 @@
     if(!modal) return;
 
     // Curated for a loose, illegible, loop-heavy "professional scrawl" — not tidy readable
-    // script. Verified each exists on Google Fonts before picking (fonts.googleapis.com/css2
-    // returned 200 for all six) rather than trusting names from memory.
-    const SIG_FONTS = ['Kristi', 'WindSong', 'Beau Rivage', 'Meddon', 'Herr Von Muellerhoff', 'Mrs Saint Delafield'];
+    // script. Trimmed to fonts sharing WindSong/Mrs Saint Delafield's thin, fast-flowing DNA
+    // (user's explicit favorites) — Beau Rivage (too formal/calligraphic) and Meddon (too bold/
+    // heavy) dropped for not matching that register. Verified each exists on Google Fonts before
+    // picking (fonts.googleapis.com/css2 returned 200 for all) rather than trusting names from memory.
+    const SIG_FONTS = ['Kristi', 'WindSong', 'Herr Von Muellerhoff', 'Mrs Saint Delafield'];
 
     const fontCache = new Map();
     let opentypeReady = null;
@@ -2865,53 +2867,79 @@
     function randRange(min, max){ return min + Math.random() * (max - min); }
     function pick(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
 
-    // Hand-tuned parametric flourish, not raw noise: a big underline swoop that always appears
-    // and loops back on itself (the defining "swoop" of a signature — reference examples all
-    // have one), plus an optional entry curl and an optional diagonal cross-stroke that cuts
-    // back through the letters. Sized aggressively (loop amplitude ~1x fontSize) and positioned
-    // to overlap the text, not just orbit politely outside it — a small, tidy underline reads
-    // as decoration; a big self-crossing loop reads as an illegible signature. Positions are
-    // relative to the glyph path's own bounding box so they scale with any name/font.
-    function buildFlourish(bbox, fontSize){
-      const x1 = bbox.x1, x2 = bbox.x2;
-      const w = Math.max(x2 - x1, fontSize);
+    // Walks the raw glyph path commands to find where the pen actually starts and finishes —
+    // the first M and the last drawn point. Anchoring the flourish to these exact coordinates
+    // (rather than numbers derived purely from the bounding box) is what makes it read as one
+    // continuous stroke instead of a decorative shape bolted on nearby; a real fast signature's
+    // trailing dash leaves from the literal end of the last letter, not from "somewhere near it."
+    function getPathEndpoints(path){
+      const cmds = path.commands;
+      let start = null, end = null;
+      for(const c of cmds){
+        if(c.type === 'M' && !start) start = { x: c.x, y: c.y };
+        if(typeof c.x === 'number') end = { x: c.x, y: c.y };
+      }
+      return { start: start || {x:0,y:0}, end: end || {x:0,y:0} };
+    }
+
+    // Fast, careless "signed a thousand of these today" scribble — a delivery-driver or
+    // celebrity-signing-line signature, not elegant calligraphy. Real fast signatures are
+    // built from a small number of DECISIVE strokes, each one continuous with the letters
+    // (no separate geometric shapes floating nearby), and end in a quick flick or flat dash
+    // rather than a big double loop. Every stroke below starts or ends at the glyph path's
+    // own real start/end point for exactly that reason.
+    function buildFlourish(bbox, fontSize, startPt, endPt){
+      const w = Math.max(bbox.x2 - bbox.x1, fontSize);
       const paths = [];
 
-      // underline swoop: dips well below the baseline, sweeps back up past the last letter,
-      // then curls into a loop that crosses back over its own stroke
-      const dip = fontSize * randRange(0.55, 0.85);
-      const riseX = x2 - w * randRange(0.05, 0.2);
-      const loopCx = riseX + fontSize * randRange(0.55, 0.85);
-      const loopR = fontSize * randRange(0.4, 0.65);
-      const startX = x1 + w * randRange(-0.05, 0.15);
-      const startY = fontSize * randRange(0.05, 0.15);
+      // terminal stroke — leaves from the literal last point of the last letter, whips up or
+      // down fast, and either trails off flat or (sometimes) flicks back in one tight motion.
+      // This is the single most important stroke for the "just signed it fast" read.
+      const dir = Math.random() < 0.5 ? 1 : -1;
+      const reach = fontSize * randRange(1.1, 1.9);
+      const midX = endPt.x + reach * 0.4;
+      const midY = endPt.y + dir * fontSize * randRange(0.35, 0.7);
+      const tailX = endPt.x + reach;
+      const tailY = endPt.y - dir * fontSize * randRange(0.05, 0.3);
 
       paths.push(
-        `M ${startX.toFixed(1)} ${startY.toFixed(1)} ` +
-        `C ${(startX + w*0.15).toFixed(1)} ${dip.toFixed(1)}, ${(riseX - w*0.25).toFixed(1)} ${dip.toFixed(1)}, ${riseX.toFixed(1)} ${(dip*0.2).toFixed(1)} ` +
-        // loop: swing up and over, cross the incoming stroke, come back down and out
-        `C ${(riseX + loopR*1.3).toFixed(1)} ${(-loopR*0.9).toFixed(1)}, ${(loopCx + loopR*0.7).toFixed(1)} ${(-loopR*1.1).toFixed(1)}, ${(loopCx + loopR*1.3).toFixed(1)} ${(-loopR*0.15).toFixed(1)} ` +
-        `C ${(loopCx + loopR*0.9).toFixed(1)} ${(loopR*0.55).toFixed(1)}, ${(riseX + w*0.05).toFixed(1)} ${(loopR*0.35).toFixed(1)}, ${(loopCx + loopR*1.6).toFixed(1)} ${(-loopR*0.5).toFixed(1)}`
+        `M ${endPt.x.toFixed(1)} ${endPt.y.toFixed(1)} ` +
+        `Q ${midX.toFixed(1)} ${midY.toFixed(1)}, ${tailX.toFixed(1)} ${tailY.toFixed(1)}`
       );
 
-      // entry curl before the first letter — bigger and more looped than a simple lead-in stroke
-      if(Math.random() < 0.65){
-        const cx = x1 - fontSize * randRange(0.35, 0.6);
-        const topY = -fontSize * randRange(0.5, 0.8);
+      // occasionally the trail whips back into one small, tight terminal loop instead of
+      // trailing straight off — never a second big loop, just a quick flick-back
+      if(Math.random() < 0.35){
+        const r = fontSize * randRange(0.16, 0.28);
         paths.push(
-          `M ${(x1 + fontSize*0.1).toFixed(1)} ${(fontSize*0.1).toFixed(1)} ` +
-          `C ${(cx+fontSize*0.25).toFixed(1)} ${topY.toFixed(1)}, ${(cx-fontSize*0.1).toFixed(1)} ${(topY*0.6).toFixed(1)}, ${(cx+fontSize*0.2).toFixed(1)} ${(fontSize*0.25).toFixed(1)} ` +
-          `C ${(cx+fontSize*0.45).toFixed(1)} ${(-fontSize*0.15).toFixed(1)}, ${(x1-fontSize*0.1).toFixed(1)} ${(-fontSize*0.25).toFixed(1)}, ${(x1+fontSize*0.15).toFixed(1)} ${(fontSize*0.05).toFixed(1)}`
+          `M ${tailX.toFixed(1)} ${tailY.toFixed(1)} ` +
+          `C ${(tailX + r*1.3).toFixed(1)} ${(tailY - dir*r).toFixed(1)}, ${(tailX + r*0.1).toFixed(1)} ${(tailY - dir*r*1.6).toFixed(1)}, ${(tailX - r*0.6).toFixed(1)} ${(tailY - dir*r*0.5).toFixed(1)}`
         );
       }
 
-      // diagonal cross-stroke, cutting back through the middle of the name like a hasty
-      // underline-and-cross in one motion
-      if(Math.random() < 0.45){
-        const cy = bbox.y1 + (bbox.y2 - bbox.y1) * randRange(0.25, 0.55);
-        const sx = x1 - w*0.1, sy = cy - fontSize*randRange(0.6, 0.9);
-        const ex = x2 + w*0.15, ey = cy + fontSize*randRange(0.4, 0.7);
-        paths.push(`M ${sx.toFixed(1)} ${sy.toFixed(1)} L ${ex.toFixed(1)} ${ey.toFixed(1)}`);
+      // entry lead-in — a short quick dash straight into the first letter's actual start
+      // point, not a decorative loop hovering near it
+      if(Math.random() < 0.5){
+        const backX = startPt.x - fontSize * randRange(0.3, 0.55);
+        const backY = startPt.y - fontSize * randRange(0.15, 0.4) * (Math.random() < 0.5 ? 1 : -1);
+        paths.push(
+          `M ${backX.toFixed(1)} ${backY.toFixed(1)} ` +
+          `Q ${(backX + fontSize*0.18).toFixed(1)} ${(startPt.y - fontSize*0.05).toFixed(1)}, ${startPt.x.toFixed(1)} ${startPt.y.toFixed(1)}`
+        );
+      }
+
+      // a fast, mostly-flat dash under the name — thin and slightly wavy, not a big dipping
+      // swoop that loops back on itself. This is the quick underline-slash real signatures
+      // almost always end with.
+      if(Math.random() < 0.7){
+        const uY = bbox.y2 + fontSize * randRange(0.12, 0.28);
+        const uStartX = bbox.x1 + w * randRange(-0.02, 0.08);
+        const uEndX = bbox.x2 + w * randRange(0.04, 0.16);
+        const bow = fontSize * randRange(0.08, 0.22) * (Math.random() < 0.5 ? 1 : -1);
+        paths.push(
+          `M ${uStartX.toFixed(1)} ${uY.toFixed(1)} ` +
+          `Q ${((uStartX+uEndX)/2).toFixed(1)} ${(uY+bow).toFixed(1)}, ${uEndX.toFixed(1)} ${(uY - fontSize*0.05).toFixed(1)}`
+        );
       }
 
       return paths.join(' ');
@@ -2921,11 +2949,14 @@
       const path = font.getPath(text, 0, 0, fontSize, { kerning: true, features: { liga: true, rlig: true } });
       const bbox = path.getBoundingBox();
       const glyphD = path.toPathData(2);
+      const { start, end } = getPathEndpoints(path);
 
-      // flourish is positioned against the squeezed bbox so it hugs the text as it actually
-      // renders (post letter-compression), not the wider pre-squeeze layout
+      // flourish is positioned against the squeezed bbox/endpoints so it hugs the text as it
+      // actually renders (post letter-compression), not the wider pre-squeeze layout
       const sBbox = { x1: bbox.x1 * squeezeX, x2: bbox.x2 * squeezeX, y1: bbox.y1, y2: bbox.y2 };
-      const flourishD = buildFlourish(sBbox, fontSize);
+      const sStart = { x: start.x * squeezeX, y: start.y };
+      const sEnd = { x: end.x * squeezeX, y: end.y };
+      const flourishD = buildFlourish(sBbox, fontSize, sStart, sEnd);
 
       const pad = fontSize * 1.5;
       const vbX = (sBbox.x1 - pad).toFixed(1);
