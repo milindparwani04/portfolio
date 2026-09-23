@@ -20,7 +20,7 @@ An item only moves to `Live` after the Definition of Done in the [Rulebook](agen
 | NF-06 | Resilience | Every API-driven widget shows a graceful fallback when its endpoint fails | Built (partial) |
 | NF-07 | SEO / sharing | Title, meta description, Open Graph image, favicon, sitemap, robots.txt | Planned |
 | NF-08 | Analytics | Cloudflare Web Analytics (cookie-free, no banner needed) | Planned |
-| NF-09 | Source control | Code in a Git repo; deploys via `wrangler deploy` from main only; tagged releases | Planned |
+| NF-09 | Source control | Code in a Git repo; deploys via `wrangler deploy` from main only; tagged releases | Built (partial) — repo live at github.com/milindparwani04/portfolio, feature-branch + PR workflow in active use (PRs #2–#4), Cloudflare auto-builds from `main`. No tagged releases yet. |
 | NF-10 | Design fidelity | Grayscale-only palette, IBM Plex Mono / Sans, Anton; REF. labelling | Live |
 
 ## Site shell and sections

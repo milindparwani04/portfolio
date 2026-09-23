@@ -99,12 +99,12 @@ Done:
 Tested: `git log --all -p` and `git grep` across the full history and PR #1 diff for key/token/password/secret patterns, excluding node_modules noise; manually verified each hit.
 
 Known issues / not done:
-- PR #3 (docs into repo) and PR #4 (hygiene cleanup) both still open, not merged.
+- PR #3 (docs into repo) and PR #4 (hygiene cleanup) awaiting Milind's merge confirmation — pushing to GitHub requires it explicitly, this session couldn't merge on its own. **If you're reading this via `git pull` on `main` and don't see `docs/` or `CLAUDE.md`, that means neither PR was merged yet — check github.com/milindparwani04/portfolio/pulls before assuming this file is current.**
 - The old TwelveData key is still visible in the initial commit's history — harmless now that it's revoked, left as-is rather than force-pushing a history rewrite.
 - §3 of the Security Handoff (Cloudflare dashboard checklist) still unverified.
 - S-01 (reflected XSS in `/api/spotify/callback`) still open.
 
-Next session starts with: merge PR #3 and PR #4 once reviewed, then move to S-01.
+Next session starts with: once PR #3 and PR #4 are merged, verify Security Handoff §3, then fix S-01.
 
 ### 2026-09-23 — Cross-device setup, leaked key removed, docs moved into repo
 
