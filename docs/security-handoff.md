@@ -64,7 +64,7 @@ Covers the `portfolio` Worker on milindparwani.com, its static assets, the `GIG_
 | S-07 | Low | `SPOTIFY_AUTH_KEY` passed in the query string (can appear in logs and history); compared with `!==`. | Move behind Cloudflare Access, or send as a header and compare in constant time. |
 | S-08 | Low | Range requests buffer the whole audio file in Worker memory (128 MB limit). | Move audio to R2 and use its native range support, or cap file size. |
 | S-09 | Low | No explicit CORS policy on `/api/*`. | Add `Access-Control-Allow-Origin: https://milindparwani.com` only if cross-origin use is ever needed; otherwise leave closed and document it. |
-| S-10 | Low (closed 2026-09-23) | `.claude/settings.local.json` was tracked in git and contained a live TwelveData API key in plaintext (from ad-hoc, never-shipped Stock Compare testing). | Fixed in PR #2 (`dd02851`): key removed, file untracked, added to `.gitignore`. Key still visible in the repo's initial-commit history on GitHub (public) — not yet rotated at TwelveData or scrubbed from history. |
+| S-10 | Resolved 2026-09-23 | `.claude/settings.local.json` was tracked in git and contained a live TwelveData API key in plaintext (from ad-hoc, never-shipped Stock Compare testing). | Fixed in PR #2 (`dd02851`): key removed, file untracked, added to `.gitignore`. Milind regenerated the key at TwelveData the same day — old key confirmed unused/not found by anyone before rotation, now fully invalid regardless of who sees the git history. Not scrubbed from the initial commit's history (decided not worth the force-push + PR #1 rebase since the key itself is dead). |
 
 When a finding is fixed: move it to section 2 as a ticked item, note the date and test used in the Handoff session log.
 

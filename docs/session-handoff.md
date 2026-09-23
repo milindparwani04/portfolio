@@ -87,6 +87,25 @@ Next session starts with:
 - ...
 ```
 
+### 2026-09-23 — Full secret scan, repo hygiene cleanup, TwelveData key rotated
+
+Model: Sonnet (execute)
+Phase: 1 of 1
+Done:
+- Ran a full scan for secrets/PII: current tracked files, entire git history on every branch, and the open `cloudflare/workers-autoconfig` PR (#1). Only the already-known S-10 TwelveData key turned up; no other credentials, `.env` files, private keys or personal contact info found.
+- Found two repo-hygiene issues in the same pass: `.claude/tools/node_modules/` (~1,300 files, third-party dev-tool dependencies) and `.claude/launch.json` (embedded Milind's absolute Windows path) were both tracked. Untracked both, added both to `.gitignore`. Shipped as PR #4 (not yet merged).
+- Milind regenerated the TwelveData key at the provider and confirmed via their dashboard that it was never used by anyone else before rotation. S-10 updated from "closed" (code-level fix only) to "resolved" (key itself is now dead).
+
+Tested: `git log --all -p` and `git grep` across the full history and PR #1 diff for key/token/password/secret patterns, excluding node_modules noise; manually verified each hit.
+
+Known issues / not done:
+- PR #3 (docs into repo) and PR #4 (hygiene cleanup) both still open, not merged.
+- The old TwelveData key is still visible in the initial commit's history — harmless now that it's revoked, left as-is rather than force-pushing a history rewrite.
+- §3 of the Security Handoff (Cloudflare dashboard checklist) still unverified.
+- S-01 (reflected XSS in `/api/spotify/callback`) still open.
+
+Next session starts with: merge PR #3 and PR #4 once reviewed, then move to S-01.
+
 ### 2026-09-23 — Cross-device setup, leaked key removed, docs moved into repo
 
 Model: Sonnet (execute)
