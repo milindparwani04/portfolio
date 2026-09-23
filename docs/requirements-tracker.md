@@ -1,5 +1,7 @@
 # PARWANI — Requirements Tracker
 
+> **Living document.** Update this file as part of every push that changes the project — not just at a session's end. The next device to pull needs this current to pick up where you left off. (Unlike [`docs/agent-rulebook.md`](agent-rulebook.md), which is static.)
+
 ## Status legend
 
 `Live` shipped and tested in production · `Built` works in preview, not verified live · `UI only` placeholder, no function · `Planned` agreed, not started · `Parked` deliberately deferred · `Dropped` decided against.

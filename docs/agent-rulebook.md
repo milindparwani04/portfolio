@@ -1,5 +1,7 @@
 # PARWANI — Agent Rulebook
 
+> **Static.** Unlike the other three docs, this one does not get updated as part of normal work. Do not edit it unless Milind explicitly raises a change — see [`docs/session-handoff.md`](session-handoff.md), [`docs/requirements-tracker.md`](requirements-tracker.md) and [`docs/security-handoff.md`](security-handoff.md) for the living project state instead.
+
 ## 1. Session ritual
 
 Start: read [Session Handoff](session-handoff.md) → this Rulebook → [Requirements Tracker](requirements-tracker.md) → [Security Handoff](security-handoff.md). State back in two lines what you understand the goal to be and which phase you are starting. Ask before proceeding if anything is unclear.

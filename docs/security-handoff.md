@@ -1,5 +1,7 @@
 # PARWANI — Security Handoff
 
+> **Living document.** Update this file as part of every push that changes the project — not just at a session's end. The next device to pull needs this current to pick up where you left off. (Unlike [`docs/agent-rulebook.md`](agent-rulebook.md), which is static.)
+
 ## 1. Scope and how to use
 
 Covers the `portfolio` Worker on milindparwani.com, its static assets, the `GIG_KV` namespace and its six secrets. Section 2 was verified by reading the deployed Worker source on 23 Sep 2026. Section 3 covers Cloudflare zone settings that the API connector cannot read — tick each one only after checking it in the dashboard. Section 4 lists real gaps found in the code, ordered by severity. Any agent touching the Worker must re-run sections 2 and 5 before marking work complete.

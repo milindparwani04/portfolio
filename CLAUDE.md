@@ -11,12 +11,17 @@ This file is read automatically at the start of every session in this repo, on a
 
 State back in two lines what you understand the goal to be and which phase you're starting, per the Rulebook §1. Ask before proceeding if anything is unclear.
 
-## Before ending a session
+## Every push updates the living docs
 
-- Add a new entry to the Session Log in `docs/session-handoff.md` (newest first, use the template already in the file).
-- Update statuses in `docs/requirements-tracker.md` if anything changed.
-- Add or close findings in `docs/security-handoff.md` if the Worker changed.
-- Commit these doc updates in the same commit/PR as the code change they describe, so `git pull` on the other device brings both in sync. Per the Rulebook, a feature isn't finished until its docs reflect it.
+Three of the four docs are living documents, updated continuously — not just once at the end of a session:
+
+- `docs/session-handoff.md` — add a Session Log entry, update Current Build State and Priorities if they changed.
+- `docs/requirements-tracker.md` — move statuses as things ship.
+- `docs/security-handoff.md` — add or close findings if the Worker changed.
+
+**Any push that changes the project's state includes the matching doc update in the same commit or PR.** Don't wait until a session ends to write it up — the next device may pull mid-session. If you push code without the docs reflecting it, the other device's next Claude session starts from stale information.
+
+`docs/agent-rulebook.md` is the one exception: it's static. Don't edit it unless Milind explicitly asks for a rule to change.
 
 ## The short version of the rules
 

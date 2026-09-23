@@ -1,5 +1,7 @@
 # PARWANI — Session Handoff
 
+> **Living document.** Update this file as part of every push that changes the project — not just at a session's end. The next device to pull needs this current to pick up where you left off. (Unlike [`docs/agent-rulebook.md`](agent-rulebook.md), which is static.)
+
 ## How to use this doc
 
 This is the opening document for every new agent session. Read it top to bottom before touching code, then read the [Rulebook](agent-rulebook.md), [Security Handoff](security-handoff.md) and [Requirements Tracker](requirements-tracker.md). At the end of each session, add a new entry to the Session Log (newest on top) and update Current Build State and Priorities if they changed. Keep entries factual: what was done, what was tested, what is broken, what is next.
