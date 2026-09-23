@@ -26,6 +26,7 @@ End: update the Handoff session log, move statuses in the Requirements Tracker, 
 - **Corrections:** remind once that editing the last message saves tokens.
 - **Long sessions:** at 15+ messages, offer once to summarise context for a fresh chat.
 - **No web search or extended thinking** unless the task is complex or time-sensitive.
+- **Verify against GitHub.** When asked to read the handoff or confirm you're up to speed, `git fetch origin` and check `origin/main` before answering — don't rely on the local working tree or the old PDFs in `Portfolio/`, which can lag or diverge from what's actually merged.
 
 ## 4. Enterprise standards
 

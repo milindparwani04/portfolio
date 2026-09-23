@@ -87,6 +87,22 @@ Next session starts with:
 - ...
 ```
 
+### 2026-09-23 — Confirmed PR #3/#4 merged via GitHub
+
+Model: Sonnet (execute)
+Phase: 1 of 1
+Done:
+- Re-read the four docs and confirmed against `origin/main` on GitHub (not just the local clone) that PR #3 (docs into repo) and PR #4 (hygiene cleanup) are merged — the previous entry's "awaiting merge confirmation" is resolved.
+- Milind set a standing rule: any time an agent is asked to read the handoff / confirm it's up to speed, it must `git fetch` and check `origin/main` on GitHub first, not rely on the local working tree or the old PDFs in `Portfolio/`. Added to the Rulebook §3.
+
+Tested: `git fetch origin`; `git log origin/main --oneline` shows `1e7f775` (#4) and `0f15785` (#3) on `origin/main`; `git ls-tree -r origin/main` confirms `docs/*.md` and `CLAUDE.md` are present there; local `main` confirmed up to date and clean against `origin/main`.
+
+Known issues / not done:
+- §3 of the Security Handoff (Cloudflare dashboard checklist) still unverified.
+- S-01 (reflected XSS in `/api/spotify/callback`) still open.
+
+Next session starts with: verify Security Handoff §3, then fix S-01.
+
 ### 2026-09-23 — Full secret scan, repo hygiene cleanup, TwelveData key rotated
 
 Model: Sonnet (execute)
