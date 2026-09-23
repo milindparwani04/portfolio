@@ -1,2 +1,4 @@
 .wrangler/
 .claude/settings.local.json
+.claude/launch.json
+.claude/tools/node_modules/
