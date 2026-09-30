@@ -36,7 +36,7 @@ Secrets (set with `wrangler secret put`, never in code): `SPOTIFY_CLIENT_ID`, `S
 | `/api/spotify/authorize` | Owner-only OAuth start (key-gated) | Spotify | none |
 | `/api/spotify/callback` | OAuth callback, stores refresh token | Spotify | none |
 | `/api/gigs` | Upcoming gigs from top + trending artists | Spotify, Last.fm, Ticketmaster | 1 hr |
-| `/audio/*` | Music player files with Range support | Static assets | default |
+| `/audio/*` | Legacy Range handler; no MP3 assets are tracked or exposed by the current UI | Static assets | default |
 
 ## Design system (locked — do not change unless Milind raises it)
 
@@ -95,7 +95,7 @@ Done:
 - Rebuilt the visible site around the approved monochrome editorial/terminal mockups, with restrained colour in imagery, the Spotify label and weather icon.
 - Added the dashboard cards, rotating headlines, Dubai clock/weather, deployment date, heart-rate and Spotify empty states, dissertation/current-focus cards, full-width Karoshi journal feature, expanded project/tool grids, playlists/listening-history section, and five-at-a-time rotating gig finder.
 - Reused all nine working toolbox overlays from the previous interface, including the Audio Trimmer.
-- Removed the visible boot gate, old floating navigation, old status bar and local music-player surface.
+- Removed the visible boot gate, old floating navigation, old status bar and local music-player surface; deleted all ten tracked local MP3 files.
 
 Tested (how, result):
 - `node --check public/ui-v2.js` passed.
@@ -104,7 +104,7 @@ Tested (how, result):
 
 Known issues / not done:
 - Heart-rate, Spotify now-playing and monthly listening-history data are intentional empty states until data sources are connected.
-- The earlier hidden shell and local audio assets remain in the source for now; they are not reachable from the visible interface and should be removed in a focused cleanup after confirming no shared modal dependencies.
+- The earlier hidden shell/player code remains in the HTML for now, but the interface is unreachable and all local MP3 assets have been deleted. Remove the dead player code in a focused cleanup after confirming no shared modal dependencies.
 - Security finding S-01 remains open and no Worker routes were changed in this UI-only release.
 
 Next session starts with: verify the live Cloudflare build after the GitHub push, then remove the hidden legacy shell/local audio code without disturbing the reused toolbox modal implementations.
