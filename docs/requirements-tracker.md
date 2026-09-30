@@ -14,32 +14,35 @@ An item only moves to `Live` after the Definition of Done in the [Rulebook](agen
 |---|---|---|---|
 | NF-01 | Performance | Lighthouse Performance ≥ 90 on mobile; LCP < 2.5 s; CLS < 0.1 | Planned |
 | NF-02 | Accessibility | WCAG 2.1 AA: keyboard navigable, visible focus, alt text, `prefers-reduced-motion` respected (boot/CRT animations skippable) | Planned |
-| NF-03 | Responsive | Works 360 px to 1920 px; music player and EQ usable on touch | Planned |
+| NF-03 | Responsive | Works 360 px to 1920 px; dashboard, grids and tool overlays usable on touch | Built — desktop and 390×844 mobile browser-tested 2026-09-30 |
 | NF-04 | Browser support | Latest Chrome, Safari, Firefox, Edge; iOS Safari | Planned |
 | NF-05 | Security | All Security Handoff findings S-01 to S-04 closed | Planned |
 | NF-06 | Resilience | Every API-driven widget shows a graceful fallback when its endpoint fails | Built (partial) |
 | NF-07 | SEO / sharing | Title, meta description, Open Graph image, favicon, sitemap, robots.txt | Planned |
 | NF-08 | Analytics | Cloudflare Web Analytics (cookie-free, no banner needed) | Planned |
 | NF-09 | Source control | Code in a Git repo; deploys via `wrangler deploy` from main only; tagged releases | Built (partial) — repo live at github.com/milindparwani04/portfolio, feature-branch + PR workflow in active use (PRs #2–#4), Cloudflare auto-builds from `main`. No tagged releases yet. |
-| NF-10 | Design fidelity | Grayscale-only palette, IBM Plex Mono / Sans, Anton; REF. labelling | Live |
+| NF-10 | Design fidelity | Predominantly monochrome; selective colour in editorial imagery/icons; IBM Plex Mono + Anton; REF. labelling | Built — approved mockup direction implemented 2026-09-30 |
 
 ## Site shell and sections
 
 | ID | Item | Requirement | Status |
 |---|---|---|---|
-| SH-01 | Boot screen | `C:\PARWANI>_`, blinking cursor, ENTER to continue, CRT power-off transition; skippable; shown once per session | Live |
-| SH-02 | Hero + top bar | Sticky hero with scroll-fade; live clock | Live |
-| SH-03 | Ticker | Personal stats + live BBC headlines via `/api/news` with fallback text | Live |
-| SH-04 | Status bar | Fixed bottom bar tracking current section | Live |
-| SH-05 | Chapter dividers | Equal full-viewport dividers with Anton title + Ref. stamp for every section | Live |
-| SH-06 | Last updated | Deploy date from `/api/last-updated` | Live |
+| SH-01 | Boot screen | Removed by design; the portfolio opens directly on the dashboard | Dropped |
+| SH-02 | Hero + top bar | Clean `C:\PARWANI>` navigation and oversized one-line/flowing portfolio title; live Dubai clock in dashboard | Built |
+| SH-03 | Headlines | Dedicated rotating headline card via `/api/news`, auto-advances every 10 seconds with fallback copy | Built |
+| SH-04 | Status bar | Removed in favour of the clean sticky navigation | Dropped |
+| SH-05 | Sections | Journal, Projects, Toolbox, Playlists and Gigs retain Anton titles + Ref. stamps in a continuous scroll | Built |
+| SH-06 | Last updated | Deploy date from `/api/last-updated`, with local-preview fallback | Built |
+| SH-07 | Personal metrics | Heart-rate and Spotify cards keep their approved layouts as explicit empty states until sources are connected | Built |
+| SH-08 | Dubai weather | Current temperature/condition and daily high/low from Open-Meteo, with stable unavailable state | Built |
 | SC-01 | Journal (REF. 01) | Writing on economics/finance; needs a content format (Markdown files or CMS) decided | Planned |
 | SC-02 | Projects (REF. 02) | Card grid; each card links to a working project | Built |
-| SC-03 | Toolbox (REF. 03) | 10 tools, see table below | UI only (partial) |
-| SC-04 | Listen (REF. 04) | Music player, gigs feed | Built |
-| MP-01 | Music player | Persistent pinned bar; play, pause, seek (Range), queue from Milind's MP3s | Built |
-| MP-02 | Parametric EQ | Pro-Q-style draggable nodes, scroll-wheel Q, presets; Web Audio API | Built |
-| MP-03 | Gigs | Upcoming shows from Spotify top + Last.fm trending via `/api/gigs` | Built |
+| SC-03 | Toolbox (REF. 03) | Nine visible operational tools; future ideas remain tracked below | Built |
+| SC-04 | Playlists (REF. 04) | Three playlist cards and five-row monthly listening-history empty state; no provider name exposed | Built (data placeholders) |
+| SC-05 | Gig Finder (REF. 05) | Five event cards per batch, manual controls and 10-second auto-advance | Built |
+| MP-01 | Local music player | Removed from the visible experience; Spotify empty state and playlists replace local MP3 playback | Dropped |
+| MP-02 | Parametric EQ | Removed with the local music player | Dropped |
+| MP-03 | Gigs | Upcoming shows via `/api/gigs`, displayed five at a time with fallback data | Built |
 
 ## Projects
 
@@ -56,20 +59,21 @@ Each project needs before `Live`: working happy path, error/empty states, mobile
 
 ## Toolbox
 
-Suggested build order: TB-03, TB-04, TB-05, TB-06 (pure client-side, low risk), then TB-08, TB-07, then TB-09 and TB-10 (new backend surface; security review first).
+The visible toolbox contains TB-01 through TB-08 plus TB-11. TB-09 and TB-10 remain future ideas and require a security review before any backend work.
 
 | ID | Tool | Approach | Backend? | Status |
 |---|---|---|---|---|
 | TB-01 | Key/BPM Lookup | Spotify + ReccoBeats, Camelot keys | Yes — `/api/bpm-lookup` | Built |
 | TB-02 | Sample Finder | Freesound search, vocals/melody, BPM range, licence label | Yes — `/api/sample-search` | Built |
-| TB-03 | Tempo Tap | Tap to BPM, rolling average, reset | No | UI only |
-| TB-04 | Password Generator | `crypto.getRandomValues`, length + character options, strength meter | No | UI only |
-| TB-05 | QR Code Generator | Client-side library, PNG/SVG download | No | UI only |
-| TB-06 | Image Converter | Canvas API: PNG/JPG/WebP, resize, quality | No | UI only |
-| TB-07 | PDF Compressor | Client-side (pdf-lib) image downsampling; files never uploaded | No | UI only |
-| TB-08 | Audio Trimmer | Web Audio API waveform, trim, export WAV | No | UI only |
+| TB-03 | Tempo Tap | Tap to BPM, rolling average, reset | No | Built |
+| TB-04 | Password Generator | `crypto.getRandomValues`, length + character options, strength meter | No | Built |
+| TB-05 | QR Code Generator | Client-side library, PNG/SVG download | No | Built |
+| TB-06 | Image Converter | Canvas API: PNG/JPG/WebP, resize, quality | No | Built |
+| TB-07 | PDF Editor | Merge, split, rotate, reorder and annotate; files never uploaded | No | Built |
+| TB-08 | Audio Trimmer | Web Audio API waveform, trim, export WAV | No | Built — overlay retested 2026-09-30 |
 | TB-09 | Stock Compare | Two tickers, normalised price chart | Yes — market data API + new route | UI only |
 | TB-10 | URL Shortener | KV-backed short links; owner-only creation to prevent abuse | Yes — new route + KV | UI only |
+| TB-11 | Signature Creator | Draw/type a signature and export transparent PNG | No | Built |
 
 > **Note (2026-09-23):** an early TB-09 test used a real TwelveData API key hardcoded in `.claude/settings.local.json`, which got committed. It's been removed (see Security Handoff and Session Handoff log) and TB-09 is still UI-only/not built — no live integration exists yet. When TB-09 is actually built, its key must go through `wrangler secret put`, never into a settings/permissions file.
 

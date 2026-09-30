@@ -20,7 +20,7 @@ This is the opening document for every new agent session. Read it top to bottom 
 
 ## Stack and architecture
 
-Front end: a single HTML/CSS/JS site served as Worker static assets (`env.ASSETS`). No framework. Audio files served from `/audio/` with custom HTTP Range support so the music player can seek.
+Front end: a framework-free HTML/CSS/JS site served as Worker static assets (`env.ASSETS`). The approved portfolio interface lives in `public/index.html`, `public/ui-v2.css`, and `public/ui-v2.js`; cropped visual assets live in `public/assets/ui/`. The earlier shell remains in the document but is hidden while its working toolbox modals are reused.
 
 Back end: one Cloudflare Worker (`worker/index.js`) acting as an API proxy so no third-party key ever reaches the browser. Storage is one KV namespace, `GIG_KV`, holding OAuth state tokens (10-minute TTL) and the Spotify refresh token. Deploy timestamp comes from the `CF_VERSION_METADATA` binding.
 
@@ -41,7 +41,7 @@ Secrets (set with `wrangler secret put`, never in code): `SPOTIFY_CLIENT_ID`, `S
 ## Design system (locked — do not change unless Milind raises it)
 
 - Aesthetic: retro terminal / command-prompt soul fused with Apple-grade minimalism.
-- Palette: grayscale only. No accent colours, ever.
+- Palette: predominantly monochrome, with restrained colour reserved for editorial photos, project/tool thumbnails, playlist/gig artwork, the weather icon, and the Spotify label.
 - Type: IBM Plex Mono for system UI, IBM Plex Sans for body, Anton for display headlines.
 - Structure: rock-poster / cold-war redacted document language with "REF. 0X" numbered section labels.
 - Navigation: every main section gets an equal, full-viewport chapter divider. No section looks subordinate.
@@ -59,11 +59,11 @@ Priorities, in order:
 
 ## Current build state
 
-Shell: boot screen (`C:\PARWANI>_`, blinking cursor, "press ENTER") with CRT power-off transition; sticky hero with scroll-fade; top bar with live clock; scrolling ticker (live BBC headlines via `/api/news`); fixed bottom status bar tracking the current section.
+Shell: opens directly onto a clean `C:\PARWANI>` navigation bar and the `MY DIGITAL PORTFOLIO.` dashboard. The former ENTER/CRT boot gate, floating navigation and bottom status bar are no longer visible.
 
-Sections: Journal (REF. 01), Projects (REF. 02), Toolbox (REF. 03), Listen (REF. 04).
+Home dashboard: rotating headlines from `/api/news`; Dubai clock and live Dubai weather from Open-Meteo; deploy timestamp from `/api/last-updated`; empty-state heart-rate and Spotify cards; dissertation and current-focus cards. Every API-backed card retains its layout when data is unavailable.
 
-Music player: persistent pinned bar with parametric EQ (Pro-Q-style draggable nodes, scroll-wheel Q, presets). Audio served from `/audio/` with Range support.
+Sections: Journal (REF. 01, Karoshi article only), Projects (REF. 02), Toolbox (REF. 03), Playlists (REF. 04), and Gig Finder (REF. 05). The local music player is no longer exposed; playlists and a five-row listening-history placeholder replace it.
 
 Backend endpoints live: news, last-updated, BPM/key lookup, audio features, sample search, gigs, Spotify owner OAuth.
 
@@ -86,6 +86,28 @@ Known issues / not done:
 Next session starts with:
 - ...
 ```
+
+### 2026-09-30 — Approved portfolio UI implemented
+
+Model: Codex (execute)
+Phase: 2 of 2
+Done:
+- Rebuilt the visible site around the approved monochrome editorial/terminal mockups, with restrained colour in imagery, the Spotify label and weather icon.
+- Added the dashboard cards, rotating headlines, Dubai clock/weather, deployment date, heart-rate and Spotify empty states, dissertation/current-focus cards, full-width Karoshi journal feature, expanded project/tool grids, playlists/listening-history section, and five-at-a-time rotating gig finder.
+- Reused all nine working toolbox overlays from the previous interface, including the Audio Trimmer.
+- Removed the visible boot gate, old floating navigation, old status bar and local music-player surface.
+
+Tested (how, result):
+- `node --check public/ui-v2.js` passed.
+- Browser-tested desktop and 390×844 mobile layouts; Dubai weather resolved to live data, placeholders remained stable, gig/headline rotation rendered, and no console errors appeared.
+- Opened and closed the Audio Trimmer from the redesigned Toolbox; overlay worked at the mobile breakpoint.
+
+Known issues / not done:
+- Heart-rate, Spotify now-playing and monthly listening-history data are intentional empty states until data sources are connected.
+- The earlier hidden shell and local audio assets remain in the source for now; they are not reachable from the visible interface and should be removed in a focused cleanup after confirming no shared modal dependencies.
+- Security finding S-01 remains open and no Worker routes were changed in this UI-only release.
+
+Next session starts with: verify the live Cloudflare build after the GitHub push, then remove the hidden legacy shell/local audio code without disturbing the reused toolbox modal implementations.
 
 ### 2026-09-23 — Full secret scan, repo hygiene cleanup, TwelveData key rotated
 

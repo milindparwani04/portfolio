@@ -19,6 +19,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo+Black&family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/ui-v2.css?v=2">
 <style>
   :root{
     --bg:#0A0A0A;
@@ -983,6 +984,139 @@
 </div>
 
 <div id="site">
+  <div class="portfolio-v2" role="main">
+    <header class="v2-nav">
+      <a class="v2-terminal" href="#v2-home">C:\PARWANI&gt;<span class="v2-cursor" aria-hidden="true"></span></a>
+      <nav class="v2-links" aria-label="Primary navigation">
+        <a href="#v2-journal">Journal</a><a href="#v2-projects">Projects</a><a href="#v2-tools">Toolbox</a><a href="#v2-playlists">Playlists</a><a href="#v2-gigs">Gigs</a>
+      </nav>
+    </header>
+
+    <section class="v2-section" id="v2-home">
+      <h1 class="v2-display">My Digital Portfolio.</h1>
+      <div class="v2-dashboard">
+        <article class="v2-panel v2-news">
+          <div class="v2-news-copy">
+            <div class="v2-index-row"><span>01</span><span id="v2HeadlineSource" class="v2-tag">[ Headlines ]</span></div>
+            <h2 id="v2HeadlineTitle">The world, in rotation</h2>
+            <p class="v2-news-desc" id="v2HeadlineDesc">A compact stream of headlines, refreshed automatically without taking over the page.</p>
+            <div class="v2-rotator"><div class="v2-rotator-line"><span id="v2HeadlineProgress"></span></div><span id="v2HeadlineCount">01 / 01</span></div>
+          </div>
+          <div class="v2-news-media"><img id="v2HeadlineImage" src="/assets/ui/news-markets.jpg" alt="News headline image"></div>
+        </article>
+
+        <div class="v2-metrics">
+          <article class="v2-panel v2-metric">
+            <div class="v2-index-row"><span>02</span><span class="v2-tag">[ Health ]</span></div>
+            <h3>Heart Rate</h3>
+            <div class="v2-value v2-placeholder">--<small> BPM</small></div>
+            <p class="v2-metric-foot">Awaiting health data source</p>
+          </article>
+          <article class="v2-panel v2-metric">
+            <div class="v2-index-row"><span>03</span><span class="v2-tag">[ Weather ]</span></div>
+            <h3>Dubai Weather</h3>
+            <div class="v2-weather-main">
+              <div class="v2-value" id="v2WeatherTemp">--&deg;C</div>
+              <svg class="v2-sun" id="v2WeatherIcon" viewBox="0 0 64 64" aria-label="Weather icon"><circle cx="32" cy="32" r="10" fill="currentColor"/><g stroke="currentColor" stroke-width="3"><path d="M32 3v10M32 51v10M3 32h10M51 32h10M11.5 11.5l7 7M45.5 45.5l7 7M52.5 11.5l-7 7M18.5 45.5l-7 7"/></g></svg>
+            </div>
+            <p class="v2-metric-foot"><span id="v2WeatherLabel">Loading conditions</span><br><span id="v2WeatherHighLow">High --&deg; / Low --&deg;</span></p>
+          </article>
+        </div>
+
+        <div class="v2-submetrics">
+          <article class="v2-panel v2-spotify">
+            <img class="v2-spotify-cover" src="/assets/ui/playlist-work-mode.jpg" alt="Spotify placeholder artwork">
+            <div class="v2-spotify-copy">
+              <div class="v2-index-row"><span>04</span><span class="v2-spotify-label">[ Spotify ]</span></div>
+              <h3>Nothing Playing</h3>
+              <div class="v2-spotify-state">Listening data will appear here</div>
+            </div>
+          </article>
+          <article class="v2-panel v2-time">
+            <div class="v2-index-row"><span>05</span><span class="v2-tag">[ Time / Location ]</span></div>
+            <strong id="v2Time">--:--</strong>
+            <span class="v2-metric-foot">Dubai / GST<br><span id="v2Date">-- --- ----</span></span>
+          </article>
+        </div>
+
+        <div class="v2-bottom-metrics">
+          <article class="v2-panel v2-bottom-card">
+            <div class="v2-index-row"><span>06</span><span class="v2-tag">[ Dissertation ]</span></div>
+            <div><h3>Conflict &amp; Risk Preferences</h3><p>Undergraduate literature review</p><a href="/dissertation.pdf" target="_blank" rel="noopener noreferrer">Read PDF &#8594;</a></div>
+          </article>
+          <article class="v2-panel v2-bottom-card">
+            <div class="v2-index-row"><span>07</span><span class="v2-tag">[ Current Focus ]</span></div>
+            <div><h3>Sounds Like</h3><p>Phase 02 / Similarity engine</p></div>
+          </article>
+          <article class="v2-panel v2-bottom-card">
+            <div class="v2-index-row"><span>08</span><span class="v2-tag">[ Site Updated ]</span></div>
+            <div><h3 id="v2LastUpdated">-- --- ----</h3><p>Deployed / Main</p></div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="v2-section" id="v2-journal">
+      <div class="v2-section-head"><span class="v2-ref">Ref. 01 / Journal</span><h2 class="v2-section-title">Journal</h2></div>
+      <article class="v2-panel v2-journal-card">
+        <div class="v2-journal-copy">
+          <div class="v2-index-row"><span>01</span><span class="v2-tag">[ Culture / Society ]</span></div>
+          <h3>Karoshi: An Enquiry Into Japan's Work Culture</h3>
+          <p>Exploring the cultural, economic and psychological forces behind karoshi, and what it reveals about modern work, value and human limits.</p>
+          <a href="#v2-journal" aria-label="Karoshi article is currently in progress">Article in progress &#8594;</a>
+        </div>
+        <div class="v2-journal-media"><img src="/assets/ui/journal-karoshi.jpg" alt="Tokyo street at night"></div>
+      </article>
+    </section>
+
+    <section class="v2-section" id="v2-projects">
+      <div class="v2-section-head"><span class="v2-ref">Ref. 02 / Projects</span><h2 class="v2-section-title">Projects</h2></div>
+      <div class="v2-card-grid">
+        <article class="v2-panel v2-project"><img class="v2-thumb" src="/assets/ui/project-sounds.jpg" alt="Clouds over mountains"><div class="v2-card-meta"><div class="v2-index-row"><span>01</span><span class="v2-tag">[ Current Focus ]</span></div><h3>Sounds Like</h3><p>A similarity engine for music discovery.</p></div></article>
+        <article class="v2-panel v2-project"><img class="v2-thumb" src="/assets/ui/project-prompt.jpg" alt="Audio waveform"><div class="v2-card-meta"><div class="v2-index-row"><span>02</span><span class="v2-tag">[ Tool ]</span></div><h3>Prompt Playlist</h3><p>Turn text into personalised playlists.</p></div></article>
+        <article class="v2-panel v2-project"><img class="v2-thumb" src="/assets/ui/project-today.jpg" alt="Open road under clouds"><div class="v2-card-meta"><div class="v2-index-row"><span>03</span><span class="v2-tag">[ Experiment ]</span></div><h3>Today Somewhere</h3><p>A collection of places, moments and photographs.</p></div></article>
+        <article class="v2-panel v2-project"><img class="v2-thumb" src="/assets/ui/project-where.jpg" alt="Aircraft overhead"><div class="v2-card-meta"><div class="v2-index-row"><span>04</span><span class="v2-tag">[ Tool ]</span></div><h3>Where Next</h3><p>A simple tool for exploring new destinations.</p></div></article>
+        <article class="v2-panel v2-project is-mono"><img class="v2-thumb" src="/assets/ui/project-prompt.jpg" alt="Terminal game graphic"><div class="v2-card-meta"><div class="v2-index-row"><span>05</span><span class="v2-tag">[ Game ]</span></div><h3>Speed Round</h3><p>A fast-paced trivia game for curious minds.</p></div></article>
+        <article class="v2-panel v2-project is-mono"><img class="v2-thumb" src="/assets/ui/tool-tempo.jpg" alt="Terminal prompt"><div class="v2-card-meta"><div class="v2-index-row"><span>06</span><span class="v2-tag">[ Experiment ]</span></div><h3>Untitled Terminal Adventure</h3><p>A text-based experiment in choice and consequence.</p></div></article>
+        <article class="v2-panel v2-project is-mono v2-project-wide"><img class="v2-thumb" src="/assets/ui/tool-image.jpg" alt="Cracked glass"><div class="v2-card-meta"><div class="v2-index-row"><span>07</span><span class="v2-tag">[ Creative Tech ]</span></div><h3>Crack</h3><p>Visual experiments with fracture, distortion and decay. <a href="/crack.html">Play &#8594;</a></p></div></article>
+      </div>
+    </section>
+
+    <section class="v2-section" id="v2-tools">
+      <div class="v2-section-head"><span class="v2-ref">Ref. 03 / Toolbox</span><h2 class="v2-section-title">Toolbox</h2><p class="v2-section-kicker">No accounts. No clutter. Drop something in, get the result out.</p></div>
+      <div class="v2-card-grid">
+        <article class="v2-panel v2-tool"><img class="v2-thumb" src="/assets/ui/tool-image.jpg" alt="Landscape image comparison"><div><div class="v2-index-row"><span>01</span><span class="v2-tag">[ Media ]</span></div><h3>Image Converter</h3><p>Convert between JPG, PNG, WEBP and more.</p></div><button class="v2-tool-action" type="button" data-open-tool="imgConverterModal"><span>Open tool</span><span>&#8594;</span></button></article>
+        <article class="v2-panel v2-tool"><img class="v2-thumb" src="/assets/ui/tool-tempo.jpg" alt="Tempo display"><div><div class="v2-index-row"><span>02</span><span class="v2-tag">[ Music ]</span></div><h3>Tempo Tap</h3><p>Tap a tempo to get BPM, milliseconds and notes.</p></div><button class="v2-tool-action" type="button" data-open-tool="tempoTapModal"><span>Open tool</span><span>&#8594;</span></button></article>
+        <article class="v2-panel v2-tool"><img class="v2-thumb" src="/assets/ui/tool-key.jpg" alt="Guitar strings"><div><div class="v2-index-row"><span>03</span><span class="v2-tag">[ Reference ]</span></div><h3>Key / BPM Lookup</h3><p>Find key, BPM and related scales for any track.</p></div><button class="v2-tool-action" type="button" data-open-tool="bpmLookupModal"><span>Open tool</span><span>&#8594;</span></button></article>
+        <article class="v2-panel v2-tool"><img class="v2-thumb" src="/assets/ui/tool-key.jpg" alt="QR code reference"><div><div class="v2-index-row"><span>04</span><span class="v2-tag">[ Utility ]</span></div><h3>QR Code Generator</h3><p>Create QR codes for links, text, contacts and more.</p></div><button class="v2-tool-action" type="button" data-open-tool="qrGenModal"><span>Open tool</span><span>&#8594;</span></button></article>
+        <article class="v2-panel v2-tool"><img class="v2-thumb" src="/assets/ui/tool-samples.jpg" alt="Vinyl records"><div><div class="v2-index-row"><span>05</span><span class="v2-tag">[ Audio ]</span></div><h3>Sample Finder</h3><p>Discover royalty-free samples from curated sources.</p></div><button class="v2-tool-action" type="button" data-open-tool="sampleFinderModal"><span>Open tool</span><span>&#8594;</span></button></article>
+        <article class="v2-panel v2-tool"><img class="v2-thumb" src="/assets/ui/tool-pdf.jpg" alt="Pen on document"><div><div class="v2-index-row"><span>06</span><span class="v2-tag">[ Documents ]</span></div><h3>PDF Editor</h3><p>Merge, split, rotate, reorder and annotate PDFs.</p></div><button class="v2-tool-action" type="button" data-open-tool="pdfEditorModal"><span>Open tool</span><span>&#8594;</span></button></article>
+        <article class="v2-panel v2-tool"><img class="v2-thumb" src="/assets/ui/tool-audio.jpg" alt="Audio waveform"><div><div class="v2-index-row"><span>07</span><span class="v2-tag">[ Audio ]</span></div><h3>Audio Trimmer</h3><p>Trim, cut and export audio files in your browser.</p></div><button class="v2-tool-action" type="button" data-open-tool="audioTrimModal"><span>Open tool</span><span>&#8594;</span></button></article>
+        <article class="v2-panel v2-tool"><img class="v2-thumb" src="/assets/ui/tool-tempo.jpg" alt="Password display"><div><div class="v2-index-row"><span>08</span><span class="v2-tag">[ Security ]</span></div><h3>Password Generator</h3><p>Create strong random passwords with custom options.</p></div><button class="v2-tool-action" type="button" data-open-tool="passwordGenModal"><span>Open tool</span><span>&#8594;</span></button></article>
+        <article class="v2-panel v2-tool"><img class="v2-thumb" src="/assets/ui/tool-audio.jpg" alt="Signature line"><div><div class="v2-index-row"><span>09</span><span class="v2-tag">[ Creative ]</span></div><h3>Signature Creator</h3><p>Draw or type a signature and export a transparent PNG.</p></div><button class="v2-tool-action" type="button" data-open-tool="sigCreatorModal"><span>Open tool</span><span>&#8594;</span></button></article>
+      </div>
+    </section>
+
+    <section class="v2-section" id="v2-playlists">
+      <div class="v2-section-head"><span class="v2-ref">Ref. 04 / Playlists</span><h2 class="v2-section-title">Playlists</h2><p class="v2-section-kicker">Three playlists I keep coming back to.</p></div>
+      <div class="v2-playlist-layout">
+        <div class="v2-playlists">
+          <article class="v2-panel v2-playlist"><span class="v2-spotify-mark">Spotify</span><img src="/assets/ui/playlist-night-drive.jpg" alt="Night road playlist artwork"><h3>Night Drive</h3><p>Late nights, city lights and endless roads.</p></article>
+          <article class="v2-panel v2-playlist"><span class="v2-spotify-mark">Spotify</span><img src="/assets/ui/playlist-slow-sundays.jpg" alt="Plants in sunlight playlist artwork"><h3>Slow Sundays</h3><p>Chill beats, warm vibes and a slower pace.</p></article>
+          <article class="v2-panel v2-playlist"><span class="v2-spotify-mark">Spotify</span><img src="/assets/ui/playlist-work-mode.jpg" alt="Office building playlist artwork"><h3>Work Mode</h3><p>Focus, flow and heavy rotation.</p></article>
+        </div>
+        <article class="v2-panel v2-tracks"><div class="v2-index-row"><span>04</span><span class="v2-tag">[ Listening History ]</span></div><h3>Top Tracks This Month</h3><div class="v2-track"><span>01</span><span>Awaiting listening data</span><span>-- plays</span></div><div class="v2-track"><span>02</span><span>Awaiting listening data</span><span>-- plays</span></div><div class="v2-track"><span>03</span><span>Awaiting listening data</span><span>-- plays</span></div><div class="v2-track"><span>04</span><span>Awaiting listening data</span><span>-- plays</span></div><div class="v2-track"><span>05</span><span>Awaiting listening data</span><span>-- plays</span></div></article>
+      </div>
+    </section>
+
+    <section class="v2-section" id="v2-gigs">
+      <div class="v2-section-head"><span class="v2-ref">Ref. 05 / Gig Finder</span><h2 class="v2-section-title">Upcoming</h2><p class="v2-section-kicker">Five gigs at a time. Updated automatically.</p></div>
+      <div class="v2-gig-controls"><span id="v2GigBatch">Batch 01 / Loading</span><div class="v2-gig-buttons"><button type="button" id="v2GigPrev" aria-label="Previous gigs">&#8249;</button><button type="button" id="v2GigPause" aria-label="Pause gig rotation">&#8214;</button><button type="button" id="v2GigNext" aria-label="Next gigs">&#8250;</button></div><span>Auto 10 sec</span></div>
+      <div class="v2-gigs" id="v2GigList" aria-live="polite"></div>
+    </section>
+
+    <footer class="v2-footer"><span>&copy; 2026 Milind Parwani</span><span>Built on Cloudflare</span><span><a href="https://www.linkedin.com/in/milind-parwani-55a5b0266/" target="_blank" rel="noopener noreferrer">LinkedIn</a> / <a href="https://open.spotify.com/user/9zbpfc2ssjpy9tjiqo7xm3at0" target="_blank" rel="noopener noreferrer">Spotify</a></span></footer>
+  </div>
   <div class="site-header" id="siteHeader">
     <div class="topbar">
       <div class="clock" id="clock">--:-- -- - -</div>
@@ -4785,6 +4919,8 @@
   })();
 
 </script>
+
+<script src="/ui-v2.js?v=2"></script>
 
 </body>
 </html>
