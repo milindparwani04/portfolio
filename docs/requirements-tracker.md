@@ -21,7 +21,7 @@ An item only moves to `Live` after the Definition of Done in the [Rulebook](agen
 | NF-07 | SEO / sharing | Title, meta description, Open Graph image, favicon, sitemap, robots.txt | Planned |
 | NF-08 | Analytics | Cloudflare Web Analytics (cookie-free, no banner needed) | Planned |
 | NF-09 | Source control | Code in a Git repo; deploys via `wrangler deploy` from main only; tagged releases | Built (partial) — repo live at github.com/milindparwani04/portfolio, feature-branch + PR workflow in active use (PRs #2–#4), Cloudflare auto-builds from `main`. No tagged releases yet. |
-| NF-10 | Design fidelity | Predominantly monochrome; selective colour in editorial imagery/icons; IBM Plex Mono + Anton; REF. labelling | Built — approved mockup direction implemented 2026-09-30 |
+| NF-10 | Design fidelity | Predominantly monochrome; selective colour in high-resolution editorial imagery/icons; mockup-aligned fixed dashboard; IBM Plex Mono + Anton; REF. labelling | Built — corrected after visual comparison at 1672×941 on 2026-09-30; production review pending |
 
 ## Site shell and sections
 
@@ -29,15 +29,15 @@ An item only moves to `Live` after the Definition of Done in the [Rulebook](agen
 |---|---|---|---|
 | SH-01 | Boot screen | Removed by design; the portfolio opens directly on the dashboard | Dropped |
 | SH-02 | Hero + top bar | Clean `C:\PARWANI>` navigation and oversized one-line/flowing portfolio title; live Dubai clock in dashboard | Built |
-| SH-03 | Headlines | Dedicated rotating headline card via `/api/news`, auto-advances every 10 seconds with fallback copy | Built |
+| SH-03 | Headlines | Fixed-size card via `/api/news`; title text fits within its area, rotates every 10 seconds; preview copy and description follow each other | Built |
 | SH-04 | Status bar | Removed in favour of the clean sticky navigation | Dropped |
-| SH-05 | Sections | Journal, Projects, Toolbox, Playlists and Gigs retain Anton titles + Ref. stamps in a continuous scroll | Built |
+| SH-05 | Sections | Journal, Projects, Toolbox, Playlists and Gigs retain Anton titles + Ref. stamps, with explicit next-section scroll cues | Built |
 | SH-06 | Last updated | Deploy date from `/api/last-updated`, with local-preview fallback | Built |
 | SH-07 | Personal metrics | Heart-rate and Spotify cards keep their approved layouts as explicit empty states until sources are connected | Built |
-| SH-08 | Dubai weather | Current temperature/condition and daily high/low from Open-Meteo, with stable unavailable state | Built |
+| SH-08 | Dubai weather | Current temperature/condition, daily high/low, humidity, wind, and condition-appropriate icon from Open-Meteo, with stable unavailable state | Built |
 | SC-01 | Journal (REF. 01) | Writing on economics/finance; needs a content format (Markdown files or CMS) decided | Planned |
-| SC-02 | Projects (REF. 02) | Card grid; each card links to a working project | Built |
-| SC-03 | Toolbox (REF. 03) | Nine visible operational tools; future ideas remain tracked below | Built |
+| SC-02 | Projects (REF. 02) | Text-only 3×2 grid plus a full-width seventh card; active project cards link to their pages | Built |
+| SC-03 | Toolbox (REF. 03) | Six visible text-only tools with outlined overlay actions; future ideas remain tracked below | Built |
 | SC-04 | Playlists (REF. 04) | Three playlist cards and five-row monthly listening-history empty state; no provider name exposed | Built (data placeholders) |
 | SC-05 | Gig Finder (REF. 05) | Five event cards per batch, manual controls and 10-second auto-advance | Built |
 | MP-01 | Local music player | Removed from the visible experience; Spotify empty state and playlists replace local MP3 playback | Dropped |
@@ -59,7 +59,7 @@ Each project needs before `Live`: working happy path, error/empty states, mobile
 
 ## Toolbox
 
-The visible toolbox contains TB-01 through TB-08 plus TB-11. TB-09 and TB-10 remain future ideas and require a security review before any backend work.
+The visible Toolbox contains Image Converter, Tempo Tap, Key/BPM Lookup, QR Code Generator, Audio Trimmer, and Password Generator. The previously built Sample Finder, PDF Editor, and Signature Creator are intentionally absent from this layout; their modal code remains in the hidden legacy shell. TB-09 and TB-10 remain future ideas and require a security review before any backend work.
 
 | ID | Tool | Approach | Backend? | Status |
 |---|---|---|---|---|

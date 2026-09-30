@@ -9,6 +9,57 @@
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
 
+  function fitHeadline() {
+    const title = byId('v2HeadlineTitle');
+    if (!title || !title.clientHeight || !title.clientWidth) return;
+    let low = 18;
+    let high = 76;
+    let best = low;
+    for (let i = 0; i < 9; i += 1) {
+      const size = (low + high) / 2;
+      title.style.fontSize = `${size}px`;
+      if (title.scrollHeight <= title.clientHeight + 1 && title.scrollWidth <= title.clientWidth + 1) {
+        best = size;
+        low = size;
+      } else {
+        high = size;
+      }
+    }
+    title.style.fontSize = `${best}px`;
+  }
+
+  function fitPortfolioTitle() {
+    const title = document.querySelector('.v2-display');
+    if (!title) return;
+    if (window.innerWidth <= 720) {
+      title.style.fontSize = '';
+      return;
+    }
+    let low = 48;
+    let high = Math.min(window.innerWidth * .15, 280);
+    let best = low;
+    for (let i = 0; i < 10; i += 1) {
+      const size = (low + high) / 2;
+      title.style.fontSize = `${size}px`;
+      if (title.scrollWidth <= title.clientWidth + 1) {
+        best = size;
+        low = size;
+      } else {
+        high = size;
+      }
+    }
+    title.style.fontSize = `${best}px`;
+  }
+
+  window.addEventListener('resize', () => {
+    fitPortfolioTitle();
+    fitHeadline();
+  });
+  document.fonts?.ready.then(() => {
+    fitPortfolioTitle();
+    fitHeadline();
+  });
+
   function updateDubaiClock() {
     const now = new Date();
     const time = new Intl.DateTimeFormat('en-GB', {
@@ -52,10 +103,10 @@
   }
 
   const fallbackHeadlines = [
-    'Global markets steady as new data arrives',
-    'Technology and culture continue to reshape modern work',
-    'New ideas move from sketchbook to browser',
-    'A rotating view of the stories shaping the day'
+    { title: 'Global markets steady as new data arrives', description: 'Investors assess the latest economic data as markets turn their attention to the months ahead.' },
+    { title: 'Technology and culture continue to reshape modern work', description: 'A preview of the stories and ideas shaping work, technology and daily life.' },
+    { title: 'New ideas move from sketchbook to browser', description: 'Projects take shape through small experiments, practical tools and steady iteration.' },
+    { title: 'A rotating view of the stories shaping the day', description: 'The featured headline changes automatically while this panel keeps its dimensions.' }
   ];
   let headlines = fallbackHeadlines;
   let headlineIndex = 0;
@@ -71,8 +122,10 @@
   function renderHeadline() {
     const title = byId('v2HeadlineTitle');
     const count = byId('v2HeadlineCount');
-    if (title) title.textContent = headlines[headlineIndex];
+    if (title) title.textContent = headlines[headlineIndex].title;
+    byId('v2HeadlineDesc').textContent = headlines[headlineIndex].description;
     if (count) count.textContent = `${String(headlineIndex + 1).padStart(2, '0')} / ${String(headlines.length).padStart(2, '0')}`;
+    window.requestAnimationFrame(fitHeadline);
     restartHeadlineProgress();
   }
 
@@ -82,10 +135,15 @@
       if (!response.ok) throw new Error('Headline request failed');
       const payload = await response.json();
       if (!Array.isArray(payload.headlines) || !payload.headlines.length) throw new Error('No headlines');
-      headlines = payload.headlines.map(String).slice(0, 12);
+      headlines = payload.headlines.map((headline) => ({
+        title: String(headline),
+        description: 'The latest story from BBC World. Headlines rotate automatically every ten seconds.'
+      })).slice(0, 12);
       headlineIndex = 0;
+      byId('v2HeadlineSource').textContent = '[ BBC WORLD ]';
     } catch (_) {
       headlines = fallbackHeadlines;
+      byId('v2HeadlineSource').textContent = '[ PREVIEW ]';
     }
     renderHeadline();
   }
@@ -106,7 +164,7 @@
 
   async function loadWeather() {
     try {
-      const endpoint = 'https://api.open-meteo.com/v1/forecast?latitude=25.2048&longitude=55.2708&current=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min&timezone=Asia%2FDubai&forecast_days=1';
+      const endpoint = 'https://api.open-meteo.com/v1/forecast?latitude=25.2048&longitude=55.2708&current=temperature_2m,weather_code,relative_humidity_2m,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min&timezone=Asia%2FDubai&forecast_days=1';
       const response = await fetch(endpoint);
       if (!response.ok) throw new Error('Weather request failed');
       const payload = await response.json();
@@ -117,10 +175,23 @@
       byId('v2WeatherTemp').textContent = `${current}°C`;
       byId('v2WeatherLabel').textContent = weatherLabels[code] || 'Current conditions';
       byId('v2WeatherHighLow').textContent = `High ${high}° / Low ${low}°`;
+      byId('v2WeatherExtras').textContent = `Humidity ${Math.round(payload.current.relative_humidity_2m)}% / Wind ${Math.round(payload.current.wind_speed_10m)} km/h`;
+      const icon = byId('v2WeatherIcon');
+      if (code >= 51) {
+        icon.innerHTML = '<path d="M15 40a13 13 0 0 1 4-25 18 18 0 0 1 34 8 10 10 0 0 1-1 20H16" fill="none" stroke="currentColor" stroke-width="3"/><path d="M20 48l-3 8M33 48l-3 8M46 48l-3 8" stroke="currentColor" stroke-width="3"/>';
+        icon.setAttribute('aria-label', 'Rain icon');
+      } else if (code >= 2) {
+        icon.innerHTML = '<path d="M15 43a13 13 0 0 1 4-25 18 18 0 0 1 34 8 10 10 0 0 1-1 20H16" fill="none" stroke="currentColor" stroke-width="3"/>';
+        icon.setAttribute('aria-label', 'Cloud icon');
+      } else {
+        icon.innerHTML = '<circle cx="32" cy="32" r="10" fill="currentColor"/><g stroke="currentColor" stroke-width="3"><path d="M32 3v10M32 51v10M3 32h10M51 32h10M11.5 11.5l7 7M45.5 45.5l7 7M52.5 11.5l-7 7M18.5 45.5l-7 7"/></g>';
+        icon.setAttribute('aria-label', 'Sun icon');
+      }
     } catch (_) {
       byId('v2WeatherTemp').textContent = '--°C';
       byId('v2WeatherLabel').textContent = 'Weather unavailable';
       byId('v2WeatherHighLow').textContent = 'High --° / Low --°';
+      byId('v2WeatherExtras').textContent = 'Humidity --% / Wind -- km/h';
     }
   }
 
@@ -140,11 +211,11 @@
     { artist: 'The Midnight', venue: 'Forum, London', date: '2026-12-09' }
   ];
   const gigImages = [
-    '/assets/ui/gig-city-arena.jpg',
-    '/assets/ui/gig-harbour-stage.jpg',
-    '/assets/ui/gig-blue-room.jpg',
-    '/assets/ui/gig-river-hall.jpg',
-    '/assets/ui/gig-central-live.jpg'
+    '/assets/ui/gig-city-arena-hd.jpg',
+    '/assets/ui/gig-harbour-stage-hd.jpg',
+    '/assets/ui/gig-blue-room-hd.jpg',
+    '/assets/ui/gig-river-hall-hd.jpg',
+    '/assets/ui/gig-central-live-hd.jpg'
   ];
   let gigs = gigFallback;
   let gigBatch = 0;
@@ -167,7 +238,7 @@
       const search = encodeURIComponent(`${gig.artist} ${gig.venue} tickets`);
       return `<article class="v2-panel v2-gig">
         <div class="v2-index-row"><span>${String(index + 1).padStart(2, '0')}</span><span class="v2-tag">[ Event ]</span></div>
-        <img src="${gigImages[index]}" alt="${escapeHtml(gig.venue)}">
+        <img src="${gigImages[index]}" alt="Illustrative concert venue atmosphere" loading="lazy" decoding="async">
         <h3>${escapeHtml(gig.artist)}</h3>
         <p>${escapeHtml(gig.venue)}</p><p>${escapeHtml(formatGigDate(gig.date))}</p>
         <a href="https://www.google.com/search?q=${search}" target="_blank" rel="noopener noreferrer">Open details &#8599;</a>

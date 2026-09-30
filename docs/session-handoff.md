@@ -20,7 +20,7 @@ This is the opening document for every new agent session. Read it top to bottom 
 
 ## Stack and architecture
 
-Front end: a framework-free HTML/CSS/JS site served as Worker static assets (`env.ASSETS`). The approved portfolio interface lives in `public/index.html`, `public/ui-v2.css`, and `public/ui-v2.js`; cropped visual assets live in `public/assets/ui/`. The earlier shell remains in the document but is hidden while its working toolbox modals are reused.
+Front end: a framework-free HTML/CSS/JS site served as Worker static assets (`env.ASSETS`). The visible portfolio interface lives in `public/index.html`, `public/ui-v2.css`, and `public/ui-v2.js`; full-resolution editorial images live in `public/assets/ui/`. The earlier shell remains in the document but is hidden while its working toolbox modals are reused.
 
 Back end: one Cloudflare Worker (`worker/index.js`) acting as an API proxy so no third-party key ever reaches the browser. Storage is one KV namespace, `GIG_KV`, holding OAuth state tokens (10-minute TTL) and the Spotify refresh token. Deploy timestamp comes from the `CF_VERSION_METADATA` binding.
 
@@ -41,7 +41,7 @@ Secrets (set with `wrangler secret put`, never in code): `SPOTIFY_CLIENT_ID`, `S
 ## Design system (locked — do not change unless Milind raises it)
 
 - Aesthetic: retro terminal / command-prompt soul fused with Apple-grade minimalism.
-- Palette: predominantly monochrome, with restrained colour reserved for editorial photos, project/tool thumbnails, playlist/gig artwork, the weather icon, and the Spotify label.
+- Palette: predominantly monochrome, with restrained colour reserved for editorial photography, playlist/gig artwork, the weather icon, and the Spotify label. Projects and Toolbox are text-only.
 - Type: IBM Plex Mono for system UI, IBM Plex Sans for body, Anton for display headlines.
 - Structure: rock-poster / cold-war redacted document language with "REF. 0X" numbered section labels.
 - Navigation: every main section gets an equal, full-viewport chapter divider. No section looks subordinate.
@@ -61,9 +61,9 @@ Priorities, in order:
 
 Shell: opens directly onto a clean `C:\PARWANI>` navigation bar and the `MY DIGITAL PORTFOLIO.` dashboard. The former ENTER/CRT boot gate, floating navigation and bottom status bar are no longer visible.
 
-Home dashboard: rotating headlines from `/api/news`; Dubai clock and live Dubai weather from Open-Meteo; deploy timestamp from `/api/last-updated`; empty-state heart-rate and Spotify cards; dissertation and current-focus cards. Every API-backed card retains its layout when data is unavailable.
+Home dashboard: fixed-size headline card with text fitted on each rotation from `/api/news`; Dubai clock and live Dubai weather from Open-Meteo; deploy timestamp from `/api/last-updated`; empty-state heart-rate and Spotify cards; dissertation and current-focus cards. The opening section uses the approved mockup's full-width alignment and includes a scroll-to-Journal cue. Every API-backed card retains its layout when data is unavailable.
 
-Sections: Journal (REF. 01, Karoshi article only), Projects (REF. 02), Toolbox (REF. 03), Playlists (REF. 04), and Gig Finder (REF. 05). The local music player is no longer exposed; playlists and a five-row listening-history placeholder replace it.
+Sections: Journal (REF. 01, Karoshi article only), Projects (REF. 02, text-only 3×2 cards plus one full-width card), Toolbox (REF. 03, six text-only cards with outlined buttons), Playlists (REF. 04), and Gig Finder (REF. 05). The local music player is no longer exposed; playlists and a five-row listening-history placeholder replace it. Sample Finder, PDF Editor, and Signature Creator are absent from the visible Toolbox; their existing modal code remains in the hidden legacy shell pending cleanup.
 
 Backend endpoints live: news, last-updated, BPM/key lookup, audio features, sample search, gigs, Spotify owner OAuth.
 
@@ -86,6 +86,29 @@ Known issues / not done:
 Next session starts with:
 - ...
 ```
+
+### 2026-09-30 — Visual fidelity correction after live review
+
+Model: Codex (execute)
+Phase: 2 of 2
+Done:
+- Matched the approved opening-page grid more closely: aligned full-width title and card edges, fixed dashboard rows, a smaller photo area, and stable headline text fitting across 10-second rotations.
+- Removed every Project and Toolbox thumbnail, aligned Projects as two rows of three plus a full-width seventh card, and restyled six Toolbox actions as outlined terminal buttons.
+- Removed Sample Finder, PDF Editor, and Signature Creator from the visible Toolbox as requested. Existing modal implementations were left intact outside the new UI.
+- Added the missing section-to-section scroll cues and adjusted spacing in the Journal card so its article button sits clear of the description and lower border.
+- Replaced ten low-resolution crops with generated full-resolution editorial, playlist, and generic gig imagery; deleted the obsolete crops.
+- Added live humidity/wind values and condition-appropriate weather icons to make the Dubai card more useful.
+
+Tested (how, result):
+- Compared the local page visually to the supplied 1672×941 home mockup and inspected Journal, Projects, and Toolbox at desktop width.
+- At 390×844, checked that the document has no horizontal overflow, the fixed news card remains stable, and the Journal button stays separated from text and border.
+- Opened and closed Audio Trimmer from the new text-only Toolbox; no browser console errors.
+
+Known issues / not done:
+- Heart-rate, Spotify now-playing, and monthly listening-history data remain intentional empty states until connected.
+- The hidden legacy shell and three removed tools' modal code remain in `index.html`; no new Worker routes were added. Security finding S-01 remains open.
+
+Next session starts with: inspect production after Cloudflare auto-deploy, then remove hidden legacy shell/player code in a separate focused cleanup.
 
 ### 2026-09-30 — Approved portfolio UI implemented
 
