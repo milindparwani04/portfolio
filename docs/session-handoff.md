@@ -92,6 +92,20 @@ Next session starts with:
 - ...
 ```
 
+### 2026-09-30 — Spotify listening data: frontend wiring (Phase 2)
+Model: Opus
+Phase: 2 of 4
+Done:
+- `public/ui-v2.js`: `loadNowPlaying` (dashboard Spotify card; "Now playing" / "Paused" / "Last played 2h ago" + artists; polls every 30 s while the tab is visible), `loadPlaylists` (name, description as plain text, cover, track count in the tag, link), `loadListening` + `renderTop` (Top Tracks / Top Artists table, play counts, bars relative to the top item). All API strings escaped; only `https:` URLs accepted for links and images.
+- `public/index.html`: static playlist cards now show the real names (pop, Camon, idk) and link to the real playlists, so a failed `/api/playlists` still works; Tracks / Artists toggle added inside the Listening History card (hidden until data loads — Milind approved deploying after this phase; toggle chosen so the locked layout doesn't change); IDs for JS hooks; CSS/JS cache-bust `v=7`.
+- `public/ui-v2.css`: toggle, artwork in table cells, link style, ellipsis for long now-playing titles.
+Tested (how, result):
+- Scratch mock server (not committed) serving `public/` with fake `/api/*` in three modes, driven in Chrome at 1456×819 viewport: ok mode → all panels filled, `<img onerror>` track name rendered as text, `javascript:` playlist URL/image rejected (static link kept), HTML entities in description decoded, long title truncated; Artists toggle switches heading, period line and rows; fallback mode → "Last 4 weeks", `--` plays, empty bars; fail mode → every empty state unchanged, toggle hidden. 390 px (iframe) → no horizontal overflow, mobile column rule intact. No console errors.
+Known issues / not done:
+- Not deployed; real Spotify data unverified until deploy + re-authorize.
+Next session starts with:
+- Phase 3: merge to `main` (deploys), Milind re-authorizes, verify all three routes and the first cron run in production.
+
 ### 2026-09-30 — Spotify listening data: Worker routes + play log (Phase 1)
 Model: Opus
 Phase: 1 of 4
