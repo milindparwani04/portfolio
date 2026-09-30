@@ -109,6 +109,7 @@ Tested (how, result):
 - Not testable before deploy: the real Google consent (unverified-app screen), the real response shape.
 Known issues / not done:
 - If Google refuses the restricted scope for an unverified production app, fall back to Testing mode (weekly re-login) or the Apple Health push route.
+- First Google login failed: consent screen was still in Testing with no test users, and publishing needed a privacy policy URL. Added `public/privacy.html` (served at `/privacy`; claims checked — no cookies/analytics in `public/` or the Worker). Claude then (with Milind's go-ahead, in Chrome) set Branding home page + privacy link, removed the six unused restricted scopes (kept only `health_metrics_and_measurements.readonly`), and published the app.
 Next session starts with:
 - Deploy, generate `HEALTH_AUTH_KEY`, Milind logs in with Google, verify `/api/heart-rate` in production.
 
