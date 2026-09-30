@@ -18,6 +18,7 @@ Covers the `portfolio` Worker on milindparwani.com, its static assets, the `GIG_
 - [x] Refresh token stored server-side in KV, rotated when Spotify returns a new one.
 - [x] S-01 fixed and deployed 2026-09-30: `/api/spotify/callback` returns fixed messages only; the `error` param and `err.message` go to `console.error`, never into the HTML.
 - [x] `SPOTIFY_AUTH_KEY` rotated 2026-09-30 (40 random alphanumeric characters, generated and stored via `wrangler secret bulk` without being printed). `/api/playlists` now uses the owner token (read-only scopes above) to get track counts; the app token is only a fallback.
+- [x] Google Health owner OAuth (`/api/health/authorize`, `/api/health/callback`, built 2026-09-30, not yet deployed): gated by `HEALTH_AUTH_KEY` with a constant-time compare (S-07 fix applied to this route only), single-use `health_oauth_state:` KV state with 10-minute TTL, fixed-message callback, read-only scope `googlehealth.health_metrics_and_measurements.readonly`. `/api/heart-rate` takes no input, 60 s versioned cache, generic 502. Heart-rate readings are personal health data shown publicly by design (Milind's choice); only the latest single reading is exposed, never history.
 - [x] Empty queries rejected with 400; sample `mode` restricted to an allow-list (`vocals`, `melody`).
 - [x] User input passed to upstream URLs via `encodeURIComponent` / `URLSearchParams`.
 - [x] Upstream error text truncated to 200 characters.

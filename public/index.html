@@ -972,7 +972,7 @@
     .tools{ grid-template-columns:1fr; }
   }
 </style>
-<link rel="stylesheet" href="/ui-v2.css?v=7">
+<link rel="stylesheet" href="/ui-v2.css?v=8">
 </head>
 <body class="locked">
 
@@ -1009,9 +1009,9 @@
           <article class="v2-panel v2-metric">
             <div class="v2-index-row"><span>02</span><span class="v2-tag">[ Health ]</span></div>
             <h3>Heart Rate</h3>
-            <div class="v2-value v2-placeholder">--<small> BPM</small></div>
+            <div class="v2-value v2-placeholder" id="v2HeartValue">--<small> BPM</small></div>
             <svg class="v2-pulse" viewBox="0 0 160 24" preserveAspectRatio="none" aria-hidden="true"><path d="M0 12h160" fill="none" stroke="currentColor" stroke-width="1.2" stroke-dasharray="3 3"/></svg>
-            <p class="v2-metric-foot">Awaiting health data source</p>
+            <p class="v2-metric-foot" id="v2HeartFoot">Awaiting health data source</p>
           </article>
           <article class="v2-panel v2-metric">
             <div class="v2-index-row"><span>03</span><span class="v2-tag">[ Weather ]</span></div>
@@ -5030,7 +5030,7 @@
 
 </script>
 
-<script src="/ui-v2.js?v=7"></script>
+<script src="/ui-v2.js?v=8"></script>
 
 </body>
 </html>

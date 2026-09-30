@@ -24,7 +24,7 @@ Front end: a framework-free HTML/CSS/JS site served as Worker static assets (`en
 
 Back end: one Cloudflare Worker (`worker/index.js`) acting as an API proxy so no third-party key ever reaches the browser. Storage is one KV namespace, `GIG_KV`, holding OAuth state tokens (10-minute TTL) and the Spotify refresh token, plus one D1 database, `portfolio-plays` (binding `PLAYS_DB`, schema in `migrations/`), holding the Spotify play log. A Cron Trigger (`*/30 * * * *`) runs `scheduled()`, which copies the latest 50 plays from Spotify recently-played into `PLAYS_DB`. Deploy timestamp comes from the `CF_VERSION_METADATA` binding.
 
-Secrets (set with `wrangler secret put`, never in code): `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET`, `SPOTIFY_AUTH_KEY`, `FREESOUND_API_KEY`, `LASTFM_API_KEY`, `TICKETMASTER_API_KEY`. If a secret is missing the route returns 503 "Lookup is not configured" rather than crashing.
+Secrets (set with `wrangler secret bulk` from a temp file — piping into `secret put` from PowerShell 5.1 corrupted a value — never in code): `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET`, `SPOTIFY_AUTH_KEY`, `GOOGLE_HEALTH_CLIENT_ID`, `GOOGLE_HEALTH_CLIENT_SECRET`, `HEALTH_AUTH_KEY`, `FREESOUND_API_KEY`, `LASTFM_API_KEY`, `TICKETMASTER_API_KEY`. If a secret is missing the route returns 503 "Lookup is not configured" rather than crashing.
 
 | Route | Purpose | Upstream | Edge cache |
 |---|---|---|---|
@@ -36,6 +36,9 @@ Secrets (set with `wrangler secret put`, never in code): `SPOTIFY_CLIENT_ID`, `S
 | `/api/spotify/authorize` | Owner-only OAuth start (key-gated) | Spotify | none |
 | `/api/spotify/callback` | OAuth callback, stores refresh token | Spotify | none |
 | `/api/gigs` | Upcoming gigs from top + trending artists | Spotify, Last.fm, Ticketmaster | 1 hr |
+| `/api/health/authorize` | Owner-only Google Health OAuth start (`HEALTH_AUTH_KEY`, constant-time compare) | Google | none |
+| `/api/health/callback` | OAuth callback, stores `health_refresh_token` in `GIG_KV` | Google | none |
+| `/api/heart-rate` | Dashboard Health card: latest Fitbit reading `{ bpm, sampledAt, motion }` from the last 24 h | Google Health API v4 | 60 s |
 | `/api/now-playing` | Dashboard Spotify card: current track, else last played | Spotify (owner token) | 20 s |
 | `/api/playlists` | The three playlist cards (pop, Camon, idk — IDs in `PLAYLIST_IDS`) | Spotify (app token) | 6 hr |
 | `/api/listening` | Top 5 tracks + artists for the Dubai calendar month, with play counts from `PLAYS_DB`; falls back to Spotify `short_term` (no counts, `source: "short_term"`) while the month has < 5 distinct tracks | D1, Spotify (owner token) | 10 min |
@@ -64,7 +67,7 @@ Priorities, in order:
 
 Shell: opens directly onto a clean `C:\PARWANI>` navigation bar and the `MY DIGITAL PORTFOLIO.` dashboard. The former ENTER/CRT boot gate, floating navigation and bottom status bar are no longer visible.
 
-Home dashboard: fixed-size headline card with text fitted on each rotation from `/api/news`; Dubai clock and live Dubai weather from Open-Meteo; deploy timestamp from `/api/last-updated`; empty-state heart-rate card; Spotify card with the current or last-played track from `/api/now-playing`; dissertation and current-focus cards. The opening section uses the approved mockup's full-width alignment and includes a scroll-to-Journal cue. Every API-backed card retains its layout when data is unavailable.
+Home dashboard: fixed-size headline card with text fitted on each rotation from `/api/news`; Dubai clock and live Dubai weather from Open-Meteo; deploy timestamp from `/api/last-updated`; heart-rate card from `/api/heart-rate` (built, awaiting deploy + Google login); Spotify card with the current or last-played track from `/api/now-playing`; dissertation and current-focus cards. The opening section uses the approved mockup's full-width alignment and includes a scroll-to-Journal cue. Every API-backed card retains its layout when data is unavailable.
 
 Section paging: on desktop/tablet (≥721 px wide and ≥620 px tall) every section is exactly one viewport under a fixed nav bar, and one wheel gesture or key press (PageUp/PageDown/arrows/Space/Home/End) moves one whole section (`initSectionPager` in `public/ui-v2.js`, CSS scroll-snap for touch/scrollbar). Each section has a "↑ previous" cue top-right and a "SCROLL / X NEXT ↓" cue at the bottom; the nav underlines the current section and the URL hash follows it. Content scales with viewport height so nothing clips down to ~1100×620; a short-viewport tier (≤760 px tall) tightens spacing. Phones and smaller windows scroll normally.
 
@@ -91,6 +94,23 @@ Known issues / not done:
 Next session starts with:
 - ...
 ```
+
+### 2026-09-30 — Heart rate from Google Health API (Phases 1–3 of 4)
+Model: Opus
+Phase: 3 of 4
+Done:
+- Research: Fitbit Web API sunsets Sept 2026; its replacement is the Google Health API (`health.googleapis.com/v4`). Heart rate = `users/me/dataTypes/heart-rate/dataPoints`, newest first, scope `googlehealth.health_metrics_and_measurements.readonly`. All `googlehealth.*` scopes are Restricted: the OAuth app runs **In production, unverified** (single user, under the 100-user cap) because Testing mode expires refresh tokens after 7 days. Apple Health route rejected (no cloud API; would need a phone app pushing to a new public write endpoint).
+- Milind created the Google Cloud project + OAuth client (redirect `https://milindparwani.com/api/health/callback`). Claude stored `GOOGLE_HEALTH_CLIENT_ID`/`_SECRET` via `wrangler secret bulk` without printing them. `HEALTH_AUTH_KEY` is generated at deploy time.
+- Worker: `/api/health/authorize`, `/api/health/callback`, `/api/heart-rate` (see route table). Separate KV state prefix `health_oauth_state:` so a Google state can't be spent at the Spotify callback.
+- Frontend: Health card shows "68 BPM" and "Latest reading / 7m ago / At rest"; polls with now-playing every 30 s while visible.
+Tested (how, result):
+- `wrangler dev --local` with dummy config: authorize 403 without/with wrong key, 302 with right key and correct Google params (offline, consent, readonly scope, no include_granted_scopes); callback: error param not echoed, missing params, bad state, valid state + bad code → "Token exchange failed.", state single-use, health state rejected by Spotify callback; heart-rate not connected → generic 502.
+- Mock API in Chrome: reading → value + age + motion; `bpm: null` → "No reading in the last 24 h"; 502 → empty state unchanged; no console errors.
+- Not testable before deploy: the real Google consent (unverified-app screen), the real response shape.
+Known issues / not done:
+- If Google refuses the restricted scope for an unverified production app, fall back to Testing mode (weekly re-login) or the Apple Health push route.
+Next session starts with:
+- Deploy, generate `HEALTH_AUTH_KEY`, Milind logs in with Google, verify `/api/heart-rate` in production.
 
 ### 2026-09-30 — Spotify listening data: live (Phases 3–4 complete)
 Model: Opus

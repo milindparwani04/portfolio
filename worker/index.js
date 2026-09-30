@@ -502,6 +502,139 @@ async function refreshSpotifyUserAccessToken(env) {
   return data.access_token;
 }
 
+// Heart rate: the dashboard Health card reads the owner's latest Fitbit reading from the Google
+// Health API (the Fitbit Web API's replacement). Same owner-only OAuth shape as Spotify above:
+// a key-gated authorize route, a state-checked callback that stores a refresh token in KV, and a
+// read route that mints access tokens from it. The scope is read-only and limited to health
+// metrics; googlehealth.* scopes are "restricted", so the OAuth app runs unverified in production
+// (single user, under Google's 100-user cap) — Testing mode would expire the token every 7 days.
+const GOOGLE_HEALTH_API_BASE = 'https://health.googleapis.com/v4';
+const GOOGLE_HEALTH_REDIRECT_URI = 'https://milindparwani.com/api/health/callback';
+const GOOGLE_HEALTH_SCOPE = 'https://www.googleapis.com/auth/googlehealth.health_metrics_and_measurements.readonly';
+const HEART_RATE_CACHE_TTL_SECONDS = 60;
+// The Air only uploads when it syncs with the phone app; anything older than this is shown as
+// "no recent reading" rather than a stale number.
+const HEART_RATE_LOOKBACK_MS = 24 * 60 * 60 * 1000;
+
+// Constant-time comparison for owner keys (see S-07); length leak is acceptable for a random key.
+function ownerKeyMatches(provided, expected) {
+  if (!provided || !expected) return false;
+  const a = new TextEncoder().encode(provided);
+  const b = new TextEncoder().encode(expected);
+  return a.byteLength === b.byteLength && crypto.subtle.timingSafeEqual(a, b);
+}
+
+function googleHealthConfigured(env) {
+  return Boolean(env.GOOGLE_HEALTH_CLIENT_ID && env.GOOGLE_HEALTH_CLIENT_SECRET);
+}
+
+async function exchangeGoogleToken(env, params) {
+  params.set('client_id', env.GOOGLE_HEALTH_CLIENT_ID);
+  params.set('client_secret', env.GOOGLE_HEALTH_CLIENT_SECRET);
+  const res = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: params.toString(),
+    signal: AbortSignal.timeout(SPOTIFY_TIMEOUT_MS),
+  });
+  if (!res.ok) throw new Error(`Google token endpoint returned ${res.status}: ${(await res.text()).slice(0, 200)}`);
+  return res.json();
+}
+
+// access_type=offline + prompt=consent make Google return a refresh token every time.
+// include_granted_scopes is deliberately not set: mixing in legacy fitness.* grants breaks consent.
+async function handleHealthAuthorize(request, env) {
+  const url = new URL(request.url);
+  if (!googleHealthConfigured(env) || !ownerKeyMatches(url.searchParams.get('key'), env.HEALTH_AUTH_KEY)) {
+    return new Response('Forbidden', { status: 403 });
+  }
+  const state = crypto.randomUUID();
+  await env.GIG_KV.put(`health_oauth_state:${state}`, '1', { expirationTtl: 600 });
+
+  const authUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth');
+  authUrl.searchParams.set('client_id', env.GOOGLE_HEALTH_CLIENT_ID);
+  authUrl.searchParams.set('redirect_uri', GOOGLE_HEALTH_REDIRECT_URI);
+  authUrl.searchParams.set('response_type', 'code');
+  authUrl.searchParams.set('scope', GOOGLE_HEALTH_SCOPE);
+  authUrl.searchParams.set('access_type', 'offline');
+  authUrl.searchParams.set('prompt', 'consent');
+  authUrl.searchParams.set('state', state);
+  return Response.redirect(authUrl.toString(), 302);
+}
+
+// Fixed messages only — never echo query params or error text into this HTML (see S-01).
+async function handleHealthCallback(request, env) {
+  const url = new URL(request.url);
+  const html = body => new Response(body, { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+
+  if (url.searchParams.get('error')) {
+    console.error('Google Health authorization declined', { error: url.searchParams.get('error') });
+    return html('<p>Google Health authorization failed.</p>');
+  }
+  const code = url.searchParams.get('code');
+  const state = url.searchParams.get('state');
+  if (!code || !state) return html('<p>Missing code or state.</p>');
+
+  const stateKey = `health_oauth_state:${state}`;
+  if (!(await env.GIG_KV.get(stateKey))) {
+    return html('<p>Invalid or expired authorization attempt — start again at /api/health/authorize.</p>');
+  }
+  await env.GIG_KV.delete(stateKey);
+
+  try {
+    const data = await exchangeGoogleToken(env, new URLSearchParams({
+      grant_type: 'authorization_code',
+      code,
+      redirect_uri: GOOGLE_HEALTH_REDIRECT_URI,
+    }));
+    if (!data.refresh_token) throw new Error('Google did not return a refresh token');
+    await env.GIG_KV.put('health_refresh_token', data.refresh_token);
+    return html('<p>Connected. You can close this tab.</p>');
+  } catch (err) {
+    console.error('Google Health token exchange failed', { message: err.message });
+    return html('<p>Token exchange failed.</p>');
+  }
+}
+
+async function refreshGoogleHealthAccessToken(env) {
+  const refreshToken = await env.GIG_KV.get('health_refresh_token');
+  if (!refreshToken) throw new Error('Google Health not connected — visit /api/health/authorize first');
+  const data = await exchangeGoogleToken(env, new URLSearchParams({
+    grant_type: 'refresh_token',
+    refresh_token: refreshToken,
+  }));
+  if (data.refresh_token) await env.GIG_KV.put('health_refresh_token', data.refresh_token);
+  return data.access_token;
+}
+
+// Results are ordered newest first, so pageSize=1 over the lookback window is the latest reading.
+// Response: { bpm, sampledAt, motion } — all null when there's no reading in the window.
+async function handleHeartRate(env, ctx) {
+  if (!googleHealthConfigured(env)) return jsonResponse({ error: 'Lookup is not configured' }, 503);
+  return serveCached('heart-rate', HEART_RATE_CACHE_TTL_SECONDS, ctx, async () => {
+    const token = await refreshGoogleHealthAccessToken(env);
+    const since = new Date(Date.now() - HEART_RATE_LOOKBACK_MS).toISOString();
+    const params = new URLSearchParams({
+      pageSize: '1',
+      filter: `heart_rate.sample_time.physical_time >= "${since}"`,
+    });
+    const res = await fetch(`${GOOGLE_HEALTH_API_BASE}/users/me/dataTypes/heart-rate/dataPoints?${params}`, {
+      headers: { Authorization: `Bearer ${token}` },
+      signal: AbortSignal.timeout(SPOTIFY_TIMEOUT_MS),
+    });
+    if (!res.ok) throw new Error(`Google Health heart-rate returned ${res.status}: ${(await res.text()).slice(0, 200)}`);
+    const data = await res.json();
+    const reading = data.dataPoints && data.dataPoints[0] && data.dataPoints[0].heartRate;
+    const bpm = reading ? Number(reading.beatsPerMinute) : NaN;
+    if (!reading || !Number.isFinite(bpm)) return { bpm: null, sampledAt: null, motion: null };
+    return {
+      bpm: Math.round(bpm),
+      sampledAt: (reading.sampleTime && reading.sampleTime.physicalTime) || null,
+      motion: reading.motionContext || null,
+    };
+  });
+}
+
 // Bandsintown's public REST API turned out to be dead (blanket 403, "explicit deny in an
 // identity-based policy" — confirmed even against their own documented example app_id, so this
 // isn't a config issue, they've locked it to partners). Ticketmaster's Discovery API replaced it:
@@ -934,6 +1067,15 @@ export default {
     }
     if (url.pathname === '/api/listening') {
       return handleListening(env, ctx);
+    }
+    if (url.pathname === '/api/health/authorize') {
+      return handleHealthAuthorize(request, env);
+    }
+    if (url.pathname === '/api/health/callback') {
+      return handleHealthCallback(request, env);
+    }
+    if (url.pathname === '/api/heart-rate') {
+      return handleHeartRate(env, ctx);
     }
     if (url.pathname.startsWith('/audio/')) {
       return handleAsset(request, env);

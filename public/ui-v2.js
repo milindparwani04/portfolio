@@ -435,11 +435,50 @@
     });
   });
 
+  // Health card: latest Fitbit heart rate via /api/heart-rate. Readings only reach Google when
+  // the tracker syncs with the phone, so the foot always says how old the reading is.
+  const MOTION_LABELS = { SEDENTARY: 'At rest', ACTIVE: 'Active' };
+
+  async function loadHeartRate() {
+    const value = byId('v2HeartValue');
+    const foot = byId('v2HeartFoot');
+    if (!value || !foot) return;
+    try {
+      const response = await fetch('/api/heart-rate');
+      if (!response.ok) throw new Error('Heart-rate request failed');
+      const payload = await response.json();
+      if (!Number.isFinite(payload.bpm)) {
+        foot.textContent = 'No reading in the last 24 h';
+        return;
+      }
+      const unit = document.createElement('small');
+      unit.textContent = ' BPM';
+      value.replaceChildren(String(payload.bpm), unit);
+      value.classList.remove('v2-placeholder');
+      const parts = ['Latest reading'];
+      const age = payload.sampledAt ? timeAgo(payload.sampledAt) : '';
+      if (age) parts.push(age);
+      if (MOTION_LABELS[payload.motion]) parts.push(MOTION_LABELS[payload.motion]);
+      foot.textContent = parts.join(' / ');
+    } catch (_) {
+      // Keep whatever is showing.
+    }
+  }
+
   loadNowPlaying();
   loadPlaylists();
   loadListening();
-  window.setInterval(() => { if (!document.hidden) loadNowPlaying(); }, 30000);
-  document.addEventListener('visibilitychange', () => { if (!document.hidden) loadNowPlaying(); });
+  loadHeartRate();
+  window.setInterval(() => {
+    if (document.hidden) return;
+    loadNowPlaying();
+    loadHeartRate();
+  }, 30000);
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) return;
+    loadNowPlaying();
+    loadHeartRate();
+  });
 
   loadLastUpdated();
 
