@@ -14,14 +14,14 @@ An item only moves to `Live` after the Definition of Done in the [Rulebook](agen
 |---|---|---|---|
 | NF-01 | Performance | Lighthouse Performance ≥ 90 on mobile; LCP < 2.5 s; CLS < 0.1 | Planned |
 | NF-02 | Accessibility | WCAG 2.1 AA: keyboard navigable, visible focus, alt text, `prefers-reduced-motion` respected (boot/CRT animations skippable) | Planned |
-| NF-03 | Responsive | Works 360 px to 1920 px; dashboard, grids and tool overlays usable on touch | Built — desktop and 390×844 mobile browser-tested 2026-09-30 |
+| NF-03 | Responsive | Works 360 px to 1920 px; dashboard, grids and tool overlays usable on touch | Built — section paging fit-tested 2026-09-30 at 1920×1080, 1536×864, 1440×900, 1366×768, 1366×657, 1280×720, 1280×640, 1100×620, 1024×768; normal scroll at 390×844 |
 | NF-04 | Browser support | Latest Chrome, Safari, Firefox, Edge; iOS Safari | Planned |
 | NF-05 | Security | All Security Handoff findings S-01 to S-04 closed | Planned |
 | NF-06 | Resilience | Every API-driven widget shows a graceful fallback when its endpoint fails | Built (partial) |
 | NF-07 | SEO / sharing | Title, meta description, Open Graph image, favicon, sitemap, robots.txt | Planned |
 | NF-08 | Analytics | Cloudflare Web Analytics (cookie-free, no banner needed) | Planned |
 | NF-09 | Source control | Code in a Git repo; deploys via `wrangler deploy` from main only; tagged releases | Built (partial) — repo live at github.com/milindparwani04/portfolio, feature-branch + PR workflow in active use (PRs #2–#4), Cloudflare auto-builds from `main`. No tagged releases yet. |
-| NF-10 | Design fidelity | Predominantly monochrome; selective colour in high-resolution editorial imagery/icons; mockup-aligned fixed dashboard; IBM Plex Mono + Anton; REF. labelling | Built — corrected after visual comparison at 1672×941 on 2026-09-30; production review pending |
+| NF-10 | Design fidelity | Predominantly monochrome; selective colour in high-resolution editorial imagery/icons; mockup-aligned fixed dashboard; IBM Plex Mono + Anton; REF. labelling | Built — full-viewport sections matched to the four supplied mockups (home, toolbox, playlists, gigs) on 2026-09-30; production review pending |
 
 ## Site shell and sections
 
@@ -31,15 +31,16 @@ An item only moves to `Live` after the Definition of Done in the [Rulebook](agen
 | SH-02 | Hero + top bar | Clean `C:\PARWANI>` navigation and oversized one-line/flowing portfolio title; live Dubai clock in dashboard | Built |
 | SH-03 | Headlines | Fixed-size card via `/api/news`; title text fits within its area, rotates every 10 seconds; preview copy and description follow each other | Built |
 | SH-04 | Status bar | Removed in favour of the clean sticky navigation | Dropped |
-| SH-05 | Sections | Journal, Projects, Toolbox, Playlists and Gigs retain Anton titles + Ref. stamps, with explicit next-section scroll cues | Built |
+| SH-05 | Sections | Journal, Projects, Toolbox, Playlists and Gigs retain Anton titles + Ref. stamps, with next-section cues at the bottom and previous-section cues top-right | Built |
+| SH-09 | Section paging | Desktop/tablet (≥721 px wide, ≥620 px tall): every section is exactly one viewport under a fixed nav; one wheel gesture / PageUp/PageDown/arrow/Space moves one section; scroll-snap for touch and scrollbar; active nav link and URL hash follow the section; reduced motion jumps instantly. Smaller viewports scroll normally | Built |
 | SH-06 | Last updated | Deploy date from `/api/last-updated`, with local-preview fallback | Built |
 | SH-07 | Personal metrics | Heart-rate and Spotify cards keep their approved layouts as explicit empty states until sources are connected | Built |
 | SH-08 | Dubai weather | Current temperature/condition, daily high/low, humidity, wind, and condition-appropriate icon from Open-Meteo, with stable unavailable state | Built |
-| SC-01 | Journal (REF. 01) | Writing on economics/finance; needs a content format (Markdown files or CMS) decided | Planned |
-| SC-02 | Projects (REF. 02) | Text-only 3×2 grid plus a full-width seventh card; active project cards link to their pages | Built |
-| SC-03 | Toolbox (REF. 03) | Six visible text-only tools with outlined overlay actions; future ideas remain tracked below | Built |
-| SC-04 | Playlists (REF. 04) | Three playlist cards and five-row monthly listening-history empty state; no provider name exposed | Built (data placeholders) |
-| SC-05 | Gig Finder (REF. 05) | Five event cards per batch, manual controls and 10-second auto-advance | Built |
+| SC-01 | Journal (REF. 01) | Writing on economics/finance; one full-height Karoshi feature card (status, topic) plus info strip; content format (Markdown files or CMS) still to decide | Built (layout) |
+| SC-02 | Projects (REF. 02) | Text-only 3×2 grid plus a full-width seventh card; each card has a status row and an outlined action bar (links for Sounds Like and Crack, disabled "In development" for planned projects) | Built |
+| SC-03 | Toolbox (REF. 03) | 3×3 grid of all nine tools with inline-SVG thumbnails and icon action bars; Sample Finder, PDF Editor and Signature Creator show a disabled "Still being built" action | Built |
+| SC-04 | Playlists (REF. 04) | Three playlist cards with "Open on Spotify" bars (currently link to the Spotify profile — individual playlist URLs needed) and a Top Tracks table (track, artist, plays, bar) as empty state | Built (data placeholders) |
+| SC-05 | Gig Finder (REF. 05) | Five event cards per batch, manual controls, 10-second countdown with progress bar, hover/focus pauses rotation; footer with Back to top | Built |
 | MP-01 | Local music player | Removed from the visible experience; Spotify empty state and playlists replace local MP3 playback | Dropped |
 | MP-02 | Parametric EQ | Removed with the local music player | Dropped |
 | MP-03 | Gigs | Upcoming shows via `/api/gigs`, displayed five at a time with fallback data | Built |
@@ -59,7 +60,7 @@ Each project needs before `Live`: working happy path, error/empty states, mobile
 
 ## Toolbox
 
-The visible Toolbox contains Image Converter, Tempo Tap, Key/BPM Lookup, QR Code Generator, Audio Trimmer, and Password Generator. The previously built Sample Finder, PDF Editor, and Signature Creator are intentionally absent from this layout; their modal code remains in the hidden legacy shell. TB-09 and TB-10 remain future ideas and require a security review before any backend work.
+The visible Toolbox shows all nine tools. Image Converter, Tempo Tap, Key/BPM Lookup, QR Code Generator, Audio Trimmer and Password Generator open their overlays; Sample Finder, PDF Editor and Signature Creator are shown as "Still being built" (disabled) per Milind on 2026-09-30 — their modal code remains in the hidden legacy shell. TB-09 and TB-10 remain future ideas and require a security review before any backend work.
 
 | ID | Tool | Approach | Backend? | Status |
 |---|---|---|---|---|

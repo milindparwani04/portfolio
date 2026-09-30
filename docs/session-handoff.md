@@ -63,7 +63,9 @@ Shell: opens directly onto a clean `C:\PARWANI>` navigation bar and the `MY DIGI
 
 Home dashboard: fixed-size headline card with text fitted on each rotation from `/api/news`; Dubai clock and live Dubai weather from Open-Meteo; deploy timestamp from `/api/last-updated`; empty-state heart-rate and Spotify cards; dissertation and current-focus cards. The opening section uses the approved mockup's full-width alignment and includes a scroll-to-Journal cue. Every API-backed card retains its layout when data is unavailable.
 
-Sections: Journal (REF. 01, Karoshi article only), Projects (REF. 02, text-only 3×2 cards plus one full-width card), Toolbox (REF. 03, six text-only cards with outlined buttons), Playlists (REF. 04), and Gig Finder (REF. 05). The local music player is no longer exposed; playlists and a five-row listening-history placeholder replace it. Sample Finder, PDF Editor, and Signature Creator are absent from the visible Toolbox; their existing modal code remains in the hidden legacy shell pending cleanup.
+Section paging: on desktop/tablet (≥721 px wide and ≥620 px tall) every section is exactly one viewport under a fixed nav bar, and one wheel gesture or key press (PageUp/PageDown/arrows/Space/Home/End) moves one whole section (`initSectionPager` in `public/ui-v2.js`, CSS scroll-snap for touch/scrollbar). Each section has a "↑ previous" cue top-right and a "SCROLL / X NEXT ↓" cue at the bottom; the nav underlines the current section and the URL hash follows it. Content scales with viewport height so nothing clips down to ~1100×620; a short-viewport tier (≤760 px tall) tightens spacing. Phones and smaller windows scroll normally.
+
+Sections: Journal (REF. 01, one full-height Karoshi feature card with status/topic rows), Projects (REF. 02, text-only 3×2 cards plus one full-width card, each with a status row and action bar), Toolbox (REF. 03, 3×3 grid of all nine tools with inline-SVG thumbnails; Sample Finder, PDF Editor and Signature Creator show a disabled "Still being built" action), Playlists (REF. 04, three cards with "Open on Spotify" bars plus a Top Tracks table empty state), and Gig Finder (REF. 05, 10-second countdown bar, hover/focus pause, footer with Back to top). The local music player is no longer exposed. The modal code for the three unfinished tools remains in the hidden legacy shell.
 
 Backend endpoints live: news, last-updated, BPM/key lookup, audio features, sample search, gigs, Spotify owner OAuth.
 
@@ -86,6 +88,27 @@ Known issues / not done:
 Next session starts with:
 - ...
 ```
+
+### 2026-09-30 — Full-viewport section paging, layouts matched to mockups
+
+Model: Opus (plan + execute)
+Phase: 3 of 3 (1 section engine, 2 layout fidelity, 3 docs + PR)
+Done:
+- Section engine: each section is one viewport under a fixed nav; wheel/trackpad (with momentum lock and 400 ms landing cooldown), keyboard and scroll-snap move exactly one section; active nav link + URL hash sync; reduced-motion jumps instantly; paging disabled while a tool modal is open or a field has focus.
+- Layouts rebuilt against Milind's four mockups (home, toolbox, playlists, gigs); Journal and Projects designed in the same language (no mockups supplied). Home title fit now capped by viewport height; headline fit ceiling raised so it fills its box.
+- Toolbox restored to all nine tools per Milind; the three unfinished ones show a disabled "Still being built" action.
+- Gig Finder: live countdown/progress bar, hover/focus pause, footer moved into the section. Neutralised the legacy global `footer{}` rule on `.v2-footer`.
+Tested (how, result):
+- Iframe fit checks at 1920×1080, 1536×864, 1440×900, 1366×768, 1366×657, 1280×720, 1280×640, 1100×620, 1024×768: every section's content and scroll cue fit within the viewport, no clipped panels.
+- Real wheel scrolling in Chrome: a 5-tick spin moves exactly one section; PageDown/ArrowDown move one section each; nav click lands on the section top; Back to top returns home.
+- Audio Trimmer opens and closes with Escape; the three disabled tools open nothing; gig countdown holds on hover and resumes on leave; Next advances the batch and resets the countdown.
+- 390×844: normal scroll, no horizontal overflow. No console errors.
+Known issues / not done:
+- Toolbox thumbnails are inline SVG illustrations, not photos (only ~180 px mockup crops were available). Swap in HD images if supplied.
+- "Open on Spotify" buttons link to the Spotify profile; individual playlist URLs needed. Track counts/durations omitted (no real data).
+- Below 760 px viewport height the weather humidity/wind line and heart-rate flatline are hidden to keep cards within their section.
+- S-01 still open; no Worker changes this session.
+Next session starts with: review production after merge on real laptop/desktop screens; supply playlist URLs and any HD toolbox images; then remove hidden legacy shell code and fix S-01.
 
 ### 2026-09-30 — Visual fidelity correction after live review
 
