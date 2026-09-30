@@ -455,8 +455,10 @@ async function handleSpotifyCallback(request, env) {
   const url = new URL(request.url);
   const html = body => new Response(body, { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
 
+  // Fixed messages only — never echo query params or error text into this HTML (finding S-01).
   if (url.searchParams.get('error')) {
-    return html(`<p>Spotify authorization failed: ${url.searchParams.get('error')}</p>`);
+    console.error('Spotify authorization declined', { error: url.searchParams.get('error') });
+    return html('<p>Spotify authorization failed.</p>');
   }
   const code = url.searchParams.get('code');
   const state = url.searchParams.get('state');
@@ -477,7 +479,8 @@ async function handleSpotifyCallback(request, env) {
     await env.GIG_KV.put('spotify_refresh_token', data.refresh_token);
     return html('<p>Connected. You can close this tab.</p>');
   } catch (err) {
-    return html(`<p>Token exchange failed: ${err.message}</p>`);
+    console.error('Spotify token exchange failed', { message: err.message });
+    return html('<p>Token exchange failed.</p>');
   }
 }
 

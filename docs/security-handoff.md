@@ -14,6 +14,7 @@ Covers the `portfolio` Worker on milindparwani.com, its static assets, the `GIG_
 - [x] OAuth `state` is a random UUID stored in KV with a 10-minute TTL and deleted after one use (CSRF and replay protection).
 - [x] OAuth scope is minimal: `user-top-read` only.
 - [x] Refresh token stored server-side in KV, rotated when Spotify returns a new one.
+- [x] S-01 fixed 2026-09-30 (branch `feat/spotify-listening`, not yet deployed): `/api/spotify/callback` returns fixed messages only; the `error` param and `err.message` go to `console.error`, never into the HTML.
 - [x] Empty queries rejected with 400; sample `mode` restricted to an allow-list (`vocals`, `melody`).
 - [x] User input passed to upstream URLs via `encodeURIComponent` / `URLSearchParams`.
 - [x] Upstream error text truncated to 200 characters.
@@ -55,7 +56,6 @@ Covers the `portfolio` Worker on milindparwani.com, its static assets, the `GIG_
 
 | ID | Severity | Finding | Fix |
 |---|---|---|---|
-| S-01 | High | `/api/spotify/callback` writes the `error` query param and `err.message` straight into HTML — reflected XSS on your own domain. | HTML-escape all interpolated values, or return fixed plain-text messages. |
 | S-02 | Medium | No security headers set by the Worker (CSP, nosniff, frame, referrer). | Add a `withSecurityHeaders()` wrapper on every response, or a Transform Rule (section 3). |
 | S-03 | Medium | No rate limiting on `/api/*`. Cache keys include the full URL, so varying `q` bypasses cache and burns Spotify, Freesound and Ticketmaster quotas. | WAF rate-limit rule; also normalise cache keys (lowercase, trimmed `q`, drop unknown params). |
 | S-04 | Medium | Raw upstream error messages returned to clients in 502 JSON (leaks provider names, status codes). | Log detail with `console.error`; return a generic `{"error":"Upstream unavailable"}`. |

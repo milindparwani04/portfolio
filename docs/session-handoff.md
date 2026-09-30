@@ -89,6 +89,20 @@ Next session starts with:
 - ...
 ```
 
+### 2026-09-30 — Spotify listening data: plan agreed, S-01 fixed
+Model: Opus
+Phase: 0 of 4 (security prerequisite)
+Done:
+- Agreed plan with Milind for live listening data, Spotify only (Last.fm, stats.fm and statsforspotify.com considered and rejected — stats.fm has no official API, statsforspotify.com is only a front end over Spotify's own API, and Spotify never exposes play counts). Phases: 0 fix S-01 → 1 Worker (`/api/now-playing`, `/api/playlists`, `/api/listening` backed by a D1 play log filled by a 30-min Cron Trigger polling `/me/player/recently-played`, so top 5 tracks/artists are an exact calendar month with play counts; `short_term` fallback until the log has data) → 2 frontend wiring → 3 docs.
+- Fixed S-01 in `handleSpotifyCallback`: fixed plain messages only, details logged with `console.error`.
+Tested (how, result):
+- `wrangler dev --local`: `?error=<script>…` → "Spotify authorization failed." (payload appears only in the log); no params → "Missing code or state."; bad state → expired message; seeded valid state + bad code → "Token exchange failed."; `/api/spotify/authorize` without key → 403.
+Known issues / not done:
+- Not deployed. Branch `feat/spotify-listening` (off `feat/section-paging`).
+- Milind must re-run `/api/spotify/authorize` after Phase 1 adds scopes `user-read-currently-playing user-read-recently-played`, and supply the 3 playlist URLs.
+Next session starts with:
+- Phase 1 (Worker + D1 play log).
+
 ### 2026-09-30 — Full-viewport section paging, layouts matched to mockups
 
 Model: Opus (plan + execute)
