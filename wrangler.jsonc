@@ -18,5 +18,20 @@
                                // authorize/callback routes touch this.
       "id": "2cd78c74bfaf487fbb1c15c2055de305"
     }
-  ]
+  ],
+  "d1_databases": [
+    {
+      "binding": "PLAYS_DB",   // Spotify play log behind /api/listening (top 5 tracks/artists
+                               // for the calendar month, with play counts). Schema lives in
+                               // migrations/. Only scheduled() writes to it.
+      "database_name": "portfolio-plays",
+      "database_id": "b4977ab6-4861-41d9-82f3-503677a7bb3d",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "triggers": {
+    // Polls Spotify recently-played into PLAYS_DB. That endpoint returns at most 50 plays, so
+    // the interval must stay well under ~50 tracks of listening (~2.5 hours).
+    "crons": ["*/30 * * * *"]
+  }
 }

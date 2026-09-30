@@ -4,7 +4,7 @@
 
 ## 1. Scope and how to use
 
-Covers the `portfolio` Worker on milindparwani.com, its static assets, the `GIG_KV` namespace and its six secrets. Section 2 was verified by reading the deployed Worker source on 23 Sep 2026. Section 3 covers Cloudflare zone settings that the API connector cannot read — tick each one only after checking it in the dashboard. Section 4 lists real gaps found in the code, ordered by severity. Any agent touching the Worker must re-run sections 2 and 5 before marking work complete.
+Covers the `portfolio` Worker on milindparwani.com, its static assets, the `GIG_KV` namespace, the `PLAYS_DB` D1 database, the 30-minute cron trigger and its six secrets. Section 2 was verified by reading the deployed Worker source on 23 Sep 2026. Section 3 covers Cloudflare zone settings that the API connector cannot read — tick each one only after checking it in the dashboard. Section 4 lists real gaps found in the code, ordered by severity. Any agent touching the Worker must re-run sections 2 and 5 before marking work complete.
 
 ## 2. Verified in Worker code
 
@@ -12,8 +12,11 @@ Covers the `portfolio` Worker on milindparwani.com, its static assets, the `GIG_
 - [x] Missing secrets fail closed with 503 "Lookup is not configured" instead of throwing.
 - [x] Spotify owner OAuth start (`/api/spotify/authorize`) is gated by `SPOTIFY_AUTH_KEY`; returns 403 otherwise.
 - [x] OAuth `state` is a random UUID stored in KV with a 10-minute TTL and deleted after one use (CSRF and replay protection).
-- [x] OAuth scope is minimal: `user-top-read` only.
+- [x] OAuth scope is minimal and read-only: `user-top-read`, `user-read-currently-playing`, `user-read-recently-played` (last two added 2026-09-30 for live listening data; no playlist, library or playback-control scopes).
+- [x] Listening routes (`/api/now-playing`, `/api/playlists`, `/api/listening`, added 2026-09-30, not yet deployed) take no user input, use a fixed cache key so query strings can't bypass the cache, log upstream errors with `console.error` and return a generic `{"error":"Upstream unavailable"}` 502. Spotify calls have an 8 s timeout.
+- [x] `PLAYS_DB` (D1, `portfolio-plays`) holds only the owner's listening history (track/artist names and IDs, play timestamps) — low sensitivity, the site shows it publicly anyway. It's written only by the 30-minute cron; no route writes to it and every read uses bound parameters.
 - [x] Refresh token stored server-side in KV, rotated when Spotify returns a new one.
+- [x] S-01 fixed 2026-09-30 (branch `feat/spotify-listening`, not yet deployed): `/api/spotify/callback` returns fixed messages only; the `error` param and `err.message` go to `console.error`, never into the HTML.
 - [x] Empty queries rejected with 400; sample `mode` restricted to an allow-list (`vocals`, `melody`).
 - [x] User input passed to upstream URLs via `encodeURIComponent` / `URLSearchParams`.
 - [x] Upstream error text truncated to 200 characters.
@@ -55,7 +58,6 @@ Covers the `portfolio` Worker on milindparwani.com, its static assets, the `GIG_
 
 | ID | Severity | Finding | Fix |
 |---|---|---|---|
-| S-01 | High | `/api/spotify/callback` writes the `error` query param and `err.message` straight into HTML — reflected XSS on your own domain. | HTML-escape all interpolated values, or return fixed plain-text messages. |
 | S-02 | Medium | No security headers set by the Worker (CSP, nosniff, frame, referrer). | Add a `withSecurityHeaders()` wrapper on every response, or a Transform Rule (section 3). |
 | S-03 | Medium | No rate limiting on `/api/*`. Cache keys include the full URL, so varying `q` bypasses cache and burns Spotify, Freesound and Ticketmaster quotas. | WAF rate-limit rule; also normalise cache keys (lowercase, trimmed `q`, drop unknown params). |
 | S-04 | Medium | Raw upstream error messages returned to clients in 502 JSON (leaks provider names, status codes). | Log detail with `console.error`; return a generic `{"error":"Upstream unavailable"}`. |
