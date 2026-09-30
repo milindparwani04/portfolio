@@ -64,13 +64,13 @@ Priorities, in order:
 
 Shell: opens directly onto a clean `C:\PARWANI>` navigation bar and the `MY DIGITAL PORTFOLIO.` dashboard. The former ENTER/CRT boot gate, floating navigation and bottom status bar are no longer visible.
 
-Home dashboard: fixed-size headline card with text fitted on each rotation from `/api/news`; Dubai clock and live Dubai weather from Open-Meteo; deploy timestamp from `/api/last-updated`; empty-state heart-rate and Spotify cards; dissertation and current-focus cards. The opening section uses the approved mockup's full-width alignment and includes a scroll-to-Journal cue. Every API-backed card retains its layout when data is unavailable.
+Home dashboard: fixed-size headline card with text fitted on each rotation from `/api/news`; Dubai clock and live Dubai weather from Open-Meteo; deploy timestamp from `/api/last-updated`; empty-state heart-rate card; Spotify card with the current or last-played track from `/api/now-playing`; dissertation and current-focus cards. The opening section uses the approved mockup's full-width alignment and includes a scroll-to-Journal cue. Every API-backed card retains its layout when data is unavailable.
 
 Section paging: on desktop/tablet (≥721 px wide and ≥620 px tall) every section is exactly one viewport under a fixed nav bar, and one wheel gesture or key press (PageUp/PageDown/arrows/Space/Home/End) moves one whole section (`initSectionPager` in `public/ui-v2.js`, CSS scroll-snap for touch/scrollbar). Each section has a "↑ previous" cue top-right and a "SCROLL / X NEXT ↓" cue at the bottom; the nav underlines the current section and the URL hash follows it. Content scales with viewport height so nothing clips down to ~1100×620; a short-viewport tier (≤760 px tall) tightens spacing. Phones and smaller windows scroll normally.
 
-Sections: Journal (REF. 01, one full-height Karoshi feature card with status/topic rows), Projects (REF. 02, text-only 3×2 cards plus one full-width card, each with a status row and action bar), Toolbox (REF. 03, 3×3 grid of all nine tools with inline-SVG thumbnails; Sample Finder, PDF Editor and Signature Creator show a disabled "Still being built" action), Playlists (REF. 04, three cards with "Open on Spotify" bars plus a Top Tracks table empty state), and Gig Finder (REF. 05, 10-second countdown bar, hover/focus pause, footer with Back to top). The local music player is no longer exposed. The modal code for the three unfinished tools remains in the hidden legacy shell.
+Sections: Journal (REF. 01, one full-height Karoshi feature card with status/topic rows), Projects (REF. 02, text-only 3×2 cards plus one full-width card, each with a status row and action bar), Toolbox (REF. 03, 3×3 grid of all nine tools with inline-SVG thumbnails; Sample Finder, PDF Editor and Signature Creator show a disabled "Still being built" action), Playlists (REF. 04, three live playlist cards — pop, Camon, idk — plus a Listening History card with a Tracks / Artists toggle showing the month's top 5 with play counts), and Gig Finder (REF. 05, 10-second countdown bar, hover/focus pause, footer with Back to top). The local music player is no longer exposed. The modal code for the three unfinished tools remains in the hidden legacy shell.
 
-Backend endpoints live: news, last-updated, BPM/key lookup, audio features, sample search, gigs, Spotify owner OAuth. Built on `feat/spotify-listening`, not deployed: now-playing, playlists, listening, plus the play-log cron.
+Backend endpoints live: news, last-updated, BPM/key lookup, audio features, sample search, gigs, Spotify owner OAuth, now-playing, playlists, listening, plus the 30-minute play-log cron.
 
 Settled removals (do not re-propose without flagging): YouTube to MP3/MP4/WAV converters (ToS and backend complexity), Seamless Set project, standalone Liveliness Index (merged into Where Next).
 
@@ -92,7 +92,21 @@ Next session starts with:
 - ...
 ```
 
-### 2026-09-30 — Spotify listening data: deploy check (Phase 3, in progress)
+### 2026-09-30 — Spotify listening data: live (Phases 3–4 complete)
+Model: Opus
+Phase: 4 of 4
+Done:
+- `526af09` (playlist track-count fix) fast-forwarded to `main` and deployed. Merged branches `feat/spotify-listening`, `feat/section-paging` and `fix/playlist-track-count` deleted on GitHub and locally.
+- Tracker: SH-07 (Spotify card) and SC-04 marked Live.
+Tested (how, result):
+- Production: `/api/playlists` → pop 453, Camon 222, idk 113 tracks; `/api/now-playing` → real last-played track; first cron run (18:00 UTC) wrote 50 plays (49 distinct, all with artwork); `/api/listening` → `source: "log"`, September 2026 top 5 tracks and artists with play counts.
+Known issues / not done:
+- September counts start at 12:46 UTC 30 Sep (recently-played only reaches back 50 plays); October onward is complete.
+- Milind to set Workers Builds' non-production branch deploy command to `npx wrangler versions upload` — until then any branch push deploys to production.
+Next session starts with:
+- Confirm the branch-deploy setting, then Security Handoff §3 dashboard checklist and S-02 to S-04.
+
+### 2026-09-30 — Spotify listening data: deploy check (Phase 3)
 Model: Opus
 Phase: 3 of 4
 Done:
