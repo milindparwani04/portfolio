@@ -98,6 +98,17 @@ Next session starts with:
 - ...
 ```
 
+### 2026-09-30 — Rulebook: every push updates the handoff docs
+Model: Opus
+Phase: 1 of 1
+Done:
+- At Milind's request, added a §3 rule to [`agent-rulebook.md`](agent-rulebook.md): every push (any branch) must include the matching Session Log / Tracker / Security updates in the same commit; §5 Definition of Done now says the same. This is an explicit, Milind-approved exception to the rulebook being static.
+- Deleted the stray untracked `hello.txt` ("hello partner", never committed) from the working tree.
+Tested (how, result):
+- Docs only; no code or deploy behaviour changed.
+Next session starts with:
+- Unchanged — see the wrap-up entry below.
+
 ### 2026-09-30 — Session wrap-up: live data, heart rate, gigs (all on `main`, deployed)
 Model: Opus
 Done (this session, oldest → newest, all merged to `main` and live):

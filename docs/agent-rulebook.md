@@ -18,6 +18,7 @@ End: update the Handoff session log, move statuses in the Requirements Tracker, 
 
 ## 3. Project rules from Milind
 
+- **Every push updates the handoff docs.** Before any push (to `main` or any branch), update the living documents in the same commit: add or extend the Session Log entry in [`session-handoff.md`](session-handoff.md) (and Current Build State / Priorities if they changed), move statuses in [`requirements-tracker.md`](requirements-tracker.md), and update [`security-handoff.md`](security-handoff.md) whenever the Worker, secrets, OAuth apps or external services changed. A push without matching doc updates is not allowed — the other device may pull at any moment. (Added 2026-09-30 at Milind's request.)
 - **Surgical edits only.** Use `str_replace` on the exact lines that change. Never regenerate a whole file.
 - **Design is locked.** Grayscale only, IBM Plex Mono / Sans, Anton, REF. labels, equal full-page dividers. Do not change confirmed design elements unless Milind raises them.
 - **Respect settled decisions.** Do not re-propose dropped items (YouTube converters, Seamless Set, standalone Liveliness Index) without flagging the earlier reason.
@@ -52,7 +53,7 @@ A task is Done only when every box is true:
 - [ ] No console errors; no new Lighthouse regressions.
 - [ ] Security checklist passed for any Worker change.
 - [ ] Self-review completed against the requirement.
-- [ ] Handoff, Tracker and (if relevant) Security docs updated.
+- [ ] Handoff, Tracker and (if relevant) Security docs updated — in the same commit as the change, before it is pushed (see §3).
 
 ### Report format
 
