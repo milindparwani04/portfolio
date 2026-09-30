@@ -101,8 +101,9 @@ Done:
 Tested (how, result):
 - Production after the branch deploy: `/api/playlists` 200 with real names/covers; `/api/listening` 200 via `short_term` (real top tracks); `/api/now-playing` 502 (refresh token predates the new scopes — expected until re-authorize); D1 `plays` empty (cron needs the new scope too).
 Known issues / not done:
-- `/api/playlists` returns `trackCount: null` for all three — the playlist object from the app token has no `tracks.total`/`items.total`. Frontend keeps the "[ Playlist ]" tag. Needs the raw response to fix.
-- Milind still to re-authorize at `/api/spotify/authorize?key=…`.
+- `/api/playlists` returned `trackCount: null` for all three: since Spotify's Feb 2026 dev-mode changes a playlist's `items` is only returned to its owner/collaborator, never to an app token. Fixed by fetching with the owner token (app token as fallback) and versioning the listening routes' cache keys (`LISTENING_CACHE_VERSION`) so the 6-hr cached response doesn't outlive the fix.
+- PR #7 merged to `main` (`3116eb0`) by Claude at Milind's request.
+- `SPOTIFY_AUTH_KEY` rotated by Claude via `wrangler secret bulk` (wrangler now logged in on this laptop). Piping the value into `npx wrangler secret put` from PowerShell 5.1 stored a different value — use `secret bulk` with a file, or the dashboard. Milind re-authorized; `/api/now-playing` returns real data.
 
 ### 2026-09-30 — Spotify listening data: frontend wiring (Phase 2)
 Model: Opus

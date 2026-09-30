@@ -13,10 +13,11 @@ Covers the `portfolio` Worker on milindparwani.com, its static assets, the `GIG_
 - [x] Spotify owner OAuth start (`/api/spotify/authorize`) is gated by `SPOTIFY_AUTH_KEY`; returns 403 otherwise.
 - [x] OAuth `state` is a random UUID stored in KV with a 10-minute TTL and deleted after one use (CSRF and replay protection).
 - [x] OAuth scope is minimal and read-only: `user-top-read`, `user-read-currently-playing`, `user-read-recently-played` (last two added 2026-09-30 for live listening data; no playlist, library or playback-control scopes).
-- [x] Listening routes (`/api/now-playing`, `/api/playlists`, `/api/listening`, added 2026-09-30, not yet deployed) take no user input, use a fixed cache key so query strings can't bypass the cache, log upstream errors with `console.error` and return a generic `{"error":"Upstream unavailable"}` 502. Spotify calls have an 8 s timeout.
+- [x] Listening routes (`/api/now-playing`, `/api/playlists`, `/api/listening`, added 2026-09-30, not yet deployed) take no user input, use a fixed (versioned) cache key so query strings can't bypass the cache, log upstream errors with `console.error` and return a generic `{"error":"Upstream unavailable"}` 502. Spotify calls have an 8 s timeout.
 - [x] `PLAYS_DB` (D1, `portfolio-plays`) holds only the owner's listening history (track/artist names and IDs, play timestamps) — low sensitivity, the site shows it publicly anyway. It's written only by the 30-minute cron; no route writes to it and every read uses bound parameters.
 - [x] Refresh token stored server-side in KV, rotated when Spotify returns a new one.
 - [x] S-01 fixed 2026-09-30 (branch `feat/spotify-listening`, not yet deployed): `/api/spotify/callback` returns fixed messages only; the `error` param and `err.message` go to `console.error`, never into the HTML.
+- [x] `SPOTIFY_AUTH_KEY` rotated 2026-09-30 (40 random alphanumeric characters, generated and stored via `wrangler secret bulk` without being printed). `/api/playlists` now uses the owner token (read-only scopes above) to get track counts; the app token is only a fallback.
 - [x] Empty queries rejected with 400; sample `mode` restricted to an allow-list (`vocals`, `melody`).
 - [x] User input passed to upstream URLs via `encodeURIComponent` / `URLSearchParams`.
 - [x] Upstream error text truncated to 200 characters.

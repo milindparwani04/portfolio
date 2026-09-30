@@ -637,6 +637,9 @@ const NOW_PLAYING_CACHE_TTL_SECONDS = 20;
 const PLAYLISTS_CACHE_TTL_SECONDS = 21600;
 const LISTENING_CACHE_TTL_SECONDS = 600;
 const LISTENING_TOP_N = 5;
+// Bump when a response shape or upstream call changes: deploys don't clear the edge cache, so
+// without this a stale response (e.g. playlists, 6 hr) would outlive the fix.
+const LISTENING_CACHE_VERSION = 2;
 // Until the month's log has this many distinct tracks (first day of a month, or before the log
 // has filled at all), /api/listening falls back to Spotify's own ~4-week short_term top lists.
 const LISTENING_MIN_DISTINCT_TRACKS = 5;
@@ -667,7 +670,7 @@ async function spotifyGet(path, token) {
 // Upstream failures are logged with context and returned as a generic 502 (never raw errors).
 async function serveCached(name, ttl, ctx, produce) {
   const cache = caches.default;
-  const cacheKey = new Request(`https://milindparwani.com/__cache/${name}`);
+  const cacheKey = new Request(`https://milindparwani.com/__cache/v${LISTENING_CACHE_VERSION}/${name}`);
   const cached = await cache.match(cacheKey);
   if (cached) return cached;
   try {
@@ -714,12 +717,20 @@ async function handleNowPlaying(env, ctx) {
   });
 }
 
-// App-only token is enough: all three playlists are public. No `fields` filter, so a renamed
-// field on Spotify's side degrades to a missing value rather than a 400.
+// Since Spotify's Feb 2026 dev-mode changes, a playlist's `items` (and so `items.total`) is only
+// returned to its owner or a collaborator — an app-only token gets metadata without a track count.
+// The owner token is used first; the app token is the fallback so names/covers still load if the
+// owner token is unavailable. No `fields` filter, so a renamed field degrades to a missing value.
 async function handlePlaylists(env, ctx) {
   if (!spotifyConfigured(env)) return jsonResponse({ error: 'Lookup is not configured' }, 503);
   return serveCached('playlists', PLAYLISTS_CACHE_TTL_SECONDS, ctx, async () => {
-    const token = await getSpotifyToken(env);
+    let token;
+    try {
+      token = await refreshSpotifyUserAccessToken(env);
+    } catch (err) {
+      console.error('owner token unavailable for playlists, using app token', { message: err.message });
+      token = await getSpotifyToken(env);
+    }
     const playlists = await Promise.all(PLAYLIST_IDS.map(id => spotifyGet(`/playlists/${id}?market=AE`, token)));
     return playlists.map((p, i) => ({
       id: PLAYLIST_IDS[i],
