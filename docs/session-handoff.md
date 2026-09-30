@@ -22,7 +22,7 @@ This is the opening document for every new agent session. Read it top to bottom 
 
 Front end: a framework-free HTML/CSS/JS site served as Worker static assets (`env.ASSETS`). The visible portfolio interface lives in `public/index.html`, `public/ui-v2.css`, and `public/ui-v2.js`; full-resolution editorial images live in `public/assets/ui/`. The earlier shell remains in the document but is hidden while its working toolbox modals are reused.
 
-Back end: one Cloudflare Worker (`worker/index.js`) acting as an API proxy so no third-party key ever reaches the browser. Storage is one KV namespace, `GIG_KV`, holding OAuth state tokens (10-minute TTL) and the Spotify refresh token. Deploy timestamp comes from the `CF_VERSION_METADATA` binding.
+Back end: one Cloudflare Worker (`worker/index.js`) acting as an API proxy so no third-party key ever reaches the browser. Storage is one KV namespace, `GIG_KV`, holding OAuth state tokens (10-minute TTL) and the Spotify refresh token, plus one D1 database, `portfolio-plays` (binding `PLAYS_DB`, schema in `migrations/`), holding the Spotify play log. A Cron Trigger (`*/30 * * * *`) runs `scheduled()`, which copies the latest 50 plays from Spotify recently-played into `PLAYS_DB`. Deploy timestamp comes from the `CF_VERSION_METADATA` binding.
 
 Secrets (set with `wrangler secret put`, never in code): `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET`, `SPOTIFY_AUTH_KEY`, `FREESOUND_API_KEY`, `LASTFM_API_KEY`, `TICKETMASTER_API_KEY`. If a secret is missing the route returns 503 "Lookup is not configured" rather than crashing.
 
@@ -36,6 +36,9 @@ Secrets (set with `wrangler secret put`, never in code): `SPOTIFY_CLIENT_ID`, `S
 | `/api/spotify/authorize` | Owner-only OAuth start (key-gated) | Spotify | none |
 | `/api/spotify/callback` | OAuth callback, stores refresh token | Spotify | none |
 | `/api/gigs` | Upcoming gigs from top + trending artists | Spotify, Last.fm, Ticketmaster | 1 hr |
+| `/api/now-playing` | Dashboard Spotify card: current track, else last played | Spotify (owner token) | 20 s |
+| `/api/playlists` | The three playlist cards (pop, Camon, idk — IDs in `PLAYLIST_IDS`) | Spotify (app token) | 6 hr |
+| `/api/listening` | Top 5 tracks + artists for the Dubai calendar month, with play counts from `PLAYS_DB`; falls back to Spotify `short_term` (no counts, `source: "short_term"`) while the month has < 5 distinct tracks | D1, Spotify (owner token) | 10 min |
 | `/audio/*` | Legacy Range handler; no MP3 assets are tracked or exposed by the current UI | Static assets | default |
 
 ## Design system (locked — do not change unless Milind raises it)
@@ -67,7 +70,7 @@ Section paging: on desktop/tablet (≥721 px wide and ≥620 px tall) every sect
 
 Sections: Journal (REF. 01, one full-height Karoshi feature card with status/topic rows), Projects (REF. 02, text-only 3×2 cards plus one full-width card, each with a status row and action bar), Toolbox (REF. 03, 3×3 grid of all nine tools with inline-SVG thumbnails; Sample Finder, PDF Editor and Signature Creator show a disabled "Still being built" action), Playlists (REF. 04, three cards with "Open on Spotify" bars plus a Top Tracks table empty state), and Gig Finder (REF. 05, 10-second countdown bar, hover/focus pause, footer with Back to top). The local music player is no longer exposed. The modal code for the three unfinished tools remains in the hidden legacy shell.
 
-Backend endpoints live: news, last-updated, BPM/key lookup, audio features, sample search, gigs, Spotify owner OAuth.
+Backend endpoints live: news, last-updated, BPM/key lookup, audio features, sample search, gigs, Spotify owner OAuth. Built on `feat/spotify-listening`, not deployed: now-playing, playlists, listening, plus the play-log cron.
 
 Settled removals (do not re-propose without flagging): YouTube to MP3/MP4/WAV converters (ToS and backend complexity), Seamless Set project, standalone Liveliness Index (merged into Where Next).
 
@@ -88,6 +91,23 @@ Known issues / not done:
 Next session starts with:
 - ...
 ```
+
+### 2026-09-30 — Spotify listening data: Worker routes + play log (Phase 1)
+Model: Opus
+Phase: 1 of 4
+Done:
+- Created D1 `portfolio-plays` (id `b4977ab6-4861-41d9-82f3-503677a7bb3d`, EEUR) via the Cloudflare connector — wrangler isn't logged in on this laptop — and applied `migrations/0001_plays.sql` to it directly (so D1's migrations table doesn't list it; the SQL is `IF NOT EXISTS`, safe to re-apply).
+- `wrangler.jsonc`: `PLAYS_DB` binding and `*/30 * * * *` cron.
+- `worker/index.js`: OAuth scopes widened; `/api/now-playing`, `/api/playlists`, `/api/listening`; `scheduled()` → `recordRecentPlays`; 8 s timeouts added to both Spotify token calls. Playlist order from Milind: pop, Camon, idk (idk was private, Milind made it public).
+Tested (how, result):
+- `wrangler dev --local` with seeded local D1: month boundary correct (a play at 00:30 1 Sep Dubai counted, 20:59 31 Aug excluded); track and artist play counts correct including a two-artist track (first run caught a bug — `json_each`'s own `id` column hijacked `GROUP BY id`; fixed by aliasing). A request with a junk query string was a cache HIT. Log thinned to 3 distinct tracks → switches to `short_term`.
+- No secrets → all three routes 503. Dummy creds / no refresh token → generic 502, detail only in the log; cron logs and exits cleanly.
+- Not testable locally (needs real secrets + the production OAuth redirect): real Spotify responses, the cron insert, playlist field shapes. Verify after deploy.
+Known issues / not done:
+- Not deployed. Milind must re-authorize at `/api/spotify/authorize?key=…` after deploy; until then now-playing/listening return 502 and the cron logs "not connected" / 403.
+- Top artists from the log have no image (recently-played returns simplified artists); `short_term` fallback artists do.
+Next session starts with:
+- Phase 2: wire the dashboard Spotify card, playlist cards and Top Tracks/Artists into `public/ui-v2.js`, keeping every empty state.
 
 ### 2026-09-30 — Spotify listening data: plan agreed, S-01 fixed
 Model: Opus

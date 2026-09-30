@@ -83,6 +83,7 @@ export async function getSpotifyToken(env) {
       'Content-Type': 'application/x-www-form-urlencoded',
     },
     body: 'grant_type=client_credentials',
+    signal: AbortSignal.timeout(SPOTIFY_TIMEOUT_MS),
   });
   if (!res.ok) throw new Error(`Spotify auth returned ${res.status}: ${(await res.text()).slice(0, 200)}`);
   const data = await res.json();
@@ -418,6 +419,7 @@ async function exchangeSpotifyToken(env, params) {
       'Content-Type': 'application/x-www-form-urlencoded',
     },
     body: params.toString(),
+    signal: AbortSignal.timeout(SPOTIFY_TIMEOUT_MS),
   });
   if (!res.ok) throw new Error(`Spotify token endpoint returned ${res.status}: ${(await res.text()).slice(0, 200)}`);
   return res.json();
@@ -443,7 +445,9 @@ async function handleSpotifyAuthorize(request, env) {
   authUrl.searchParams.set('client_id', env.SPOTIFY_CLIENT_ID);
   authUrl.searchParams.set('response_type', 'code');
   authUrl.searchParams.set('redirect_uri', SPOTIFY_REDIRECT_URI);
-  authUrl.searchParams.set('scope', 'user-top-read');
+  // user-read-currently-playing: /api/now-playing. user-read-recently-played: the play log cron
+  // and now-playing's "last played" fallback. Adding a scope means re-running this flow once.
+  authUrl.searchParams.set('scope', 'user-top-read user-read-currently-playing user-read-recently-played');
   authUrl.searchParams.set('state', state);
   return Response.redirect(authUrl.toString(), 302);
 }
@@ -620,6 +624,216 @@ async function handleGigs(request, env, ctx) {
   }
 }
 
+// Live listening data: the dashboard Spotify card (/api/now-playing), the three playlist cards
+// (/api/playlists) and the Top Tracks / Top Artists lists (/api/listening). Spotify only — it
+// never exposes play counts, so /api/listening counts plays from our own log in PLAYS_DB, which
+// scheduled() fills every 30 minutes from /me/player/recently-played. None of these routes read
+// query params, and each uses a fixed cache key so varied URLs can't bypass the cache (S-03).
+const SPOTIFY_API_BASE = 'https://api.spotify.com/v1';
+const SPOTIFY_TIMEOUT_MS = 8000;
+// Left-to-right order of the playlist cards: pop, Camon, idk.
+const PLAYLIST_IDS = ['0xCGn0RL5DNNS7dlbjg5tv', '1MhSnhyBju5i36bBWvHbff', '7I6Yh3MjLYFaUtnDrpsL4q'];
+const NOW_PLAYING_CACHE_TTL_SECONDS = 20;
+const PLAYLISTS_CACHE_TTL_SECONDS = 21600;
+const LISTENING_CACHE_TTL_SECONDS = 600;
+const LISTENING_TOP_N = 5;
+// Until the month's log has this many distinct tracks (first day of a month, or before the log
+// has filled at all), /api/listening falls back to Spotify's own ~4-week short_term top lists.
+const LISTENING_MIN_DISTINCT_TRACKS = 5;
+// "This month" is the Dubai calendar month, matching the dashboard clock. Dubai has no DST.
+const DUBAI_UTC_OFFSET_MS = 4 * 60 * 60 * 1000;
+
+function jsonResponse(body, status = 200, maxAge = 0) {
+  const headers = { 'Content-Type': 'application/json' };
+  if (maxAge) headers['Cache-Control'] = `public, max-age=${maxAge}`;
+  return new Response(JSON.stringify(body), { status, headers });
+}
+
+function spotifyConfigured(env) {
+  return Boolean(env.SPOTIFY_CLIENT_ID && env.SPOTIFY_CLIENT_SECRET);
+}
+
+async function spotifyGet(path, token) {
+  const res = await fetch(`${SPOTIFY_API_BASE}${path}`, {
+    headers: { Authorization: `Bearer ${token}` },
+    signal: AbortSignal.timeout(SPOTIFY_TIMEOUT_MS),
+  });
+  if (res.status === 204) return null;
+  if (!res.ok) throw new Error(`Spotify ${path.split('?')[0]} returned ${res.status}`);
+  return res.json();
+}
+
+// Serves `name` from the edge cache, or runs `produce` and caches its result for `ttl` seconds.
+// Upstream failures are logged with context and returned as a generic 502 (never raw errors).
+async function serveCached(name, ttl, ctx, produce) {
+  const cache = caches.default;
+  const cacheKey = new Request(`https://milindparwani.com/__cache/${name}`);
+  const cached = await cache.match(cacheKey);
+  if (cached) return cached;
+  try {
+    const response = jsonResponse(await produce(), 200, ttl);
+    ctx.waitUntil(cache.put(cacheKey, response.clone()));
+    return response;
+  } catch (err) {
+    console.error(`/api/${name} failed`, { message: err.message });
+    return jsonResponse({ error: 'Upstream unavailable' }, 502);
+  }
+}
+
+// Spotify lists images largest first; take the smallest that's still >= 300px wide.
+function pickImage(images) {
+  if (!images || !images.length) return null;
+  const bigEnough = images.filter(img => !img.width || img.width >= 300);
+  return (bigEnough[bigEnough.length - 1] || images[0]).url;
+}
+
+function toTrack(t) {
+  return {
+    id: t.id,
+    name: t.name,
+    artists: (t.artists || []).map(a => a.name),
+    album: t.album ? t.album.name : null,
+    image: pickImage(t.album && t.album.images),
+    url: t.external_urls ? t.external_urls.spotify : null,
+    durationMs: t.duration_ms,
+  };
+}
+
+async function handleNowPlaying(env, ctx) {
+  if (!spotifyConfigured(env)) return jsonResponse({ error: 'Lookup is not configured' }, 503);
+  return serveCached('now-playing', NOW_PLAYING_CACHE_TTL_SECONDS, ctx, async () => {
+    const token = await refreshSpotifyUserAccessToken(env);
+    const current = await spotifyGet('/me/player/currently-playing', token);
+    // Podcasts and ads come back with currently_playing_type other than 'track' — treat as idle.
+    if (current && current.item && current.currently_playing_type === 'track') {
+      return { isPlaying: current.is_playing, progressMs: current.progress_ms, track: toTrack(current.item) };
+    }
+    const recent = await spotifyGet('/me/player/recently-played?limit=1', token);
+    const last = recent && recent.items && recent.items[0];
+    return { isPlaying: false, playedAt: last ? last.played_at : null, track: last ? toTrack(last.track) : null };
+  });
+}
+
+// App-only token is enough: all three playlists are public. No `fields` filter, so a renamed
+// field on Spotify's side degrades to a missing value rather than a 400.
+async function handlePlaylists(env, ctx) {
+  if (!spotifyConfigured(env)) return jsonResponse({ error: 'Lookup is not configured' }, 503);
+  return serveCached('playlists', PLAYLISTS_CACHE_TTL_SECONDS, ctx, async () => {
+    const token = await getSpotifyToken(env);
+    const playlists = await Promise.all(PLAYLIST_IDS.map(id => spotifyGet(`/playlists/${id}?market=AE`, token)));
+    return playlists.map((p, i) => ({
+      id: PLAYLIST_IDS[i],
+      name: p.name,
+      description: p.description || '',
+      image: pickImage(p.images),
+      url: p.external_urls ? p.external_urls.spotify : `https://open.spotify.com/playlist/${PLAYLIST_IDS[i]}`,
+      trackCount: (p.tracks || p.items || {}).total ?? null,
+    }));
+  });
+}
+
+function dubaiMonth(now) {
+  const local = new Date(now + DUBAI_UTC_OFFSET_MS);
+  const start = Date.UTC(local.getUTCFullYear(), local.getUTCMonth(), 1) - DUBAI_UTC_OFFSET_MS;
+  const label = local.toLocaleString('en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' });
+  return { start, label };
+}
+
+// Returns null when the log is missing or too thin for this month, so the caller falls back.
+async function listeningFromLog(env, since) {
+  if (!env.PLAYS_DB) return null;
+  const [distinct, tracks, artists] = await env.PLAYS_DB.batch([
+    env.PLAYS_DB.prepare('SELECT COUNT(DISTINCT track_id) AS n FROM plays WHERE played_at >= ?1').bind(since),
+    env.PLAYS_DB.prepare(
+      `SELECT track_id, track_name, artists, album_image, COUNT(*) AS plays
+       FROM plays WHERE played_at >= ?1
+       GROUP BY track_id ORDER BY plays DESC, MAX(played_at) DESC LIMIT ?2`
+    ).bind(since, LISTENING_TOP_N),
+    // Aliases avoid `id`: json_each() has its own `id` column, which GROUP BY would pick instead.
+    env.PLAYS_DB.prepare(
+      `SELECT json_extract(a.value, '$.id') AS artist_id, json_extract(a.value, '$.name') AS artist_name,
+              COUNT(*) AS plays
+       FROM plays, json_each(plays.artists) AS a WHERE plays.played_at >= ?1
+       GROUP BY artist_id ORDER BY plays DESC, MAX(plays.played_at) DESC LIMIT ?2`
+    ).bind(since, LISTENING_TOP_N),
+  ]);
+  if (distinct.results[0].n < LISTENING_MIN_DISTINCT_TRACKS) return null;
+  return {
+    source: 'log',
+    tracks: tracks.results.map(r => ({
+      id: r.track_id,
+      name: r.track_name,
+      artists: JSON.parse(r.artists).map(a => a.name),
+      image: r.album_image,
+      url: `https://open.spotify.com/track/${r.track_id}`,
+      plays: r.plays,
+    })),
+    artists: artists.results.map(r => ({
+      id: r.artist_id,
+      name: r.artist_name,
+      image: null,
+      url: `https://open.spotify.com/artist/${r.artist_id}`,
+      plays: r.plays,
+    })),
+  };
+}
+
+async function listeningFromShortTerm(env) {
+  const token = await refreshSpotifyUserAccessToken(env);
+  const [tracks, artists] = await Promise.all([
+    spotifyGet(`/me/top/tracks?time_range=short_term&limit=${LISTENING_TOP_N}`, token),
+    spotifyGet(`/me/top/artists?time_range=short_term&limit=${LISTENING_TOP_N}`, token),
+  ]);
+  return {
+    source: 'short_term',
+    tracks: (tracks.items || []).map(t => ({ ...toTrack(t), plays: null })),
+    artists: (artists.items || []).map(a => ({
+      id: a.id,
+      name: a.name,
+      image: pickImage(a.images),
+      url: a.external_urls ? a.external_urls.spotify : null,
+      plays: null,
+    })),
+  };
+}
+
+async function handleListening(env, ctx) {
+  if (!spotifyConfigured(env)) return jsonResponse({ error: 'Lookup is not configured' }, 503);
+  return serveCached('listening', LISTENING_CACHE_TTL_SECONDS, ctx, async () => {
+    const month = dubaiMonth(Date.now());
+    let data = null;
+    try {
+      data = await listeningFromLog(env, month.start);
+    } catch (err) {
+      console.error('play log query failed, using short_term', { message: err.message });
+    }
+    if (!data) data = await listeningFromShortTerm(env);
+    return { ...data, month: month.label, since: new Date(month.start).toISOString() };
+  });
+}
+
+// Cron (every 30 min, see wrangler.jsonc): copies the latest 50 plays into PLAYS_DB. played_at
+// is the primary key, so re-reading plays already stored is a no-op via INSERT OR IGNORE.
+// Local files and anything without a track id are skipped.
+async function recordRecentPlays(env) {
+  if (!spotifyConfigured(env) || !env.PLAYS_DB) return;
+  const token = await refreshSpotifyUserAccessToken(env);
+  const data = await spotifyGet('/me/player/recently-played?limit=50', token);
+  const items = ((data && data.items) || []).filter(i => i.track && i.track.id && i.played_at);
+  if (!items.length) return;
+  const insert = env.PLAYS_DB.prepare(
+    'INSERT OR IGNORE INTO plays (played_at, track_id, track_name, artists, album_image, duration_ms) VALUES (?1, ?2, ?3, ?4, ?5, ?6)'
+  );
+  await env.PLAYS_DB.batch(items.map(i => insert.bind(
+    Date.parse(i.played_at),
+    i.track.id,
+    i.track.name,
+    JSON.stringify((i.track.artists || []).map(a => ({ id: a.id, name: a.name }))),
+    pickImage(i.track.album && i.track.album.images),
+    i.track.duration_ms ?? null,
+  )));
+}
+
 // Cloudflare's static-asset serving answers HTTP Range requests with a full 200 instead of a
 // 206, and omits Accept-Ranges. Browsers therefore can't seek into audio that isn't fully
 // buffered yet — clicking the seek bar restarts the track. We route /audio/ through the Worker
@@ -701,9 +915,24 @@ export default {
     if (url.pathname === '/api/gigs') {
       return handleGigs(request, env, ctx);
     }
+    if (url.pathname === '/api/now-playing') {
+      return handleNowPlaying(env, ctx);
+    }
+    if (url.pathname === '/api/playlists') {
+      return handlePlaylists(env, ctx);
+    }
+    if (url.pathname === '/api/listening') {
+      return handleListening(env, ctx);
+    }
     if (url.pathname.startsWith('/audio/')) {
       return handleAsset(request, env);
     }
     return env.ASSETS.fetch(request);
+  },
+
+  async scheduled(controller, env, ctx) {
+    ctx.waitUntil(recordRecentPlays(env).catch(err => {
+      console.error('play log cron failed', { message: err.message });
+    }));
   },
 };
