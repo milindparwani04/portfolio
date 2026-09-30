@@ -13,7 +13,7 @@
     const title = byId('v2HeadlineTitle');
     if (!title || !title.clientHeight || !title.clientWidth) return;
     let low = 18;
-    let high = 76;
+    let high = Math.max(76, Math.min(120, window.innerHeight * .1));
     let best = low;
     for (let i = 0; i < 9; i += 1) {
       const size = (low + high) / 2;
@@ -36,7 +36,8 @@
       return;
     }
     let low = 48;
-    let high = Math.min(window.innerWidth * .15, 280);
+    // Capped by height too, so the title never pushes the dashboard out of the home section.
+    let high = Math.min(window.innerWidth * .15, window.innerHeight * .22, 280);
     let best = low;
     for (let i = 0; i < 10; i += 1) {
       const size = (low + high) / 2;
@@ -244,7 +245,20 @@
         <a href="https://www.google.com/search?q=${search}" target="_blank" rel="noopener noreferrer">Open details &#8599;</a>
       </article>`;
     }).join('');
-    byId('v2GigBatch').textContent = `Batch ${String(gigBatch + 1).padStart(2, '0')} / ${String(batchCount).padStart(2, '0')}`;
+    byId('v2GigBatch').textContent = `Batch ${String(gigBatch + 1).padStart(2, '0')} of ${String(batchCount).padStart(2, '0')}`;
+    gigTick = 0;
+    renderGigTick();
+  }
+
+  const GIG_SECONDS = 10;
+  let gigTick = 0;
+  let gigHover = false;
+
+  function renderGigTick() {
+    const tick = byId('v2GigTick');
+    const progress = byId('v2GigProgress');
+    if (tick) tick.textContent = `${String(gigTick).padStart(2, '0')} / ${GIG_SECONDS}`;
+    if (progress) progress.style.width = `${(gigTick / GIG_SECONDS) * 100}%`;
   }
 
   async function loadGigs() {
@@ -270,13 +284,113 @@
     event.currentTarget.setAttribute('aria-label', gigPaused ? 'Resume gig rotation' : 'Pause gig rotation');
   });
 
+  // "Hover or focus pauses": the countdown holds while the pointer or keyboard focus is on a card.
+  const gigList = byId('v2GigList');
+  gigList?.addEventListener('pointerenter', () => { gigHover = true; });
+  gigList?.addEventListener('pointerleave', () => { gigHover = false; });
+  gigList?.addEventListener('focusin', () => { gigHover = true; });
+  gigList?.addEventListener('focusout', (event) => { if (!gigList.contains(event.relatedTarget)) gigHover = false; });
+
   loadGigs();
   window.setInterval(() => {
-    if (!gigPaused) {
+    if (gigPaused || gigHover || document.hidden) return;
+    gigTick += 1;
+    if (gigTick >= GIG_SECONDS) {
       gigBatch += 1;
       renderGigs();
+    } else {
+      renderGigTick();
     }
-  }, 10000);
+  }, 1000);
 
   loadLastUpdated();
+
+  // One wheel gesture or key press moves exactly one section. CSS scroll-snap handles touch
+  // swipes and scrollbar drags; this handles wheel/trackpad (so momentum can't skip sections)
+  // and keyboard. Only active when the paging media query matches (desktop/tablet).
+  function initSectionPager() {
+    const sections = Array.from(document.querySelectorAll('.v2-section'));
+    if (!sections.length) return;
+    const paging = window.matchMedia('(min-width: 721px) and (min-height: 620px)');
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const navLinks = Array.from(document.querySelectorAll('.v2-links a'));
+    let moving = false;
+    let quietUntil = 0;
+    let landedAt = 0;
+    let moveTimer = 0;
+
+    function currentIndex() {
+      let best = 0;
+      let bestDistance = Infinity;
+      sections.forEach((section, index) => {
+        const distance = Math.abs(section.getBoundingClientRect().top);
+        if (distance < bestDistance) { bestDistance = distance; best = index; }
+      });
+      return best;
+    }
+
+    function goTo(index) {
+      const target = sections[Math.max(0, Math.min(sections.length - 1, index))];
+      if (!target || target === sections[currentIndex()]) return;
+      moving = true;
+      target.scrollIntoView({ behavior: reduceMotion.matches ? 'auto' : 'smooth', block: 'start' });
+      // Unlock when the smooth scroll lands; the timeout covers browsers without `scrollend`.
+      window.clearTimeout(moveTimer);
+      moveTimer = window.setTimeout(release, reduceMotion.matches ? 80 : 1000);
+    }
+
+    function release() {
+      window.clearTimeout(moveTimer);
+      if (moving) landedAt = performance.now();
+      moving = false;
+    }
+    window.addEventListener('scrollend', release);
+
+    function blockedTarget(target) {
+      return document.querySelector('.tool-modal.open') ||
+        (target instanceof Element && target.closest('input, textarea, select, [contenteditable="true"]'));
+    }
+
+    window.addEventListener('wheel', (event) => {
+      if (!paging.matches || event.ctrlKey || blockedTarget(event.target)) return;
+      if (Math.abs(event.deltaY) < Math.abs(event.deltaX)) return;
+      event.preventDefault();
+      const now = performance.now();
+      // Trackpad momentum keeps firing wheel events after the gesture ends; treat any event
+      // within 180 ms of the previous one as part of the same gesture.
+      const sameGesture = now < quietUntil;
+      quietUntil = now + 180;
+      // A short cooldown after landing stops one long spin of the wheel chaining into several moves.
+      if (moving || sameGesture || now - landedAt < 400 || Math.abs(event.deltaY) < 4) return;
+      goTo(currentIndex() + (event.deltaY > 0 ? 1 : -1));
+    }, { passive: false });
+
+    document.addEventListener('keydown', (event) => {
+      if (!paging.matches || event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey) return;
+      if (blockedTarget(event.target) || (event.target instanceof Element && event.target.closest('button, a') && event.key === ' ')) return;
+      const keys = { ArrowDown: 1, PageDown: 1, ArrowUp: -1, PageUp: -1 };
+      let step = keys[event.key];
+      if (event.key === ' ') step = event.shiftKey ? -1 : 1;
+      if (event.key === 'Home') { event.preventDefault(); goTo(0); return; }
+      if (event.key === 'End') { event.preventDefault(); goTo(sections.length - 1); return; }
+      if (!step) return;
+      event.preventDefault();
+      if (!moving) goTo(currentIndex() + step);
+    });
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        const id = entry.target.id;
+        navLinks.forEach((link) => {
+          if (link.getAttribute('href') === `#${id}`) link.setAttribute('aria-current', 'true');
+          else link.removeAttribute('aria-current');
+        });
+        if (paging.matches && location.hash !== `#${id}`) history.replaceState(null, '', id === 'v2-home' ? location.pathname + location.search : `#${id}`);
+      });
+    }, { threshold: 0.55 });
+    sections.forEach((section) => observer.observe(section));
+  }
+
+  initSectionPager();
 }());
