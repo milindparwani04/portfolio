@@ -67,7 +67,7 @@ Priorities, in order:
 
 Shell: opens directly onto a clean `C:\PARWANI>` navigation bar and the `MY DIGITAL PORTFOLIO.` dashboard. The former ENTER/CRT boot gate, floating navigation and bottom status bar are no longer visible.
 
-Home dashboard: fixed-size headline card with text fitted on each rotation from `/api/news`; Dubai clock and live Dubai weather from Open-Meteo; deploy timestamp from `/api/last-updated`; heart-rate card from `/api/heart-rate` (built, awaiting deploy + Google login); Spotify card with the current or last-played track from `/api/now-playing`; dissertation and current-focus cards. The opening section uses the approved mockup's full-width alignment and includes a scroll-to-Journal cue. Every API-backed card retains its layout when data is unavailable.
+Home dashboard: fixed-size headline card with text fitted on each rotation from `/api/news`; Dubai clock and live Dubai weather from Open-Meteo; deploy timestamp from `/api/last-updated`; heart-rate card from `/api/heart-rate` (latest Fitbit reading and its age); Spotify card with the current or last-played track from `/api/now-playing`; dissertation and current-focus cards. The opening section uses the approved mockup's full-width alignment and includes a scroll-to-Journal cue. Every API-backed card retains its layout when data is unavailable.
 
 Section paging: on desktop/tablet (≥721 px wide and ≥620 px tall) every section is exactly one viewport under a fixed nav bar, and one wheel gesture or key press (PageUp/PageDown/arrows/Space/Home/End) moves one whole section (`initSectionPager` in `public/ui-v2.js`, CSS scroll-snap for touch/scrollbar). Each section has a "↑ previous" cue top-right and a "SCROLL / X NEXT ↓" cue at the bottom; the nav underlines the current section and the URL hash follows it. Content scales with viewport height so nothing clips down to ~1100×620; a short-viewport tier (≤760 px tall) tightens spacing. Phones and smaller windows scroll normally.
 
@@ -94,6 +94,17 @@ Known issues / not done:
 Next session starts with:
 - ...
 ```
+
+### 2026-09-30 — Heart rate live
+Model: Opus
+Phase: 4 of 4
+Done:
+- Deployed (`4ddb271`, privacy page `e3c5f55`); `HEALTH_AUTH_KEY` generated via `wrangler secret bulk` (rotated once more at Milind's request); Milind completed the Google consent (unverified-app screen, app In production).
+Tested (how, result):
+- Production `/api/heart-rate` → `{"bpm":81,"sampledAt":"2026-09-30T18:41:17Z","motion":null}`, ~30 s after the reading. An unverified In-production app with a restricted scope works.
+Known issues / not done:
+- `motion` came back null (field absent for this reading or named differently); the card simply omits it.
+- Check the Google refresh token survives past 7 days (it should, now that the app is In production).
 
 ### 2026-09-30 — Heart rate from Google Health API (Phases 1–3 of 4)
 Model: Opus
