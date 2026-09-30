@@ -235,14 +235,6 @@ body.locked { overflow: auto !important; height: auto !important; }
 .v2-track-art { height: min(30px, 70%); aspect-ratio: 1; border: 1px dashed var(--v2-soft-line); }
 .v2-track-bar { height: 16px; border: 1px solid var(--v2-line); }
 .v2-track-bar i { display: block; width: 0; height: 100%; background: var(--v2-fg); }
-.v2-track-art img { display: block; width: 100%; height: 100%; object-fit: cover; }
-.v2-track-art:has(img) { border-style: solid; border-color: var(--v2-line); }
-.v2-track-row a { color: inherit; text-decoration: none; }
-.v2-track-row a:hover, .v2-track-row a:focus-visible { text-decoration: underline; }
-.v2-top-toggle { display: flex; gap: 6px; margin-top: .7rem; }
-.v2-top-toggle button { padding: .3rem .6rem; border: 1px solid var(--v2-line); background: transparent; color: var(--v2-fg); font: inherit; font-size: .68rem; letter-spacing: .06em; text-transform: uppercase; cursor: pointer; }
-.v2-top-toggle button[aria-pressed="true"] { background: var(--v2-fg); color: var(--v2-bg); }
-.v2-spotify h3, .v2-spotify-state { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* Gig finder */
 .v2-gig-controls { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, .45fr); border: 1px solid var(--v2-line); font-size: .8rem; letter-spacing: .05em; text-transform: uppercase; }
