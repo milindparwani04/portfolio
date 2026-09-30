@@ -772,7 +772,7 @@ const LISTENING_CACHE_TTL_SECONDS = 600;
 const LISTENING_TOP_N = 5;
 // Bump when a response shape or upstream call changes: deploys don't clear the edge cache, so
 // without this a stale response (e.g. playlists, 6 hr) would outlive the fix.
-const LISTENING_CACHE_VERSION = 2;
+const LISTENING_CACHE_VERSION = 3;
 // Until the month's log has this many distinct tracks (first day of a month, or before the log
 // has filled at all), /api/listening falls back to Spotify's own ~4-week short_term top lists.
 const LISTENING_MIN_DISTINCT_TRACKS = 5;
@@ -894,11 +894,14 @@ async function listeningFromLog(env, since) {
        GROUP BY track_id ORDER BY plays DESC, MAX(played_at) DESC LIMIT ?2`
     ).bind(since, LISTENING_TOP_N),
     // Aliases avoid `id`: json_each() has its own `id` column, which GROUP BY would pick instead.
+    // Recently-played only carries simplified artists (no images), so each artist shows the album
+    // cover from their latest play: with exactly one MAX() in the query, SQLite takes the bare
+    // album_image column from the row that produced the max.
     env.PLAYS_DB.prepare(
       `SELECT json_extract(a.value, '$.id') AS artist_id, json_extract(a.value, '$.name') AS artist_name,
-              COUNT(*) AS plays
+              COUNT(*) AS plays, plays.album_image AS album_image, MAX(plays.played_at) AS last_played
        FROM plays, json_each(plays.artists) AS a WHERE plays.played_at >= ?1
-       GROUP BY artist_id ORDER BY plays DESC, MAX(plays.played_at) DESC LIMIT ?2`
+       GROUP BY artist_id ORDER BY plays DESC, last_played DESC LIMIT ?2`
     ).bind(since, LISTENING_TOP_N),
   ]);
   if (distinct.results[0].n < LISTENING_MIN_DISTINCT_TRACKS) return null;
@@ -915,7 +918,7 @@ async function listeningFromLog(env, since) {
     artists: artists.results.map(r => ({
       id: r.artist_id,
       name: r.artist_name,
-      image: null,
+      image: r.album_image,
       url: `https://open.spotify.com/artist/${r.artist_id}`,
       plays: r.plays,
     })),

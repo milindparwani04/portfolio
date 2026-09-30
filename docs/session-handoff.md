@@ -178,7 +178,7 @@ Tested (how, result):
 - Not testable locally (needs real secrets + the production OAuth redirect): real Spotify responses, the cron insert, playlist field shapes. Verify after deploy.
 Known issues / not done:
 - Not deployed. Milind must re-authorize at `/api/spotify/authorize?key=…` after deploy; until then now-playing/listening return 502 and the cron logs "not connected" / 403.
-- Top artists from the log have no image (recently-played returns simplified artists); `short_term` fallback artists do.
+- Top artists from the log have no image (recently-played returns simplified artists); `short_term` fallback artists do. **Resolved 2026-09-30:** each artist now shows the album cover from their latest logged play (`LISTENING_CACHE_VERSION` 3); verified read-only against production D1 — all top 5 artists get a cover, each from their most recent play.
 Next session starts with:
 - Phase 2: wire the dashboard Spotify card, playlist cards and Top Tracks/Artists into `public/ui-v2.js`, keeping every empty state.
 
