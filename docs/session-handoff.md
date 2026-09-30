@@ -70,8 +70,6 @@ Section paging: on desktop/tablet (≥721 px wide and ≥620 px tall) every sect
 
 Sections: Journal (REF. 01, one full-height Karoshi feature card with status/topic rows), Projects (REF. 02, text-only 3×2 cards plus one full-width card, each with a status row and action bar), Toolbox (REF. 03, 3×3 grid of all nine tools with inline-SVG thumbnails; Sample Finder, PDF Editor and Signature Creator show a disabled "Still being built" action), Playlists (REF. 04, three cards with "Open on Spotify" bars plus a Top Tracks table empty state), and Gig Finder (REF. 05, 10-second countdown bar, hover/focus pause, footer with Back to top). The local music player is no longer exposed. The modal code for the three unfinished tools remains in the hidden legacy shell.
 
-Sections: Journal (REF. 01, one full-height Karoshi feature card with status/topic rows), Projects (REF. 02, text-only 3×2 cards plus one full-width card, each with a status row and action bar), Toolbox (REF. 03, 3×3 grid of all nine tools with inline-SVG thumbnails; Sample Finder, PDF Editor and Signature Creator show a disabled "Still being built" action), Playlists (REF. 04, three cards with "Open on Spotify" bars plus a Top Tracks table empty state), and Gig Finder (REF. 05, 10-second countdown bar, hover/focus pause, footer with Back to top). The local music player is no longer exposed. The modal code for the three unfinished tools remains in the hidden legacy shell.
-
 Backend endpoints live: news, last-updated, BPM/key lookup, audio features, sample search, gigs, Spotify owner OAuth. Built on `feat/spotify-listening`, not deployed: now-playing, playlists, listening, plus the play-log cron.
 
 Settled removals (do not re-propose without flagging): YouTube to MP3/MP4/WAV converters (ToS and backend complexity), Seamless Set project, standalone Liveliness Index (merged into Where Next).
@@ -93,6 +91,63 @@ Known issues / not done:
 Next session starts with:
 - ...
 ```
+
+### 2026-09-30 — Spotify listening data: deploy check (Phase 3, in progress)
+Model: Opus
+Phase: 3 of 4
+Done:
+- Found PR #7 (`feat/spotify-listening`) had a "Merge branch 'main'" commit (`a923102`) whose conflict resolution dropped every Phase 2 frontend change and part of the docs (the conflicts came from #6 being squash-merged while this branch still carried the original section-paging commit). Restored the files from a clean rebase onto `main` as a new commit — no force-push.
+- Production was already running this branch's Worker (routes live, HTML still the old `v=6`) before any merge to `main`: **pushing a non-main branch deploys to production.** Check Workers → portfolio → Settings → Builds: the non-production branch command should be `npx wrangler versions upload`, not `deploy`.
+Tested (how, result):
+- Production after the branch deploy: `/api/playlists` 200 with real names/covers; `/api/listening` 200 via `short_term` (real top tracks); `/api/now-playing` 502 (refresh token predates the new scopes — expected until re-authorize); D1 `plays` empty (cron needs the new scope too).
+Known issues / not done:
+- `/api/playlists` returns `trackCount: null` for all three — the playlist object from the app token has no `tracks.total`/`items.total`. Frontend keeps the "[ Playlist ]" tag. Needs the raw response to fix.
+- Milind still to re-authorize at `/api/spotify/authorize?key=…`.
+
+### 2026-09-30 — Spotify listening data: frontend wiring (Phase 2)
+Model: Opus
+Phase: 2 of 4
+Done:
+- `public/ui-v2.js`: `loadNowPlaying` (dashboard Spotify card; "Now playing" / "Paused" / "Last played 2h ago" + artists; polls every 30 s while the tab is visible), `loadPlaylists` (name, description as plain text, cover, track count in the tag, link), `loadListening` + `renderTop` (Top Tracks / Top Artists table, play counts, bars relative to the top item). All API strings escaped; only `https:` URLs accepted for links and images.
+- `public/index.html`: static playlist cards now show the real names (pop, Camon, idk) and link to the real playlists, so a failed `/api/playlists` still works; Tracks / Artists toggle added inside the Listening History card (hidden until data loads — Milind approved deploying after this phase; toggle chosen so the locked layout doesn't change); IDs for JS hooks; CSS/JS cache-bust `v=7`.
+- `public/ui-v2.css`: toggle, artwork in table cells, link style, ellipsis for long now-playing titles.
+Tested (how, result):
+- Scratch mock server (not committed) serving `public/` with fake `/api/*` in three modes, driven in Chrome at 1456×819 viewport: ok mode → all panels filled, `<img onerror>` track name rendered as text, `javascript:` playlist URL/image rejected (static link kept), HTML entities in description decoded, long title truncated; Artists toggle switches heading, period line and rows; fallback mode → "Last 4 weeks", `--` plays, empty bars; fail mode → every empty state unchanged, toggle hidden. 390 px (iframe) → no horizontal overflow, mobile column rule intact. No console errors.
+Known issues / not done:
+- Not deployed; real Spotify data unverified until deploy + re-authorize.
+Next session starts with:
+- Phase 3: merge to `main` (deploys), Milind re-authorizes, verify all three routes and the first cron run in production.
+
+### 2026-09-30 — Spotify listening data: Worker routes + play log (Phase 1)
+Model: Opus
+Phase: 1 of 4
+Done:
+- Created D1 `portfolio-plays` (id `b4977ab6-4861-41d9-82f3-503677a7bb3d`, EEUR) via the Cloudflare connector — wrangler isn't logged in on this laptop — and applied `migrations/0001_plays.sql` to it directly (so D1's migrations table doesn't list it; the SQL is `IF NOT EXISTS`, safe to re-apply).
+- `wrangler.jsonc`: `PLAYS_DB` binding and `*/30 * * * *` cron.
+- `worker/index.js`: OAuth scopes widened; `/api/now-playing`, `/api/playlists`, `/api/listening`; `scheduled()` → `recordRecentPlays`; 8 s timeouts added to both Spotify token calls. Playlist order from Milind: pop, Camon, idk (idk was private, Milind made it public).
+Tested (how, result):
+- `wrangler dev --local` with seeded local D1: month boundary correct (a play at 00:30 1 Sep Dubai counted, 20:59 31 Aug excluded); track and artist play counts correct including a two-artist track (first run caught a bug — `json_each`'s own `id` column hijacked `GROUP BY id`; fixed by aliasing). A request with a junk query string was a cache HIT. Log thinned to 3 distinct tracks → switches to `short_term`.
+- No secrets → all three routes 503. Dummy creds / no refresh token → generic 502, detail only in the log; cron logs and exits cleanly.
+- Not testable locally (needs real secrets + the production OAuth redirect): real Spotify responses, the cron insert, playlist field shapes. Verify after deploy.
+Known issues / not done:
+- Not deployed. Milind must re-authorize at `/api/spotify/authorize?key=…` after deploy; until then now-playing/listening return 502 and the cron logs "not connected" / 403.
+- Top artists from the log have no image (recently-played returns simplified artists); `short_term` fallback artists do.
+Next session starts with:
+- Phase 2: wire the dashboard Spotify card, playlist cards and Top Tracks/Artists into `public/ui-v2.js`, keeping every empty state.
+
+### 2026-09-30 — Spotify listening data: plan agreed, S-01 fixed
+Model: Opus
+Phase: 0 of 4 (security prerequisite)
+Done:
+- Agreed plan with Milind for live listening data, Spotify only (Last.fm, stats.fm and statsforspotify.com considered and rejected — stats.fm has no official API, statsforspotify.com is only a front end over Spotify's own API, and Spotify never exposes play counts). Phases: 0 fix S-01 → 1 Worker (`/api/now-playing`, `/api/playlists`, `/api/listening` backed by a D1 play log filled by a 30-min Cron Trigger polling `/me/player/recently-played`, so top 5 tracks/artists are an exact calendar month with play counts; `short_term` fallback until the log has data) → 2 frontend wiring → 3 docs.
+- Fixed S-01 in `handleSpotifyCallback`: fixed plain messages only, details logged with `console.error`.
+Tested (how, result):
+- `wrangler dev --local`: `?error=<script>…` → "Spotify authorization failed." (payload appears only in the log); no params → "Missing code or state."; bad state → expired message; seeded valid state + bad code → "Token exchange failed."; `/api/spotify/authorize` without key → 403.
+Known issues / not done:
+- Not deployed. Branch `feat/spotify-listening` (off `feat/section-paging`).
+- Milind must re-run `/api/spotify/authorize` after Phase 1 adds scopes `user-read-currently-playing user-read-recently-played`, and supply the 3 playlist URLs.
+Next session starts with:
+- Phase 1 (Worker + D1 play log).
 
 ### 2026-09-30 — Full-viewport section paging, layouts matched to mockups
 
