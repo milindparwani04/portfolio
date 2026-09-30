@@ -22,7 +22,7 @@ This is the opening document for every new agent session. Read it top to bottom 
 
 Front end: a framework-free HTML/CSS/JS site served as Worker static assets (`env.ASSETS`). The visible portfolio interface lives in `public/index.html`, `public/ui-v2.css`, and `public/ui-v2.js`; full-resolution editorial images live in `public/assets/ui/`. The earlier shell remains in the document but is hidden while its working toolbox modals are reused.
 
-Back end: one Cloudflare Worker (`worker/index.js`) acting as an API proxy so no third-party key ever reaches the browser. Storage is one KV namespace, `GIG_KV`, holding OAuth state tokens (10-minute TTL) and the Spotify refresh token, plus one D1 database, `portfolio-plays` (binding `PLAYS_DB`, schema in `migrations/`), holding the Spotify play log. A Cron Trigger (`*/30 * * * *`) runs `scheduled()`, which copies the latest 50 plays from Spotify recently-played into `PLAYS_DB`. Deploy timestamp comes from the `CF_VERSION_METADATA` binding.
+Back end: one Cloudflare Worker (`worker/index.js`) acting as an API proxy so no third-party key ever reaches the browser. Storage is one KV namespace, `GIG_KV`, holding OAuth state tokens (10-minute TTL, prefixes `oauth_state:` for Spotify and `health_oauth_state:` for Google), the owner refresh tokens (`spotify_refresh_token`, `health_refresh_token`) and the Gig Finder's per-artist verification cache (`gig_artist:v2:*`, 30 days), plus one D1 database, `portfolio-plays` (binding `PLAYS_DB`, schema in `migrations/`), holding the Spotify play log. A Cron Trigger (`*/30 * * * *`) runs `scheduled()`, which copies the latest 50 plays from Spotify recently-played into `PLAYS_DB`. Deploy timestamp comes from the `CF_VERSION_METADATA` binding.
 
 Secrets (set with `wrangler secret bulk` from a temp file — piping into `secret put` from PowerShell 5.1 corrupted a value — never in code): `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET`, `SPOTIFY_AUTH_KEY`, `GOOGLE_HEALTH_CLIENT_ID`, `GOOGLE_HEALTH_CLIENT_SECRET`, `HEALTH_AUTH_KEY`, `FREESOUND_API_KEY`, `LASTFM_API_KEY`, `TICKETMASTER_API_KEY`. If a secret is missing the route returns 503 "Lookup is not configured" rather than crashing.
 
@@ -35,13 +35,14 @@ Secrets (set with `wrangler secret bulk` from a temp file — piping into `secre
 | `/api/sample-search` | Sample Finder tool | Freesound | 1 hr |
 | `/api/spotify/authorize` | Owner-only OAuth start (key-gated) | Spotify | none |
 | `/api/spotify/callback` | OAuth callback, stores refresh token | Spotify | none |
-| `/api/gigs` | Upcoming gigs from top + trending artists | Spotify, Last.fm, Ticketmaster | 1 hr |
+| `/api/gigs` | Upcoming gigs from top + trending artists, real artists only: exact Ticketmaster attraction → its events; MusicBrainz excludes dead/disbanded acts; tribute titles filtered. Returns `{ artist, venue, date, image, url }` (artist photo, ticket page) | Spotify, Last.fm, Ticketmaster, MusicBrainz | 1 hr (fixed key `gigs-v2`) |
 | `/api/health/authorize` | Owner-only Google Health OAuth start (`HEALTH_AUTH_KEY`, constant-time compare) | Google | none |
 | `/api/health/callback` | OAuth callback, stores `health_refresh_token` in `GIG_KV` | Google | none |
-| `/api/heart-rate` | Dashboard Health card: latest Fitbit reading `{ bpm, sampledAt, motion }` from the last 24 h | Google Health API v4 | 60 s |
+| `/api/heart-rate` | Dashboard Health card: latest Fitbit reading `{ bpm, sampledAt, motion }` from the last 24 h | Google Health API v4 | 30 s |
 | `/api/now-playing` | Dashboard Spotify card: current track, else last played | Spotify (owner token) | 20 s |
-| `/api/playlists` | The three playlist cards (pop, Camon, idk — IDs in `PLAYLIST_IDS`) | Spotify (app token) | 6 hr |
-| `/api/listening` | Top 5 tracks + artists for the Dubai calendar month, with play counts from `PLAYS_DB`; falls back to Spotify `short_term` (no counts, `source: "short_term"`) while the month has < 5 distinct tracks | D1, Spotify (owner token) | 10 min |
+| `/api/playlists` | The three playlist cards (pop, Camon, idk — IDs in `PLAYLIST_IDS`) with track counts | Spotify (owner token; app token fallback — Spotify only returns track counts to the owner since Feb 2026) | 6 hr |
+| `/api/listening` | Top 5 tracks + artists for the Dubai calendar month, with play counts from `PLAYS_DB`; artists show the album cover from their latest play; falls back to Spotify `short_term` (no counts, `source: "short_term"`) while the month has < 5 distinct tracks | D1, Spotify (owner token) | 10 min |
+| `/privacy` | Static privacy page (`public/privacy.html`), required by Google's OAuth consent screen | — | default |
 | `/audio/*` | Legacy Range handler; no MP3 assets are tracked or exposed by the current UI | Static assets | default |
 
 ## Design system (locked — do not change unless Milind raises it)
@@ -58,7 +59,7 @@ Long-term goal: a portfolio that feels like an enterprise-quality product — fa
 
 Priorities, in order:
 
-1. Close the open security findings (see [Security Handoff](security-handoff.md) §4) before shipping new public endpoints.
+1. Close the open security findings (see [Security Handoff](security-handoff.md) §4) before shipping new public endpoints. Most urgent operational item: confirm Workers Builds' non-production branch command is `npx wrangler versions upload` — until then every branch push deploys to production.
 2. Finish API-integrated projects: Sounds Like, then Where Next (with Liveliness Index).
 3. Activate remaining Toolbox placeholders, client-side tools first (no new backend risk).
 4. Parked: real-time multiplayer "swipe to decide where to go out" — needs WebSockets/Durable Objects or Supabase, a places API and match logic. Do not start until 1–3 are done.
@@ -67,13 +68,15 @@ Priorities, in order:
 
 Shell: opens directly onto a clean `C:\PARWANI>` navigation bar and the `MY DIGITAL PORTFOLIO.` dashboard. The former ENTER/CRT boot gate, floating navigation and bottom status bar are no longer visible.
 
-Home dashboard: fixed-size headline card with text fitted on each rotation from `/api/news`; Dubai clock and live Dubai weather from Open-Meteo; deploy timestamp from `/api/last-updated`; heart-rate card from `/api/heart-rate` (latest Fitbit reading and its age); Spotify card with the current or last-played track from `/api/now-playing`; dissertation and current-focus cards. The opening section uses the approved mockup's full-width alignment and includes a scroll-to-Journal cue. Every API-backed card retains its layout when data is unavailable.
+Home dashboard: fixed-size headline card with text fitted on each rotation from `/api/news`; Dubai clock and live Dubai weather from Open-Meteo; deploy timestamp from `/api/last-updated`; heart-rate card from `/api/heart-rate` (latest Fitbit reading and its age) and Spotify card with the current or last-played track from `/api/now-playing`, both refreshed every 30 s without a reload (polls bypass the browser cache); dissertation and current-focus cards. The opening section uses the approved mockup's full-width alignment and includes a scroll-to-Journal cue. Every API-backed card retains its layout when data is unavailable.
 
 Section paging: on desktop/tablet (≥721 px wide and ≥620 px tall) every section is exactly one viewport under a fixed nav bar, and one wheel gesture or key press (PageUp/PageDown/arrows/Space/Home/End) moves one whole section (`initSectionPager` in `public/ui-v2.js`, CSS scroll-snap for touch/scrollbar). Each section has a "↑ previous" cue top-right and a "SCROLL / X NEXT ↓" cue at the bottom; the nav underlines the current section and the URL hash follows it. Content scales with viewport height so nothing clips down to ~1100×620; a short-viewport tier (≤760 px tall) tightens spacing. Phones and smaller windows scroll normally.
 
-Sections: Journal (REF. 01, one full-height Karoshi feature card with status/topic rows), Projects (REF. 02, text-only 3×2 cards plus one full-width card, each with a status row and action bar), Toolbox (REF. 03, 3×3 grid of all nine tools with inline-SVG thumbnails; Sample Finder, PDF Editor and Signature Creator show a disabled "Still being built" action), Playlists (REF. 04, three live playlist cards — pop, Camon, idk — plus a Listening History card with a Tracks / Artists toggle showing the month's top 5 with play counts), and Gig Finder (REF. 05, 10-second countdown bar, hover/focus pause, footer with Back to top). The local music player is no longer exposed. The modal code for the three unfinished tools remains in the hidden legacy shell.
+Sections: Journal (REF. 01, one full-height Karoshi feature card with status/topic rows), Projects (REF. 02, text-only 3×2 cards plus one full-width card, each with a status row and action bar), Toolbox (REF. 03, 3×3 grid of all nine tools with inline-SVG thumbnails; Sample Finder, PDF Editor and Signature Creator show a disabled "Still being built" action), Playlists (REF. 04, three live playlist cards — pop, Camon, idk — plus a Listening History card with a Tracks / Artists toggle showing the month's top 5 with play counts), and Gig Finder (REF. 05, verified real-artist shows with the artist's photo and a link to the ticket page, 10-second countdown bar, hover/focus pause, footer with Back to top). A privacy page lives at `/privacy`. The local music player is no longer exposed. The modal code for the three unfinished tools remains in the hidden legacy shell.
 
-Backend endpoints live: news, last-updated, BPM/key lookup, audio features, sample search, gigs, Spotify owner OAuth, now-playing, playlists, listening, plus the 30-minute play-log cron.
+Backend endpoints live: news, last-updated, BPM/key lookup, audio features, sample search, gigs, Spotify owner OAuth, now-playing, playlists, listening, Google Health owner OAuth, heart-rate, plus the 30-minute play-log cron.
+
+External accounts connected (owner-only): Spotify (re-authorize at `/api/spotify/authorize?key=<SPOTIFY_AUTH_KEY>` if scopes change) and Google Health (Google Cloud project `golden-monolith-255513`, OAuth app **In production, unverified**, single scope `googlehealth.health_metrics_and_measurements.readonly`; re-authorize at `/api/health/authorize?key=<HEALTH_AUTH_KEY>`). Both keys are stored only as Worker secrets — if lost, generate a new random value and store it with `wrangler secret bulk <file.json>` (then delete the file) rather than trying to read them back; secrets are write-only.
 
 Settled removals (do not re-propose without flagging): YouTube to MP3/MP4/WAV converters (ToS and backend complexity), Seamless Set project, standalone Liveliness Index (merged into Where Next).
 
@@ -95,6 +98,25 @@ Next session starts with:
 - ...
 ```
 
+### 2026-09-30 — Session wrap-up: live data, heart rate, gigs (all on `main`, deployed)
+Model: Opus
+Done (this session, oldest → newest, all merged to `main` and live):
+- S-01 fixed. Spotify listening data: `/api/now-playing`, `/api/playlists`, `/api/listening`, D1 play log + cron; frontend wiring (PR #7, `3116eb0`). Playlist track counts via owner token (`526af09`).
+- Heart rate from the Google Health API (`4ddb271`), privacy page (`85652c2`), Google Cloud consent screen fixed and published (Chrome, with approval).
+- Top-artist album covers (`8daec92`); Gig Finder shows only verified real-artist shows with artist photos and ticket links (`f80652a`); heart rate + now-playing refresh without reload (`31d8f93`).
+- Secrets rotated/created via `wrangler secret bulk`: `SPOTIFY_AUTH_KEY`, `HEALTH_AUTH_KEY`, `GOOGLE_HEALTH_CLIENT_ID/SECRET`. Wrangler is now logged in on this laptop.
+- Merged branches deleted (local + GitHub).
+Tested (how, result):
+- Production checks after each deploy: all listening routes 200 with real data; first cron write 50 plays; `/api/heart-rate` real readings; `/api/gigs` 8 verified shows with images and URLs; artist covers present. Details in the entries below.
+Known issues / not done:
+- Workers Builds non-production branch command still to be confirmed as `npx wrangler versions upload` (Milind).
+- Google Health refresh token should outlive 7 days now that the app is In production — confirm after 2026-10-07.
+- Heart rate is only as fresh as the phone's last background sync (iOS decides; typically 15–60 min). Nothing server-side can force it.
+- Heart-rate `motion` comes back null; card omits it.
+- Security findings S-02 to S-09 still open (S-07 fixed for the health route only).
+Next session starts with:
+- Confirm the branch-deploy setting and the Google token after 7 days, then Security Handoff §3 dashboard checklist and S-02 to S-04.
+
 ### 2026-09-30 — Heart rate updates without a page reload
 Model: Opus
 Phase: 1 of 1
@@ -103,7 +125,8 @@ Done:
 Tested (how, result):
 - Mock server sending production's `Cache-Control: public, max-age=30` and a new bpm per request: value changed on screen after 30 s without reload (62 → 63 BPM), 0 of 2 polls served from browser cache.
 Known issues / not done:
-- Readings only reach Google when the phone app syncs with the tracker; nothing server-side can force that. See the phone settings advice given to Milind (background app refresh, don't force-quit the app).
+- Deployed (`31d8f93`) and verified: production serves `ui-v2.js?v=10` with `cache: 'no-store'` polls; `/api/heart-rate` sends `max-age=30`.
+- Readings only reach Google when the phone app syncs with the tracker; nothing server-side can force that. Advice given to Milind: Background App Refresh on for the Google Health/Fitbit app, don't force-quit it, Bluetooth on, Low Power Mode off, enable any "all-day sync" option.
 
 ### 2026-09-30 — Gig Finder: real artists only, artist photos, top-artist covers
 Model: Opus
@@ -115,6 +138,7 @@ Tested (how, result):
 - `wrangler dev --remote` (real secrets/KV): after warming the cache, gigs = Maroon 5, Bruno Mars, Barry Can't Swim, The Weeknd, Disclosure, Post Malone, Calvin Harris, Tame Impala — all real headline shows with images and ticket URLs; every false entry gone (KV shows why: ended, no exact attraction, or no upcoming events). Chrome: cards render artist photos, links go to Ticketmaster/Moshtix, no console errors.
 - Queen: MusicBrainz's top "Queen" is marked ended (Queen + Adam Lambert is a separate act) — only matters if Ticketmaster lists a "Queen" attraction with upcoming events.
 Known issues / not done:
+- Deployed (`f80652a`) and verified in production: same 8 verified shows, all with images and ticket URLs.
 - Visitors' browsers may hold the old `/api/gigs` response up to 1 h (`max-age=3600`); the edge cache is retired by the new key.
 - Old `gig_artist:v1:*` KV entries from testing expire on their own within 30 days.
 

@@ -4,7 +4,7 @@
 
 ## 1. Scope and how to use
 
-Covers the `portfolio` Worker on milindparwani.com, its static assets, the `GIG_KV` namespace, the `PLAYS_DB` D1 database, the 30-minute cron trigger and its six secrets. Section 2 was verified by reading the deployed Worker source on 23 Sep 2026. Section 3 covers Cloudflare zone settings that the API connector cannot read — tick each one only after checking it in the dashboard. Section 4 lists real gaps found in the code, ordered by severity. Any agent touching the Worker must re-run sections 2 and 5 before marking work complete.
+Covers the `portfolio` Worker on milindparwani.com, its static assets, the `GIG_KV` namespace, the `PLAYS_DB` D1 database, the 30-minute cron trigger, its nine secrets (`SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET`, `SPOTIFY_AUTH_KEY`, `GOOGLE_HEALTH_CLIENT_ID`, `GOOGLE_HEALTH_CLIENT_SECRET`, `HEALTH_AUTH_KEY`, `FREESOUND_API_KEY`, `LASTFM_API_KEY`, `TICKETMASTER_API_KEY`) and the Google Cloud OAuth app (project `golden-monolith-255513`). Section 2 was verified by reading the deployed Worker source on 23 Sep 2026 and updated with each change on 30 Sep 2026. Section 3 covers Cloudflare zone settings that the API connector cannot read — tick each one only after checking it in the dashboard. Section 4 lists real gaps found in the code, ordered by severity. Any agent touching the Worker must re-run sections 2 and 5 before marking work complete.
 
 ## 2. Verified in Worker code
 
@@ -18,13 +18,15 @@ Covers the `portfolio` Worker on milindparwani.com, its static assets, the `GIG_
 - [x] Refresh token stored server-side in KV, rotated when Spotify returns a new one.
 - [x] S-01 fixed and deployed 2026-09-30: `/api/spotify/callback` returns fixed messages only; the `error` param and `err.message` go to `console.error`, never into the HTML.
 - [x] `SPOTIFY_AUTH_KEY` rotated 2026-09-30 (40 random alphanumeric characters, generated and stored via `wrangler secret bulk` without being printed). `/api/playlists` now uses the owner token (read-only scopes above) to get track counts; the app token is only a fallback.
-- [x] Google Health owner OAuth (`/api/health/authorize`, `/api/health/callback`, live 2026-09-30): gated by `HEALTH_AUTH_KEY` with a constant-time compare (S-07 fix applied to this route only), single-use `health_oauth_state:` KV state with 10-minute TTL, fixed-message callback, read-only scope `googlehealth.health_metrics_and_measurements.readonly`. `/api/heart-rate` takes no input, 60 s versioned cache, generic 502. Heart-rate readings are personal health data shown publicly by design (Milind's choice); only the latest single reading is exposed, never history.
+- [x] Google Health owner OAuth (`/api/health/authorize`, `/api/health/callback`, live 2026-09-30): gated by `HEALTH_AUTH_KEY` with a constant-time compare (S-07 fix applied to this route only), single-use `health_oauth_state:` KV state with 10-minute TTL, fixed-message callback, read-only scope `googlehealth.health_metrics_and_measurements.readonly`. `/api/heart-rate` takes no input, 30 s versioned cache, generic 502. Google OAuth app is In production but unverified (100-user cap, single owner user), with only this one restricted scope on its consent screen (six unused health scopes removed 2026-09-30). Heart-rate readings are personal health data shown publicly by design (Milind's choice); only the latest single reading is exposed, never history.
 - [x] Empty queries rejected with 400; sample `mode` restricted to an allow-list (`vocals`, `melody`).
 - [x] User input passed to upstream URLs via `encodeURIComponent` / `URLSearchParams`.
 - [x] Upstream error text truncated to 200 characters.
 - [x] Edge caching on every read endpoint (5 min to 1 hr) limits upstream quota burn.
 - [x] Audio Range header parsed strictly by regex; invalid ranges return 416.
 - [x] Ticketmaster queries bounded to future dates; tribute acts filtered.
+- [x] Gig Finder (2026-09-30): events fetched only for the artist's exact Ticketmaster attraction; MusicBrainz called with an identifying User-Agent and ≤ 1 req/s, results cached in `GIG_KV` (`gig_artist:v2:*`, 30 days) with at most 6 cold lookups per run to stay within the subrequest limit; `/api/gigs` uses a fixed versioned cache key. Image and ticket URLs from Ticketmaster are accepted only if `https://`, and the frontend escapes them and re-checks the scheme before rendering.
+- [x] Privacy page at `/privacy` (required for the Google consent screen); its claims — no cookies, no analytics/trackers — were checked against `public/` and the Worker on 2026-09-30. Keep it accurate if either changes.
 
 ## 3. Cloudflare zone baseline (verify in dashboard)
 
@@ -46,7 +48,10 @@ Covers the `portfolio` Worker on milindparwani.com, its static assets, the `GIG_
 - [ ] Cloudflare Managed Ruleset (free tier) active.
 - [ ] Bot Fight Mode on.
 - [ ] Rate limiting rule on `/api/*` (e.g. 30 requests / 10 s per IP → block for 1 min).
-- [ ] `/api/spotify/*` restricted (WAF rule or Cloudflare Access) so only the owner can reach it.
+- [ ] `/api/spotify/*` and `/api/health/authorize|callback` restricted (WAF rule or Cloudflare Access) so only the owner can reach them.
+
+**Workers Builds**
+- [ ] Non-production branch command set to `npx wrangler versions upload` (as of 2026-09-30 it was `npx wrangler deploy`, so any pushed branch went live).
 
 **Response headers (Transform Rule or in the Worker)**
 - [ ] `Content-Security-Policy` limiting scripts, fonts and media to self + Google Fonts.
@@ -62,10 +67,10 @@ Covers the `portfolio` Worker on milindparwani.com, its static assets, the `GIG_
 |---|---|---|---|
 | S-02 | Medium | No security headers set by the Worker (CSP, nosniff, frame, referrer). | Add a `withSecurityHeaders()` wrapper on every response, or a Transform Rule (section 3). |
 | S-03 | Medium | No rate limiting on `/api/*`. Cache keys include the full URL, so varying `q` bypasses cache and burns Spotify, Freesound and Ticketmaster quotas. (2026-09-30: `/api/gigs` and the listening/heart-rate routes now use fixed cache keys; `bpm-lookup`, `audio-features`, `sample-search` still don't, and there's still no rate limit.) | WAF rate-limit rule; also normalise cache keys (lowercase, trimmed `q`, drop unknown params). |
-| S-04 | Medium | Raw upstream error messages returned to clients in 502 JSON (leaks provider names, status codes). | Log detail with `console.error`; return a generic `{"error":"Upstream unavailable"}`. |
+| S-04 | Medium | Raw upstream error messages returned to clients in 502 JSON (leaks provider names, status codes). (2026-09-30: the listening and heart-rate routes already return a generic error; `news`, `bpm-lookup`, `audio-features`, `sample-search` and `gigs` still return `err.message`.) | Log detail with `console.error`; return a generic `{"error":"Upstream unavailable"}`. |
 | S-05 | Low | `bpm_min` / `bpm_max` concatenated into the Freesound filter unvalidated (filter injection). | Parse as integers, clamp 40–250, reject otherwise. |
 | S-06 | Low | `q` has no length limit. | Reject over 100 characters with 400. |
-| S-07 | Low | `SPOTIFY_AUTH_KEY` passed in the query string (can appear in logs and history); compared with `!==`. | Move behind Cloudflare Access, or send as a header and compare in constant time. |
+| S-07 | Low | `SPOTIFY_AUTH_KEY` passed in the query string (can appear in logs and history); compared with `!==`. (2026-09-30: `/api/health/authorize` uses a constant-time compare via `ownerKeyMatches`; the Spotify route doesn't yet, and both keys still travel in the query string.) | Move behind Cloudflare Access, or send as a header and compare in constant time. |
 | S-08 | Low | Range requests buffer the whole audio file in Worker memory (128 MB limit). | Move audio to R2 and use its native range support, or cap file size. |
 | S-09 | Low | No explicit CORS policy on `/api/*`. | Add `Access-Control-Allow-Origin: https://milindparwani.com` only if cross-origin use is ever needed; otherwise leave closed and document it. |
 | S-10 | Resolved 2026-09-23 | `.claude/settings.local.json` was tracked in git and contained a live TwelveData API key in plaintext (from ad-hoc, never-shipped Stock Compare testing). | Fixed in PR #2 (`dd02851`): key removed, file untracked, added to `.gitignore`. Milind regenerated the key at TwelveData the same day — old key confirmed unused/not found by anyone before rotation, now fully invalid regardless of who sees the git history. Not scrubbed from the initial commit's history (decided not worth the force-push + PR #1 rebase since the key itself is dead). |
@@ -74,7 +79,7 @@ When a finding is fixed: move it to section 2 as a ticked item, note the date an
 
 ## 5. Rules for any new endpoint
 
-- [ ] Keys go in `wrangler secret put`, never in code, `wrangler.toml`/`wrangler.jsonc`, or any file committed to the repo (including `.claude/settings.local.json` — see S-10).
+- [ ] Keys go in Worker secrets (`wrangler secret bulk <file.json>` from a temp file, then delete it — piping into `wrangler secret put` from Windows PowerShell 5.1 stored a corrupted value), never in code, `wrangler.toml`/`wrangler.jsonc`, or any file committed to the repo (including `.claude/settings.local.json` — see S-10).
 - [ ] Fail closed: missing secret → 503; bad input → 400; never a stack trace.
 - [ ] Validate every param: type, length, range, allow-list.
 - [ ] Escape anything written into HTML; prefer JSON responses.
@@ -88,5 +93,6 @@ When a finding is fixed: move it to section 2 as a ticked item, note the date an
 
 1. Key leaked or abused: rotate at the provider, then `wrangler secret put` the new value and redeploy.
 2. Spotify token compromised: revoke app access in Spotify settings, delete `spotify_refresh_token` from `GIG_KV`, re-run owner authorise.
-3. Traffic spike: enable Under Attack mode, tighten the `/api/*` rate limit, check Worker logs.
-4. Record what happened and the fix in the Handoff session log.
+3. Google Health token compromised: remove the app's access at myaccount.google.com → Security → Third-party apps, delete `health_refresh_token` from `GIG_KV`, rotate `GOOGLE_HEALTH_CLIENT_SECRET` in Google Cloud and `HEALTH_AUTH_KEY` (both via `wrangler secret bulk`), re-run `/api/health/authorize`.
+4. Traffic spike: enable Under Attack mode, tighten the `/api/*` rate limit, check Worker logs.
+5. Record what happened and the fix in the Handoff session log.
