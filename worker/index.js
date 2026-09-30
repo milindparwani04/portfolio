@@ -511,7 +511,7 @@ async function refreshSpotifyUserAccessToken(env) {
 const GOOGLE_HEALTH_API_BASE = 'https://health.googleapis.com/v4';
 const GOOGLE_HEALTH_REDIRECT_URI = 'https://milindparwani.com/api/health/callback';
 const GOOGLE_HEALTH_SCOPE = 'https://www.googleapis.com/auth/googlehealth.health_metrics_and_measurements.readonly';
-const HEART_RATE_CACHE_TTL_SECONDS = 60;
+const HEART_RATE_CACHE_TTL_SECONDS = 30;
 // The Air only uploads when it syncs with the phone app; anything older than this is shown as
 // "no recent reading" rather than a stale number.
 const HEART_RATE_LOOKBACK_MS = 24 * 60 * 60 * 1000;

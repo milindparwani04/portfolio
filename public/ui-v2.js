@@ -329,7 +329,7 @@
     const cover = byId('v2NowCover');
     if (!title || !state || !cover) return;
     try {
-      const response = await fetch('/api/now-playing');
+      const response = await fetch('/api/now-playing', { cache: 'no-store' });
       if (!response.ok) throw new Error('Now-playing request failed');
       const payload = await response.json();
       const track = payload.track;
@@ -446,29 +446,41 @@
   // the tracker syncs with the phone, so the foot always says how old the reading is.
   const MOTION_LABELS = { SEDENTARY: 'At rest', ACTIVE: 'Active' };
 
+  let heartReading = null;
+
+  // Re-rendered on every tick, so "4m ago" keeps counting between new readings.
+  function renderHeartFoot() {
+    const foot = byId('v2HeartFoot');
+    if (!foot || !heartReading) return;
+    const parts = ['Latest reading'];
+    const age = heartReading.sampledAt ? timeAgo(heartReading.sampledAt) : '';
+    if (age) parts.push(age);
+    if (MOTION_LABELS[heartReading.motion]) parts.push(MOTION_LABELS[heartReading.motion]);
+    foot.textContent = parts.join(' / ');
+  }
+
   async function loadHeartRate() {
     const value = byId('v2HeartValue');
     const foot = byId('v2HeartFoot');
     if (!value || !foot) return;
     try {
-      const response = await fetch('/api/heart-rate');
+      // no-store: the browser's HTTP cache otherwise answered every poll with the first reading.
+      // The Worker's own edge cache still limits calls to Google.
+      const response = await fetch('/api/heart-rate', { cache: 'no-store' });
       if (!response.ok) throw new Error('Heart-rate request failed');
       const payload = await response.json();
       if (!Number.isFinite(payload.bpm)) {
-        foot.textContent = 'No reading in the last 24 h';
+        if (!heartReading) foot.textContent = 'No reading in the last 24 h';
         return;
       }
+      heartReading = payload;
       const unit = document.createElement('small');
       unit.textContent = ' BPM';
       value.replaceChildren(String(payload.bpm), unit);
       value.classList.remove('v2-placeholder');
-      const parts = ['Latest reading'];
-      const age = payload.sampledAt ? timeAgo(payload.sampledAt) : '';
-      if (age) parts.push(age);
-      if (MOTION_LABELS[payload.motion]) parts.push(MOTION_LABELS[payload.motion]);
-      foot.textContent = parts.join(' / ');
+      renderHeartFoot();
     } catch (_) {
-      // Keep whatever is showing.
+      renderHeartFoot();
     }
   }
 

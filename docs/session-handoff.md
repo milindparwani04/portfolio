@@ -95,6 +95,16 @@ Next session starts with:
 - ...
 ```
 
+### 2026-09-30 — Heart rate updates without a page reload
+Model: Opus
+Phase: 1 of 1
+Done:
+- Found (Chrome, production) that the 30 s polls for `/api/heart-rate` were all answered from the browser's HTTP cache (`max-age` header), so the card only changed on reload. Polls for heart rate and now-playing now use `fetch(..., { cache: 'no-store' })`; the Worker's edge cache still rate-limits calls to Google/Spotify. Heart-rate edge TTL 60 → 30 s. The "Xm ago" label re-renders on every tick.
+Tested (how, result):
+- Mock server sending production's `Cache-Control: public, max-age=30` and a new bpm per request: value changed on screen after 30 s without reload (62 → 63 BPM), 0 of 2 polls served from browser cache.
+Known issues / not done:
+- Readings only reach Google when the phone app syncs with the tracker; nothing server-side can force that. See the phone settings advice given to Milind (background app refresh, don't force-quit the app).
+
 ### 2026-09-30 — Gig Finder: real artists only, artist photos, top-artist covers
 Model: Opus
 Phase: 1 of 1
