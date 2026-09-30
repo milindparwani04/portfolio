@@ -61,7 +61,7 @@ Covers the `portfolio` Worker on milindparwani.com, its static assets, the `GIG_
 | ID | Severity | Finding | Fix |
 |---|---|---|---|
 | S-02 | Medium | No security headers set by the Worker (CSP, nosniff, frame, referrer). | Add a `withSecurityHeaders()` wrapper on every response, or a Transform Rule (section 3). |
-| S-03 | Medium | No rate limiting on `/api/*`. Cache keys include the full URL, so varying `q` bypasses cache and burns Spotify, Freesound and Ticketmaster quotas. | WAF rate-limit rule; also normalise cache keys (lowercase, trimmed `q`, drop unknown params). |
+| S-03 | Medium | No rate limiting on `/api/*`. Cache keys include the full URL, so varying `q` bypasses cache and burns Spotify, Freesound and Ticketmaster quotas. (2026-09-30: `/api/gigs` and the listening/heart-rate routes now use fixed cache keys; `bpm-lookup`, `audio-features`, `sample-search` still don't, and there's still no rate limit.) | WAF rate-limit rule; also normalise cache keys (lowercase, trimmed `q`, drop unknown params). |
 | S-04 | Medium | Raw upstream error messages returned to clients in 502 JSON (leaks provider names, status codes). | Log detail with `console.error`; return a generic `{"error":"Upstream unavailable"}`. |
 | S-05 | Low | `bpm_min` / `bpm_max` concatenated into the Freesound filter unvalidated (filter injection). | Parse as integers, clamp 40–250, reject otherwise. |
 | S-06 | Low | `q` has no length limit. | Reject over 100 characters with 400. |

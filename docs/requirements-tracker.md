@@ -43,7 +43,7 @@ An item only moves to `Live` after the Definition of Done in the [Rulebook](agen
 | SC-05 | Gig Finder (REF. 05) | Five event cards per batch, manual controls, 10-second countdown with progress bar, hover/focus pauses rotation; footer with Back to top | Built |
 | MP-01 | Local music player | Removed from the visible experience; Spotify empty state and playlists replace local MP3 playback | Dropped |
 | MP-02 | Parametric EQ | Removed with the local music player | Dropped |
-| MP-03 | Gigs | Upcoming shows via `/api/gigs`, displayed five at a time with fallback data | Built |
+| MP-03 | Gigs | Upcoming shows via `/api/gigs`, displayed five at a time with fallback data. Only the real artist's shows: each artist resolved to their exact Ticketmaster attraction, dead/disbanded acts excluded via MusicBrainz, tribute-style titles filtered. Cards show the artist's Ticketmaster photo and link to the ticket page | Built — verified against real data via `wrangler dev --remote` 2026-09-30, awaiting deploy |
 
 ## Projects
 

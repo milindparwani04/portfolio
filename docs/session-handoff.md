@@ -95,6 +95,19 @@ Next session starts with:
 - ...
 ```
 
+### 2026-09-30 — Gig Finder: real artists only, artist photos, top-artist covers
+Model: Opus
+Phase: 1 of 1
+Done:
+- Top artists (play log) now show the album cover from each artist's latest play (`fix/artist-images`, `LISTENING_CACHE_VERSION` 3).
+- Gig Finder: Ticketmaster keyword search matched tributes, venue names and unrelated titles (live feed had Frank Sinatra, Fleetwood Mac, Daft Punk, INXS, Queen at an opera house, Drake at "The Drake Hotel", "salute"). Now: exact-name Ticketmaster attraction → only that attraction's events; MusicBrainz top match with `life-span.ended` excludes dead/disbanded acts (replaces the hard-coded list as the main check); wider tribute-title pattern, applied with the artist's own name removed. Per-artist results cached in `GIG_KV` (`gig_artist:v2:*`, 30 days); at most 6 uncached lookups per run (subrequest budget + MusicBrainz 1 req/s). Cards use the artist's Ticketmaster photo (listing image as fallback) and link to the ticket page. `/api/gigs` cache key is now fixed and versioned (`gigs-v2`).
+Tested (how, result):
+- `wrangler dev --remote` (real secrets/KV): after warming the cache, gigs = Maroon 5, Bruno Mars, Barry Can't Swim, The Weeknd, Disclosure, Post Malone, Calvin Harris, Tame Impala — all real headline shows with images and ticket URLs; every false entry gone (KV shows why: ended, no exact attraction, or no upcoming events). Chrome: cards render artist photos, links go to Ticketmaster/Moshtix, no console errors.
+- Queen: MusicBrainz's top "Queen" is marked ended (Queen + Adam Lambert is a separate act) — only matters if Ticketmaster lists a "Queen" attraction with upcoming events.
+Known issues / not done:
+- Visitors' browsers may hold the old `/api/gigs` response up to 1 h (`max-age=3600`); the edge cache is retired by the new key.
+- Old `gig_artist:v1:*` KV entries from testing expire on their own within 30 days.
+
 ### 2026-09-30 — Heart rate live
 Model: Opus
 Phase: 4 of 4

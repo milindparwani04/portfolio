@@ -236,13 +236,20 @@
     let batch = gigs.slice(gigBatch * 5, gigBatch * 5 + 5);
     if (batch.length < 5) batch = batch.concat(gigs.slice(0, 5 - batch.length));
     list.innerHTML = batch.map((gig, index) => {
-      const search = encodeURIComponent(`${gig.artist} ${gig.venue} tickets`);
+      // Ticketmaster listing photo and ticket page when the API has them; stock art and a
+      // search link otherwise (fallback data, or listings without images).
+      const listingImage = /^https:\/\//.test(gig.image || '') ? gig.image : '';
+      const image = listingImage || gigImages[index];
+      const alt = listingImage ? `${gig.artist} performing` : 'Illustrative concert venue atmosphere';
+      const link = /^https:\/\//.test(gig.url || '')
+        ? gig.url
+        : `https://www.google.com/search?q=${encodeURIComponent(`${gig.artist} ${gig.venue} tickets`)}`;
       return `<article class="v2-panel v2-gig">
         <div class="v2-index-row"><span>${String(index + 1).padStart(2, '0')}</span><span class="v2-tag">[ Event ]</span></div>
-        <img src="${gigImages[index]}" alt="Illustrative concert venue atmosphere" loading="lazy" decoding="async">
+        <img src="${escapeHtml(image)}" alt="${escapeHtml(alt)}" loading="lazy" decoding="async">
         <h3>${escapeHtml(gig.artist)}</h3>
         <p>${escapeHtml(gig.venue)}</p><p>${escapeHtml(formatGigDate(gig.date))}</p>
-        <a href="https://www.google.com/search?q=${search}" target="_blank" rel="noopener noreferrer">Open details &#8599;</a>
+        <a href="${escapeHtml(link)}" target="_blank" rel="noopener noreferrer">Open details &#8599;</a>
       </article>`;
     }).join('');
     byId('v2GigBatch').textContent = `Batch ${String(gigBatch + 1).padStart(2, '0')} of ${String(batchCount).padStart(2, '0')}`;

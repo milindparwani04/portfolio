@@ -641,46 +641,129 @@ async function handleHeartRate(env, ctx) {
 // self-serve API key, instant approval, actively maintained. Returns the soonest upcoming show
 // for one artist, or null if none found — most artists in a top-artists list aren't touring
 // right now, that's normal, not an error.
-// Keyword search matches tribute acts as readily as the real artist (seen live: "Michael
-// Jackson" surfaced "MJ LIVE – Michael Jackson Tribute Concert", "Fleetwood Mac" surfaced
-// "Rumours of Fleetwood Mac" with classification subType "Tribute Band"). Ticketmaster doesn't
-// expose an "is this the real artist" flag, so this is a heuristic, not exact — but "tribute" /
-// "impersonator" reliably shows up in the event name, attraction name, or subType across every
-// case seen so far, and real headline events (checked against "Bruno Mars") never false-positive.
-const TRIBUTE_PATTERN = /tribute|impersonat/i;
-function isTributeEvent(ev) {
-  if (TRIBUTE_PATTERN.test(ev.name || '')) return true;
+// Keyword search was far too loose: it matched tribute acts ("Rumours of Fleetwood Mac"),
+// venue names ("Drake" -> The Drake Hotel) and unrelated titles ("salute"). So each artist is
+// first resolved to their own Ticketmaster *attraction* by exact name, and only events booked for
+// that attraction are considered — tribute bands have their own attraction IDs. Shows that still
+// tag the real attraction (candlelight concerts, "The Music of …", orchestral nights) are caught
+// by the title pattern below, tested with the artist's own name removed so an artist whose name
+// happens to match (e.g. "Salute") isn't excluded. Heuristic, not exact — but seen live, the
+// remaining false positives all carried one of these words.
+const TRIBUTE_PATTERN = /tribute|impersonat|candlelight|hommage|homenaje|homage|\bmusic of\b|\bsongs of\b|\bcelebrat|\blegacy\b|\bexperience\b|\bsalute\b|\bsound of\b|\bstory of\b|\bsymphon|\borchestra|\bthe musical\b|\bnight of\b/i;
+const TICKETMASTER_API_BASE = 'https://app.ticketmaster.com/discovery/v2';
+const MUSICBRAINZ_API_BASE = 'https://musicbrainz.org/ws/2';
+// MusicBrainz asks for an identifying User-Agent and at most ~1 request/second.
+const MUSICBRAINZ_USER_AGENT = 'PARWANI-site/1.0 ( https://milindparwani.com )';
+const GIG_ARTIST_CACHE_PREFIX = 'gig_artist:v2:';
+const GIG_ARTIST_CACHE_TTL_SECONDS = 30 * 24 * 60 * 60;
+// Each uncached artist costs two subrequests (Ticketmaster attraction + MusicBrainz) plus a 1.1 s
+// MusicBrainz pause; capping per run keeps a cold cache under the 50-subrequest limit. Uncached
+// artists beyond the cap are skipped this hour and resolved on later runs.
+const GIG_MAX_RESOLVES_PER_RUN = 6;
+
+function normalizeArtistName(name) {
+  return String(name || '').toLowerCase().normalize('NFKD').replace(/[̀-ͯ]/g, '')
+    .replace(/&/g, 'and').replace(/[^a-z0-9]+/g, ' ').trim();
+}
+
+function isTributeEvent(ev, artistName) {
+  const title = normalizeArtistName(ev.name);
+  const ownName = normalizeArtistName(artistName);
+  const titleWithoutArtist = ownName ? title.split(ownName).join(' ') : title;
+  if (TRIBUTE_PATTERN.test(titleWithoutArtist)) return true;
   const cls = ev.classifications && ev.classifications[0];
   if (cls && TRIBUTE_PATTERN.test((cls.subType && cls.subType.name) || '')) return true;
   const attractions = (ev._embedded && ev._embedded.attractions) || [];
-  return attractions.some(a => TRIBUTE_PATTERN.test(a.name || ''));
+  return attractions.some(a => /tribute|impersonat/i.test(a.name || ''));
 }
 
-async function fetchTicketmasterSoonestShow(artistName, env) {
+// Ticketmaster images carry ratio/width and a `fallback` flag for generic placeholders. The gig
+// card crops to roughly square, so prefer 4:3, then 3:2, then 16:9, at the smallest width >= 500.
+function pickTicketmasterImage(images) {
+  const real = (images || []).filter(img => img && img.url && !img.fallback && img.url.startsWith('https://'));
+  for (const ratio of ['4_3', '3_2', '16_9']) {
+    const sized = real.filter(img => img.ratio === ratio).sort((a, b) => (a.width || 0) - (b.width || 0));
+    const pick = sized.find(img => (img.width || 0) >= 500) || sized[sized.length - 1];
+    if (pick) return pick.url;
+  }
+  return real.length ? real[0].url : null;
+}
+
+// Returns { attractionId, upcoming, image, ended } for an artist. `ended` is true when MusicBrainz
+// lists the artist's life-span as ended (person died / group dissolved). Cached in KV by caller.
+async function resolveGigArtist(artistName, env) {
+  const params = new URLSearchParams({
+    keyword: artistName,
+    classificationName: 'music',
+    size: '10',
+    apikey: env.TICKETMASTER_API_KEY,
+  });
+  const res = await fetch(`${TICKETMASTER_API_BASE}/attractions.json?${params}`, { signal: AbortSignal.timeout(SPOTIFY_TIMEOUT_MS) });
+  if (!res.ok) throw new Error(`Ticketmaster attractions returned ${res.status}`);
+  const data = await res.json();
+  const target = normalizeArtistName(artistName);
+  const matches = ((data._embedded && data._embedded.attractions) || [])
+    .filter(a => normalizeArtistName(a.name) === target)
+    .sort((a, b) => ((b.upcomingEvents && b.upcomingEvents._total) || 0) - ((a.upcomingEvents && a.upcomingEvents._total) || 0));
+  const attraction = matches[0];
+
+  let ended = false;
+  try {
+    const mbParams = new URLSearchParams({ query: `artist:"${artistName.replace(/"/g, '')}"`, limit: '5', fmt: 'json' });
+    const mbRes = await fetch(`${MUSICBRAINZ_API_BASE}/artist?${mbParams}`, {
+      headers: { 'User-Agent': MUSICBRAINZ_USER_AGENT, Accept: 'application/json' },
+      signal: AbortSignal.timeout(SPOTIFY_TIMEOUT_MS),
+    });
+    if (mbRes.ok) {
+      const mb = await mbRes.json();
+      // Only trust the top-ranked result: several artists can share a name (MusicBrainz has
+      // multiple "Queen"s, some ended), and the most relevant one is the famous act.
+      const top = (mb.artists || [])[0];
+      const hit = top && top.score === 100 && normalizeArtistName(top.name) === target ? top : null;
+      ended = Boolean(hit && hit['life-span'] && hit['life-span'].ended);
+    }
+  } catch (err) {
+    console.error('MusicBrainz lookup failed', { artist: artistName, message: err.message });
+  }
+
+  return {
+    attractionId: attraction ? attraction.id : null,
+    upcoming: attraction ? (attraction.upcomingEvents && attraction.upcomingEvents._total) || 0 : 0,
+    image: attraction ? pickTicketmasterImage(attraction.images) : null,
+    ended,
+  };
+}
+
+// Soonest real show for a resolved attraction, or null. Most artists aren't touring — not an error.
+async function fetchTicketmasterSoonestShow(artistName, attraction, env) {
   try {
     const params = new URLSearchParams({
-      keyword: artistName,
-      classificationName: 'music',
+      attractionId: attraction.attractionId,
       sort: 'date,asc',
-      size: '5',
-      // Without a lower bound, Ticketmaster's index can surface stale/past-dated listings
-      // (seen live: a "Michael Jackson" event dated in the past) even sorted ascending —
-      // explicitly exclude anything before right now.
+      size: '10',
+      // Without a lower bound Ticketmaster can surface past-dated listings even sorted ascending.
       startDateTime: new Date().toISOString().split('.')[0] + 'Z',
       apikey: env.TICKETMASTER_API_KEY,
     });
-    const res = await fetch(`https://app.ticketmaster.com/discovery/v2/events.json?${params.toString()}`);
+    const res = await fetch(`${TICKETMASTER_API_BASE}/events.json?${params}`, { signal: AbortSignal.timeout(SPOTIFY_TIMEOUT_MS) });
     if (!res.ok) return null;
     const data = await res.json();
     const events = (data._embedded && data._embedded.events) || [];
-    const ev = events.find(e => !isTributeEvent(e));
+    const ev = events.find(e => !isTributeEvent(e, artistName));
     if (!ev) return null;
 
     const localDate = ev.dates && ev.dates.start && ev.dates.start.localDate;
     const venueObj = ev._embedded && ev._embedded.venues && ev._embedded.venues[0];
     const venueLabel = venueObj && [venueObj.name, venueObj.city && venueObj.city.name].filter(Boolean).join(', ');
     if (!localDate || !venueLabel) return null;
-    return { venue: venueLabel, date: localDate };
+    // Prefer the artist's own Ticketmaster photo: event listing images are often festival
+    // posters or venue shots (seen live: a racetrack for a show at an F1 circuit).
+    return {
+      venue: venueLabel,
+      date: localDate,
+      image: attraction.image || pickTicketmasterImage(ev.images),
+      url: typeof ev.url === 'string' && ev.url.startsWith('https://') ? ev.url : null,
+    };
   } catch {
     return null;
   }
@@ -702,8 +785,10 @@ async function handleGigs(request, env, ctx) {
     });
   }
 
+  // Fixed, versioned key: query strings can't bypass the cache (S-03), and bumping the version
+  // retires a cached response when the gig logic changes (v2: attraction-verified artists).
   const cache = caches.default;
-  const cacheKey = new Request(new URL(request.url).toString(), request);
+  const cacheKey = new Request('https://milindparwani.com/__cache/gigs-v2');
   const cached = await cache.match(cacheKey);
   if (cached) return cached;
 
@@ -735,9 +820,31 @@ async function handleGigs(request, env, ctx) {
       if (pool.length >= GIG_POOL_MAX) break;
     }
 
+    // Resolve each artist to a Ticketmaster attraction + MusicBrainz status (KV-cached 30 days).
+    // Uncached lookups run one at a time with a pause, per MusicBrainz's rate limit.
+    const resolved = new Map();
+    let resolvesLeft = GIG_MAX_RESOLVES_PER_RUN;
+    for (const artist of pool) {
+      const kvKey = GIG_ARTIST_CACHE_PREFIX + normalizeArtistName(artist);
+      const cachedArtist = await env.GIG_KV.get(kvKey, 'json');
+      if (cachedArtist) { resolved.set(artist, cachedArtist); continue; }
+      if (resolvesLeft <= 0) continue;
+      resolvesLeft -= 1;
+      try {
+        const info = await resolveGigArtist(artist, env);
+        resolved.set(artist, info);
+        ctx.waitUntil(env.GIG_KV.put(kvKey, JSON.stringify(info), { expirationTtl: GIG_ARTIST_CACHE_TTL_SECONDS }));
+      } catch (err) {
+        console.error('gig artist resolve failed', { artist, message: err.message });
+      }
+      if (resolvesLeft > 0) await new Promise(r => setTimeout(r, 1100));
+    }
+
     const withShows = await Promise.all(pool.map(async artist => {
-      const show = await fetchTicketmasterSoonestShow(artist, env);
-      return show ? { artist, venue: show.venue, date: show.date } : null;
+      const info = resolved.get(artist);
+      if (!info || !info.attractionId || info.ended || !info.upcoming) return null;
+      const show = await fetchTicketmasterSoonestShow(artist, info, env);
+      return show ? { artist, venue: show.venue, date: show.date, image: show.image, url: show.url } : null;
     }));
     const gigs = withShows.filter(Boolean).sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
 
