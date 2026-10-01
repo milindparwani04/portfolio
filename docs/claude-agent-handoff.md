@@ -12,20 +12,20 @@
 
 ## Current assignment
 
-Status: **Idle — awaiting Milind's next Claude assignment.** Last delivered: grey-box UI rebuild, fit-to-box titles and eased section scrolling (all live, 2026-10-01).
+Status: **Idle — awaiting Milind's next Claude assignment.** Last delivered: feed-style section scrolling (live, 2026-10-01).
 
 Areas Claude has most recently owned (coordinate before Codex changes these):
 
 | Area | Files | Notes |
 |---|---|---|
-| Visible portfolio UI | `public/index.html` (the `.portfolio-v2` block only), `public/ui-v2.css`, `public/ui-v2.js` | Grey-box design from the Soft Monolith mockups. Cache-bust versions at last push: `ui-v2.css?v=15`, `ui-v2.js?v=13` — bump on every change. |
+| Visible portfolio UI | `public/index.html` (the `.portfolio-v2` block only), `public/ui-v2.css`, `public/ui-v2.js` | Grey-box design from the Soft Monolith mockups. Cache-bust versions: `ui-v2.css?v=16`, `ui-v2.js?v=14` — bump on every change. |
 | Worker routes and data | `worker/index.js`, `migrations/` | Spotify listening data, heart rate, gigs (2026-09-30). Unchanged on 2026-10-01. |
 
 ## How the current UI works (for the next Claude session)
 
 - **Home dashboard:** a single grid with named areas (`.v2-dashboard`), columns `1.72fr 1fr .72fr .24fr 1.02fr`, rows `1fr 1.25fr .5fr`. Every cell is min-size 0 and clips its own content, so cards cannot overlap. The time and weather cards use container queries (`container-type: size`, `cqh` units) to size their content from the card itself; the weather card hides humidity/wind below 175 px tall.
 - **Title fitting:** `fitText()` in `ui-v2.js` handles any element with `data-fit="1|2"` (line budget) and optional `data-fit-max` (extra lines allowed). It shrinks the font from the CSS size down to 70% within the budget, then for `data-fit-max` down to 55% with more lines. Lines are counted from `range.getClientRects()`, because Anton's tall glyphs make `scrollHeight` checks wrongly report overflow. Call `fitText(el)` after changing any fitted title's text; it also re-runs on resize and when fonts load. The headline and portfolio title keep their own fitters (`fitHeadline`, `fitPortfolioTitle`).
-- **Section paging:** `initSectionPager()` is active at ≥721 × ≥620 px. Each move is a requestAnimationFrame scroll (ease-in-out quint, 900 ms) with `scroll-snap-type` switched off on `<html>` while it runs and restored when it lands. Wheel (one move per gesture, 180 ms gesture window, 400 ms landing cooldown), keys and in-page `#v2-*` links all go through `goTo()`. With reduced motion it jumps instantly. Phones scroll continuously.
+- **Section paging:** `initSectionPager()` is active at ≥721 × ≥620 px. Each move is a critically damped spring (`OMEGA = 14`, 4 substeps per frame, ~0.6 s settle) driven by requestAnimationFrame, with `scroll-snap-type` switched off on `<html>` while it runs and restored when it lands. A move in flight is retargeted, not queued: the next step counts from `targetIndex`. Jumps of 2+ sections add `html.v2-jump-out` (sections fade to 0 over 150 ms), teleport to the target's neighbour, then fade in while the spring finishes. Wheel: a new gesture is a 200 ms pause, a direction change, or a delta >1.6× the previous one (>20 px, ≥250 ms since the last step), so a swipe during momentum counts but one flick or a fast wheel spin moves once; `deltaMode` lines/pages are normalised. Held keys step once per landing. A touch or scrollbar press mid-move stops the spring. Wheel, keys and in-page `#v2-*` links all go through `goTo()`. With reduced motion it jumps instantly. Phones scroll continuously.
 - **Empty and failure states:** gigs show "No upcoming gigs to show right now" (there is no invented fallback list — Rulebook §2.4); covers stay as grey squares until a real image loads; the listening rows read "Awaiting listening data".
 - **Phones (≤720 px):** two-column dashboard with fixed row heights; small print set to 12 px (Lighthouse legible-font-size).
 
@@ -45,6 +45,12 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 - Lighthouse `valid-source-maps` flags a third-party library map; it doesn't affect the score categories that matter (production: 90 / 100 / 100).
 
 ## Work log (newest first)
+
+### 2026-10-01 — Feed-style section scrolling (live)
+
+- Milind: scrolling felt clunky; wanted TikTok/Instagram-smooth section moves and seamless nav jumps. Causes found: ease-in-out quint barely moves for the first ~150 ms (feels laggy), any input during the 0.9 s move plus a 400 ms landing cooldown was dropped, and nav jumps scrolled through every section in between.
+- Replaced with the spring + retarget + fade-jump described above. Also fixed Firefox line-mode wheel deltas (3 lines read as <4 px and were ignored).
+- Tested in headless Edge (puppeteer-core in scratchpad) at 1920×969 and 1280×720: trackpad flick with 50-event momentum moves one section and restores snap; motion monotonic, moving from the first frame; a second swipe during coasting adds a section; a 12-notch fast wheel spin moves one; two notches 300 ms apart move two; nav Home→Gigs lands exactly with one hidden teleport and opacity restored; adjacent nav click springs without fade; three quick ArrowUp presses move three; hash follows; no page errors. Reduced motion jumps instantly at 1440×789; wheel not intercepted at 390×844. 24/24 pass.
 
 ### 2026-10-01 — Two-agent docs split
 

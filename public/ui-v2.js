@@ -553,9 +553,6 @@
     const paging = window.matchMedia('(min-width: 721px) and (min-height: 620px)');
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     const navLinks = Array.from(document.querySelectorAll('.v2-links a'));
-    let moving = false;
-    let quietUntil = 0;
-    let landedAt = 0;
     const root = document.documentElement;
 
     function currentIndex() {
@@ -568,42 +565,97 @@
       return best;
     }
 
-    // Eased scroll (ease-in-out quint over ~0.9 s) driven by requestAnimationFrame. Scroll-snap
-    // is switched off while it runs so the browser doesn't snap mid-animation, then restored.
-    const SCROLL_MS = 900;
-    const ease = (t) => (t < .5 ? 16 * t ** 5 : 1 - ((-2 * t + 2) ** 5) / 2);
+    // Moves are driven by a critically damped spring rather than a fixed-length easing curve:
+    // it responds on the first frame, settles softly (~0.6 s) and, when a new gesture arrives
+    // mid-move, retargets from the current position and velocity instead of waiting or jumping.
+    // Scroll-snap is switched off while the spring runs so the browser doesn't fight it.
+    const OMEGA = 14;
+    let animating = false;
+    let jumping = false;
+    let targetIndex = 0;
+    let targetY = 0;
+    let position = 0;
+    let velocity = 0;
+    let lastFrame = 0;
     let animationFrame = 0;
 
-    function goTo(index) {
-      const target = sections[Math.max(0, Math.min(sections.length - 1, index))];
-      if (!target || target === sections[currentIndex()]) return;
-      const from = window.scrollY;
-      const to = target.getBoundingClientRect().top + from;
-      moving = true;
-      window.cancelAnimationFrame(animationFrame);
-      if (reduceMotion.matches) {
-        window.scrollTo({ top: to, behavior: 'instant' });
-        release();
+    const sectionTop = (section) => Math.round(section.getBoundingClientRect().top + window.scrollY);
+    const clampIndex = (index) => Math.max(0, Math.min(sections.length - 1, index));
+    // While a move is in flight, the next step counts from where it is heading, not where it is.
+    const baseIndex = () => (animating || jumping ? targetIndex : currentIndex());
+
+    function step(now) {
+      const dt = Math.min(.034, (now - lastFrame) / 1000);
+      lastFrame = now;
+      for (let i = 0; i < 4; i += 1) {
+        const h = dt / 4;
+        velocity += (OMEGA * OMEGA * (targetY - position) - 2 * OMEGA * velocity) * h;
+        position += velocity * h;
+      }
+      if (Math.abs(targetY - position) < .5 && Math.abs(velocity) < 30) {
+        window.scrollTo({ top: targetY, behavior: 'instant' });
+        stop();
         return;
       }
-      root.style.scrollSnapType = 'none';
-      const start = performance.now();
-      const step = (now) => {
-        const t = Math.min(1, (now - start) / SCROLL_MS);
-        window.scrollTo({ top: from + (to - from) * ease(t), behavior: 'instant' });
-        if (t < 1) animationFrame = window.requestAnimationFrame(step);
-        else release();
-      };
+      window.scrollTo({ top: position, behavior: 'instant' });
       animationFrame = window.requestAnimationFrame(step);
     }
 
-    function release() {
-      root.style.scrollSnapType = '';
-      if (moving) landedAt = performance.now();
-      moving = false;
+    function stop() {
+      window.cancelAnimationFrame(animationFrame);
+      animating = false;
+      if (!jumping) root.style.scrollSnapType = '';
     }
 
-    // In-page links (nav, scroll cues, back to top) use the same animation.
+    function springTo(index) {
+      targetIndex = index;
+      targetY = sectionTop(sections[index]);
+      if (reduceMotion.matches) {
+        stop();
+        window.scrollTo({ top: targetY, behavior: 'instant' });
+        return;
+      }
+      if (animating) return;
+      position = window.scrollY;
+      velocity = 0;
+      animating = true;
+      root.style.scrollSnapType = 'none';
+      lastFrame = performance.now();
+      animationFrame = window.requestAnimationFrame(step);
+    }
+
+    // Jumps of more than one section (nav links, Home/End) would otherwise blur through every
+    // section in between, so the sections fade out, the page moves to the target's neighbour,
+    // and the sections fade back in while the spring carries it the last section.
+    const FADE_MS = 150;
+    function goTo(index) {
+      index = clampIndex(index);
+      if (jumping) { targetIndex = index; return; }
+      const from = baseIndex();
+      if (index === from && !animating) return;
+      const distance = Math.abs(index - currentIndex());
+      if (distance <= 1 || reduceMotion.matches) { springTo(index); return; }
+      jumping = true;
+      targetIndex = index;
+      root.style.scrollSnapType = 'none';
+      root.classList.add('v2-jump-out');
+      window.setTimeout(() => {
+        const land = targetIndex;
+        const dir = Math.sign(land - currentIndex()) || 1;
+        stop();
+        window.scrollTo({ top: sectionTop(sections[clampIndex(land - dir)]), behavior: 'instant' });
+        jumping = false;
+        root.classList.remove('v2-jump-out');
+        springTo(land);
+      }, FADE_MS);
+    }
+
+    // A touch or scrollbar drag during a move hands control back to the user.
+    const interrupt = () => { if (animating && !jumping) stop(); };
+    window.addEventListener('touchstart', interrupt, { passive: true });
+    window.addEventListener('mousedown', (event) => { if (event.clientX >= root.clientWidth) interrupt(); });
+
+    // In-page links (nav, scroll cues, back to top) use the same motion.
     document.addEventListener('click', (event) => {
       const link = event.target instanceof Element && event.target.closest('a[href^="#v2-"]');
       if (!paging.matches || !link || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey) return;
@@ -618,31 +670,46 @@
         (target instanceof Element && target.closest('input, textarea, select, [contenteditable="true"]'));
     }
 
+    // One gesture moves one section. A gesture starts after a 200 ms pause, on a change of
+    // direction, or when the wheel delta jumps well above the decaying trackpad momentum (a new
+    // swipe while the last one is still coasting) — so quick repeated swipes each count, like a
+    // feed, while one long flick or a fast wheel spin still moves only once.
+    let lastWheelAt = 0;
+    let lastWheelSize = 0;
+    let lastWheelDir = 0;
+    let lastStepAt = 0;
     window.addEventListener('wheel', (event) => {
       if (!paging.matches || event.ctrlKey || blockedTarget(event.target)) return;
       if (Math.abs(event.deltaY) < Math.abs(event.deltaX)) return;
       event.preventDefault();
+      const scale = event.deltaMode === 1 ? 33 : event.deltaMode === 2 ? window.innerHeight : 1;
+      const size = Math.abs(event.deltaY * scale);
+      if (size < 1) return;
+      const dir = Math.sign(event.deltaY);
       const now = performance.now();
-      // Trackpad momentum keeps firing wheel events after the gesture ends; treat any event
-      // within 180 ms of the previous one as part of the same gesture.
-      const sameGesture = now < quietUntil;
-      quietUntil = now + 180;
-      // A short cooldown after landing stops one long spin of the wheel chaining into several moves.
-      if (moving || sameGesture || now - landedAt < 400 || Math.abs(event.deltaY) < 4) return;
-      goTo(currentIndex() + (event.deltaY > 0 ? 1 : -1));
+      const fresh = now - lastWheelAt > 200 || dir !== lastWheelDir ||
+        (size > lastWheelSize * 1.6 && size > 20 && now - lastStepAt > 250);
+      lastWheelAt = now;
+      lastWheelSize = size;
+      lastWheelDir = dir;
+      if (!fresh || size < 4) return;
+      lastStepAt = now;
+      goTo(baseIndex() + dir);
     }, { passive: false });
 
     document.addEventListener('keydown', (event) => {
       if (!paging.matches || event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey) return;
       if (blockedTarget(event.target) || (event.target instanceof Element && event.target.closest('button, a') && event.key === ' ')) return;
       const keys = { ArrowDown: 1, PageDown: 1, ArrowUp: -1, PageUp: -1 };
-      let step = keys[event.key];
-      if (event.key === ' ') step = event.shiftKey ? -1 : 1;
+      let move = keys[event.key];
+      if (event.key === ' ') move = event.shiftKey ? -1 : 1;
       if (event.key === 'Home') { event.preventDefault(); goTo(0); return; }
       if (event.key === 'End') { event.preventDefault(); goTo(sections.length - 1); return; }
-      if (!step) return;
+      if (!move) return;
       event.preventDefault();
-      if (!moving) goTo(currentIndex() + step);
+      // A held key steps once per landing rather than racing through every section.
+      if (event.repeat && (animating || jumping)) return;
+      goTo(baseIndex() + move);
     });
 
     const observer = new IntersectionObserver((entries) => {

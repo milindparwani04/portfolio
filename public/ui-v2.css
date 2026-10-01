@@ -316,6 +316,9 @@ body.locked { overflow: auto !important; height: auto !important; }
     scroll-margin-top: 0;
   }
   .v2-section + .v2-section { border-top: 0; }
+  /* Multi-section jumps fade the sections out and back in rather than blurring past them. */
+  .v2-section { transition: opacity .15s ease; }
+  html.v2-jump-out .v2-section { opacity: 0; }
   .v2-section > .v2-scroll-next { margin-top: auto; padding-top: clamp(.6rem, 2vh, 1.4rem); }
   .v2-section > .v2-footer { margin-top: auto; padding-top: clamp(.6rem, 2vh, 1.4rem); }
 
