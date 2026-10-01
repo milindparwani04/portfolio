@@ -4,7 +4,23 @@
 
 ## How to use this doc
 
-This is the opening document for every new agent session. Read it top to bottom before touching code, then read the [Rulebook](agent-rulebook.md), [Security Handoff](security-handoff.md) and [Requirements Tracker](requirements-tracker.md). At the end of each session, add a new entry to the Session Log (newest on top) and update Current Build State and Priorities if they changed. Keep entries factual: what was done, what was tested, what is broken, what is next.
+This is the opening document for every new agent session. Read it top to bottom before touching code, then read your own agent handoff (below), the [Rulebook](agent-rulebook.md), [Security Handoff](security-handoff.md) and [Requirements Tracker](requirements-tracker.md). This file holds the **overall project scope and shared state**; each agent's detailed working notes live in its own handoff. At the end of each session, add a short project-level entry to the Session Log (newest on top) and update Current Build State and Priorities if they changed. Keep entries factual: what changed in the project, what was verified, what is broken, what is next.
+
+## Agents and handoff docs
+
+Milind runs two agents in parallel and assigns each its own work:
+
+| Agent | Own handoff | Use it for |
+|---|---|---|
+| Claude (Claude Code) | [`claude-agent-handoff.md`](claude-agent-handoff.md) | Claude's assignment, implementation notes, test runs, follow-ups |
+| Codex | [`codex-agent-handoff.md`](codex-agent-handoff.md) | Codex's assignment, notes and follow-ups |
+
+Shared rules:
+
+- Each agent works only on what Milind assigns to it. Shared priorities below are the project backlog, not a task list either agent can pick from unprompted.
+- Each agent writes only its own handoff. This file is shared: record project-wide changes here (build state, priorities, architecture, conventions, anything the other agent must know), with detail in your own handoff.
+- Before editing, check `git status` for the other agent's uncommitted work and preserve it. Coordinate before changing an area the other agent is working in: each handoff's "Current assignment" lists its areas.
+- Pushing any branch currently deploys to production (see Priorities #1). Push only when Milind has asked for it, and include the doc updates in the same push.
 
 ## Project snapshot
 
@@ -87,7 +103,7 @@ Copy this template for each session:
 
 ```
 ### YYYY-MM-DD — <session goal>
-Model: <Opus plan / Sonnet execute>
+Agent: <Claude / Codex> · Model: <model>
 Phase: <n of N>
 Done:
 - ...
@@ -99,41 +115,59 @@ Next session starts with:
 - ...
 ```
 
-### 2026-10-01 — Fit-to-box titles and smoother section scrolling
-Model: Opus
-Phase: 1 of 1
+### 2026-10-01 — Two-agent handoff docs
+Agent: Claude
 Done:
-- Long titles now shrink and wrap instead of ending in "…": `fitText()` in `public/ui-v2.js` with `data-fit` / `data-fit-max` in the markup (Spotify track, playlist names, gig artists, tool titles, metric and bottom-row headings). Lines are counted from the text's line boxes because Anton's tall glyphs make height checks unreliable.
-- Section paging now uses its own eased animation instead of the browser's smooth scroll, with snap off during the move; in-page links use it too.
-Tested (how, result):
-- Headless Edge (Puppeteer) with production API responses as fixtures: overlap/clip/truncation check passes on all six sections at 1280×720, 1366×657, 1440×789, 1920×969, 1100×620, 1024×700, 768×1024, 2560×1300 and 390×844. "Freaking Out the Neighborhood" wraps to two lines at full size everywhere. A 59-character test title uses three lines at ≥1100 px; on 768 px portrait it still ends in "…" at the minimum size.
-- Scroll: PageDown, wheel up/down, nav link (Journal→Gigs), Back to top and the scroll cue all move monotonically (max 30 px per frame between neighbours), land exactly on the section, update the hash and restore snapping. Reduced motion jumps instantly. No page errors.
-Known issues / not done:
-- Chrome extension was disconnected, so testing used headless Edge rather than an on-screen browser.
-
-### 2026-10-01 — Grey-box UI rebuild from the Soft Monolith mockups
-Model: Opus
-Phase: 4 of 4 (1 shared styles + Home, 2 Journal/Projects/Toolbox, 3 Playlists/Gigs, 4 test + deploy)
-Done:
-- Restyled the whole site to Milind's six mockups: filled grey panels with no outlines, single-rule nav, hairline card footers (status left, action right), text-only Projects and Toolbox, filled strips.
-- Home rebuilt on a named-area grid so cards cannot overlap (the mockup screenshot had the bottom row overlapping the Spotify/Time cards). New About card, centred Spotify cover, three-city clock, title spans the full width.
-- Journal: separate grey diagonal placeholder panel, kept as a placeholder per Milind.
-- Playlists: real Spotify covers and track counts; listening history as name / artist / bar / plays. Kicker now "Three on repeat, plus this month's listening history."
-- Gig Finder: real listings only. Removed the invented fallback acts and stock venue photos (Rulebook §2.4: no fake data); shows "No upcoming gigs to show right now" when `/api/gigs` fails.
-- Removed the unused placeholder images in `public/assets/ui/`. No Worker, secret or config changes.
-Tested (how, result):
-- Automated overlap/clip check (no card overlaps another, no child spills out of its card, no section content past the viewport) on all six sections at 1280×720, 1366×657, 1440×789, 1920×969, 1100×620, 1024×700, 768×1024 and 2560×1300, using production API responses as fixtures in a local `wrangler dev` copy: all pass. Phones at 390×844 and 360×740: all pass, continuous scroll, no horizontal overflow.
-- Screenshots at 1280×720 of every section compared with the mockups.
-- APIs down (all `/api/*` returning 503): every card keeps its layout; gigs show the empty-state message; covers stay grey.
-- Keyboard: PageDown steps Home → Journal → Projects → Toolbox → Playlists → Gigs, Home returns; Tab focus shows the 2 px outline; Toolbox buttons open their modals and Escape closes them; Back to top works. Gig next/pause controls and the Tracks/Artists toggle work.
-- Lighthouse (Edge headless, mobile): production before 68 performance / 100 accessibility / 100 best practices (LCP 6.4 s); production after 90 / 100 / 100 (LCP 3.3 s, CLS 0.012).
-- Production (deployed from `main` at `ef1b737`, 2026-10-01 16:32 UTC): overlap/clip check passes on all six sections at 1280×720, 1366×657, 1920×969 and 390×844 with live data — heart rate, now-playing cover, three playlist covers and track counts, October top tracks, 5 gig cards with photos (batch 1 of 2), three clocks, deploy date.
-Known issues / not done:
-- Playlist descriptions are empty on Spotify, so cards say "Playlist on Spotify." Adding a description on Spotify will show it automatically.
-- On 720p-class screens the weather card hides its humidity/wind line to keep the heading readable.
-- Uncommitted Codex notes from 2026-10-01 in this file and `docs/codex-agent-handoff.md` were left untouched in the working tree for Milind/that agent to commit.
+- Added the "Agents and handoff docs" section above and created [`claude-agent-handoff.md`](claude-agent-handoff.md). Claude's detailed notes moved there; this log keeps project-level entries. Codex's entries and handoff were committed unchanged.
 Next session starts with:
-- Unchanged priorities: Workers Builds branch-deploy setting, Google token check after 2026-10-07, then Security Handoff §3 and S-02 to S-04.
+- Each agent reads this file, then its own handoff, then waits for Milind's assignment.
+
+### 2026-10-01 — Grey-box UI live (Soft Monolith implemented)
+Agent: Claude
+Done:
+- The whole visible site now follows the Soft Monolith mockups Codex produced and Milind selected: filled grey panels without outlines, single-rule nav, hairline status/action footers, text-only Projects and Toolbox, a grey diagonal placeholder for the Journal image, real Spotify covers and gig artist photos only. **This supersedes the "mockup only / awaiting implementation" status in Codex's entries below.**
+- Long titles shrink and wrap to fit their box (`fitText()`, `data-fit`) instead of being cut off; section paging uses an eased 0.9 s scroll; phones scroll continuously.
+- Removed the invented Gig Finder fallback list and the placeholder photos in `public/assets/ui/`.
+- No Worker, secret, config or security changes.
+Tested (how, result):
+- Automated overlap/clip/truncation checks on all six sections at ten viewport sizes from 2560×1300 to 360×740 with production data; failure states with every API down; keyboard paging; production re-checked after each deploy. Lighthouse mobile on production: 90 / 100 / 100 (was 68 / 100 / 100). Details in [`claude-agent-handoff.md`](claude-agent-handoff.md).
+Known issues / not done:
+- See Claude handoff → Open follow-ups.
+Next session starts with:
+- Unchanged priorities below.
+
+### 2026-10-01 — Minimal UI direction exploration (mockups only)
+Model: Codex
+Phase: 1 of 2 — visual direction selected and refined
+Done:
+- Created eight interactive UI directions for Milind to compare without changing the website: Hairline Index, Editorial Columns, Quiet Bands, Offset Ledger, Terminal Type, Swiss Archive, Open Grid, and Soft Monolith.
+- All directions preserve the existing home information hierarchy and section navigation while exploring fewer full containers, more bottom rules/open whitespace, a concise gray portfolio-introduction field in place of the home news image, and compact playlist artwork.
+- Toolbox treatment is explicitly type-and-rule led; article and gig imagery remain valid editorial content.
+- Milind selected Soft Monolith. The refined home mockup preserves the original oversized Anton title and all visible live-content labels/values from the supplied production screenshot, retains the gray “About this space” module, and makes Spotify an album-led lock-screen-style module with the track and artist beneath the cover.
+- Expanded Soft Monolith into a navigable six-section mock site covering Home, Journal, Projects, Toolbox, Playlists, and Gigs. Home drops the “Interest-led / always evolving” footer, tightens Spotify around the cover/track metadata, and uses the recovered width for Dubai, London, and Sydney clocks with the date anchored at the bottom. Toolbox is text-only; playlist covers are compact; article and gig image areas remain.
+- Refined the full-site mockup after review: the sticky nav no longer clips the home or section titles; the home title visually spans to the weather module's right edge; Spotify centers its cover, track, and artist while leaving `NOW PLAYING` left-aligned; Dubai, London, and Sydney now use equal-size time rows with larger adjacent zone labels and a larger bottom date.
+- Completed the final static-review pass requested for handoff: every section fits within one 1280×720-style viewport with section-level scroll snapping and no intentional intra-section vertical scroll. On Home, the full `MY DIGITAL PORTFOLIO.` title is visible and its period aligns to the Weather module's right edge; Time / Location is a centered vertical sequence of three equal-size time → location/time-zone pairs with the date visible at the bottom.
+- Exported six handoff screenshots outside the repository in the task visualization workspace: `soft-monolith-home.png`, `soft-monolith-journal.png`, `soft-monolith-projects.png`, `soft-monolith-toolbox.png`, `soft-monolith-playlists.png`, and `soft-monolith-gigs.png`.
+Tested (how, result):
+- Rendered the comparison gallery, refined home, and full Soft Monolith site locally. Confirmed navigation reaches all six sections, Home and Journal clear the sticky navigation without clipping, the image-free Toolbox layout renders correctly, responsive reflow is present, and browser logs contain no errors or warnings. Exported and visually inspected all six final 1248×720 section screenshots; the Home title, clock hierarchy/date, lower cards, and next-section control all remain visible in the same frame.
+Known issues / not done:
+- The selected direction remains a mockup. No website code, assets, configuration, requirements, security state, commit, push, or deployment changed.
+Next session starts with:
+- Use the six static screenshots as the approved visual handoff reference. Do not implement from them unless Milind explicitly assigns that work to the receiving agent.
+
+### 2026-10-01 — Parallel-agent coordination boundary
+Model: Codex
+Phase: coordination setup (documentation only)
+Done:
+- Established that this Codex session will work only on tasks Milind explicitly assigns to it and will not pick up shared priorities or another agent's tasks by inference.
+- Reserved [`codex-agent-handoff.md`](codex-agent-handoff.md) for this agent's task-specific notes so parallel work stays separate; shared facts that affect the whole project will still be recorded in this communal handoff.
+- Set the working-tree boundary: apart from explicitly assigned changes, this agent may edit only the communal handoff and its individual handoff, and will preserve concurrent changes made by other agents.
+Tested (how, result):
+- Documentation-only setup; checked the working tree before editing and found no existing changes.
+Known issues / not done:
+- No implementation task has been assigned to this agent yet. No code, configuration, requirements, or security state changed.
+Next session starts with:
+- Read this communal handoff and [`codex-agent-handoff.md`](codex-agent-handoff.md), then act only on Milind's explicit Codex assignment.
 
 ### 2026-09-30 — Rulebook: every push updates the handoff docs
 Model: Opus

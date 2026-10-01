@@ -8,6 +8,9 @@ This file is read automatically at the start of every session in this repo, on a
 2. [`docs/agent-rulebook.md`](docs/agent-rulebook.md) — how to work: phasing, testing, communication style, Definition of Done.
 3. [`docs/requirements-tracker.md`](docs/requirements-tracker.md) — status of every requirement, section, project and toolbox item.
 4. [`docs/security-handoff.md`](docs/security-handoff.md) — verified security posture, open findings, rules for new endpoints.
+5. [`docs/claude-agent-handoff.md`](docs/claude-agent-handoff.md) — **Claude's own work record**: current assignment, implementation notes, test approach, follow-ups.
+
+Milind runs Claude and Codex in parallel on separate assignments (see "Agents and handoff docs" in the session handoff). Work only on what is assigned to Claude, preserve Codex's uncommitted work, and never edit `docs/codex-agent-handoff.md`.
 
 State back in two lines what you understand the goal to be and which phase you're starting, per the Rulebook §1. Ask before proceeding if anything is unclear.
 
@@ -15,7 +18,8 @@ State back in two lines what you understand the goal to be and which phase you'r
 
 Three of the four docs are living documents, updated continuously — not just once at the end of a session:
 
-- `docs/session-handoff.md` — add a Session Log entry, update Current Build State and Priorities if they changed.
+- `docs/session-handoff.md` — add a short project-level Session Log entry, update Current Build State and Priorities if they changed.
+- `docs/claude-agent-handoff.md` — Claude's detailed notes for the work in that push.
 - `docs/requirements-tracker.md` — move statuses as things ship.
 - `docs/security-handoff.md` — add or close findings if the Worker changed.
 
