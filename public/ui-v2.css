@@ -372,6 +372,11 @@ body.locked { overflow: auto !important; height: auto !important; }
   .v2-gig-timer { display: none; }
   .v2-footer { flex-wrap: wrap; justify-content: space-between; white-space: normal; }
   .v2-footer-rule { display: none; }
+  /* Phones: no small print below 12px. */
+  .v2-index-row, .v2-ref, .v2-scroll-prev, .v2-scroll-next, .v2-card-foot, .v2-metric-foot, .v2-spotify-state, .v2-spotify-status,
+  .v2-cities li > span, .v2-time-date, .v2-bottom-card p, .v2-news-desc, .v2-journal-card p, .v2-journal-meta div, .v2-journal-status,
+  .v2-journal-media span, .v2-project p, .v2-tool-copy p, .v2-playlist-copy p, .v2-track-row, .v2-top-toggle button,
+  .v2-gig p, .v2-gig-link, .v2-gig-controls, .v2-strip, .v2-footer { font-size: .75rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {

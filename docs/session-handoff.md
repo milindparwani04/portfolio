@@ -48,7 +48,8 @@ Secrets (set with `wrangler secret bulk` from a temp file — piping into `secre
 ## Design system (locked — do not change unless Milind raises it)
 
 - Aesthetic: retro terminal / command-prompt soul fused with Apple-grade minimalism.
-- Palette: predominantly monochrome, with restrained colour reserved for editorial photography, playlist/gig artwork, the weather icon, and the Spotify label. Projects and Toolbox are text-only.
+- Palette: predominantly monochrome, with restrained colour reserved for real Spotify covers, gig artist photos, the weather icon, and the Spotify label. Everything else is text-only.
+- Surfaces ("grey box", 2026-10-01): filled grey panels (`--v2-panel` #151515; the About card uses `--v2-panel-raised` #202020) on #070707, no outlines. Hairline rules (`--v2-soft-line`, 20% white) for the nav underline, card footers and table rows. Card actions are a hairline footer with status left and action right, not outlined buttons. Reference mockups: the six "Soft Monolith" screenshots Milind supplied on 2026-10-01.
 - Type: IBM Plex Mono for system UI, IBM Plex Sans for body, Anton for display headlines.
 - Structure: rock-poster / cold-war redacted document language with "REF. 0X" numbered section labels.
 - Navigation: every main section gets an equal, full-viewport chapter divider. No section looks subordinate.
@@ -68,11 +69,11 @@ Priorities, in order:
 
 Shell: opens directly onto a clean `C:\PARWANI>` navigation bar and the `MY DIGITAL PORTFOLIO.` dashboard. The former ENTER/CRT boot gate, floating navigation and bottom status bar are no longer visible.
 
-Home dashboard: fixed-size headline card with text fitted on each rotation from `/api/news`; Dubai clock and live Dubai weather from Open-Meteo; deploy timestamp from `/api/last-updated`; heart-rate card from `/api/heart-rate` (latest Fitbit reading and its age) and Spotify card with the current or last-played track from `/api/now-playing`, both refreshed every 30 s without a reload (polls bypass the browser cache); dissertation and current-focus cards. The opening section uses the approved mockup's full-width alignment and includes a scroll-to-Journal cue. Every API-backed card retains its layout when data is unavailable.
+Home dashboard: one CSS grid with named areas (`.v2-dashboard` in `public/ui-v2.css`), so cards cannot overlap. Headline card (text only, fitted on each rotation from `/api/news`); grey "About this space" card; heart rate from `/api/heart-rate`; Dubai weather from Open-Meteo (humidity/wind line hides when the card is short; temperature scales to the card); Spotify card with the cover centred, track and artist beneath and "Now playing / Last played" bottom-left from `/api/now-playing` (grey square until a cover loads); Time / Location with Dubai, London and Sydney clocks (London/Sydney zone names follow daylight saving) sized from the card's own height via container units; bottom row with dissertation, current focus (Sounds Like) and deploy date from `/api/last-updated`. Heart rate and now-playing refresh every 30 s without a reload. Every API-backed card keeps its layout when data is unavailable.
 
-Section paging: on desktop/tablet (≥721 px wide and ≥620 px tall) every section is exactly one viewport under a fixed nav bar, and one wheel gesture or key press (PageUp/PageDown/arrows/Space/Home/End) moves one whole section (`initSectionPager` in `public/ui-v2.js`, CSS scroll-snap for touch/scrollbar). Each section has a "↑ previous" cue top-right and a "SCROLL / X NEXT ↓" cue at the bottom; the nav underlines the current section and the URL hash follows it. Content scales with viewport height so nothing clips down to ~1100×620; a short-viewport tier (≤760 px tall) tightens spacing. Phones and smaller windows scroll normally.
+Section paging: on desktop/tablet (≥721 px wide and ≥620 px tall) every section is exactly one viewport under a fixed nav bar, and one wheel gesture or key press (PageUp/PageDown/arrows/Space/Home/End) moves one whole section (`initSectionPager` in `public/ui-v2.js`, CSS scroll-snap for touch/scrollbar). Each section has a "↑ previous" cue top-right and a "SCROLL / X NEXT ↓" cue at the bottom; the nav underlines the current section and the URL hash follows it. Content scales with viewport height so nothing clips down to ~1100×620; a short-viewport tier (≤760 px tall) tightens spacing. Grids stay three columns down to 721 px so locked sections still fit. Phones (≤720 px wide) and short windows scroll continuously with no paging, and small print is at least 12 px.
 
-Sections: Journal (REF. 01, one full-height Karoshi feature card with status/topic rows), Projects (REF. 02, text-only 3×2 cards plus one full-width card, each with a status row and action bar), Toolbox (REF. 03, 3×3 grid of all nine tools with inline-SVG thumbnails; Sample Finder, PDF Editor and Signature Creator show a disabled "Still being built" action), Playlists (REF. 04, three live playlist cards — pop, Camon, idk — plus a Listening History card with a Tracks / Artists toggle showing the month's top 5 with play counts), and Gig Finder (REF. 05, verified real-artist shows with the artist's photo and a link to the ticket page, 10-second countdown bar, hover/focus pause, footer with Back to top). A privacy page lives at `/privacy`. The local music player is no longer exposed. The modal code for the three unfinished tools remains in the hidden legacy shell.
+Sections: Journal (REF. 01, Karoshi copy card with status/topic rows beside a grey diagonal-stripe image placeholder, plus info strip), Projects (REF. 02, text-only 3×2 cards plus one full-width card, each ending in a status / action footer), Toolbox (REF. 03, text-only 3×3 grid of all nine tools; Sample Finder, PDF Editor and Signature Creator show a disabled "Still being built"), Playlists (REF. 04, three playlist cards with real Spotify covers and track counts, plus "Top this month" — name / artist / bar / plays with a Tracks / Artists toggle), and Gig Finder (REF. 05, verified real-artist shows with artist photos and ticket links, 10-second countdown, hover/focus pause; an honest empty state replaces the old invented fallback list; footer with © / Back to top / LinkedIn / Spotify). The placeholder photography in `public/assets/ui/` has been removed. A privacy page lives at `/privacy`. The local music player is no longer exposed. The modal code for the three unfinished tools remains in the hidden legacy shell.
 
 Backend endpoints live: news, last-updated, BPM/key lookup, audio features, sample search, gigs, Spotify owner OAuth, now-playing, playlists, listening, Google Health owner OAuth, heart-rate, plus the 30-minute play-log cron.
 
@@ -97,6 +98,29 @@ Known issues / not done:
 Next session starts with:
 - ...
 ```
+
+### 2026-10-01 — Grey-box UI rebuild from the Soft Monolith mockups
+Model: Opus
+Phase: 4 of 4 (1 shared styles + Home, 2 Journal/Projects/Toolbox, 3 Playlists/Gigs, 4 test + deploy)
+Done:
+- Restyled the whole site to Milind's six mockups: filled grey panels with no outlines, single-rule nav, hairline card footers (status left, action right), text-only Projects and Toolbox, filled strips.
+- Home rebuilt on a named-area grid so cards cannot overlap (the mockup screenshot had the bottom row overlapping the Spotify/Time cards). New About card, centred Spotify cover, three-city clock, title spans the full width.
+- Journal: separate grey diagonal placeholder panel, kept as a placeholder per Milind.
+- Playlists: real Spotify covers and track counts; listening history as name / artist / bar / plays. Kicker now "Three on repeat, plus this month's listening history."
+- Gig Finder: real listings only. Removed the invented fallback acts and stock venue photos (Rulebook §2.4: no fake data); shows "No upcoming gigs to show right now" when `/api/gigs` fails.
+- Removed the unused placeholder images in `public/assets/ui/`. No Worker, secret or config changes.
+Tested (how, result):
+- Automated overlap/clip check (no card overlaps another, no child spills out of its card, no section content past the viewport) on all six sections at 1280×720, 1366×657, 1440×789, 1920×969, 1100×620, 1024×700, 768×1024 and 2560×1300, using production API responses as fixtures in a local `wrangler dev` copy: all pass. Phones at 390×844 and 360×740: all pass, continuous scroll, no horizontal overflow.
+- Screenshots at 1280×720 of every section compared with the mockups.
+- APIs down (all `/api/*` returning 503): every card keeps its layout; gigs show the empty-state message; covers stay grey.
+- Keyboard: PageDown steps Home → Journal → Projects → Toolbox → Playlists → Gigs, Home returns; Tab focus shows the 2 px outline; Toolbox buttons open their modals and Escape closes them; Back to top works. Gig next/pause controls and the Tracks/Artists toggle work.
+- Lighthouse (Edge headless, mobile): production before 68 performance / 100 accessibility / 100 best practices; local build 89 / 100 / 96. The two remaining best-practice flags are local-only (APIs 503 without secrets, `wrangler dev` source map).
+Known issues / not done:
+- Playlist descriptions are empty on Spotify, so cards say "Playlist on Spotify." Adding a description on Spotify will show it automatically.
+- On 720p-class screens the weather card hides its humidity/wind line to keep the heading readable.
+- Uncommitted Codex notes from 2026-10-01 in this file and `docs/codex-agent-handoff.md` were left untouched in the working tree for Milind/that agent to commit.
+Next session starts with:
+- Unchanged priorities: Workers Builds branch-deploy setting, Google token check after 2026-10-07, then Security Handoff §3 and S-02 to S-04.
 
 ### 2026-09-30 — Rulebook: every push updates the handoff docs
 Model: Opus
