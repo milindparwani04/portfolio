@@ -972,7 +972,7 @@
     .tools{ grid-template-columns:1fr; }
   }
 </style>
-<link rel="stylesheet" href="/ui-v2.css?v=14">
+<link rel="stylesheet" href="/ui-v2.css?v=15">
 </head>
 <body class="locked">
 
@@ -1008,14 +1008,14 @@
 
         <article class="v2-panel v2-metric v2-heart">
           <div class="v2-index-row"><span>02</span><span class="v2-tag">[ Health ]</span></div>
-          <h3>Heart Rate</h3>
+          <h3 data-fit="1">Heart Rate</h3>
           <div class="v2-value v2-placeholder" id="v2HeartValue">--<small> BPM</small></div>
           <p class="v2-metric-foot" id="v2HeartFoot">Awaiting health data source</p>
         </article>
 
         <article class="v2-panel v2-metric v2-weather">
           <div class="v2-index-row"><span>03</span><span class="v2-tag">[ Weather ]</span></div>
-          <h3>Dubai Weather</h3>
+          <h3 data-fit="1">Dubai Weather</h3>
           <div class="v2-weather-main">
             <div class="v2-value" id="v2WeatherTemp">--&deg;C</div>
             <svg class="v2-sun" id="v2WeatherIcon" viewBox="0 0 64 64" aria-label="Weather icon"><circle cx="32" cy="32" r="10" fill="currentColor"/><g stroke="currentColor" stroke-width="3"><path d="M32 3v10M32 51v10M3 32h10M51 32h10M11.5 11.5l7 7M45.5 45.5l7 7M52.5 11.5l-7 7M18.5 45.5l-7 7"/></g></svg>
@@ -1026,7 +1026,7 @@
         <article class="v2-panel v2-spotify">
           <div class="v2-index-row"><span>04</span><span class="v2-spotify-label">[ Spotify ]</span></div>
           <div class="v2-spotify-art"><img class="v2-spotify-cover" id="v2NowCover" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt=""></div>
-          <h3 id="v2NowTitle">Nothing Playing</h3>
+          <h3 id="v2NowTitle" data-fit="2" data-fit-max="3">Nothing Playing</h3>
           <div class="v2-spotify-state" id="v2NowState">Listening data will appear here</div>
           <div class="v2-spotify-status" id="v2NowStatus"></div>
         </article>
@@ -1043,15 +1043,15 @@
 
         <article class="v2-panel v2-bottom-card v2-dissertation">
           <div class="v2-index-row"><span>06</span><span class="v2-tag">[ Dissertation ]</span></div>
-          <div><h3>Conflict &amp; Risk Preferences</h3><p><span>Undergraduate literature review</span><a href="/dissertation.pdf" target="_blank" rel="noopener noreferrer">Read PDF &#8594;</a></p></div>
+          <div><h3 data-fit="1">Conflict &amp; Risk Preferences</h3><p><span>Undergraduate literature review</span><a href="/dissertation.pdf" target="_blank" rel="noopener noreferrer">Read PDF &#8594;</a></p></div>
         </article>
         <article class="v2-panel v2-bottom-card v2-focus">
           <div class="v2-index-row"><span>07</span><span class="v2-tag">[ Current Focus ]</span></div>
-          <div><h3>Sounds Like</h3><p>Phase 02 / Similarity engine</p></div>
+          <div><h3 data-fit="1">Sounds Like</h3><p>Phase 02 / Similarity engine</p></div>
         </article>
         <article class="v2-panel v2-bottom-card v2-updated">
           <div class="v2-index-row"><span>08</span><span class="v2-tag">[ Site Updated ]</span></div>
-          <div><h3 id="v2LastUpdated">-- --- ----</h3><p>Deployed / Main</p></div>
+          <div><h3 id="v2LastUpdated" data-fit="1">-- --- ----</h3><p>Deployed / Main</p></div>
         </article>
       </div>
       <a class="v2-scroll-next" href="#v2-journal"><span></span>Scroll&nbsp; / &nbsp;Journal next&nbsp; &#8595;<span></span></a>
@@ -1097,47 +1097,47 @@
       <div class="v2-stage v2-tool-grid">
         <article class="v2-panel v2-tool">
           <div class="v2-index-row"><span>01</span><span class="v2-tag">[ Media ]</span></div>
-          <div class="v2-tool-copy"><h3>Image Converter</h3><p>Convert between JPG, PNG, WEBP and more. Fast, simple, in your browser.</p></div>
+          <div class="v2-tool-copy"><h3 data-fit="1">Image Converter</h3><p>Convert between JPG, PNG, WEBP and more. Fast, simple, in your browser.</p></div>
           <div class="v2-card-foot"><button type="button" data-open-tool="imgConverterModal">Open tool &#8594;</button></div>
         </article>
         <article class="v2-panel v2-tool">
           <div class="v2-index-row"><span>02</span><span class="v2-tag">[ Music ]</span></div>
-          <div class="v2-tool-copy"><h3>Tempo Tap</h3><p>Tap a tempo to get BPM, milliseconds and note values instantly.</p></div>
+          <div class="v2-tool-copy"><h3 data-fit="1">Tempo Tap</h3><p>Tap a tempo to get BPM, milliseconds and note values instantly.</p></div>
           <div class="v2-card-foot"><button type="button" data-open-tool="tempoTapModal">Open tool &#8594;</button></div>
         </article>
         <article class="v2-panel v2-tool">
           <div class="v2-index-row"><span>03</span><span class="v2-tag">[ Reference ]</span></div>
-          <div class="v2-tool-copy"><h3>Key / BPM Lookup</h3><p>Find key, BPM and related scales for any track or chord progression.</p></div>
+          <div class="v2-tool-copy"><h3 data-fit="1">Key / BPM Lookup</h3><p>Find key, BPM and related scales for any track or chord progression.</p></div>
           <div class="v2-card-foot"><button type="button" data-open-tool="bpmLookupModal">Open tool &#8594;</button></div>
         </article>
         <article class="v2-panel v2-tool">
           <div class="v2-index-row"><span>04</span><span class="v2-tag">[ Utility ]</span></div>
-          <div class="v2-tool-copy"><h3>QR Code Generator</h3><p>Create QR codes for links, text, contacts and more.</p></div>
+          <div class="v2-tool-copy"><h3 data-fit="1">QR Code Generator</h3><p>Create QR codes for links, text, contacts and more.</p></div>
           <div class="v2-card-foot"><button type="button" data-open-tool="qrGenModal">Open tool &#8594;</button></div>
         </article>
         <article class="v2-panel v2-tool is-building">
           <div class="v2-index-row"><span>05</span><span class="v2-tag">[ Audio ]</span></div>
-          <div class="v2-tool-copy"><h3>Sample Finder</h3><p>Discover royalty-free samples from curated sources across the web.</p></div>
+          <div class="v2-tool-copy"><h3 data-fit="1">Sample Finder</h3><p>Discover royalty-free samples from curated sources across the web.</p></div>
           <div class="v2-card-foot"><button type="button" disabled>Still being built</button></div>
         </article>
         <article class="v2-panel v2-tool is-building">
           <div class="v2-index-row"><span>06</span><span class="v2-tag">[ Documents ]</span></div>
-          <div class="v2-tool-copy"><h3>PDF Editor</h3><p>Merge, split, rotate, reorder and annotate PDF files.</p></div>
+          <div class="v2-tool-copy"><h3 data-fit="1">PDF Editor</h3><p>Merge, split, rotate, reorder and annotate PDF files.</p></div>
           <div class="v2-card-foot"><button type="button" disabled>Still being built</button></div>
         </article>
         <article class="v2-panel v2-tool">
           <div class="v2-index-row"><span>07</span><span class="v2-tag">[ Audio ]</span></div>
-          <div class="v2-tool-copy"><h3>Audio Trimmer</h3><p>Trim, cut and export audio files directly in your browser.</p></div>
+          <div class="v2-tool-copy"><h3 data-fit="1">Audio Trimmer</h3><p>Trim, cut and export audio files directly in your browser.</p></div>
           <div class="v2-card-foot"><button type="button" data-open-tool="audioTrimModal">Open tool &#8594;</button></div>
         </article>
         <article class="v2-panel v2-tool">
           <div class="v2-index-row"><span>08</span><span class="v2-tag">[ Security ]</span></div>
-          <div class="v2-tool-copy"><h3>Password Generator</h3><p>Create strong, random passwords with custom options.</p></div>
+          <div class="v2-tool-copy"><h3 data-fit="1">Password Generator</h3><p>Create strong, random passwords with custom options.</p></div>
           <div class="v2-card-foot"><button type="button" data-open-tool="passwordGenModal">Open tool &#8594;</button></div>
         </article>
         <article class="v2-panel v2-tool is-building">
           <div class="v2-index-row"><span>09</span><span class="v2-tag">[ Creative ]</span></div>
-          <div class="v2-tool-copy"><h3>Signature Creator</h3><p>Draw or type a signature and export as a transparent PNG.</p></div>
+          <div class="v2-tool-copy"><h3 data-fit="1">Signature Creator</h3><p>Draw or type a signature and export as a transparent PNG.</p></div>
           <div class="v2-card-foot"><button type="button" disabled>Still being built</button></div>
         </article>
       </div>
@@ -1152,21 +1152,21 @@
             <div class="v2-index-row"><span>01</span><span class="v2-tag">[ Playlist ]</span></div>
             <div class="v2-playlist-body">
               <img class="v2-playlist-cover" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="">
-              <div class="v2-playlist-copy"><h3>pop</h3><p>Playlist on Spotify.</p><div class="v2-card-foot"><a href="https://open.spotify.com/playlist/0xCGn0RL5DNNS7dlbjg5tv" target="_blank" rel="noopener noreferrer">Open on Spotify &#8599;</a></div></div>
+              <div class="v2-playlist-copy"><h3 data-fit="2">pop</h3><p>Playlist on Spotify.</p><div class="v2-card-foot"><a href="https://open.spotify.com/playlist/0xCGn0RL5DNNS7dlbjg5tv" target="_blank" rel="noopener noreferrer">Open on Spotify &#8599;</a></div></div>
             </div>
           </article>
           <article class="v2-panel v2-playlist">
             <div class="v2-index-row"><span>02</span><span class="v2-tag">[ Playlist ]</span></div>
             <div class="v2-playlist-body">
               <img class="v2-playlist-cover" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="">
-              <div class="v2-playlist-copy"><h3>Camon</h3><p>Playlist on Spotify.</p><div class="v2-card-foot"><a href="https://open.spotify.com/playlist/1MhSnhyBju5i36bBWvHbff" target="_blank" rel="noopener noreferrer">Open on Spotify &#8599;</a></div></div>
+              <div class="v2-playlist-copy"><h3 data-fit="2">Camon</h3><p>Playlist on Spotify.</p><div class="v2-card-foot"><a href="https://open.spotify.com/playlist/1MhSnhyBju5i36bBWvHbff" target="_blank" rel="noopener noreferrer">Open on Spotify &#8599;</a></div></div>
             </div>
           </article>
           <article class="v2-panel v2-playlist">
             <div class="v2-index-row"><span>03</span><span class="v2-tag">[ Playlist ]</span></div>
             <div class="v2-playlist-body">
               <img class="v2-playlist-cover" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="">
-              <div class="v2-playlist-copy"><h3>idk</h3><p>Playlist on Spotify.</p><div class="v2-card-foot"><a href="https://open.spotify.com/playlist/7I6Yh3MjLYFaUtnDrpsL4q" target="_blank" rel="noopener noreferrer">Open on Spotify &#8599;</a></div></div>
+              <div class="v2-playlist-copy"><h3 data-fit="2">idk</h3><p>Playlist on Spotify.</p><div class="v2-card-foot"><a href="https://open.spotify.com/playlist/7I6Yh3MjLYFaUtnDrpsL4q" target="_blank" rel="noopener noreferrer">Open on Spotify &#8599;</a></div></div>
             </div>
           </article>
         </div>
@@ -5009,7 +5009,7 @@
 
 </script>
 
-<script src="/ui-v2.js?v=12"></script>
+<script src="/ui-v2.js?v=13"></script>
 
 </body>
 </html>

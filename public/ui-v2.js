@@ -52,13 +52,49 @@
     title.style.fontSize = `${best}px`;
   }
 
+  // Shrinks [data-fit] titles until they fit their box in data-fit lines (1 or 2), down to 70%
+  // of the CSS size. Titles with data-fit-max may then take extra lines, shrinking to 55%.
+  // Re-run whenever a title's text changes or the window resizes.
+  function fitText(scope = document) {
+    const targets = scope.matches?.('[data-fit]') ? [scope] : scope.querySelectorAll('[data-fit]');
+    targets.forEach((el) => {
+      el.style.fontSize = '';
+      if (!el.clientWidth) return;
+      el.classList.add('is-fitting');
+      const lines = Number(el.dataset.fit) || 1;
+      const maxLines = Number(el.dataset.fitMax) || lines;
+      const max = parseFloat(getComputedStyle(el).fontSize);
+      let size = max;
+      // Count rendered lines from the text's line boxes; Anton's tall glyphs make height checks unreliable.
+      const range = document.createRange();
+      range.selectNodeContents(el);
+      const lineCount = () => new Set(Array.from(range.getClientRects(), (rect) => Math.round(rect.top))).size;
+      const fits = (budget) => el.scrollWidth <= el.clientWidth + 1 && lineCount() <= budget;
+      const shrink = (budget, floor) => {
+        while (!fits(budget) && size > floor) {
+          size = Math.max(floor, size * 0.95);
+          el.style.fontSize = `${size}px`;
+        }
+      };
+      shrink(lines, maxLines > lines ? max * 0.7 : max * 0.55);
+      if (!fits(lines) && maxLines > lines) shrink(maxLines, max * 0.55);
+      el.classList.remove('is-fitting');
+    });
+  }
+
+  let resizeFrame = 0;
   window.addEventListener('resize', () => {
-    fitPortfolioTitle();
-    fitHeadline();
+    window.cancelAnimationFrame(resizeFrame);
+    resizeFrame = window.requestAnimationFrame(() => {
+      fitPortfolioTitle();
+      fitHeadline();
+      fitText();
+    });
   });
   document.fonts?.ready.then(() => {
     fitPortfolioTitle();
     fitHeadline();
+    fitText();
   });
 
   // Dubai has no common abbreviation in Intl ("GMT+4"), so its label stays GST in the markup.
@@ -113,6 +149,7 @@
     } catch (_) {
       target.textContent = 'LOCAL PREVIEW';
     }
+    fitText(target);
   }
 
   const fallbackHeadlines = [
@@ -245,11 +282,12 @@
       return `<article class="v2-panel v2-gig">
         <div class="v2-index-row"><span>${String(gigBatch * 5 + index + 1).padStart(2, '0')}</span><span class="v2-tag">[ Event ]</span></div>
         <div class="v2-gig-art">${image ? `<img src="${escapeHtml(image)}" alt="${escapeHtml(gig.artist)}" loading="lazy" decoding="async">` : ''}</div>
-        <h3 title="${escapeHtml(gig.artist)}">${escapeHtml(gig.artist)}</h3>
+        <h3 data-fit="2" title="${escapeHtml(gig.artist)}">${escapeHtml(gig.artist)}</h3>
         <p class="v2-gig-venue" title="${escapeHtml(gig.venue)}">${escapeHtml(gig.venue)}</p><p class="v2-gig-date">${escapeHtml(formatGigDate(gig.date))}</p>
         <a class="v2-gig-link" href="${escapeHtml(link)}" target="_blank" rel="noopener noreferrer">Open details &#8599;</a>
       </article>`;
     }).join('');
+    fitText(list);
     byId('v2GigBatch').textContent = `Batch ${String(gigBatch + 1).padStart(2, '0')} of ${String(batchCount).padStart(2, '0')}`;
     gigTick = 0;
     renderGigTick();
@@ -340,6 +378,7 @@
       const artists = (track.artists || []).join(', ');
       title.textContent = track.name;
       title.title = track.name;
+      fitText(title);
       state.textContent = artists || 'Unknown artist';
       if (statusLine) statusLine.textContent = status;
       const image = safeUrl(track.image);
@@ -370,7 +409,10 @@
         const image = card.querySelector('.v2-playlist-cover');
         const link = card.querySelector('.v2-card-foot a');
         const tag = card.querySelector('.v2-tag');
-        if (playlist.name && heading) heading.textContent = playlist.name;
+        if (playlist.name && heading) {
+          heading.textContent = playlist.name;
+          fitText(heading);
+        }
         const description = descriptionText(playlist.description);
         if (description && text) text.textContent = description;
         const imageUrl = safeUrl(playlist.image);
@@ -514,7 +556,7 @@
     let moving = false;
     let quietUntil = 0;
     let landedAt = 0;
-    let moveTimer = 0;
+    const root = document.documentElement;
 
     function currentIndex() {
       let best = 0;
@@ -526,22 +568,50 @@
       return best;
     }
 
+    // Eased scroll (ease-in-out quint over ~0.9 s) driven by requestAnimationFrame. Scroll-snap
+    // is switched off while it runs so the browser doesn't snap mid-animation, then restored.
+    const SCROLL_MS = 900;
+    const ease = (t) => (t < .5 ? 16 * t ** 5 : 1 - ((-2 * t + 2) ** 5) / 2);
+    let animationFrame = 0;
+
     function goTo(index) {
       const target = sections[Math.max(0, Math.min(sections.length - 1, index))];
       if (!target || target === sections[currentIndex()]) return;
+      const from = window.scrollY;
+      const to = target.getBoundingClientRect().top + from;
       moving = true;
-      target.scrollIntoView({ behavior: reduceMotion.matches ? 'auto' : 'smooth', block: 'start' });
-      // Unlock when the smooth scroll lands; the timeout covers browsers without `scrollend`.
-      window.clearTimeout(moveTimer);
-      moveTimer = window.setTimeout(release, reduceMotion.matches ? 80 : 1000);
+      window.cancelAnimationFrame(animationFrame);
+      if (reduceMotion.matches) {
+        window.scrollTo({ top: to, behavior: 'instant' });
+        release();
+        return;
+      }
+      root.style.scrollSnapType = 'none';
+      const start = performance.now();
+      const step = (now) => {
+        const t = Math.min(1, (now - start) / SCROLL_MS);
+        window.scrollTo({ top: from + (to - from) * ease(t), behavior: 'instant' });
+        if (t < 1) animationFrame = window.requestAnimationFrame(step);
+        else release();
+      };
+      animationFrame = window.requestAnimationFrame(step);
     }
 
     function release() {
-      window.clearTimeout(moveTimer);
+      root.style.scrollSnapType = '';
       if (moving) landedAt = performance.now();
       moving = false;
     }
-    window.addEventListener('scrollend', release);
+
+    // In-page links (nav, scroll cues, back to top) use the same animation.
+    document.addEventListener('click', (event) => {
+      const link = event.target instanceof Element && event.target.closest('a[href^="#v2-"]');
+      if (!paging.matches || !link || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey) return;
+      const index = sections.findIndex((section) => `#${section.id}` === link.getAttribute('href'));
+      if (index < 0) return;
+      event.preventDefault();
+      goTo(index);
+    });
 
     function blockedTarget(target) {
       return document.querySelector('.tool-modal.open') ||

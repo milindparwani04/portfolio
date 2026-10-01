@@ -128,7 +128,7 @@ body.locked { overflow: auto !important; height: auto !important; }
 /* Short weather card (720p-class screens): drop the humidity/wind line rather than squeeze the heading. */
 @container (max-height: 175px) { #v2WeatherExtras { display: none; } }
 .v2-weather .v2-value { font-size: clamp(1.8rem, min(4.4vw, 8.6vh, 30cqh), 5.25rem); }
-.v2-metric h3 { margin: clamp(.4rem, 1.8vh, 1.1rem) 0 .1rem; font-family: var(--display); font-weight: 400; font-size: clamp(1.05rem, min(1.7vw, 3.3vh), 2rem); line-height: 1.1; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.v2-metric h3 { margin: clamp(.4rem, 1.8vh, 1.1rem) 0 .1rem; font-family: var(--display); font-weight: 400; font-size: clamp(1.05rem, min(1.7vw, 3.3vh), 2rem); line-height: 1.1; text-transform: uppercase; }
 .v2-value { margin: .05rem 0; font-family: var(--display); font-size: clamp(2.1rem, min(4.4vw, 8.6vh), 5.25rem); line-height: 1.08; white-space: nowrap; }
 .v2-value small { font-size: .42em; }
 .v2-placeholder { color: var(--v2-dim); }
@@ -146,7 +146,8 @@ body.locked { overflow: auto !important; height: auto !important; }
 .v2-spotify-state { max-width: 100%; margin-top: .15rem; font-size: clamp(.54rem, 1.25vh, .7rem); text-transform: uppercase; }
 .v2-spotify-status { margin-top: clamp(.2rem, .8vh, .45rem); color: var(--v2-dim); font-size: clamp(.5rem, 1.15vh, .64rem); text-align: left; text-transform: uppercase; }
 .v2-spotify-status:empty { display: none; }
-.v2-spotify h3, .v2-spotify-state, .v2-spotify-status { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.v2-spotify h3 { flex: 0 0 auto; }
+.v2-spotify-state, .v2-spotify-status { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .v2-time { grid-area: time; container-type: size; }
 .v2-cities { list-style: none; margin: auto 0; padding: 0; display: flex; flex-direction: column; align-items: center; gap: 2.2cqh; }
@@ -159,11 +160,20 @@ body.locked { overflow: auto !important; height: auto !important; }
 .v2-focus { grid-area: focus; }
 .v2-updated { grid-area: updated; }
 .v2-dashboard > .v2-bottom-card { justify-content: space-between; }
-.v2-bottom-card h3 { margin: 0 0 .25rem; font-family: var(--display); font-weight: 400; font-size: clamp(1.05rem, min(2.1vw, 4.4vh), 2.45rem); line-height: 1; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.v2-bottom-card h3 { margin: 0 0 .25rem; font-family: var(--display); font-weight: 400; font-size: clamp(1.05rem, min(2.1vw, 4.4vh), 2.45rem); line-height: 1; text-transform: uppercase; }
 .v2-bottom-card p { margin: 0; color: var(--v2-dim); font-size: clamp(.54rem, 1.25vh, .72rem); text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .v2-dissertation p { display: flex; gap: .8rem; }
 .v2-dissertation p > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .v2-bottom-card a { flex: 0 0 auto; display: inline-block; color: var(--v2-fg); text-decoration: underline; text-underline-offset: .2em; }
+
+/* Fit-to-box titles (fitText in ui-v2.js): the CSS size is the maximum; long text shrinks
+   until it fits its line budget (data-fit="1" one line, "2" wraps onto a second line). The
+   clamp/ellipsis only shows if text is still too long at the minimum size. */
+[data-fit] { overflow: hidden; }
+[data-fit="1"] { white-space: nowrap; text-overflow: ellipsis; }
+[data-fit="2"] { white-space: normal; overflow-wrap: break-word; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+[data-fit-max="3"] { -webkit-line-clamp: 3; }
+[data-fit].is-fitting { display: block; -webkit-line-clamp: unset; text-overflow: clip; }
 
 .v2-stage { display: flex; flex-direction: column; gap: 10px; min-height: 0; }
 .v2-strip { flex: 0 0 auto; display: flex; flex-wrap: wrap; row-gap: .35rem; background: var(--v2-panel); padding: .75rem 1rem; font-size: .74rem; letter-spacing: .05em; text-transform: uppercase; }
@@ -216,7 +226,7 @@ body.locked { overflow: auto !important; height: auto !important; }
 .v2-tool-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
 .v2-tool { min-width: 0; min-height: 150px; padding: clamp(.6rem, 1.5vh, .9rem) clamp(.7rem, 1vw, .95rem); display: flex; flex-direction: column; overflow: hidden; }
 .v2-tool-copy { margin-top: auto; min-width: 0; min-height: 0; }
-.v2-tool-copy h3 { margin: 0 0 .35rem; font-family: var(--display); font-weight: 400; font-size: clamp(1.15rem, min(2.1vw, 4.3vh), 2.4rem); text-transform: uppercase; line-height: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.v2-tool-copy h3 { margin: 0 0 .35rem; font-family: var(--display); font-weight: 400; font-size: clamp(1.15rem, min(2.1vw, 4.3vh), 2.4rem); text-transform: uppercase; line-height: 1; }
 .v2-tool-copy p { margin: 0 0 clamp(.3rem, .9vh, .55rem); color: var(--v2-fg); font-size: clamp(.58rem, min(.95vw, 1.35vh), .78rem); line-height: 1.5; min-height: 3em; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .v2-tool .v2-card-foot { margin-top: 0; padding-bottom: clamp(.2rem, 1.2vh, .8rem); }
 
@@ -226,7 +236,7 @@ body.locked { overflow: auto !important; height: auto !important; }
 .v2-playlist-body { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: clamp(.6rem, 1vw, .9rem); margin-top: clamp(.5rem, 1.8vh, 1.1rem); }
 .v2-playlist-cover { width: clamp(56px, min(6vw, 10vh), 110px); aspect-ratio: 1; object-fit: cover; display: block; background: var(--v2-panel-raised); }
 .v2-playlist-copy { min-width: 0; display: flex; flex-direction: column; }
-.v2-playlist-copy h3 { margin: 0 0 .2rem; font-family: var(--display); font-weight: 400; font-size: clamp(1.2rem, min(2.3vw, 4.6vh), 2.6rem); line-height: 1; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.v2-playlist-copy h3 { margin: 0 0 .2rem; font-family: var(--display); font-weight: 400; font-size: clamp(1.2rem, min(2.3vw, 4.6vh), 2.6rem); line-height: 1; text-transform: uppercase; }
 .v2-playlist-copy p { margin: 0 0 clamp(.3rem, .9vh, .55rem); font-size: clamp(.56rem, 1.25vh, .72rem); line-height: 1.5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .v2-playlist .v2-card-foot { margin-top: 0; }
 
@@ -262,7 +272,7 @@ body.locked { overflow: auto !important; height: auto !important; }
 .v2-gig { min-width: 0; min-height: 0; padding: clamp(.55rem, 1.4vh, .85rem) clamp(.6rem, .9vw, .85rem); display: flex; flex-direction: column; overflow: hidden; }
 .v2-gig-art { aspect-ratio: 1.05; min-height: 0; margin-top: clamp(.4rem, 1.4vh, .8rem); background: var(--v2-panel-raised); overflow: hidden; }
 .v2-gig-art img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.v2-gig h3 { flex: 0 0 auto; margin: clamp(.45rem, 1.5vh, .85rem) 0 .25rem; font-family: var(--display); font-weight: 400; font-size: clamp(1.05rem, min(2vw, 4.2vh), 2.2rem); line-height: 1; text-transform: uppercase; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.v2-gig h3 { flex: 0 0 auto; margin: clamp(.45rem, 1.5vh, .85rem) 0 .25rem; font-family: var(--display); font-weight: 400; font-size: clamp(1.05rem, min(2vw, 4.2vh), 2.2rem); line-height: 1; text-transform: uppercase; }
 .v2-gig p { flex: 0 0 auto; margin: 0; font-size: clamp(.52rem, 1.15vh, .66rem); letter-spacing: .04em; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .v2-gig-date { color: var(--v2-dim); }
 .v2-gig-link { flex: 0 0 auto; display: block; margin-top: clamp(.35rem, 1vh, .6rem); padding-top: clamp(.45rem, 1.4vh, .85rem); border-top: 1px solid var(--v2-soft-line); text-align: center; font-size: clamp(.56rem, 1.25vh, .72rem); letter-spacing: .05em; text-transform: uppercase; }
