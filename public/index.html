@@ -972,7 +972,7 @@
     .tools{ grid-template-columns:1fr; }
   }
 </style>
-<link rel="stylesheet" href="/ui-v2.css?v=9">
+<link rel="stylesheet" href="/ui-v2.css?v=12">
 </head>
 <body class="locked">
 
@@ -1060,8 +1060,8 @@
     <section class="v2-section" id="v2-journal">
       <div class="v2-section-head"><div class="v2-ref-row"><span class="v2-ref">Ref. 01 / Journal</span><a class="v2-scroll-prev" href="#v2-home">&#8593;&nbsp; Home</a></div><h2 class="v2-section-title">Journal</h2><p class="v2-section-kicker">Writing on economics, work and the way we live.</p></div>
       <div class="v2-stage v2-journal-stage">
-        <article class="v2-panel v2-journal-card">
-          <div class="v2-journal-copy">
+        <div class="v2-journal-grid">
+          <article class="v2-panel v2-journal-card">
             <div class="v2-index-row"><span>01&nbsp; &mdash; &nbsp;Latest entry</span><span class="v2-tag">[ Culture / Society ]</span></div>
             <h3>Karoshi: An Enquiry Into Japan's Work Culture</h3>
             <p>Exploring the cultural, economic and psychological forces behind karoshi, and what it reveals about modern work, value and human limits.</p>
@@ -1069,10 +1069,10 @@
               <div><dt>Status</dt><dd>Researching</dd></div>
               <div><dt>Topic</dt><dd>Culture / Society</dd></div>
             </dl>
-            <a class="v2-tool-action" href="#v2-journal" aria-label="Karoshi article is currently in progress"><span>Article in progress &#8594;</span><span class="v2-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 19l1-4L16 5l3 3L9 18z M14 7l3 3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></span></a>
-          </div>
-          <div class="v2-journal-media"><img src="/assets/ui/journal-karoshi-hd.jpg" alt="Rainy Tokyo street at night" loading="lazy" decoding="async"></div>
-        </article>
+            <span class="v2-journal-status">Article in progress &#8594;</span>
+          </article>
+          <div class="v2-panel v2-journal-media" role="img" aria-label="Article image placeholder"><span>Tokyo / Article image</span></div>
+        </div>
         <div class="v2-strip"><span>01 entry</span><span>New writing appears here as it's finished</span><span>Economics / Work / Culture</span></div>
       </div>
       <a class="v2-scroll-next" href="#v2-projects"><span></span>Scroll&nbsp; / &nbsp;Projects next&nbsp; &#8595;<span></span></a>
@@ -1081,13 +1081,13 @@
     <section class="v2-section" id="v2-projects">
       <div class="v2-section-head"><div class="v2-ref-row"><span class="v2-ref">Ref. 02 / Projects</span><a class="v2-scroll-prev" href="#v2-journal">&#8593;&nbsp; Journal</a></div><h2 class="v2-section-title">Projects</h2><p class="v2-section-kicker">Working experiments across music, finance, travel and games.</p></div>
       <div class="v2-stage v2-project-grid">
-        <article class="v2-panel v2-project"><div class="v2-index-row"><span>01</span><span class="v2-tag">[ Current Focus ]</span></div><div class="v2-project-copy"><h3>Sounds Like</h3><p>A similarity engine for music discovery.</p></div><dl class="v2-project-meta"><div><dt>Status</dt><dd>Phase 02 / Similarity engine</dd></div></dl><a class="v2-tool-action" href="/sounds-like.html"><span>Explore project &#8594;</span><span class="v2-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 12h2M7 8v8M11 5v14M15 9v6M19 11v2" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></span></a></article>
-        <article class="v2-panel v2-project"><div class="v2-index-row"><span>02</span><span class="v2-tag">[ Tool ]</span></div><div class="v2-project-copy"><h3>Prompt Playlist</h3><p>Turn text into personalised playlists.</p></div><dl class="v2-project-meta"><div><dt>Status</dt><dd>Planned</dd></div></dl><span class="v2-tool-action is-disabled"><span>In development</span><span class="v2-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 7v5l3 2" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></span></span></article>
-        <article class="v2-panel v2-project"><div class="v2-index-row"><span>03</span><span class="v2-tag">[ Experiment ]</span></div><div class="v2-project-copy"><h3>Today Somewhere</h3><p>A collection of places, moments and photographs.</p></div><dl class="v2-project-meta"><div><dt>Status</dt><dd>Planned</dd></div></dl><span class="v2-tool-action is-disabled"><span>In development</span><span class="v2-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 7v5l3 2" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></span></span></article>
-        <article class="v2-panel v2-project"><div class="v2-index-row"><span>04</span><span class="v2-tag">[ Tool ]</span></div><div class="v2-project-copy"><h3>Where Next</h3><p>A simple tool for exploring new destinations.</p></div><dl class="v2-project-meta"><div><dt>Status</dt><dd>Planned</dd></div></dl><span class="v2-tool-action is-disabled"><span>In development</span><span class="v2-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 7v5l3 2" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></span></span></article>
-        <article class="v2-panel v2-project"><div class="v2-index-row"><span>05</span><span class="v2-tag">[ Game ]</span></div><div class="v2-project-copy"><h3>Speed Round</h3><p>A fast-paced trivia game for curious minds.</p></div><dl class="v2-project-meta"><div><dt>Status</dt><dd>Planned</dd></div></dl><span class="v2-tool-action is-disabled"><span>In development</span><span class="v2-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 7v5l3 2" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></span></span></article>
-        <article class="v2-panel v2-project"><div class="v2-index-row"><span>06</span><span class="v2-tag">[ Experiment ]</span></div><div class="v2-project-copy"><h3>Untitled Terminal Adventure</h3><p>A text-based experiment in choice and consequence.</p></div><dl class="v2-project-meta"><div><dt>Status</dt><dd>Planned</dd></div></dl><span class="v2-tool-action is-disabled"><span>In development</span><span class="v2-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 7v5l3 2" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></span></span></article>
-        <article class="v2-panel v2-project v2-project-wide"><div class="v2-index-row"><span>07</span><span class="v2-tag">[ Creative Tech ]</span></div><div class="v2-project-copy"><h3>Crack</h3><p>Visual experiments with fracture, distortion and decay.</p></div><dl class="v2-project-meta"><div><dt>Status</dt><dd>Playable</dd></div></dl><a class="v2-tool-action" href="/crack.html"><span>Play &#8594;</span><span class="v2-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5l11 7-11 7z" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></span></a></article>
+        <article class="v2-panel v2-project"><div class="v2-index-row"><span>01</span><span class="v2-tag">[ Current Focus ]</span></div><div class="v2-project-copy"><h3>Sounds Like</h3><p>A similarity engine for music discovery.</p></div><div class="v2-card-foot"><span>Phase 02 / Similarity engine</span><a href="/sounds-like.html">Explore &#8594;</a></div></article>
+        <article class="v2-panel v2-project"><div class="v2-index-row"><span>02</span><span class="v2-tag">[ Tool ]</span></div><div class="v2-project-copy"><h3>Prompt Playlist</h3><p>Turn text into personalised playlists.</p></div><div class="v2-card-foot"><span>Planned</span><span>In development</span></div></article>
+        <article class="v2-panel v2-project"><div class="v2-index-row"><span>03</span><span class="v2-tag">[ Experiment ]</span></div><div class="v2-project-copy"><h3>Today Somewhere</h3><p>A collection of places, moments and photographs.</p></div><div class="v2-card-foot"><span>Planned</span><span>In development</span></div></article>
+        <article class="v2-panel v2-project"><div class="v2-index-row"><span>04</span><span class="v2-tag">[ Tool ]</span></div><div class="v2-project-copy"><h3>Where Next</h3><p>A simple tool for exploring new destinations.</p></div><div class="v2-card-foot"><span>Planned</span><span>In development</span></div></article>
+        <article class="v2-panel v2-project"><div class="v2-index-row"><span>05</span><span class="v2-tag">[ Game ]</span></div><div class="v2-project-copy"><h3>Speed Round</h3><p>A fast-paced trivia game for curious minds.</p></div><div class="v2-card-foot"><span>Planned</span><span>In development</span></div></article>
+        <article class="v2-panel v2-project"><div class="v2-index-row"><span>06</span><span class="v2-tag">[ Experiment ]</span></div><div class="v2-project-copy"><h3>Untitled Terminal Adventure</h3><p>A text-based experiment in choice and consequence.</p></div><div class="v2-card-foot"><span>Planned</span><span>In development</span></div></article>
+        <article class="v2-panel v2-project v2-project-wide"><div class="v2-index-row"><span>07</span><span class="v2-tag">[ Creative Tech ]</span></div><div class="v2-project-copy"><h3>Crack</h3><p>Visual experiments with fracture, distortion and decay.</p></div><div class="v2-card-foot"><span>Playable</span><a href="/crack.html">Play &#8594;</a></div></article>
       </div>
       <a class="v2-scroll-next" href="#v2-tools"><span></span>Scroll&nbsp; / &nbsp;Toolbox next&nbsp; &#8595;<span></span></a>
     </section>
@@ -1097,75 +1097,48 @@
       <div class="v2-stage v2-tool-grid">
         <article class="v2-panel v2-tool">
           <div class="v2-index-row"><span>01</span><span class="v2-tag">[ Media ]</span></div>
-          <div class="v2-tool-body">
-            <div class="v2-thumb" aria-hidden="true"><svg viewBox="0 0 160 100" preserveAspectRatio="xMidYMid slice"><rect width="160" height="100" fill="#0e1622"/><g fill="#dfe6ee"><circle cx="18" cy="14" r=".9"/><circle cx="46" cy="9" r=".7"/><circle cx="64" cy="22" r=".8"/><circle cx="104" cy="12" r=".7"/><circle cx="132" cy="20" r=".9"/><circle cx="150" cy="8" r=".6"/></g><path d="M0 100V70l22-22 14 12 22-30 22 26 16-14 20 20 18-24 26 30v32z" fill="#3a4250"/><path d="M36 60l22-30 22 26M116 64l18-24 26 30" fill="none" stroke="#e8ecf0" stroke-width="1.4"/><path d="M52 38l6-8 6 8-6-2zM128 48l6-8 6 8-6-2z" fill="#e8ecf0"/><path d="M0 100V84l30-12 26 10 30-14 30 12 44-8v28z" fill="#1c222b"/><path d="M80 0v100" stroke="#f4f3ef" stroke-width="1"/><rect x="80" width="80" height="100" fill="#f4f3ef" opacity=".06"/></svg></div>
-            <div class="v2-tool-copy"><h3>Image Converter</h3><p>Convert between JPG, PNG, WEBP and more. Fast, simple, in your browser.</p></div>
-          </div>
-          <button class="v2-tool-action" type="button" data-open-tool="imgConverterModal"><span>Open tool &#8594;</span><span class="v2-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4 16l5-5 4 4 2-2 5 5" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="15.5" cy="9" r="1.4" fill="currentColor"/></svg></span></button>
+          <div class="v2-tool-copy"><h3>Image Converter</h3><p>Convert between JPG, PNG, WEBP and more. Fast, simple, in your browser.</p></div>
+          <div class="v2-card-foot"><button type="button" data-open-tool="imgConverterModal">Open tool &#8594;</button></div>
         </article>
         <article class="v2-panel v2-tool">
           <div class="v2-index-row"><span>02</span><span class="v2-tag">[ Music ]</span></div>
-          <div class="v2-tool-body">
-            <div class="v2-thumb" aria-hidden="true"><svg viewBox="0 0 160 100" preserveAspectRatio="xMidYMid slice"><rect width="160" height="100" fill="#0a0806"/><g stroke="#f7a93b" stroke-width="2.4" stroke-linecap="round"><path d="M80 10v8M56 16l4 7M104 16l-4 7M38 32l7 4M122 32l-7 4M31 52h8M121 52h8M36 72l7-3M124 72l-7-3"/></g><text x="80" y="64" text-anchor="middle" fill="#f7a93b" font-family="'IBM Plex Mono', monospace" font-size="30" letter-spacing="1">120</text><text x="80" y="82" text-anchor="middle" fill="#f7a93b" font-family="'IBM Plex Mono', monospace" font-size="10" letter-spacing="1">BPM</text></svg></div>
-            <div class="v2-tool-copy"><h3>Tempo Tap</h3><p>Tap a tempo to get BPM, milliseconds and note values instantly.</p></div>
-          </div>
-          <button class="v2-tool-action" type="button" data-open-tool="tempoTapModal"><span>Open tool &#8594;</span><span class="v2-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 12h1M7 9v6M10 6v12M13 8v8M16 10v4M19 11v2" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></span></button>
+          <div class="v2-tool-copy"><h3>Tempo Tap</h3><p>Tap a tempo to get BPM, milliseconds and note values instantly.</p></div>
+          <div class="v2-card-foot"><button type="button" data-open-tool="tempoTapModal">Open tool &#8594;</button></div>
         </article>
         <article class="v2-panel v2-tool">
           <div class="v2-index-row"><span>03</span><span class="v2-tag">[ Reference ]</span></div>
-          <div class="v2-tool-body">
-            <div class="v2-thumb" aria-hidden="true"><svg viewBox="0 0 160 100" preserveAspectRatio="xMidYMid slice"><rect width="160" height="100" fill="#2a1a12"/><g stroke="#c9b79c" stroke-width="3"><path d="M24 0v100M68 0v100M110 0v100M150 0v100"/></g><g stroke="#e9e4da"><path d="M0 14h160" stroke-width=".8"/><path d="M0 30h160" stroke-width="1"/><path d="M0 46h160" stroke-width="1.2"/><path d="M0 62h160" stroke-width="1.5"/><path d="M0 78h160" stroke-width="1.8"/><path d="M0 94h160" stroke-width="2.1"/></g><g fill="#f4f3ef"><circle cx="46" cy="54" r="5"/><circle cx="89" cy="54" r="5"/><circle cx="130" cy="38" r="4"/><circle cx="130" cy="70" r="4"/></g></svg></div>
-            <div class="v2-tool-copy"><h3>Key / BPM Lookup</h3><p>Find key, BPM and related scales for any track or chord progression.</p></div>
-          </div>
-          <button class="v2-tool-action" type="button" data-open-tool="bpmLookupModal"><span>Open tool &#8594;</span><span class="v2-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M15 15l5 5" stroke="currentColor" stroke-width="1.6"/></svg></span></button>
+          <div class="v2-tool-copy"><h3>Key / BPM Lookup</h3><p>Find key, BPM and related scales for any track or chord progression.</p></div>
+          <div class="v2-card-foot"><button type="button" data-open-tool="bpmLookupModal">Open tool &#8594;</button></div>
         </article>
         <article class="v2-panel v2-tool">
           <div class="v2-index-row"><span>04</span><span class="v2-tag">[ Utility ]</span></div>
-          <div class="v2-tool-body">
-            <div class="v2-thumb" aria-hidden="true"><svg viewBox="0 0 160 100" preserveAspectRatio="xMidYMid slice"><rect width="160" height="100" fill="#141414"/><rect x="46" y="8" width="68" height="84" rx="9" fill="#050505" stroke="#6b6b6b" stroke-width="1.5"/><rect x="54" y="24" width="52" height="52" fill="#f4f3ef"/><g fill="#050505"><path d="M57 27h14v14H57zM89 27h14v14H89zM57 59h14v14H57z"/></g><g fill="#f4f3ef"><path d="M59 29h10v10H59zM91 29h10v10H91zM59 61h10v10H59z"/></g><g fill="#050505"><path d="M61 31h6v6h-6zM93 31h6v6h-6zM61 63h6v6h-6zM75 27h4v4h-4zM81 31h4v4h-4zM75 35h4v4h-4zM75 45h4v4h-4zM57 45h4v4h-4zM65 49h4v4h-4zM79 49h8v4h-8zM91 45h4v4h-4zM99 49h4v4h-4zM87 55h4v8h-4zM95 59h8v4h-8zM75 59h4v4h-4zM79 67h8v4h-8zM91 67h4v6h-4zM99 67h4v4h-4zM83 41h4v4h-4z"/></g></svg></div>
-            <div class="v2-tool-copy"><h3>QR Code Generator</h3><p>Create QR codes for links, text, contacts and more.</p></div>
-          </div>
-          <button class="v2-tool-action" type="button" data-open-tool="qrGenModal"><span>Open tool &#8594;</span><span class="v2-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4z" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M14 14h2v2h-2zM18 18h2v2h-2zM14 18h2v2h-2zM18 14h2v2h-2z" fill="currentColor"/></svg></span></button>
+          <div class="v2-tool-copy"><h3>QR Code Generator</h3><p>Create QR codes for links, text, contacts and more.</p></div>
+          <div class="v2-card-foot"><button type="button" data-open-tool="qrGenModal">Open tool &#8594;</button></div>
         </article>
         <article class="v2-panel v2-tool is-building">
           <div class="v2-index-row"><span>05</span><span class="v2-tag">[ Audio ]</span></div>
-          <div class="v2-tool-body">
-            <div class="v2-thumb" aria-hidden="true"><svg viewBox="0 0 160 100" preserveAspectRatio="xMidYMid slice"><rect width="160" height="100" fill="#15110d"/><g><rect x="6" y="40" width="12" height="60" fill="#8a3b3b"/><rect x="19" y="34" width="12" height="66" fill="#c9a86a"/><rect x="32" y="44" width="12" height="56" fill="#3f5a7a"/><rect x="45" y="30" width="12" height="70" fill="#b8b1a4"/><rect x="58" y="38" width="12" height="62" fill="#7a2f2f"/><rect x="71" y="36" width="12" height="64" fill="#4e6b58"/><rect x="84" y="42" width="12" height="58" fill="#c36f4c"/><rect x="97" y="32" width="12" height="68" fill="#2f4a6b"/><rect x="110" y="40" width="12" height="60" fill="#d4c6a8"/><rect x="123" y="35" width="12" height="65" fill="#6e3d56"/><rect x="136" y="44" width="12" height="56" fill="#9aa4ad"/><rect x="149" y="38" width="11" height="62" fill="#a14a3a"/></g><g transform="rotate(-8 60 24)"><rect x="34" y="12" width="56" height="20" fill="#efe6d2"/><text x="62" y="27" text-anchor="middle" fill="#1a1a1a" font-family="'Anton', sans-serif" font-size="13">SAMPLES</text></g></svg></div>
-            <div class="v2-tool-copy"><h3>Sample Finder</h3><p>Discover royalty-free samples from curated sources across the web.</p></div>
-          </div>
-          <button class="v2-tool-action" type="button" disabled><span>Still being built</span><span class="v2-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M15 15l5 5" stroke="currentColor" stroke-width="1.6"/></svg></span></button>
+          <div class="v2-tool-copy"><h3>Sample Finder</h3><p>Discover royalty-free samples from curated sources across the web.</p></div>
+          <div class="v2-card-foot"><button type="button" disabled>Still being built</button></div>
         </article>
         <article class="v2-panel v2-tool is-building">
           <div class="v2-index-row"><span>06</span><span class="v2-tag">[ Documents ]</span></div>
-          <div class="v2-tool-body">
-            <div class="v2-thumb" aria-hidden="true"><svg viewBox="0 0 160 100" preserveAspectRatio="xMidYMid slice"><rect width="160" height="100" fill="#cbb89a"/><g stroke="#a8946f" stroke-width=".6" opacity=".7"><path d="M0 12h160M0 24h160M0 36h160M0 48h160M0 60h160M0 72h160M0 84h160M0 96h160M12 0v100M24 0v100M36 0v100M48 0v100M60 0v100M72 0v100M84 0v100M96 0v100M108 0v100M120 0v100M132 0v100M144 0v100"/></g><path d="M58 70q20-6 34-4" fill="none" stroke="#2a2a2a" stroke-width="1.2"/><g transform="rotate(-32 110 50)"><rect x="92" y="42" width="78" height="16" rx="3" fill="#5a1422"/><rect x="86" y="44" width="10" height="12" fill="#d7b46a"/><path d="M86 44l-22 6 22 6z" fill="#d7b46a"/><path d="M64 50h14" stroke="#5a4520" stroke-width="1"/></g></svg></div>
-            <div class="v2-tool-copy"><h3>PDF Editor</h3><p>Merge, split, rotate, reorder and annotate PDF files.</p></div>
-          </div>
-          <button class="v2-tool-action" type="button" disabled><span>Still being built</span><span class="v2-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z M14 3v4h4 M9 12h6M9 15h6M9 18h4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></span></button>
+          <div class="v2-tool-copy"><h3>PDF Editor</h3><p>Merge, split, rotate, reorder and annotate PDF files.</p></div>
+          <div class="v2-card-foot"><button type="button" disabled>Still being built</button></div>
         </article>
         <article class="v2-panel v2-tool">
           <div class="v2-index-row"><span>07</span><span class="v2-tag">[ Audio ]</span></div>
-          <div class="v2-tool-body">
-            <div class="v2-thumb" aria-hidden="true"><svg viewBox="0 0 160 100" preserveAspectRatio="xMidYMid slice"><rect width="160" height="100" fill="#050505"/><g stroke="#71c8ff" stroke-width="1.6" stroke-linecap="round"><path d="M8 50v0M12 47v6M16 44v12M20 40v20M24 46v8M28 36v28M32 42v16M36 30v40M40 38v24M44 44v12M48 34v32M52 26v48M56 38v24M60 42v16M64 30v40M68 22v56M72 36v28M76 40v20M80 28v44M84 34v32M88 24v52M92 38v24M96 30v40M100 42v16M104 34v32M108 26v48M112 40v20M116 32v36M120 44v12M124 36v28M128 42v16M132 38v24M136 46v8M140 42v16M144 47v6M148 49v2"/></g><g stroke="#f4f3ef" stroke-width="1" stroke-dasharray="2 3"><path d="M40 10v80M120 10v80"/></g><g fill="#f4f3ef"><path d="M36 10h8l-4 5zM116 10h8l-4 5zM36 90h8l-4-5zM116 90h8l-4-5z"/></g></svg></div>
-            <div class="v2-tool-copy"><h3>Audio Trimmer</h3><p>Trim, cut and export audio files directly in your browser.</p></div>
-          </div>
-          <button class="v2-tool-action" type="button" data-open-tool="audioTrimModal"><span>Open tool &#8594;</span><span class="v2-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="6" cy="6" r="2.6" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="6" cy="18" r="2.6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 8l12 10M8 16L20 6" stroke="currentColor" stroke-width="1.6"/></svg></span></button>
+          <div class="v2-tool-copy"><h3>Audio Trimmer</h3><p>Trim, cut and export audio files directly in your browser.</p></div>
+          <div class="v2-card-foot"><button type="button" data-open-tool="audioTrimModal">Open tool &#8594;</button></div>
         </article>
         <article class="v2-panel v2-tool">
           <div class="v2-index-row"><span>08</span><span class="v2-tag">[ Security ]</span></div>
-          <div class="v2-tool-body">
-            <div class="v2-thumb" aria-hidden="true"><svg viewBox="0 0 160 100" preserveAspectRatio="xMidYMid slice"><rect width="160" height="100" fill="#050505"/><rect x="14" y="34" width="132" height="30" fill="none" stroke="#f4f3ef" stroke-width="1.2"/><text x="22" y="54" fill="#f4f3ef" font-family="'IBM Plex Mono', monospace" font-size="12.5">k3F!9zP@mQ2v</text><rect x="128" y="42" width="9" height="11" fill="none" stroke="#f4f3ef" stroke-width="1.2"/><path d="M125 45v11h9" fill="none" stroke="#f4f3ef" stroke-width="1.2"/></svg></div>
-            <div class="v2-tool-copy"><h3>Password Generator</h3><p>Create strong, random passwords with custom options.</p></div>
-          </div>
-          <button class="v2-tool-action" type="button" data-open-tool="passwordGenModal"><span>Open tool &#8594;</span><span class="v2-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 11V8a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="16" r="1.4" fill="currentColor"/></svg></span></button>
+          <div class="v2-tool-copy"><h3>Password Generator</h3><p>Create strong, random passwords with custom options.</p></div>
+          <div class="v2-card-foot"><button type="button" data-open-tool="passwordGenModal">Open tool &#8594;</button></div>
         </article>
         <article class="v2-panel v2-tool is-building">
           <div class="v2-index-row"><span>09</span><span class="v2-tag">[ Creative ]</span></div>
-          <div class="v2-tool-body">
-            <div class="v2-thumb" aria-hidden="true"><svg viewBox="0 0 160 100" preserveAspectRatio="xMidYMid slice"><rect width="160" height="100" fill="#050505"/><path d="M16 78c10-10 22-34 30-48 6-10 12-8 8 6-4 16-14 34-10 40 4 6 14-18 20-26 4-5 6 2 2 10-3 6 2 8 8 0 6-8 10-10 12-4 2 5 8 2 14-4 5-5 12-8 22-6" fill="none" stroke="#f4f3ef" stroke-width="1.8" stroke-linecap="round"/><path d="M92 56c14 2 30 0 52-4" fill="none" stroke="#f4f3ef" stroke-width="1.2" stroke-linecap="round"/></svg></div>
-            <div class="v2-tool-copy"><h3>Signature Creator</h3><p>Draw or type a signature and export as a transparent PNG.</p></div>
-          </div>
-          <button class="v2-tool-action" type="button" disabled><span>Still being built</span><span class="v2-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 19l1-4L16 5l3 3L9 18z M14 7l3 3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></span></button>
+          <div class="v2-tool-copy"><h3>Signature Creator</h3><p>Draw or type a signature and export as a transparent PNG.</p></div>
+          <div class="v2-card-foot"><button type="button" disabled>Still being built</button></div>
         </article>
       </div>
       <a class="v2-scroll-next" href="#v2-playlists"><span></span>Scroll&nbsp; / &nbsp;Playlists next&nbsp; &#8595;<span></span></a>

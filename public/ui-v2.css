@@ -127,6 +127,7 @@ body.locked { overflow: auto !important; height: auto !important; }
 .v2-metric > * { flex: 0 0 auto; }
 /* Short weather card (720p-class screens): drop the humidity/wind line rather than squeeze the heading. */
 @container (max-height: 175px) { #v2WeatherExtras { display: none; } }
+.v2-weather .v2-value { font-size: clamp(1.8rem, min(4.4vw, 8.6vh, 30cqh), 5.25rem); }
 .v2-metric h3 { margin: clamp(.4rem, 1.8vh, 1.1rem) 0 .1rem; font-family: var(--display); font-weight: 400; font-size: clamp(1.05rem, min(1.7vw, 3.3vh), 2rem); line-height: 1.1; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .v2-value { margin: .05rem 0; font-family: var(--display); font-size: clamp(2.1rem, min(4.4vw, 8.6vh), 5.25rem); line-height: 1.08; white-space: nowrap; }
 .v2-value small { font-size: .42em; }
@@ -165,7 +166,7 @@ body.locked { overflow: auto !important; height: auto !important; }
 .v2-bottom-card a { flex: 0 0 auto; display: inline-block; color: var(--v2-fg); text-decoration: underline; text-underline-offset: .2em; }
 
 .v2-stage { display: flex; flex-direction: column; gap: 10px; min-height: 0; }
-.v2-strip { display: flex; flex-wrap: wrap; row-gap: .35rem; border: 1px solid var(--v2-line); padding: .75rem 1rem; font-size: .74rem; letter-spacing: .05em; text-transform: uppercase; }
+.v2-strip { flex: 0 0 auto; display: flex; flex-wrap: wrap; row-gap: .35rem; background: var(--v2-panel); padding: .75rem 1rem; font-size: .74rem; letter-spacing: .05em; text-transform: uppercase; }
 .v2-strip span + span::before { content: '/'; margin: 0 1.3rem; color: var(--v2-dim); }
 
 /* Shared outlined action bar: label cell + square icon cell, as in the mockups. */
@@ -182,49 +183,54 @@ body.locked { overflow: auto !important; height: auto !important; }
 
 .v2-tool, .v2-project, .v2-playlist, .v2-gig { transition: outline-color .15s ease; outline: 1px solid transparent; outline-offset: 3px; }
 .v2-tool:hover, .v2-project:hover, .v2-playlist:hover, .v2-gig:hover,
-.v2-tool:focus-within, .v2-project:focus-within, .v2-playlist:focus-within, .v2-gig:focus-within { outline-color: var(--v2-line); }
+.v2-tool:focus-within, .v2-project:focus-within, .v2-playlist:focus-within, .v2-gig:focus-within { outline-color: var(--v2-soft-line); }
 
-/* Journal */
-.v2-journal-card { display: grid; grid-template-columns: minmax(0,.42fr) minmax(0,.58fr); gap: 1.1rem; padding: .9rem; min-height: 380px; overflow: hidden; }
-.v2-journal-copy { min-width: 0; min-height: 0; display: flex; flex-direction: column; }
-.v2-journal-copy h3 { margin: 1rem 0 .8rem; font-family: var(--display); font-weight: 400; font-size: clamp(2.2rem, 4vw, 4.6rem); text-transform: uppercase; line-height: .92; }
-.v2-journal-copy p { margin: 0; color: var(--v2-fg); font-size: .86rem; line-height: 1.6; max-width: 50ch; }
-.v2-journal-meta { margin: 1.2rem 0 1.2rem; border-top: 1px solid var(--v2-soft-line); }
-.v2-journal-meta div { display: flex; justify-content: space-between; gap: 1rem; padding: .6rem 0; border-bottom: 1px solid var(--v2-soft-line); font-size: .76rem; letter-spacing: .05em; text-transform: uppercase; }
+/* Card foot: hairline, status on the left, action on the right. Shared by projects and tools. */
+.v2-card-foot { flex: 0 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-top: auto; padding-top: clamp(.45rem, 1.4vh, .85rem); border-top: 1px solid var(--v2-soft-line); font-size: clamp(.56rem, 1.25vh, .72rem); letter-spacing: .05em; text-transform: uppercase; }
+.v2-card-foot > * { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.v2-card-foot a, .v2-card-foot button { padding: 0; border: 0; background: none; color: var(--v2-fg); font: inherit; letter-spacing: inherit; text-transform: inherit; cursor: pointer; }
+.v2-card-foot a:hover, .v2-card-foot a:focus-visible, .v2-card-foot button:not(:disabled):hover, .v2-card-foot button:not(:disabled):focus-visible { text-decoration: underline; text-underline-offset: .3em; }
+.v2-card-foot button:disabled { cursor: default; }
+
+/* Journal: copy card beside a grey diagonal placeholder panel (no photography yet). */
+.v2-journal-grid { flex: 1 1 auto; min-height: 380px; display: grid; grid-template-columns: minmax(0, .43fr) minmax(0, .57fr); gap: 10px; }
+.v2-journal-card { min-width: 0; min-height: 0; overflow: hidden; padding: clamp(.6rem, 1.5vh, .9rem) clamp(.7rem, 1vw, .95rem); display: flex; flex-direction: column; }
+.v2-journal-card h3 { margin: clamp(.6rem, 2.4vh, 1.5rem) 0 clamp(.5rem, 1.6vh, 1rem); font-family: var(--display); font-weight: 400; font-size: clamp(1.8rem, min(4.2vw, 8vh), 4.8rem); text-transform: uppercase; line-height: .95; }
+.v2-journal-card p { margin: 0; color: var(--v2-fg); font-size: clamp(.66rem, 1.55vh, .88rem); line-height: 1.6; max-width: 58ch; }
+.v2-journal-meta { margin: clamp(.6rem, 2.2vh, 1.4rem) 0 0; }
+.v2-journal-meta div { display: flex; justify-content: space-between; gap: 1rem; padding: clamp(.45rem, 1.6vh, .95rem) 0; border-top: 1px solid var(--v2-soft-line); font-size: clamp(.56rem, 1.25vh, .72rem); letter-spacing: .05em; text-transform: uppercase; }
+.v2-journal-meta div:last-child { border-bottom: 1px solid var(--v2-soft-line); }
 .v2-journal-meta dt { color: var(--v2-dim); }
 .v2-journal-meta dd { margin: 0; }
-.v2-journal-media { min-height: 0; overflow: hidden; border: 1px solid var(--v2-line); }
-.v2-journal-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.v2-journal-status { margin-top: clamp(.5rem, 1.8vh, 1.1rem); color: var(--v2-dim); font-size: clamp(.56rem, 1.25vh, .72rem); letter-spacing: .05em; text-transform: uppercase; }
+.v2-journal-media {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  background: linear-gradient(146deg, #3a3a3a 0%, #262626 30%, #121212 30% 55%, #626262 55% 57.5%, #121212 57.5% 72%, #464646 72% 100%);
+}
+.v2-journal-media span { position: absolute; left: clamp(.7rem, 1.4vw, 1.1rem); bottom: clamp(.6rem, 2vh, 1.1rem); font-size: clamp(.56rem, 1.25vh, .72rem); letter-spacing: .05em; text-transform: uppercase; }
 
 /* Projects */
 .v2-project-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
-.v2-project { min-width: 0; min-height: 190px; padding: .9rem; display: flex; flex-direction: column; overflow: hidden; }
-.v2-project-copy { flex: 1 1 auto; min-height: 0; }
-.v2-project h3 { margin: .8rem 0 .4rem; font-family: var(--display); font-weight: 400; font-size: clamp(1.7rem, 2.5vw, 3rem); text-transform: uppercase; line-height: .95; }
-.v2-project p { margin: 0 0 .8rem; color: var(--v2-fg); font-size: .82rem; line-height: 1.5; }
-.v2-project-meta { margin: 0 0 .8rem; border-top: 1px solid var(--v2-soft-line); }
-.v2-project-meta div { display: flex; justify-content: space-between; gap: 1rem; padding: .5rem 0; border-bottom: 1px solid var(--v2-soft-line); font-size: .74rem; letter-spacing: .05em; text-transform: uppercase; }
-.v2-project-meta dt { color: var(--v2-dim); }
-.v2-project-meta dd { margin: 0; }
-.v2-project-wide { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 1fr) minmax(220px, 30%); grid-template-rows: auto 1fr; column-gap: 1.5rem; min-height: 120px; }
+.v2-project { min-width: 0; min-height: 170px; padding: clamp(.6rem, 1.5vh, .9rem) clamp(.7rem, 1vw, .95rem); display: flex; flex-direction: column; overflow: hidden; }
+.v2-project-copy { min-height: 0; overflow: hidden; }
+.v2-project h3 { margin: clamp(.5rem, 2.2vh, 1.3rem) 0 .35rem; font-family: var(--display); font-weight: 400; font-size: clamp(1.3rem, min(2.4vw, 5vh), 3.2rem); text-transform: uppercase; line-height: .95; }
+.v2-project p { margin: 0 0 .6rem; color: var(--v2-fg); font-size: clamp(.6rem, 1.4vh, .8rem); line-height: 1.5; }
+/* Wide card: title, description and foot share one bottom line. */
+.v2-project-wide { grid-column: 1 / -1; min-height: 110px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(200px, 27%); grid-template-rows: auto minmax(0, 1fr); column-gap: 1.5rem; }
 .v2-project-wide .v2-index-row { grid-column: 1 / -1; }
-.v2-project-wide { grid-template-columns: minmax(0, 1fr) minmax(180px, 20%) minmax(220px, 30%); }
-.v2-project-wide .v2-project-copy { display: flex; align-items: flex-end; gap: 2rem; align-self: end; }
-.v2-project-wide .v2-project-meta { align-self: end; margin: 0; }
-.v2-project-wide h3 { margin: .4rem 0 0; }
-.v2-project-wide p { margin: 0; }
-.v2-project-wide .v2-tool-action { align-self: end; }
+.v2-project-wide .v2-project-copy { display: contents; }
+.v2-project-wide h3, .v2-project-wide p, .v2-project-wide .v2-card-foot { align-self: end; margin: 0; }
+.v2-project-wide p { padding-bottom: .1rem; }
 
-/* Toolbox */
+/* Toolbox: text only. */
 .v2-tool-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
-.v2-tool { min-width: 0; min-height: 210px; padding: .8rem; display: flex; flex-direction: column; gap: .6rem; overflow: hidden; }
-.v2-tool-body { flex: 1 1 auto; min-height: 110px; display: grid; grid-template-columns: minmax(0, .44fr) minmax(0, .56fr); gap: .9rem; }
-.v2-thumb { min-height: 0; border: 1px solid var(--v2-line); overflow: hidden; background: #000; }
-.v2-thumb svg { width: 100%; height: 100%; display: block; }
-.v2-tool-copy { align-self: start; min-width: 0; }
-.v2-tool-copy h3 { margin: 0 0 .45rem; font-family: var(--display); font-weight: 400; font-size: clamp(1.3rem, 2vw, 2.25rem); text-transform: uppercase; line-height: .95; }
-.v2-tool-copy p { margin: 0; color: var(--v2-fg); font-size: .8rem; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
-.v2-tool.is-building .v2-thumb { opacity: .5; }
+.v2-tool { min-width: 0; min-height: 150px; padding: clamp(.6rem, 1.5vh, .9rem) clamp(.7rem, 1vw, .95rem); display: flex; flex-direction: column; overflow: hidden; }
+.v2-tool-copy { margin-top: auto; min-width: 0; min-height: 0; }
+.v2-tool-copy h3 { margin: 0 0 .35rem; font-family: var(--display); font-weight: 400; font-size: clamp(1.15rem, min(2.1vw, 4.3vh), 2.4rem); text-transform: uppercase; line-height: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.v2-tool-copy p { margin: 0 0 clamp(.3rem, .9vh, .55rem); color: var(--v2-fg); font-size: clamp(.58rem, min(.95vw, 1.35vh), .78rem); line-height: 1.5; min-height: 3em; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.v2-tool .v2-card-foot { margin-top: 0; padding-bottom: clamp(.2rem, 1.2vh, .8rem); }
 
 /* Playlists */
 .v2-playlists { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
@@ -327,26 +333,12 @@ body.locked { overflow: auto !important; height: auto !important; }
   #v2-home .v2-display { flex: 0 0 auto; margin: 0 0 clamp(.4rem, 1.2vh, .9rem); line-height: .88; }
   .v2-dashboard { flex: 1 1 auto; min-height: 0; grid-template-rows: minmax(0, 1fr) minmax(0, 1.25fr) minmax(0, .5fr); }
 
-  .v2-journal-card { flex: 1 1 auto; min-height: 0; }
-  .v2-journal-copy h3 { font-size: clamp(1.8rem, min(4vw, 7.4vh), 4.6rem); margin: clamp(.4rem, 1.8vh, 1rem) 0 clamp(.4rem, 1.4vh, .8rem); }
-  .v2-journal-copy p { font-size: clamp(.68rem, 1.6vh, .9rem); }
-  .v2-journal-meta { margin: clamp(.5rem, 2vh, 1.2rem) 0; }
-  .v2-journal-meta div { padding: clamp(.3rem, 1vh, .6rem) 0; font-size: clamp(.62rem, 1.4vh, .78rem); }
+  .v2-journal-grid { min-height: 0; }
   .v2-strip { font-size: clamp(.62rem, 1.4vh, .78rem); padding: clamp(.45rem, 1.3vh, .8rem) 1rem; }
 
   .v2-project-grid { grid-template-rows: minmax(0, 1fr) minmax(0, 1fr) minmax(0, .55fr); }
-  .v2-project { min-height: 0; }
-  .v2-project h3 { font-size: clamp(1.2rem, min(2.35vw, 5.4vh), 3.6rem); margin: clamp(.3rem, 1.4vh, .8rem) 0 .35rem; }
-  .v2-project p { font-size: clamp(.64rem, 1.5vh, .86rem); }
-  .v2-project-meta div { font-size: clamp(.58rem, 1.3vh, .76rem); padding: clamp(.25rem, .9vh, .5rem) 0; }
-  .v2-project-meta { margin-bottom: clamp(.4rem, 1.2vh, .8rem); }
-  .v2-project-wide { min-height: 0; }
-
+  .v2-project, .v2-project-wide, .v2-tool { min-height: 0; }
   .v2-tool-grid { grid-template-rows: repeat(3, minmax(0, 1fr)); }
-  .v2-tool { min-height: 0; gap: clamp(.3rem, 1vh, .6rem); padding: clamp(.45rem, 1.2vh, .8rem); }
-  .v2-tool-body { min-height: 0; }
-  .v2-tool-copy h3 { font-size: clamp(1rem, min(2vw, 3.4vh), 2.25rem); }
-  .v2-tool-copy p { font-size: clamp(.6rem, min(.95vw, 1.45vh), .84rem); -webkit-line-clamp: 3; }
 
   .v2-playlist-stage { gap: clamp(8px, 1.2vh, 12px); }
   .v2-playlists { flex: 1.1 1 0; min-height: 0; }
@@ -381,16 +373,9 @@ body.locked { overflow: auto !important; height: auto !important; }
    drop purely decorative lines so every card still fits its section. */
 @media (min-width: 721px) and (min-height: 620px) and (max-height: 760px) {
   .v2-metric h3 { margin-top: .3rem; }
-  .v2-project { padding: .6rem .7rem; }
-  .v2-project h3 { margin: .3rem 0 .25rem; }
-  .v2-project p { margin-bottom: .35rem; }
-  .v2-project-meta div { padding: .2rem 0; }
-  .v2-project-grid { grid-template-rows: minmax(0, 1fr) minmax(0, 1fr) minmax(0, .5fr); }
 }
 
 @media (max-width: 900px) {
-  .v2-project-grid, .v2-tool-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
-  .v2-project-wide { grid-column: 1 / -1; }
   .v2-playlists { grid-template-columns: 1fr; }
   .v2-tracks { grid-template-columns: 1fr; }
   .v2-gigs { grid-template-columns: repeat(2,1fr); }
@@ -412,12 +397,13 @@ body.locked { overflow: auto !important; height: auto !important; }
   .v2-value { font-size: 2.6rem; }
   .v2-bottom-card h3 { font-size: 1.3rem; }
   .v2-project-grid, .v2-tool-grid, .v2-gigs { grid-template-columns: 1fr; }
-  .v2-journal-card { grid-template-columns: 1fr; grid-template-rows: auto 220px; }
-  .v2-journal-copy h3 { font-size: clamp(2.2rem,9vw,3.3rem); }
+  .v2-journal-grid { grid-template-columns: 1fr; grid-template-rows: auto 220px; }
+  .v2-journal-card h3 { font-size: clamp(2.2rem, 9vw, 3.3rem); }
   .v2-project-wide { grid-column: 1; display: flex; }
   .v2-project-wide .v2-project-copy { display: block; }
-  .v2-project-wide .v2-project-meta { margin: 0 0 .8rem; }
-  .v2-project-wide .v2-tool-action { margin-top: auto; }
+  .v2-project-wide h3 { margin: .8rem 0 .35rem; }
+  .v2-project-wide p { margin-bottom: .6rem; }
+  .v2-project-wide .v2-card-foot { align-self: stretch; margin-top: auto; }
   .v2-strip { flex-direction: column; }
   .v2-strip span + span::before { display: none; }
   .v2-track-row { grid-template-columns: 1.8rem minmax(0, 1fr) 3rem; }
