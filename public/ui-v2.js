@@ -37,7 +37,7 @@
     }
     let low = 48;
     // Capped by height too, so the title never pushes the dashboard out of the home section.
-    let high = Math.min(window.innerWidth * .15, window.innerHeight * .22, 280);
+    let high = Math.min(window.innerWidth * .15, window.innerHeight * .26, 300);
     let best = low;
     for (let i = 0; i < 10; i += 1) {
       const size = (low + high) / 2;
@@ -61,14 +61,27 @@
     fitHeadline();
   });
 
+  // Dubai has no common abbreviation in Intl ("GMT+4"), so its label stays GST in the markup.
+  // London (GMT/BST) and Sydney (AEST/AEDT) follow daylight saving from Intl.
+  const clockCities = [
+    { timeZone: 'Asia/Dubai', time: 'v2TimeDubai' },
+    { timeZone: 'Europe/London', time: 'v2TimeLondon', zone: 'v2ZoneLondon', locale: 'en-GB' },
+    { timeZone: 'Australia/Sydney', time: 'v2TimeSydney', zone: 'v2ZoneSydney', locale: 'en-AU' }
+  ].map((city) => ({
+    ...city,
+    timeFormat: new Intl.DateTimeFormat('en-GB', { timeZone: city.timeZone, hour: '2-digit', minute: '2-digit', hour12: false }),
+    zoneFormat: city.zone ? new Intl.DateTimeFormat(city.locale, { timeZone: city.timeZone, timeZoneName: 'short' }) : null
+  }));
+
   function updateDubaiClock() {
     const now = new Date();
-    const time = new Intl.DateTimeFormat('en-GB', {
-      timeZone: 'Asia/Dubai',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false
-    }).format(now);
+    clockCities.forEach((city) => {
+      const time = byId(city.time);
+      if (time) time.textContent = city.timeFormat.format(now);
+      const zone = city.zone && byId(city.zone);
+      const name = city.zoneFormat && city.zoneFormat.formatToParts(now).find((part) => part.type === 'timeZoneName');
+      if (zone && name) zone.textContent = name.value.toUpperCase();
+    });
     const date = new Intl.DateTimeFormat('en-GB', {
       timeZone: 'Asia/Dubai',
       weekday: 'short',
@@ -76,7 +89,6 @@
       month: 'short',
       year: 'numeric'
     }).format(now).toUpperCase();
-    if (byId('v2Time')) byId('v2Time').textContent = time;
     if (byId('v2Date')) byId('v2Date').textContent = date;
   }
 
@@ -326,6 +338,7 @@
   async function loadNowPlaying() {
     const title = byId('v2NowTitle');
     const state = byId('v2NowState');
+    const statusLine = byId('v2NowStatus');
     const cover = byId('v2NowCover');
     if (!title || !state || !cover) return;
     try {
@@ -340,7 +353,8 @@
       const artists = (track.artists || []).join(', ');
       title.textContent = track.name;
       title.title = track.name;
-      state.textContent = artists ? `${status} / ${artists}` : status;
+      state.textContent = artists || 'Unknown artist';
+      if (statusLine) statusLine.textContent = status;
       const image = safeUrl(track.image);
       if (image && cover.getAttribute('src') !== image) cover.src = image;
       cover.alt = `${track.album || track.name} album artwork`;

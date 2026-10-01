@@ -972,7 +972,7 @@
     .tools{ grid-template-columns:1fr; }
   }
 </style>
-<link rel="stylesheet" href="/ui-v2.css?v=8">
+<link rel="stylesheet" href="/ui-v2.css?v=9">
 </head>
 <body class="locked">
 
@@ -996,64 +996,63 @@
       <h1 class="v2-display">My Digital Portfolio.</h1>
       <div class="v2-dashboard">
         <article class="v2-panel v2-news">
-          <div class="v2-news-copy">
-            <div class="v2-index-row"><span>01&nbsp; — &nbsp; WORLD / HEADLINES</span><span id="v2HeadlineSource" class="v2-tag">[ FEATURED ]</span></div>
-            <h2 id="v2HeadlineTitle">Global markets steady as new data arrives</h2>
-            <p class="v2-news-desc" id="v2HeadlineDesc">Investors assess the latest economic data as markets turn their attention to the months ahead.</p>
-            <div class="v2-rotator"><div class="v2-rotator-line"><span id="v2HeadlineProgress"></span></div><span id="v2HeadlineCount">01 / 01</span></div>
-          </div>
-          <div class="v2-news-media"><img id="v2HeadlineImage" src="/assets/ui/news-markets-hd.jpg" alt="Market display inside a trading hall"></div>
+          <div class="v2-index-row"><span>01&nbsp; &mdash; &nbsp;World / Headlines</span><span id="v2HeadlineSource" class="v2-tag">[ Featured ]</span></div>
+          <h2 id="v2HeadlineTitle">Global markets steady as new data arrives</h2>
+          <p class="v2-news-desc" id="v2HeadlineDesc">Investors assess the latest economic data as markets turn their attention to the months ahead.</p>
         </article>
 
-        <div class="v2-metrics">
-          <article class="v2-panel v2-metric">
-            <div class="v2-index-row"><span>02</span><span class="v2-tag">[ Health ]</span></div>
-            <h3>Heart Rate</h3>
-            <div class="v2-value v2-placeholder" id="v2HeartValue">--<small> BPM</small></div>
-            <svg class="v2-pulse" viewBox="0 0 160 24" preserveAspectRatio="none" aria-hidden="true"><path d="M0 12h160" fill="none" stroke="currentColor" stroke-width="1.2" stroke-dasharray="3 3"/></svg>
-            <p class="v2-metric-foot" id="v2HeartFoot">Awaiting health data source</p>
-          </article>
-          <article class="v2-panel v2-metric">
-            <div class="v2-index-row"><span>03</span><span class="v2-tag">[ Weather ]</span></div>
-            <h3>Dubai Weather</h3>
-            <div class="v2-weather-main">
-              <div class="v2-value" id="v2WeatherTemp">--&deg;C</div>
-              <svg class="v2-sun" id="v2WeatherIcon" viewBox="0 0 64 64" aria-label="Weather icon"><circle cx="32" cy="32" r="10" fill="currentColor"/><g stroke="currentColor" stroke-width="3"><path d="M32 3v10M32 51v10M3 32h10M51 32h10M11.5 11.5l7 7M45.5 45.5l7 7M52.5 11.5l-7 7M18.5 45.5l-7 7"/></g></svg>
-            </div>
-            <p class="v2-metric-foot"><span id="v2WeatherLabel">Loading conditions</span><span id="v2WeatherHighLow">High --&deg; / Low --&deg;</span><span id="v2WeatherExtras">Humidity --% / Wind -- km/h</span></p>
-          </article>
-        </div>
+        <article class="v2-panel v2-about">
+          <div class="v2-index-row"><span>About this space</span><span class="v2-tag">[ 00 ]</span></div>
+          <p>No fixed brief. A growing collection of things I am curious enough to build, research or test right now.</p>
+        </article>
 
-        <div class="v2-submetrics">
-          <article class="v2-panel v2-spotify">
-            <img class="v2-spotify-cover" id="v2NowCover" src="/assets/ui/playlist-work-mode-hd.jpg" alt="Placeholder album artwork">
-            <div class="v2-spotify-copy">
-              <div class="v2-index-row"><span>04</span><span class="v2-spotify-label">[ Spotify ]</span></div>
-              <h3 id="v2NowTitle">Nothing Playing</h3>
-              <div class="v2-spotify-state" id="v2NowState">Listening data will appear here</div>
-            </div>
-          </article>
-          <article class="v2-panel v2-time">
-            <div class="v2-index-row"><span>05</span><span class="v2-tag">[ Time / Location ]</span></div>
-            <strong id="v2Time">--:--</strong>
-            <span class="v2-metric-foot">Dubai / GST<br><span id="v2Date">-- --- ----</span></span>
-          </article>
-        </div>
+        <article class="v2-panel v2-metric v2-heart">
+          <div class="v2-index-row"><span>02</span><span class="v2-tag">[ Health ]</span></div>
+          <h3>Heart Rate</h3>
+          <div class="v2-value v2-placeholder" id="v2HeartValue">--<small> BPM</small></div>
+          <p class="v2-metric-foot" id="v2HeartFoot">Awaiting health data source</p>
+        </article>
 
-        <div class="v2-bottom-metrics">
-          <article class="v2-panel v2-bottom-card">
-            <div class="v2-index-row"><span>06</span><span class="v2-tag">[ Dissertation ]</span></div>
-            <div><h3>Conflict &amp; Risk Preferences</h3><p>Undergraduate literature review <a href="/dissertation.pdf" target="_blank" rel="noopener noreferrer">Read PDF &#8594;</a></p></div>
-          </article>
-          <article class="v2-panel v2-bottom-card">
-            <div class="v2-index-row"><span>07</span><span class="v2-tag">[ Current Focus ]</span></div>
-            <div><h3>Sounds Like</h3><p>Phase 02 / Similarity engine</p></div>
-          </article>
-          <article class="v2-panel v2-bottom-card">
-            <div class="v2-index-row"><span>08</span><span class="v2-tag">[ Site Updated ]</span></div>
-            <div><h3 id="v2LastUpdated">-- --- ----</h3><p>Deployed / Main</p></div>
-          </article>
-        </div>
+        <article class="v2-panel v2-metric v2-weather">
+          <div class="v2-index-row"><span>03</span><span class="v2-tag">[ Weather ]</span></div>
+          <h3>Dubai Weather</h3>
+          <div class="v2-weather-main">
+            <div class="v2-value" id="v2WeatherTemp">--&deg;C</div>
+            <svg class="v2-sun" id="v2WeatherIcon" viewBox="0 0 64 64" aria-label="Weather icon"><circle cx="32" cy="32" r="10" fill="currentColor"/><g stroke="currentColor" stroke-width="3"><path d="M32 3v10M32 51v10M3 32h10M51 32h10M11.5 11.5l7 7M45.5 45.5l7 7M52.5 11.5l-7 7M18.5 45.5l-7 7"/></g></svg>
+          </div>
+          <p class="v2-metric-foot"><span id="v2WeatherLabel">Loading conditions</span><span id="v2WeatherHighLow">High --&deg; / Low --&deg;</span><span id="v2WeatherExtras">Humidity --% / Wind -- km/h</span></p>
+        </article>
+
+        <article class="v2-panel v2-spotify">
+          <div class="v2-index-row"><span>04</span><span class="v2-spotify-label">[ Spotify ]</span></div>
+          <div class="v2-spotify-art"><img class="v2-spotify-cover" id="v2NowCover" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt=""></div>
+          <h3 id="v2NowTitle">Nothing Playing</h3>
+          <div class="v2-spotify-state" id="v2NowState">Listening data will appear here</div>
+          <div class="v2-spotify-status" id="v2NowStatus"></div>
+        </article>
+
+        <article class="v2-panel v2-time">
+          <div class="v2-index-row"><span>05</span><span class="v2-tag">[ Time / Location ]</span></div>
+          <ul class="v2-cities">
+            <li><strong id="v2TimeDubai">--:--</strong><span>Dubai / <span id="v2ZoneDubai">GST</span></span></li>
+            <li><strong id="v2TimeLondon">--:--</strong><span>London / <span id="v2ZoneLondon">--</span></span></li>
+            <li><strong id="v2TimeSydney">--:--</strong><span>Sydney / <span id="v2ZoneSydney">--</span></span></li>
+          </ul>
+          <span class="v2-time-date" id="v2Date">-- --- ----</span>
+        </article>
+
+        <article class="v2-panel v2-bottom-card v2-dissertation">
+          <div class="v2-index-row"><span>06</span><span class="v2-tag">[ Dissertation ]</span></div>
+          <div><h3>Conflict &amp; Risk Preferences</h3><p><span>Undergraduate literature review</span><a href="/dissertation.pdf" target="_blank" rel="noopener noreferrer">Read PDF &#8594;</a></p></div>
+        </article>
+        <article class="v2-panel v2-bottom-card v2-focus">
+          <div class="v2-index-row"><span>07</span><span class="v2-tag">[ Current Focus ]</span></div>
+          <div><h3>Sounds Like</h3><p>Phase 02 / Similarity engine</p></div>
+        </article>
+        <article class="v2-panel v2-bottom-card v2-updated">
+          <div class="v2-index-row"><span>08</span><span class="v2-tag">[ Site Updated ]</span></div>
+          <div><h3 id="v2LastUpdated">-- --- ----</h3><p>Deployed / Main</p></div>
+        </article>
       </div>
       <a class="v2-scroll-next" href="#v2-journal"><span></span>Scroll&nbsp; / &nbsp;Journal next&nbsp; &#8595;<span></span></a>
     </section>
@@ -5030,7 +5029,7 @@
 
 </script>
 
-<script src="/ui-v2.js?v=10"></script>
+<script src="/ui-v2.js?v=11"></script>
 
 </body>
 </html>
