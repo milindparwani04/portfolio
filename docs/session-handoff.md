@@ -114,7 +114,8 @@ Tested (how, result):
 - Screenshots at 1280×720 of every section compared with the mockups.
 - APIs down (all `/api/*` returning 503): every card keeps its layout; gigs show the empty-state message; covers stay grey.
 - Keyboard: PageDown steps Home → Journal → Projects → Toolbox → Playlists → Gigs, Home returns; Tab focus shows the 2 px outline; Toolbox buttons open their modals and Escape closes them; Back to top works. Gig next/pause controls and the Tracks/Artists toggle work.
-- Lighthouse (Edge headless, mobile): production before 68 performance / 100 accessibility / 100 best practices; local build 89 / 100 / 96. The two remaining best-practice flags are local-only (APIs 503 without secrets, `wrangler dev` source map).
+- Lighthouse (Edge headless, mobile): production before 68 performance / 100 accessibility / 100 best practices (LCP 6.4 s); production after 90 / 100 / 100 (LCP 3.3 s, CLS 0.012).
+- Production (deployed from `main` at `ef1b737`, 2026-10-01 16:32 UTC): overlap/clip check passes on all six sections at 1280×720, 1366×657, 1920×969 and 390×844 with live data — heart rate, now-playing cover, three playlist covers and track counts, October top tracks, 5 gig cards with photos (batch 1 of 2), three clocks, deploy date.
 Known issues / not done:
 - Playlist descriptions are empty on Spotify, so cards say "Playlist on Spotify." Adding a description on Spotify will show it automatically.
 - On 720p-class screens the weather card hides its humidity/wind line to keep the heading readable.

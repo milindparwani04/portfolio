@@ -21,7 +21,7 @@ An item only moves to `Live` after the Definition of Done in the [Rulebook](agen
 | NF-07 | SEO / sharing | Title, meta description, Open Graph image, favicon, sitemap, robots.txt | Planned |
 | NF-08 | Analytics | Cloudflare Web Analytics (cookie-free, no banner needed) | Planned |
 | NF-09 | Source control | Code in a Git repo; deploys via `wrangler deploy` from main only; tagged releases | Built (partial) — repo live at github.com/milindparwani04/portfolio, feature-branch + PR workflow in active use (PRs #2–#7), Cloudflare auto-builds from `main`. No tagged releases yet. Non-production branch builds currently also deploy to production — command must be changed to `npx wrangler versions upload`. |
-| NF-10 | Design fidelity | Predominantly monochrome grey-box panels; colour only in real Spotify covers, gig artist photos, weather icon and Spotify label; IBM Plex Mono + Anton; REF. labelling | Built — all six sections matched to the Soft Monolith mockups on 2026-10-01 |
+| NF-10 | Design fidelity | Predominantly monochrome grey-box panels; colour only in real Spotify covers, gig artist photos, weather icon and Spotify label; IBM Plex Mono + Anton; REF. labelling | Live 2026-10-01 — all six sections matched to the Soft Monolith mockups; verified in production |
 
 ## Site shell and sections
 
