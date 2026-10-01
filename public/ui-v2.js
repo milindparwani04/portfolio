@@ -211,26 +211,8 @@
   loadWeather();
   window.setInterval(loadWeather, 30 * 60 * 1000);
 
-  const gigFallback = [
-    { artist: 'Palace', venue: 'O2 Academy Brixton, London', date: '2026-10-07' },
-    { artist: 'Parcels', venue: 'Roundhouse, London', date: '2026-10-12' },
-    { artist: 'Men I Trust', venue: 'Troxy, London', date: '2026-10-18' },
-    { artist: 'Khruangbin', venue: 'Alexandra Palace, London', date: '2026-10-24' },
-    { artist: 'Fontaines D.C.', venue: 'Victoria Park, London', date: '2026-11-02' },
-    { artist: 'Jungle', venue: 'Wembley Arena, London', date: '2026-11-08' },
-    { artist: 'Alvvays', venue: 'EartH, London', date: '2026-11-15' },
-    { artist: 'Beabadoobee', venue: 'Brixton Academy, London', date: '2026-11-21' },
-    { artist: 'King Krule', venue: 'Troxy, London', date: '2026-12-02' },
-    { artist: 'The Midnight', venue: 'Forum, London', date: '2026-12-09' }
-  ];
-  const gigImages = [
-    '/assets/ui/gig-city-arena-hd.jpg',
-    '/assets/ui/gig-harbour-stage-hd.jpg',
-    '/assets/ui/gig-blue-room-hd.jpg',
-    '/assets/ui/gig-river-hall-hd.jpg',
-    '/assets/ui/gig-central-live-hd.jpg'
-  ];
-  let gigs = gigFallback;
+  let gigs = [];
+  let gigsLoading = true;
   let gigBatch = 0;
   let gigPaused = false;
 
@@ -243,25 +225,29 @@
   function renderGigs() {
     const list = byId('v2GigList');
     if (!list) return;
+    if (!gigs.length) {
+      const message = gigsLoading ? 'Loading upcoming gigs&hellip;' : 'No upcoming gigs to show right now. Check back soon.';
+      list.innerHTML = `<div class="v2-panel v2-gig-empty">${message}</div>`;
+      byId('v2GigBatch').textContent = 'Batch 00 of 00';
+      gigTick = 0;
+      renderGigTick();
+      return;
+    }
     const batchCount = Math.max(1, Math.ceil(gigs.length / 5));
     gigBatch = (gigBatch + batchCount) % batchCount;
-    let batch = gigs.slice(gigBatch * 5, gigBatch * 5 + 5);
-    if (batch.length < 5) batch = batch.concat(gigs.slice(0, 5 - batch.length));
+    const batch = gigs.slice(gigBatch * 5, gigBatch * 5 + 5);
     list.innerHTML = batch.map((gig, index) => {
-      // Ticketmaster listing photo and ticket page when the API has them; stock art and a
-      // search link otherwise (fallback data, or listings without images).
-      const listingImage = /^https:\/\//.test(gig.image || '') ? gig.image : '';
-      const image = listingImage || gigImages[index];
-      const alt = listingImage ? `${gig.artist} performing` : 'Illustrative concert venue atmosphere';
+      // Artist photo and ticket page from the API; a plain grey block when there is no photo.
+      const image = /^https:\/\//.test(gig.image || '') ? gig.image : '';
       const link = /^https:\/\//.test(gig.url || '')
         ? gig.url
         : `https://www.google.com/search?q=${encodeURIComponent(`${gig.artist} ${gig.venue} tickets`)}`;
       return `<article class="v2-panel v2-gig">
-        <div class="v2-index-row"><span>${String(index + 1).padStart(2, '0')}</span><span class="v2-tag">[ Event ]</span></div>
-        <img src="${escapeHtml(image)}" alt="${escapeHtml(alt)}" loading="lazy" decoding="async">
-        <h3>${escapeHtml(gig.artist)}</h3>
-        <p>${escapeHtml(gig.venue)}</p><p>${escapeHtml(formatGigDate(gig.date))}</p>
-        <a href="${escapeHtml(link)}" target="_blank" rel="noopener noreferrer">Open details &#8599;</a>
+        <div class="v2-index-row"><span>${String(gigBatch * 5 + index + 1).padStart(2, '0')}</span><span class="v2-tag">[ Event ]</span></div>
+        <div class="v2-gig-art">${image ? `<img src="${escapeHtml(image)}" alt="${escapeHtml(gig.artist)}" loading="lazy" decoding="async">` : ''}</div>
+        <h3 title="${escapeHtml(gig.artist)}">${escapeHtml(gig.artist)}</h3>
+        <p class="v2-gig-venue" title="${escapeHtml(gig.venue)}">${escapeHtml(gig.venue)}</p><p class="v2-gig-date">${escapeHtml(formatGigDate(gig.date))}</p>
+        <a class="v2-gig-link" href="${escapeHtml(link)}" target="_blank" rel="noopener noreferrer">Open details &#8599;</a>
       </article>`;
     }).join('');
     byId('v2GigBatch').textContent = `Batch ${String(gigBatch + 1).padStart(2, '0')} of ${String(batchCount).padStart(2, '0')}`;
@@ -289,10 +275,11 @@
       if (!Array.isArray(payload) || !payload.length) throw new Error('No gigs');
       gigs = payload;
       gigBatch = 0;
-      renderGigs();
     } catch (_) {
-      gigs = gigFallback;
+      gigs = [];
     }
+    gigsLoading = false;
+    renderGigs();
   }
 
   byId('v2GigPrev')?.addEventListener('click', () => { gigBatch -= 1; renderGigs(); });
@@ -380,8 +367,8 @@
         if (!card || !playlist) return;
         const heading = card.querySelector('h3');
         const text = card.querySelector('.v2-playlist-copy p');
-        const image = card.querySelector('.v2-playlist-body img');
-        const link = card.querySelector('.v2-tool-action');
+        const image = card.querySelector('.v2-playlist-cover');
+        const link = card.querySelector('.v2-card-foot a');
         const tag = card.querySelector('.v2-tag');
         if (playlist.name && heading) heading.textContent = playlist.name;
         const description = descriptionText(playlist.description);
@@ -410,17 +397,17 @@
     const items = (artistsMode ? listening.artists : listening.tracks) || [];
     const fromLog = listening.source === 'log';
     const maxPlays = Math.max(1, ...items.map((item) => item.plays || 0));
-    byId('v2TopTitle').textContent = artistsMode ? 'Top Artists' : 'Top Tracks';
-    byId('v2TopPeriod').textContent = `${fromLog ? 'This month' : 'Last 4 weeks'} / Top 5 ${artistsMode ? 'artists' : 'songs'}`;
+    const month = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Dubai', month: 'long' }).format(new Date());
+    byId('v2TopTitle').textContent = fromLog ? 'Top this month' : 'Top last 4 weeks';
+    byId('v2TopPeriod').textContent = `[ ${fromLog ? month : 'Last 4 weeks'} / ${artistsMode ? 'Artists' : 'Tracks'} ]`;
     table.setAttribute('aria-label', `Top ${topMode} ${fromLog ? 'this month' : 'over the last 4 weeks'}`);
-    const header = `<div class="v2-track-row v2-track-header" role="row"><span role="columnheader">#</span><span></span><span role="columnheader">${artistsMode ? 'Artist' : 'Track'}</span><span role="columnheader">${artistsMode ? '' : 'Artist'}</span><span role="columnheader">Plays</span><span></span></div>`;
+    const header = `<div class="v2-track-row v2-track-header" role="row"><span role="columnheader">${artistsMode ? 'Artist' : 'Track'}</span><span role="columnheader">${artistsMode ? '' : 'Artist'}</span><span></span><span role="columnheader">Plays</span></div>`;
     const rows = Array.from({ length: 5 }, (_, index) => {
       const item = items[index];
       if (!item) {
-        return `<div class="v2-track-row" role="row"><span role="cell">${pad2(index + 1)}</span><span class="v2-track-art"></span><span role="cell">Not enough listening yet</span><span role="cell">--</span><span role="cell">--</span><span class="v2-track-bar"><i></i></span></div>`;
+        return '<div class="v2-track-row" role="row"><span role="cell">Not enough listening yet</span><span role="cell">--</span><span class="v2-track-bar" aria-hidden="true"><i></i></span><span role="cell">--</span></div>';
       }
       const url = safeUrl(item.url);
-      const image = safeUrl(item.image);
       const name = url
         ? `<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(item.name)}</a>`
         : escapeHtml(item.name);
@@ -428,7 +415,7 @@
       const hasPlays = Number.isFinite(item.plays);
       // No bar without real play counts — a rank-shaped bar would imply numbers we don't have.
       const width = hasPlays ? Math.round((item.plays / maxPlays) * 100) : 0;
-      return `<div class="v2-track-row" role="row"><span role="cell">${pad2(index + 1)}</span><span class="v2-track-art">${image ? `<img src="${escapeHtml(image)}" alt="" loading="lazy" decoding="async">` : ''}</span><span role="cell">${name}</span><span role="cell">${second}</span><span role="cell">${hasPlays ? item.plays : '--'}</span><span class="v2-track-bar"><i style="width:${width}%"></i></span></div>`;
+      return `<div class="v2-track-row" role="row"><span role="cell">${name}</span><span role="cell">${second}</span><span class="v2-track-bar" aria-hidden="true"><i style="width:${width}%"></i></span><span role="cell">${hasPlays ? item.plays : '--'}</span></div>`;
     });
     table.innerHTML = header + rows.join('');
   }

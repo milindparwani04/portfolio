@@ -169,18 +169,6 @@ body.locked { overflow: auto !important; height: auto !important; }
 .v2-strip { flex: 0 0 auto; display: flex; flex-wrap: wrap; row-gap: .35rem; background: var(--v2-panel); padding: .75rem 1rem; font-size: .74rem; letter-spacing: .05em; text-transform: uppercase; }
 .v2-strip span + span::before { content: '/'; margin: 0 1.3rem; color: var(--v2-dim); }
 
-/* Shared outlined action bar: label cell + square icon cell, as in the mockups. */
-.v2-tool-action { width: 100%; height: 42px; flex: 0 0 auto; display: flex; align-items: stretch; justify-content: space-between; margin-top: auto; border: 1px solid var(--v2-line); background: transparent; color: var(--v2-fg); padding: 0; font-family: var(--mono); font-size: .82rem; letter-spacing: .05em; text-align: left; text-transform: uppercase; cursor: pointer; }
-.v2-tool-action > span:first-child { display: flex; align-items: center; padding: 0 1rem; white-space: nowrap; overflow: hidden; }
-.v2-action-icon { height: 100%; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; border-left: 1px solid var(--v2-line); }
-.v2-action-icon svg { width: 52%; height: 52%; max-width: 24px; max-height: 24px; }
-.v2-tool-action:not(:disabled):not(.is-disabled):hover,
-.v2-tool-action:not(:disabled):not(.is-disabled):focus-visible { background: var(--v2-fg); color: var(--v2-bg); }
-.v2-tool-action:disabled, .v2-tool-action.is-disabled { cursor: default; color: var(--v2-dim); border-color: var(--v2-soft-line); }
-.v2-tool-action:disabled .v2-action-icon, .v2-tool-action.is-disabled .v2-action-icon { border-color: var(--v2-soft-line); }
-.v2-spotify-icon { color: var(--v2-green); }
-.v2-tool-action:hover .v2-spotify-icon, .v2-tool-action:focus-visible .v2-spotify-icon { color: var(--v2-green); }
-
 .v2-tool, .v2-project, .v2-playlist, .v2-gig { transition: outline-color .15s ease; outline: 1px solid transparent; outline-offset: 3px; }
 .v2-tool:hover, .v2-project:hover, .v2-playlist:hover, .v2-gig:hover,
 .v2-tool:focus-within, .v2-project:focus-within, .v2-playlist:focus-within, .v2-gig:focus-within { outline-color: var(--v2-soft-line); }
@@ -232,66 +220,66 @@ body.locked { overflow: auto !important; height: auto !important; }
 .v2-tool-copy p { margin: 0 0 clamp(.3rem, .9vh, .55rem); color: var(--v2-fg); font-size: clamp(.58rem, min(.95vw, 1.35vh), .78rem); line-height: 1.5; min-height: 3em; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .v2-tool .v2-card-foot { margin-top: 0; padding-bottom: clamp(.2rem, 1.2vh, .8rem); }
 
-/* Playlists */
+/* Playlists: compact cover cards over the listening-history table. */
 .v2-playlists { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
-.v2-playlist { min-width: 0; min-height: 250px; padding: .8rem; display: flex; flex-direction: column; gap: .6rem; overflow: hidden; }
-.v2-playlist-body { flex: 1 1 auto; min-height: 130px; display: grid; grid-template-columns: minmax(0, .44fr) minmax(0, .56fr); gap: .9rem; }
-.v2-playlist-body img { width: 100%; height: 100%; min-height: 0; object-fit: cover; display: block; border: 1px solid var(--v2-line); }
-.v2-playlist-copy { min-width: 0; }
-.v2-playlist-copy h3 { margin: 0 0 .6rem; font-family: var(--display); font-weight: 400; font-size: clamp(1.4rem, 2.2vw, 2.4rem); text-transform: uppercase; line-height: .95; }
-.v2-playlist-copy p { margin: 0; font-size: .8rem; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+.v2-playlist { min-width: 0; padding: clamp(.6rem, 1.5vh, .9rem) clamp(.7rem, 1vw, .95rem); display: flex; flex-direction: column; overflow: hidden; }
+.v2-playlist-body { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: clamp(.6rem, 1vw, .9rem); margin-top: clamp(.5rem, 1.8vh, 1.1rem); }
+.v2-playlist-cover { width: clamp(56px, min(6vw, 10vh), 110px); aspect-ratio: 1; object-fit: cover; display: block; background: var(--v2-panel-raised); }
+.v2-playlist-copy { min-width: 0; display: flex; flex-direction: column; }
+.v2-playlist-copy h3 { margin: 0 0 .2rem; font-family: var(--display); font-weight: 400; font-size: clamp(1.2rem, min(2.3vw, 4.6vh), 2.6rem); line-height: 1; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.v2-playlist-copy p { margin: 0 0 clamp(.3rem, .9vh, .55rem); font-size: clamp(.56rem, 1.25vh, .72rem); line-height: 1.5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.v2-playlist .v2-card-foot { margin-top: 0; }
 
-.v2-tracks { display: grid; grid-template-columns: minmax(170px, .26fr) minmax(0, 1fr); grid-template-rows: auto 1fr; column-gap: 1rem; padding: .8rem .9rem .9rem; min-height: 0; }
-.v2-tracks-top { grid-column: 1 / -1; }
-.v2-tracks-head h3 { white-space: nowrap; margin: .35rem 0 .45rem; font-family: var(--display); font-weight: 400; font-size: clamp(2rem, 3.9vw, 4.2rem); text-transform: uppercase; line-height: .9; }
-.v2-tracks-head p { margin: 0; font-size: .8rem; letter-spacing: .06em; text-transform: uppercase; }
-.v2-tracks-table { display: grid; grid-template-rows: auto repeat(5, minmax(34px, 1fr)); min-height: 0; }
-.v2-track-row { display: grid; grid-template-columns: 2.2rem 2.4rem minmax(0, 1.3fr) minmax(0, 1fr) 3.5rem minmax(80px, 1.1fr); align-items: center; gap: .9rem; padding: 0 .9rem; border: 1px solid var(--v2-line); border-top: 0; min-height: 0; font-size: .82rem; }
+.v2-tracks { min-height: 0; padding: clamp(.6rem, 1.5vh, .9rem) clamp(.7rem, 1vw, .95rem); display: flex; flex-direction: column; overflow: hidden; }
+.v2-tracks-head { flex: 0 0 auto; display: flex; align-items: flex-end; justify-content: space-between; gap: 1rem; margin: clamp(.5rem, 2vh, 1.2rem) 0 clamp(.35rem, 1vh, .6rem); }
+.v2-tracks-head h3 { margin: 0; font-family: var(--display); font-weight: 400; font-size: clamp(1.5rem, min(3vw, 5.6vh), 3.4rem); line-height: 1; text-transform: uppercase; white-space: nowrap; }
+.v2-top-toggle { display: flex; gap: 4px; }
+.v2-top-toggle[hidden] { display: none; }
+.v2-top-toggle button { padding: .3rem .65rem; border: 0; background: var(--v2-panel-raised); color: var(--v2-fg); font: inherit; font-size: clamp(.54rem, 1.2vh, .68rem); letter-spacing: .06em; text-transform: uppercase; cursor: pointer; }
+.v2-top-toggle button[aria-pressed="true"] { background: var(--v2-fg); color: var(--v2-bg); }
+.v2-tracks-table { position: relative; flex: 1 1 auto; min-height: 0; display: grid; grid-template-rows: repeat(5, minmax(38px, 1fr)); }
+.v2-track-row { min-height: 0; display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1.25fr) minmax(0, 1.6fr) 3rem; align-items: center; gap: clamp(.8rem, 1.6vw, 1.6rem); border-top: 1px solid var(--v2-soft-line); font-size: clamp(.56rem, 1.3vh, .74rem); letter-spacing: .04em; text-transform: uppercase; }
 .v2-track-row > span { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.v2-track-header { border: 0; border-bottom: 1px solid var(--v2-line); padding-bottom: .4rem; font-size: .7rem; letter-spacing: .05em; text-transform: uppercase; }
-.v2-track-row:not(.v2-track-header) > span:nth-child(n+3):nth-child(-n+5) { color: var(--v2-dim); }
-.v2-track-art { height: min(30px, 70%); aspect-ratio: 1; border: 1px dashed var(--v2-soft-line); }
-.v2-track-bar { height: 16px; border: 1px solid var(--v2-line); }
+.v2-track-row > span:nth-child(2) { color: var(--v2-dim); }
+.v2-track-row > span:last-child { text-align: right; }
+/* Column headers stay for screen readers; the mockup has no visible header row. */
+.v2-track-header { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.v2-track-bar { height: clamp(3px, .55vh, 5px); background: rgba(244, 243, 239, .14); }
 .v2-track-bar i { display: block; width: 0; height: 100%; background: var(--v2-fg); }
-.v2-track-art img { display: block; width: 100%; height: 100%; object-fit: cover; }
-.v2-track-art:has(img) { border-style: solid; border-color: var(--v2-line); }
 .v2-track-row a { color: inherit; text-decoration: none; }
 .v2-track-row a:hover, .v2-track-row a:focus-visible { text-decoration: underline; }
-.v2-top-toggle { display: flex; gap: 6px; margin-top: .7rem; }
-.v2-top-toggle button { padding: .3rem .6rem; border: 1px solid var(--v2-line); background: transparent; color: var(--v2-fg); font: inherit; font-size: .68rem; letter-spacing: .06em; text-transform: uppercase; cursor: pointer; }
-.v2-top-toggle button[aria-pressed="true"] { background: var(--v2-fg); color: var(--v2-bg); }
-.v2-spotify h3, .v2-spotify-state { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* Gig finder */
-.v2-gig-controls { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, .45fr); border: 1px solid var(--v2-line); font-size: .8rem; letter-spacing: .05em; text-transform: uppercase; }
-.v2-gig-status { display: flex; align-items: center; padding: .8rem 1rem; white-space: nowrap; overflow: hidden; }
-.v2-gig-buttons { display: flex; align-items: center; gap: .9rem; padding: .4rem .9rem; border-left: 1px solid var(--v2-line); border-right: 1px solid var(--v2-line); }
-.v2-gig-buttons button { width: 50px; height: 40px; border: 1px solid var(--v2-line); background: transparent; color: var(--v2-fg); font-size: 1.15rem; cursor: pointer; }
+.v2-gig-controls { flex: 0 0 auto; display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 1rem; background: var(--v2-panel); padding: clamp(.4rem, 1.2vh, .75rem) clamp(.7rem, 1vw, .95rem); font-size: clamp(.56rem, 1.25vh, .72rem); letter-spacing: .05em; text-transform: uppercase; }
+.v2-gig-status { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.v2-gig-buttons { display: flex; background: var(--v2-panel-raised); }
+.v2-gig-buttons button { width: clamp(32px, 2.8vw, 42px); height: clamp(26px, 4.4vh, 36px); border: 0; background: transparent; color: var(--v2-fg); font: inherit; font-size: .95rem; cursor: pointer; }
 .v2-gig-buttons button:hover, .v2-gig-buttons button:focus-visible { background: var(--v2-fg); color: var(--v2-bg); }
-.v2-gig-timer { display: flex; align-items: center; gap: 1.2rem; padding: .8rem 1rem; }
-.v2-gig-progress { flex: 1; height: 14px; border: 1px solid var(--v2-line); }
+.v2-gig-timer { display: flex; align-items: center; justify-content: flex-end; gap: .9rem; white-space: nowrap; }
+.v2-gig-progress { width: clamp(50px, 6vw, 96px); height: 1px; background: var(--v2-soft-line); }
 .v2-gig-progress span { display: block; width: 0; height: 100%; background: var(--v2-fg); transition: width 1s linear; }
 .v2-gigs { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; min-height: 0; }
-.v2-gig { min-width: 0; min-height: 0; padding: .7rem; display: flex; flex-direction: column; overflow: hidden; }
-.v2-gig img { width: 100%; aspect-ratio: 1.02; margin-top: .6rem; object-fit: cover; display: block; border: 1px solid var(--v2-line); filter: saturate(.8) contrast(1.06); }
-.v2-gig h3 { margin: .75rem 0 .25rem; font-family: var(--display); font-weight: 400; font-size: clamp(1.3rem, 2.2vw, 2.3rem); text-transform: uppercase; line-height: .95; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.v2-gig p { margin: .12rem 0; font-size: .8rem; letter-spacing: .04em; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.v2-gig a { display: block; margin-top: .75rem; padding: .6rem .4rem; border: 1px solid var(--v2-line); text-align: center; font-size: .8rem; letter-spacing: .04em; text-transform: uppercase; }
-.v2-gig a:hover, .v2-gig a:focus-visible { background: var(--v2-fg); color: var(--v2-bg); }
+.v2-gig { min-width: 0; min-height: 0; padding: clamp(.55rem, 1.4vh, .85rem) clamp(.6rem, .9vw, .85rem); display: flex; flex-direction: column; overflow: hidden; }
+.v2-gig-art { aspect-ratio: 1.05; min-height: 0; margin-top: clamp(.4rem, 1.4vh, .8rem); background: var(--v2-panel-raised); overflow: hidden; }
+.v2-gig-art img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.v2-gig h3 { flex: 0 0 auto; margin: clamp(.45rem, 1.5vh, .85rem) 0 .25rem; font-family: var(--display); font-weight: 400; font-size: clamp(1.05rem, min(2vw, 4.2vh), 2.2rem); line-height: 1; text-transform: uppercase; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.v2-gig p { flex: 0 0 auto; margin: 0; font-size: clamp(.52rem, 1.15vh, .66rem); letter-spacing: .04em; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.v2-gig-date { color: var(--v2-dim); }
+.v2-gig-link { flex: 0 0 auto; display: block; margin-top: clamp(.35rem, 1vh, .6rem); padding-top: clamp(.45rem, 1.4vh, .85rem); border-top: 1px solid var(--v2-soft-line); text-align: center; font-size: clamp(.56rem, 1.25vh, .72rem); letter-spacing: .05em; text-transform: uppercase; }
+.v2-gig-link:hover, .v2-gig-link:focus-visible { text-decoration: underline; text-underline-offset: .3em; }
+.v2-gig-empty { grid-column: 1 / -1; min-height: 200px; display: flex; align-items: center; justify-content: center; padding: 2rem; color: var(--v2-dim); font-size: clamp(.6rem, 1.4vh, .78rem); letter-spacing: .05em; text-align: center; text-transform: uppercase; }
 
-/* Resets the legacy global footer{} rule in index.html (max-width, auto margins, padding, dim colour). */
-.v2-footer { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: .8rem 1rem; max-width: none; margin: 1.4rem 0 0; border-top: 1px solid var(--v2-line); padding: 1rem 0 0; color: var(--v2-fg); font-size: .8rem; letter-spacing: .04em; text-transform: uppercase; }
-.v2-footer > span:first-child { grid-column: 1; grid-row: 1; }
-.v2-footer-built { grid-column: 2; grid-row: 2; }
-.v2-footer .v2-back-top { grid-column: 3; grid-row: 2; justify-self: end; }
+/* Footer in the scroll-cue style. Resets the legacy global footer{} rule in index.html. */
+.v2-footer { display: flex; align-items: center; gap: 1rem; max-width: none; margin: 1.4rem 0 0; padding: 0; border: 0; color: var(--v2-fg); font-size: clamp(.58rem, 1.35vh, .78rem); letter-spacing: .04em; text-transform: uppercase; white-space: nowrap; }
+.v2-footer-rule { flex: 1; height: 1px; background: var(--v2-soft-line); }
+.v2-footer-links { display: flex; align-items: center; gap: .7rem; }
+.v2-footer-links span { color: var(--v2-dim); }
+.v2-footer a:hover, .v2-footer a:focus-visible { text-decoration: underline; text-underline-offset: .3em; }
 
 .v2-ref-row { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin-bottom: .3rem; }
 .v2-scroll-prev { color: var(--v2-dim); font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
 .v2-scroll-prev:hover, .v2-scroll-prev:focus-visible { color: var(--v2-fg); }
 .v2-links a[aria-current="true"] { text-decoration: underline; text-underline-offset: .35em; }
-.v2-footer-links { grid-column: 3; grid-row: 1; justify-self: end; display: flex; align-items: center; gap: 1rem; }
-.v2-back-top { border: 1px solid var(--v2-line); padding: .6rem 1rem; color: var(--v2-fg); }
-.v2-back-top:hover, .v2-back-top:focus-visible { background: var(--v2-fg); color: var(--v2-bg); }
 
 /* Section paging: on desktop/tablet every section is exactly one viewport under the fixed
    nav, and scrolling moves one whole section at a time (see initSectionPager in ui-v2.js).
@@ -319,7 +307,7 @@ body.locked { overflow: auto !important; height: auto !important; }
   }
   .v2-section + .v2-section { border-top: 0; }
   .v2-section > .v2-scroll-next { margin-top: auto; padding-top: clamp(.6rem, 2vh, 1.4rem); }
-  .v2-section > .v2-footer { margin-top: clamp(.7rem, 2vh, 1.4rem); padding-top: clamp(.5rem, 1.4vh, 1rem); gap: clamp(.3rem, 1vh, .8rem) 1rem; }
+  .v2-section > .v2-footer { margin-top: auto; padding-top: clamp(.6rem, 2vh, 1.4rem); }
 
   /* Fit every section to the stage: the header keeps its size, the stage takes whatever
      height is left, and cards/type scale with viewport height as well as width. */
@@ -328,7 +316,6 @@ body.locked { overflow: auto !important; height: auto !important; }
   .v2-section-kicker { margin: 0 0 clamp(.5rem, 1.5vh, 1rem); font-size: clamp(.72rem, 1.9vh, 1.1rem); }
   .v2-stage { flex: 1 1 auto; min-height: 0; }
   .v2-index-row { font-size: clamp(.6rem, 1.35vh, .8rem); }
-  .v2-tool-action { height: clamp(28px, 4.2vh, 44px); font-size: clamp(.64rem, 1.55vh, .9rem); }
 
   #v2-home .v2-display { flex: 0 0 auto; margin: 0 0 clamp(.4rem, 1.2vh, .9rem); line-height: .88; }
   .v2-dashboard { flex: 1 1 auto; min-height: 0; grid-template-rows: minmax(0, 1fr) minmax(0, 1.25fr) minmax(0, .5fr); }
@@ -340,45 +327,17 @@ body.locked { overflow: auto !important; height: auto !important; }
   .v2-project, .v2-project-wide, .v2-tool { min-height: 0; }
   .v2-tool-grid { grid-template-rows: repeat(3, minmax(0, 1fr)); }
 
-  .v2-playlist-stage { gap: clamp(8px, 1.2vh, 12px); }
-  .v2-playlists { flex: 1.1 1 0; min-height: 0; }
-  .v2-playlist { min-height: 0; gap: clamp(.3rem, 1vh, .6rem); padding: clamp(.45rem, 1.2vh, .8rem); }
-  .v2-playlist-body { min-height: 0; }
-  .v2-playlist-copy h3 { font-size: clamp(1.1rem, min(2.2vw, 4vh), 2.4rem); }
-  .v2-playlist-copy p { font-size: clamp(.6rem, min(.95vw, 1.5vh), .84rem); }
-  .v2-tracks { flex: 1 1 0; padding: clamp(.4rem, 1.1vh, .8rem) .9rem clamp(.45rem, 1.2vh, .9rem); }
-  .v2-tracks-head h3 { font-size: clamp(1.6rem, min(3.6vw, 7vh), 4.2rem); }
-  .v2-tracks-head p { font-size: clamp(.6rem, 1.45vh, .82rem); }
-  .v2-tracks-table { grid-template-rows: auto repeat(5, minmax(0, 1fr)); }
-  .v2-track-row { font-size: clamp(.62rem, 1.5vh, .84rem); }
-  .v2-track-header { font-size: clamp(.56rem, 1.2vh, .72rem); padding-bottom: .3rem; }
-  .v2-track-bar { height: clamp(8px, 1.6vh, 16px); }
-
-  .v2-gig-stage { gap: clamp(8px, 1.2vh, 12px); }
-  .v2-gig-controls { font-size: clamp(.62rem, 1.5vh, .82rem); }
-  .v2-gig-status, .v2-gig-timer { padding: clamp(.35rem, 1vh, .8rem) 1rem; }
-  .v2-gig-buttons { padding: clamp(.25rem, .7vh, .4rem) .9rem; }
-  .v2-gig-buttons button { height: clamp(28px, 4vh, 40px); width: clamp(38px, 3.2vw, 50px); }
+  .v2-playlists { flex: 0 0 auto; }
+  .v2-tracks { flex: 1 1 0; }
+  .v2-tracks-table { grid-template-rows: repeat(5, minmax(0, 1fr)); }
   .v2-gigs { flex: 1 1 auto; }
-  .v2-gig { padding: clamp(.4rem, 1.1vh, .7rem); }
-  .v2-gig img { flex: 1 1 0; min-height: 0; height: auto; aspect-ratio: auto; margin-top: clamp(.3rem, 1vh, .6rem); }
-  .v2-gig h3 { font-size: clamp(1.05rem, min(2.2vw, 4.2vh), 2.3rem); margin: clamp(.35rem, 1.2vh, .75rem) 0 .2rem; }
-  .v2-gig p { font-size: clamp(.6rem, 1.5vh, .82rem); }
-  .v2-gig a { font-size: clamp(.6rem, 1.45vh, .8rem); padding: clamp(.3rem, .9vh, .6rem) .4rem; margin-top: clamp(.35rem, 1.2vh, .75rem); }
-  .v2-footer { font-size: clamp(.6rem, 1.45vh, .8rem); }
-  .v2-back-top { padding: clamp(.3rem, .9vh, .6rem) 1rem; }
+  .v2-gig-art { flex: 1 1 0; aspect-ratio: auto; }
 }
 
 /* Short laptop viewports (e.g. 1366x768 screens minus browser chrome): tighten spacing and
    drop purely decorative lines so every card still fits its section. */
 @media (min-width: 721px) and (min-height: 620px) and (max-height: 760px) {
   .v2-metric h3 { margin-top: .3rem; }
-}
-
-@media (max-width: 900px) {
-  .v2-playlists { grid-template-columns: 1fr; }
-  .v2-tracks { grid-template-columns: 1fr; }
-  .v2-gigs { grid-template-columns: repeat(2,1fr); }
 }
 
 @media (max-width: 720px) {
@@ -396,7 +355,8 @@ body.locked { overflow: auto !important; height: auto !important; }
   .v2-about p { max-width: none; font-size: 1rem; }
   .v2-value { font-size: 2.6rem; }
   .v2-bottom-card h3 { font-size: 1.3rem; }
-  .v2-project-grid, .v2-tool-grid, .v2-gigs { grid-template-columns: 1fr; }
+  .v2-project-grid, .v2-tool-grid, .v2-playlists { grid-template-columns: 1fr; }
+  .v2-gigs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .v2-journal-grid { grid-template-columns: 1fr; grid-template-rows: auto 220px; }
   .v2-journal-card h3 { font-size: clamp(2.2rem, 9vw, 3.3rem); }
   .v2-project-wide { grid-column: 1; display: flex; }
@@ -406,12 +366,12 @@ body.locked { overflow: auto !important; height: auto !important; }
   .v2-project-wide .v2-card-foot { align-self: stretch; margin-top: auto; }
   .v2-strip { flex-direction: column; }
   .v2-strip span + span::before { display: none; }
-  .v2-track-row { grid-template-columns: 1.8rem minmax(0, 1fr) 3rem; }
-  .v2-track-row > span:nth-child(2), .v2-track-row > span:nth-child(4), .v2-track-row > span:nth-child(6) { display: none; }
-  .v2-gig-controls { grid-template-columns: 1fr; }
-  .v2-gig-buttons { border: 0; border-top: 1px solid var(--v2-line); border-bottom: 1px solid var(--v2-line); }
-  .v2-footer { grid-template-columns: 1fr; }
-  .v2-footer > *, .v2-footer .v2-back-top, .v2-footer-links { grid-column: 1; grid-row: auto; justify-self: start; }
+  .v2-track-row { grid-template-columns: minmax(0, 1fr) 4.5rem 2rem; gap: .7rem; }
+  .v2-track-row > span:nth-child(2) { display: none; }
+  .v2-gig-controls { grid-template-columns: 1fr auto; }
+  .v2-gig-timer { display: none; }
+  .v2-footer { flex-wrap: wrap; justify-content: space-between; white-space: normal; }
+  .v2-footer-rule { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
