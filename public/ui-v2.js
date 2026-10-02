@@ -384,7 +384,7 @@
       const today = todayIso();
       let status;
       if (isGame) status = item.date <= today ? 'Out now' : 'Coming soon';
-      else if (item.rerelease || item.endDate) status = 'Limited run';
+      else if (item.rerelease || item.endDate || item.location) status = 'Limited run';
       else status = item.date <= today ? 'In cinemas' : 'Coming soon';
       return `<article class="v2-panel v2-gig v2-media">
         <div class="v2-index-row"><span>${String(number).padStart(2, '0')}</span><span class="v2-tag">[ ${tag} ]</span></div>

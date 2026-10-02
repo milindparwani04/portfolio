@@ -18,7 +18,7 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 
 | Area | Files | Notes |
 |---|---|---|
-| Visible portfolio UI | `public/index.html` (the `.portfolio-v2` block only), `public/ui-v2.css`, `public/ui-v2.js` | Grey-box design from the Soft Monolith mockups. Cache-bust versions: `ui-v2.css?v=19`, `ui-v2.js?v=16` — bump on every change. Journal redesign implemented 2026-10-02 from Codex's mockup. |
+| Visible portfolio UI | `public/index.html` (the `.portfolio-v2` block only), `public/ui-v2.css`, `public/ui-v2.js` | Grey-box design from the Soft Monolith mockups. Cache-bust versions: `ui-v2.css?v=20`, `ui-v2.js?v=18` — bump on every change. Journal redesign implemented 2026-10-02 from Codex's mockup. |
 | Worker routes and data | `worker/index.js`, `worker/gig-picks.json`, `migrations/` | Spotify listening data, heart rate, gigs. Gig Finder rebuilt 2026-10-02. |
 
 ## Media tracker (how it works, for the next session and the weekly routine)
@@ -81,7 +81,7 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 
 ### 2026-10-02 — Media tracker section
 
-- The brief, sources and rules are in "Media tracker" above. Built `/api/media` (`handleMedia`, `reelFilms`, `akilFilms`, optional `tmdbPoster`), `worker/media-picks.json`, the Media section in `index.html` (REF. 04; Playlists is now 05 and Gigs 06; nav, cues and back links renumbered) and `.v2-media-*` CSS. The gig rail's state and countdown code became `createCardRail`, shared by both sections. Versions: `ui-v2.css?v=20`, `ui-v2.js?v=17`.
+- The brief, sources and rules are in "Media tracker" above. Built `/api/media` (`handleMedia`, `reelFilms`, `akilFilms`, optional `tmdbPoster`), `worker/media-picks.json`, the Media section in `index.html` (REF. 04; Playlists is now 05 and Gigs 06; nav, cues and back links renumbered) and `.v2-media-*` CSS. The gig rail's state and countdown code became `createCardRail`, shared by both sections. Versions: `ui-v2.css?v=20`, `ui-v2.js?v=18` (v18: single-day Cinema Akil screenings read "Limited run").
 - Research: probed every venue with curl, a Cloudflare Worker and Chrome. Reel and Akil expose data that Workers can read; VOX and ROXY don't. ROXY K-Fest showtimes per venue were read in Chrome.
 - Tested:
   - Remote-preview harness (`?path=/api/media`): 80 items. All image URLs return 200 with real images. Language set {English, Korean, Japanese}. Dates from 2026-10-01 (released within the last week) to 2026-12-31.

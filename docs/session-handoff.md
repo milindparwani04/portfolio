@@ -127,6 +127,7 @@ Done:
 - New Worker route `/api/media` and file `worker/media-picks.json`; 25 game covers in `public/assets/media/games/`. A new weekly routine, "Media tracker weekly refresh" (`trig_014ZDNi4Uf1ecndu8k5oJ6as`, Mondays 06:30 Dubai), maintains the games and the VOX/ROXY extras.
 - VOX and ROXY block automated requests (403 from Workers, hang or 403 from curl). Today's VOX and ROXY listings were checked by hand in Chrome: the only English/Japanese/Korean screenings Reel doesn't list were ROXY Dubai Hills' Korean Film Week (Dark Nuns, Revolver, No Other Choice).
 Tested (how, result):
+- Production checked after deploy (`e372902`): `/api/media` returns the same 80 items with no missing images; in Chrome, the Media nav link opens the section, posters and covers load, and there are no failed requests.
 - Remote preview against live sources: 80 items (44 films, 8 re-releases, 3 Akil, 25 games); all 81 image URLs load; only English, Korean and Japanese films. Headless Edge at ten sizes: no overlaps, no page errors; PageDown paging reaches Media and the nav follows it; the gig rail still works; Enter works on the Media Next button.
 Known issues / not done:
 - Reel's posters are 300×450. Adding a free `TMDB_API_KEY` secret switches films to 780 px posters automatically.
