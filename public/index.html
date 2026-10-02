@@ -972,7 +972,7 @@
     .tools{ grid-template-columns:1fr; }
   }
 </style>
-<link rel="stylesheet" href="/ui-v2.css?v=19">
+<link rel="stylesheet" href="/ui-v2.css?v=20">
 </head>
 <body class="locked">
 
@@ -988,7 +988,7 @@
     <header class="v2-nav">
       <a class="v2-terminal" href="#v2-home">C:\PARWANI&gt;<span class="v2-cursor" aria-hidden="true"></span></a>
       <nav class="v2-links" aria-label="Primary navigation">
-        <a href="#v2-journal">Journal</a><a href="#v2-projects">Projects</a><a href="#v2-tools">Toolbox</a><a href="#v2-playlists">Playlists</a><a href="#v2-gigs">Gigs</a>
+        <a href="#v2-journal">Journal</a><a href="#v2-projects">Projects</a><a href="#v2-tools">Toolbox</a><a href="#v2-media">Media</a><a href="#v2-playlists">Playlists</a><a href="#v2-gigs">Gigs</a>
       </nav>
     </header>
 
@@ -1166,11 +1166,25 @@
           <div class="v2-card-foot"><button type="button" disabled>Still being built</button></div>
         </article>
       </div>
+      <a class="v2-scroll-next" href="#v2-media"><span></span>Scroll&nbsp; / &nbsp;Media next&nbsp; &#8595;<span></span></a>
+    </section>
+
+    <section class="v2-section" id="v2-media">
+      <div class="v2-section-head"><div class="v2-ref-row"><span class="v2-ref">Ref. 04 / Media</span><a class="v2-scroll-prev" href="#v2-tools">&#8593;&nbsp; Toolbox</a></div><h2 class="v2-section-title">Media</h2><p class="v2-section-kicker">Films in Dubai cinemas and new games. Next three months.</p></div>
+      <div class="v2-stage v2-gig-stage">
+        <div class="v2-gig-controls">
+          <span class="v2-gig-status"><span id="v2MediaBatch">Batch 01 of 01</span>&nbsp; / &nbsp;Auto 10 sec</span>
+          <div class="v2-gig-buttons"><button type="button" id="v2MediaPrev" aria-label="Previous releases">&#8249;</button><button type="button" id="v2MediaPause" aria-label="Pause releases rotation">&#8214;</button><button type="button" id="v2MediaNext" aria-label="Next releases">&#8250;</button></div>
+          <span class="v2-gig-timer"><span id="v2MediaTick">01 / 10</span><span class="v2-gig-progress"><span id="v2MediaProgress"></span></span></span>
+        </div>
+        <div class="v2-gigs" id="v2MediaList" aria-live="polite"></div>
+        <div class="v2-strip"><span>Films: English, Japanese, Korean</span><span>Reel / VOX / ROXY / Cinema Akil</span><span>Games: release dates</span></div>
+      </div>
       <a class="v2-scroll-next" href="#v2-playlists"><span></span>Scroll&nbsp; / &nbsp;Playlists next&nbsp; &#8595;<span></span></a>
     </section>
 
     <section class="v2-section" id="v2-playlists">
-      <div class="v2-section-head"><div class="v2-ref-row"><span class="v2-ref">Ref. 04 / Playlists</span><a class="v2-scroll-prev" href="#v2-tools">&#8593;&nbsp; Toolbox</a></div><h2 class="v2-section-title">Playlists</h2><p class="v2-section-kicker">Three on repeat, plus this month&rsquo;s listening history.</p></div>
+      <div class="v2-section-head"><div class="v2-ref-row"><span class="v2-ref">Ref. 05 / Playlists</span><a class="v2-scroll-prev" href="#v2-media">&#8593;&nbsp; Media</a></div><h2 class="v2-section-title">Playlists</h2><p class="v2-section-kicker">Three on repeat, plus this month&rsquo;s listening history.</p></div>
       <div class="v2-stage v2-playlist-stage">
         <div class="v2-playlists">
           <article class="v2-panel v2-playlist">
@@ -1212,7 +1226,7 @@
     </section>
 
     <section class="v2-section" id="v2-gigs">
-      <div class="v2-section-head"><div class="v2-ref-row"><span class="v2-ref">Ref. 05 / Gig Finder</span><a class="v2-scroll-prev" href="#v2-playlists">&#8593;&nbsp; Playlists</a></div><h2 class="v2-section-title">Upcoming</h2><p class="v2-section-kicker">Dubai and Abu Dhabi. Five at a time.</p></div>
+      <div class="v2-section-head"><div class="v2-ref-row"><span class="v2-ref">Ref. 06 / Gig Finder</span><a class="v2-scroll-prev" href="#v2-playlists">&#8593;&nbsp; Playlists</a></div><h2 class="v2-section-title">Upcoming</h2><p class="v2-section-kicker">Dubai and Abu Dhabi. Five at a time.</p></div>
       <div class="v2-stage v2-gig-stage">
         <div class="v2-gig-controls">
           <span class="v2-gig-status"><span id="v2GigBatch">Batch 01 of 01</span>&nbsp; / &nbsp;Auto 10 sec</span>
@@ -5036,7 +5050,7 @@
 
 </script>
 
-<script src="/ui-v2.js?v=16"></script>
+<script src="/ui-v2.js?v=17"></script>
 
 </body>
 </html>

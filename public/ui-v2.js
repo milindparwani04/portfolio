@@ -248,11 +248,6 @@
   loadWeather();
   window.setInterval(loadWeather, 30 * 60 * 1000);
 
-  let gigs = [];
-  let gigsLoading = true;
-  let gigBatch = 0;
-  let gigPaused = false;
-
   const GIG_CATEGORY_LABELS = { comedy: 'Comedy', musical: 'Musical', concert: 'Concert', dj: 'DJ', 'film-score': 'Film score', major: 'Big event' };
 
   // "12 OCT", "25–29 NOV", "30 NOV – 02 DEC"; the year is added when it isn't this year.
@@ -269,93 +264,137 @@
     return `${day(start)} ${month(start)} – ${day(last)} ${month(last)}${year}`;
   }
 
-  function renderGigs() {
-    const list = byId('v2GigList');
+  // Five-at-a-time card rail shared by the Gig Finder and the Media tracker: batch counter,
+  // prev / pause / next, a 10-second countdown that holds on hover or focus, and an honest empty
+  // state. `ids` are the element ids of one section; `renderCard(item, number)` returns a card.
+  const RAIL_SECONDS = 10;
+  function createCardRail({ url, ids, noun, renderCard }) {
+    const list = byId(ids.list);
     if (!list) return;
-    if (!gigs.length) {
-      const message = gigsLoading ? 'Loading upcoming gigs&hellip;' : 'No upcoming gigs to show right now. Check back soon.';
-      list.innerHTML = `<div class="v2-panel v2-gig-empty">${message}</div>`;
-      byId('v2GigBatch').textContent = 'Batch 00 of 00';
-      gigTick = 0;
-      renderGigTick();
-      return;
+    let items = [];
+    let loading = true;
+    let batch = 0;
+    let paused = false;
+    let hover = false;
+    let tick = 0;
+
+    function renderTick() {
+      const tickEl = byId(ids.tick);
+      const progress = byId(ids.progress);
+      if (tickEl) tickEl.textContent = `${String(tick).padStart(2, '0')} / ${RAIL_SECONDS}`;
+      if (progress) progress.style.width = `${(tick / RAIL_SECONDS) * 100}%`;
     }
-    const batchCount = Math.max(1, Math.ceil(gigs.length / 5));
-    gigBatch = (gigBatch + batchCount) % batchCount;
-    const batch = gigs.slice(gigBatch * 5, gigBatch * 5 + 5);
-    list.innerHTML = batch.map((gig, index) => {
+
+    function render() {
+      if (!items.length) {
+        const message = loading ? `Loading ${noun}&hellip;` : `No ${noun} to show right now. Check back soon.`;
+        list.innerHTML = `<div class="v2-panel v2-gig-empty">${message}</div>`;
+        byId(ids.batch).textContent = 'Batch 00 of 00';
+        tick = 0;
+        renderTick();
+        return;
+      }
+      const batchCount = Math.max(1, Math.ceil(items.length / 5));
+      batch = (batch + batchCount) % batchCount;
+      list.innerHTML = items.slice(batch * 5, batch * 5 + 5).map((item, index) => renderCard(item, batch * 5 + index + 1)).join('');
+      fitText(list);
+      byId(ids.batch).textContent = `Batch ${String(batch + 1).padStart(2, '0')} of ${String(batchCount).padStart(2, '0')}`;
+      tick = 0;
+      renderTick();
+    }
+
+    async function load() {
+      render();
+      try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`${url} failed`);
+        const payload = await response.json();
+        if (!Array.isArray(payload) || !payload.length) throw new Error('Empty');
+        items = payload;
+        batch = 0;
+      } catch (_) {
+        items = [];
+      }
+      loading = false;
+      render();
+    }
+
+    byId(ids.prev)?.addEventListener('click', () => { batch -= 1; render(); });
+    byId(ids.next)?.addEventListener('click', () => { batch += 1; render(); });
+    byId(ids.pause)?.addEventListener('click', (event) => {
+      paused = !paused;
+      event.currentTarget.textContent = paused ? '▶' : '‖';
+      event.currentTarget.setAttribute('aria-label', paused ? `Resume ${noun} rotation` : `Pause ${noun} rotation`);
+    });
+    // "Hover or focus pauses": the countdown holds while the pointer or keyboard focus is on a card.
+    list.addEventListener('pointerenter', () => { hover = true; });
+    list.addEventListener('pointerleave', () => { hover = false; });
+    list.addEventListener('focusin', () => { hover = true; });
+    list.addEventListener('focusout', (event) => { if (!list.contains(event.relatedTarget)) hover = false; });
+
+    load();
+    window.setInterval(() => {
+      if (paused || hover || document.hidden) return;
+      tick += 1;
+      if (tick >= RAIL_SECONDS) {
+        batch += 1;
+        render();
+      } else {
+        renderTick();
+      }
+    }, 1000);
+  }
+
+  createCardRail({
+    url: '/api/gigs',
+    noun: 'upcoming gigs',
+    ids: { list: 'v2GigList', batch: 'v2GigBatch', tick: 'v2GigTick', progress: 'v2GigProgress', prev: 'v2GigPrev', next: 'v2GigNext', pause: 'v2GigPause' },
+    renderCard(gig, number) {
       // Artist photo and ticket page from the API; a plain grey block when there is no photo.
       const image = /^https:\/\//.test(gig.image || '') ? gig.image : '';
       const link = /^https:\/\//.test(gig.url || '')
         ? gig.url
         : `https://www.google.com/search?q=${encodeURIComponent(`${gig.artist} ${gig.venue} tickets`)}`;
       return `<article class="v2-panel v2-gig">
-        <div class="v2-index-row"><span>${String(gigBatch * 5 + index + 1).padStart(2, '0')}</span><span class="v2-tag">[ ${escapeHtml(GIG_CATEGORY_LABELS[gig.category] || 'Event')} ]</span></div>
+        <div class="v2-index-row"><span>${String(number).padStart(2, '0')}</span><span class="v2-tag">[ ${escapeHtml(GIG_CATEGORY_LABELS[gig.category] || 'Event')} ]</span></div>
         <div class="v2-gig-art">${image ? `<img src="${escapeHtml(image)}" alt="${escapeHtml(gig.artist)}" loading="lazy" decoding="async">` : ''}${image && gig.credit && /^https:\/\//.test(gig.credit.url || '') ? `<a class="v2-gig-credit" href="${escapeHtml(gig.credit.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(gig.credit.text)}</a>` : ''}</div>
         <h3 data-fit="2" title="${escapeHtml(gig.artist)}">${escapeHtml(gig.artist)}</h3>
         <p class="v2-gig-venue" title="${escapeHtml(gig.venue)}">${escapeHtml(gig.venue)}</p><p class="v2-gig-date">${escapeHtml(formatGigDate(gig.date, gig.endDate))}</p>
         <a class="v2-gig-link" href="${escapeHtml(link)}" target="_blank" rel="noopener noreferrer">Open details &#8599;</a>
       </article>`;
-    }).join('');
-    fitText(list);
-    byId('v2GigBatch').textContent = `Batch ${String(gigBatch + 1).padStart(2, '0')} of ${String(batchCount).padStart(2, '0')}`;
-    gigTick = 0;
-    renderGigTick();
-  }
-
-  const GIG_SECONDS = 10;
-  let gigTick = 0;
-  let gigHover = false;
-
-  function renderGigTick() {
-    const tick = byId('v2GigTick');
-    const progress = byId('v2GigProgress');
-    if (tick) tick.textContent = `${String(gigTick).padStart(2, '0')} / ${GIG_SECONDS}`;
-    if (progress) progress.style.width = `${(gigTick / GIG_SECONDS) * 100}%`;
-  }
-
-  async function loadGigs() {
-    renderGigs();
-    try {
-      const response = await fetch('/api/gigs');
-      if (!response.ok) throw new Error('Gig request failed');
-      const payload = await response.json();
-      if (!Array.isArray(payload) || !payload.length) throw new Error('No gigs');
-      gigs = payload;
-      gigBatch = 0;
-    } catch (_) {
-      gigs = [];
-    }
-    gigsLoading = false;
-    renderGigs();
-  }
-
-  byId('v2GigPrev')?.addEventListener('click', () => { gigBatch -= 1; renderGigs(); });
-  byId('v2GigNext')?.addEventListener('click', () => { gigBatch += 1; renderGigs(); });
-  byId('v2GigPause')?.addEventListener('click', (event) => {
-    gigPaused = !gigPaused;
-    event.currentTarget.textContent = gigPaused ? '▶' : '‖';
-    event.currentTarget.setAttribute('aria-label', gigPaused ? 'Resume gig rotation' : 'Pause gig rotation');
+    },
   });
 
-  // "Hover or focus pauses": the countdown holds while the pointer or keyboard focus is on a card.
-  const gigList = byId('v2GigList');
-  gigList?.addEventListener('pointerenter', () => { gigHover = true; });
-  gigList?.addEventListener('pointerleave', () => { gigHover = false; });
-  gigList?.addEventListener('focusin', () => { gigHover = true; });
-  gigList?.addEventListener('focusout', (event) => { if (!gigList.contains(event.relatedTarget)) gigHover = false; });
+  // Media tracker: posters and game covers are portrait, so the art panel shows the whole image
+  // over a blurred copy of itself instead of cropping it square. No links — information only.
+  function todayIso() {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  }
 
-  loadGigs();
-  window.setInterval(() => {
-    if (gigPaused || gigHover || document.hidden) return;
-    gigTick += 1;
-    if (gigTick >= GIG_SECONDS) {
-      gigBatch += 1;
-      renderGigs();
-    } else {
-      renderGigTick();
-    }
-  }, 1000);
+  createCardRail({
+    url: '/api/media',
+    noun: 'releases',
+    ids: { list: 'v2MediaList', batch: 'v2MediaBatch', tick: 'v2MediaTick', progress: 'v2MediaProgress', prev: 'v2MediaPrev', next: 'v2MediaNext', pause: 'v2MediaPause' },
+    renderCard(item, number) {
+      const image = /^(https:\/\/|\/assets\/media\/)/.test(item.image || '') ? item.image : '';
+      const isGame = item.kind === 'game';
+      const tag = isGame ? 'Game' : item.rerelease ? 'Re-release' : 'Film';
+      const detail = isGame ? item.platforms : item.location || item.language || '';
+      const today = todayIso();
+      let status;
+      if (isGame) status = item.date <= today ? 'Out now' : 'Coming soon';
+      else if (item.rerelease || item.endDate) status = 'Limited run';
+      else status = item.date <= today ? 'In cinemas' : 'Coming soon';
+      return `<article class="v2-panel v2-gig v2-media">
+        <div class="v2-index-row"><span>${String(number).padStart(2, '0')}</span><span class="v2-tag">[ ${tag} ]</span></div>
+        <div class="v2-gig-art v2-media-art">${image ? `<img class="v2-media-blur" src="${escapeHtml(image)}" alt="" aria-hidden="true" loading="lazy" decoding="async"><img src="${escapeHtml(image)}" alt="${escapeHtml(item.title)} ${isGame ? 'cover' : 'poster'}" loading="lazy" decoding="async">` : ''}</div>
+        <h3 data-fit="2" title="${escapeHtml(item.title)}">${escapeHtml(item.title)}</h3>
+        <p class="v2-gig-venue" title="${escapeHtml(detail)}">${escapeHtml(detail)}</p><p class="v2-gig-date">${escapeHtml(formatGigDate(item.date, item.endDate))}</p>
+        <span class="v2-gig-link v2-media-status">${status}</span>
+      </article>`;
+    },
+  });
 
   // Live listening data (dashboard Spotify card, playlist cards, Top Tracks / Artists). Each
   // panel keeps its static empty state, or its last good data, when its route fails.

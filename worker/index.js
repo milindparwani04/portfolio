@@ -1,4 +1,5 @@
 import GIG_PICKS from './gig-picks.json';
+import MEDIA_PICKS from './media-picks.json';
 
 const FEED_URL = 'https://feeds.bbci.co.uk/news/world/rss.xml';
 const CACHE_TTL_SECONDS = 300;
@@ -981,6 +982,201 @@ async function handleGigs(request, env, ctx) {
   }
 }
 
+// Media tracker (2026-10-02): films showing in Dubai and notable game releases, from the last 7
+// days to 3 months ahead. Films must be in English, Japanese or Korean. Sources:
+//   - Reel Cinemas: the public Vista JSON its own site loads (Films.json for titles, language and
+//     opening dates; Sessions.json for Dubai Mall's screening days, which give old films their range).
+//   - Cinema Akil: its site's /api/films?startDate&endDate feed (per-day screening dates, language).
+//     Akil is the only venue named on a card, as Milind asked.
+//   - worker/media-picks.json: games, plus VOX / ROXY screenings the Worker can't fetch (both
+//     answer automated requests with 403), curated weekly.
+// New releases show their release date once, whichever chain shows them; re-releases (old films on
+// a limited run) and Akil screenings show the first..last screening day.
+const REEL_VISTA_JSON = 'https://storage.googleapis.com/eeg-prod-reelcinema-sb/web/vista/json';
+const REEL_POSTER_BASE = 'https://storage.googleapis.com/eeg-prod-reelcinema-sb/web/vista/movie_images';
+const REEL_DUBAI_MALL_ID = '0001';
+const AKIL_FILMS_API = 'https://www.cinemaakil.com/api/films';
+const AKIL_ASSET_BASE = 'https://api-v1.cinemaakil.com';
+const MEDIA_LANGUAGES = /\b(english|japanese|korean)\b/i;
+const MEDIA_LOOKBACK_DAYS = 7;
+const MEDIA_AHEAD_MONTHS = 3;
+// Filmed stage shows (Royal Ballet / Royal Opera) are listed as films but aren't movies.
+const MEDIA_NOT_A_FILM = /royal (ballet|opera)/i;
+const MEDIA_RERELEASE = /\((19|20)\d{2}\)|\bre[- ]?release\b|\bencore\b|\banniversary\b/i;
+const MEDIA_CACHE_TTL_SECONDS = 3 * 60 * 60;
+const MEDIA_POSTER_CACHE_PREFIX = 'media_poster:v1:';
+const MEDIA_MAX_POSTER_LOOKUPS = 12;
+
+function addMonths(isoDate, months) {
+  const d = new Date(`${isoDate}T00:00:00Z`);
+  d.setUTCMonth(d.getUTCMonth() + months);
+  return d.toISOString().slice(0, 10);
+}
+
+// "Interstellar (2014)" → "Interstellar"; "Avengers Endgame : Encore" → "Avengers Endgame: Encore".
+function cleanFilmTitle(title) {
+  return String(title || '')
+    .replace(/\s*[([]\s*(english|japanese|korean|re[- ]?release|(19|20)\d{2})\s*[)\]]/gi, '')
+    .replace(/\s+:\s*/g, ': ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function mediaKey(title) {
+  return normalizeArtistName(cleanFilmTitle(title).replace(/:\s*encore$/i, ''));
+}
+
+async function fetchJson(url, label) {
+  const res = await fetch(url, { signal: AbortSignal.timeout(15000), headers: { Accept: 'application/json' } });
+  if (!res.ok) throw new Error(`${label} returned ${res.status}`);
+  return res.json();
+}
+
+async function reelFilms(today, from, to) {
+  const [films, sessions] = await Promise.all([
+    fetchJson(`${REEL_VISTA_JSON}/Films.json`, 'Reel Films.json'),
+    fetchJson(`${REEL_VISTA_JSON}/Sessions.json`, 'Reel Sessions.json'),
+  ]);
+  const dubaiMall = new Map();
+  for (const s of sessions.value || []) {
+    if (s.CinemaId !== REEL_DUBAI_MALL_ID || typeof s.Showtime !== 'string') continue;
+    const day = s.Showtime.slice(0, 10);
+    const span = dubaiMall.get(s.ScheduledFilmId);
+    if (!span) dubaiMall.set(s.ScheduledFilmId, { first: day, last: day });
+    else {
+      if (day < span.first) span.first = day;
+      if (day > span.last) span.last = day;
+    }
+  }
+  const out = [];
+  for (const f of films.value || []) {
+    const language = String(f.Language || '').trim();
+    if (!MEDIA_LANGUAGES.test(language) || MEDIA_NOT_A_FILM.test(f.Title || '')) continue;
+    const opening = String(f.OpeningDate || '').slice(0, 10);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(opening)) continue;
+    const film = { kind: 'film', title: cleanFilmTitle(f.Title), language, image: `${REEL_POSTER_BASE}/${encodeURIComponent(f.ID)}.jpg` };
+    if (MEDIA_RERELEASE.test(f.Title || '')) {
+      // An old film back for a limited run: the range Dubai Mall is screening it, or its
+      // announced date when its sessions aren't on sale yet.
+      const span = dubaiMall.get(f.ID);
+      if (span && span.last >= today && span.first <= to) out.push({ ...film, rerelease: true, date: span.first, endDate: span.last });
+      else if (!span && opening >= today && opening <= to) out.push({ ...film, rerelease: true, date: opening });
+    } else if (opening >= from && opening <= to) {
+      out.push({ ...film, date: opening });
+    }
+  }
+  return out;
+}
+
+async function akilFilms(today, to) {
+  const data = await fetchJson(`${AKIL_FILMS_API}?startDate=${today}&endDate=${to}`, 'Cinema Akil films');
+  const byTitle = new Map();
+  for (const r of (data.films && data.films.Records) || []) {
+    const language = ((r.movie_languages || []).map(l => l.lang_name).filter(Boolean)).join(', ');
+    if (!MEDIA_LANGUAGES.test(language)) continue;
+    const days = (r.datesArray || []).filter(d => d.formats && d.formats.length && d.date >= today).map(d => d.date).sort();
+    if (!days.length) continue;
+    // Q&A screenings are listed as separate films; fold them into the film itself.
+    const title = cleanFilmTitle(String(r.original_movie_title || '').replace(/\s*[-–]\s*["']?(online\s+)?q\s*&\s*a\b.*$/i, ''));
+    const content = (r.movie_content || []).find(c => c.lang_name === 'English' && (c.original_artwork || c.artwork));
+    const art = content && (content.original_artwork ? `${AKIL_ASSET_BASE}${content.original_artwork}` : content.artwork);
+    const key = mediaKey(title);
+    const prev = byTitle.get(key);
+    if (prev) {
+      if (days[0] < prev.date) prev.date = days[0];
+      if (days[days.length - 1] > prev.endDate) prev.endDate = days[days.length - 1];
+      continue;
+    }
+    byTitle.set(key, { kind: 'film', title, language, location: 'Cinema Akil', date: days[0], endDate: days[days.length - 1], image: art || null });
+  }
+  return [...byTitle.values()];
+}
+
+// Optional: a sharper poster from TMDB when the TMDB_API_KEY secret is set (Reel's are 300×450).
+function tmdbPoster(title, year, env) {
+  return async () => {
+    const params = new URLSearchParams({ query: title, include_adult: 'false', api_key: env.TMDB_API_KEY });
+    if (year) params.set('year', year);
+    const data = await fetchJson(`https://api.themoviedb.org/3/search/movie?${params}`, 'TMDB search');
+    const hit = (data.results || []).find(m => m.poster_path && normalizeArtistName(m.title) === normalizeArtistName(title)) || null;
+    return { image: hit ? `https://image.tmdb.org/t/p/w780${hit.poster_path}` : null };
+  };
+}
+
+function safeMediaImage(url) {
+  if (typeof url !== 'string') return null;
+  return url.startsWith('https://') || /^\/assets\/media\/[\w./-]+$/.test(url) ? url : null;
+}
+
+async function handleMedia(env, ctx) {
+  const cache = caches.default;
+  const cacheKey = new Request('https://milindparwani.com/__cache/media-v1');
+  const cached = await cache.match(cacheKey);
+  if (cached) return cached;
+
+  const today = dubaiToday(Date.now());
+  const from = addDays(today, -MEDIA_LOOKBACK_DAYS);
+  const to = addMonths(today, MEDIA_AHEAD_MONTHS);
+  const picks = MEDIA_PICKS || {};
+  const excluded = new Set((picks.excludeTitles || []).map(mediaKey));
+  let pending = false;
+
+  const [reel, akil] = await Promise.all([
+    reelFilms(today, from, to).catch(err => { console.error('media: Reel failed', { message: err.message }); pending = true; return []; }),
+    akilFilms(today, to).catch(err => { console.error('media: Cinema Akil failed', { message: err.message }); pending = true; return []; }),
+  ]);
+
+  // Chain releases (Reel + curated VOX/ROXY) appear once per film, without a venue.
+  const chain = new Map();
+  for (const f of [...reel, ...(picks.films || []).map(p => ({ ...p, kind: 'film' }))]) {
+    if (!f || !f.title || !/^\d{4}-\d{2}-\d{2}$/.test(f.date || '')) continue;
+    if (f.language && !MEDIA_LANGUAGES.test(f.language)) continue;
+    const end = f.endDate || f.date;
+    if (end < (f.rerelease ? today : from) || f.date > to) continue;
+    const key = mediaKey(f.title);
+    if (!chain.has(key)) chain.set(key, f);
+  }
+  // Cinema Akil keeps its own card unless the same film is a current chain release.
+  const films = [...chain.values(), ...akil.filter(f => !chain.has(mediaKey(f.title)))];
+
+  const games = (picks.games || []).filter(g => g && g.title && /^\d{4}-\d{2}-\d{2}$/.test(g.date || '') && g.date >= today && g.date <= to)
+    .map(g => ({ kind: 'game', title: g.title, date: g.date, platforms: g.platforms || '', image: g.image }));
+
+  const budget = { left: MEDIA_MAX_POSTER_LOOKUPS };
+  const items = [];
+  for (const item of [...films, ...games]) {
+    if (excluded.has(mediaKey(item.title))) continue;
+    let image = item.image;
+    if (item.kind === 'film' && env.TMDB_API_KEY && (!image || image.startsWith(REEL_POSTER_BASE))) {
+      const year = item.rerelease ? null : item.date.slice(0, 4);
+      const found = await cachedGigLookup(env, ctx, MEDIA_POSTER_CACHE_PREFIX + mediaKey(item.title), budget, tmdbPoster(item.title, year, env));
+      if (found === undefined) pending = true;
+      else if (found.image) image = found.image;
+    }
+    items.push({
+      kind: item.kind,
+      title: String(item.title).slice(0, 120),
+      date: item.date,
+      endDate: item.endDate && item.endDate !== item.date ? item.endDate : undefined,
+      rerelease: item.rerelease ? true : undefined,
+      location: item.location || undefined,
+      language: item.kind === 'film' ? item.language || undefined : undefined,
+      platforms: item.kind === 'game' ? String(item.platforms).slice(0, 80) : undefined,
+      image: safeMediaImage(image),
+    });
+  }
+  items.sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : a.kind.localeCompare(b.kind)));
+
+  const response = new Response(JSON.stringify(items), {
+    headers: {
+      'Content-Type': 'application/json',
+      'Cache-Control': `public, max-age=${pending ? GIGS_PENDING_CACHE_TTL_SECONDS : MEDIA_CACHE_TTL_SECONDS}`,
+    },
+  });
+  ctx.waitUntil(cache.put(cacheKey, response.clone()));
+  return response;
+}
+
 // Live listening data: the dashboard Spotify card (/api/now-playing), the three playlist cards
 // (/api/playlists) and the Top Tracks / Top Artists lists (/api/listening). Spotify only — it
 // never exposes play counts, so /api/listening counts plays from our own log in PLAYS_DB, which
@@ -1285,6 +1481,12 @@ export default {
     }
     if (url.pathname === '/api/gigs') {
       return handleGigs(request, env, ctx);
+    }
+    if (url.pathname === '/api/media') {
+      return handleMedia(env, ctx).catch(err => {
+        console.error('media failed', { message: err.message });
+        return jsonResponse({ error: 'Media lookup failed' }, 502);
+      });
     }
     if (url.pathname === '/api/now-playing') {
       return handleNowPlaying(env, ctx);

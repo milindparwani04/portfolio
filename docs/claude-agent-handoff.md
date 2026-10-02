@@ -12,7 +12,7 @@
 
 ## Current assignment
 
-Status: **Journal redesign (Codex's mockup) implemented and pushed 2026-10-02 — awaiting Milind's review.** Also live today: Gig Finder Dubai/Abu Dhabi and photos. Ongoing: the weekly curated refresh routine below.
+Status: **Media tracker (new section) pushed 2026-10-02 — awaiting Milind's review.** Also live today: Journal redesign, Gig Finder changes. Ongoing: two weekly routines (Gig Finder and Media).
 
 Areas Claude has most recently owned (coordinate before Codex changes these):
 
@@ -20,6 +20,22 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 |---|---|---|
 | Visible portfolio UI | `public/index.html` (the `.portfolio-v2` block only), `public/ui-v2.css`, `public/ui-v2.js` | Grey-box design from the Soft Monolith mockups. Cache-bust versions: `ui-v2.css?v=19`, `ui-v2.js?v=16` — bump on every change. Journal redesign implemented 2026-10-02 from Codex's mockup. |
 | Worker routes and data | `worker/index.js`, `worker/gig-picks.json`, `migrations/` | Spotify listening data, heart rate, gigs. Gig Finder rebuilt 2026-10-02. |
+
+## Media tracker (how it works, for the next session and the weekly routine)
+
+- **Milind's brief (2026-10-02):** a section like the Gig Finder for films and games; no TV. Films only in English, Japanese or Korean, from Reel (Dubai Mall), VOX (Mercato, BurJuman, Mall of the Emirates), ROXY (Dubai Hills) and Cinema Akil. A new release shows once with its release date and no venue. Old films on a limited run show the range of days. Cinema Akil is the only venue named, with its date range. Include films released in the last 7 days. Games: notable releases only (no small indies) from a verifiable games outlet, with release date and platforms. Window: next 3 months, rolling. Use the store's poster or cover. No buy links.
+- **Sources:**
+  - Reel publishes the JSON its own site uses at `storage.googleapis.com/eeg-prod-reelcinema-sb/web/vista/json/`: `Films.json` (title, `Language`, `OpeningDate`, `IsComingSoon`), `Sessions.json` (`CinemaId` `0001` is Dubai Mall; `Showtime`), `Cinemas.json`. Posters are `.../movie_images/{ID}.jpg` (300×450).
+  - Cinema Akil: `https://www.cinemaakil.com/api/films?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD` gives `films.Records[]` with `movie_languages`, `datesArray` (a day is a screening if it has `formats`) and `movie_content[].original_artwork` (about 966×1451).
+  - VOX (`uae.voxcinemas.com`) and ROXY (`theroxycinemas.com`) return 403 to Workers and hang or return 403 to curl, so they are curated. In Chrome they render normally: VOX lists show "Language:" in the page text, and on ROXY movie pages the showtimes are `input[cinema-name][date]` elements.
+- **Rules in code (`handleMedia`):** re-release = title matches `(YYYY)`, "re-release", "encore" or "anniversary". Its range is the first to last Dubai Mall session; if nothing is on sale yet, its announced date. Royal Ballet / Royal Opera broadcasts are excluded as not films. Chain films are deduplicated by normalised title (Reel first, then curated). An Akil card is dropped when the same film is a current chain release (e.g. Digger). Akil Q&A screenings fold into the film. Games come only from `media-picks.json`. `excludeTitles` hides anything by name. With a `TMDB_API_KEY` secret set, film posters are swapped for TMDB w780 posters (KV `media_poster:v1:*`, at most 12 lookups a run).
+- **Games:** Game Informer's schedule (`gameinformer.com/2026`, `/2027`) is parseable HTML (`span.calendar_entry` with `time[datetime]`). Box art: the product page's `/styles/product_box_art/public/...webp` has a 1440×2160 original without the style path. Covers are resized to 600 px wide (mozjpeg q78) in `public/assets/media/games/`. GameSpot and VGC block automated requests.
+- **Frontend:** `createCardRail({url, ids, noun, renderCard})` in `ui-v2.js` drives both rails. Media cards reuse the `.v2-gig` card with `.v2-media-art`: the poster is shown whole (contain) over a blurred copy. Status line: Coming soon / In cinemas / Limited run / Out now.
+- **Weekly routine:** "Media tracker weekly refresh", `trig_014ZDNi4Uf1ecndu8k5oJ6as`, cron `30 2 * * 1` (Mondays 06:30 Dubai), https://claude.ai/code/routines/trig_014ZDNi4Uf1ecndu8k5oJ6as.
+
+### Media tracker refresh log
+
+- 2026-10-02 — initial list. Games (25) from the Game Informer 2026 schedule, filtered to notable releases (no indies, no plain Switch 2 ports). Films curated: ROXY Dubai Hills K-Fest (Dark Nuns 2 Oct, Revolver 3 Oct, No Other Choice 4 Oct; Exhuma played only at Al Khawaneej and City Walk, so it is excluded). VOX coming soon and what's on were checked in Chrome: no English/Japanese/Korean titles that Reel lacks, apart from spelling variants and K-pop concert broadcasts. Excluded "Verity - Her Night" (a ladies'-night screening).
 
 ## Gig Finder (how it works, for the next session and the weekly routine)
 
@@ -51,6 +67,8 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 
 ## Open follow-ups (Claude's areas)
 
+- Media: Reel posters are 300×450. A free TMDB API key, stored with `wrangler secret bulk` as `TMDB_API_KEY`, turns on 780 px posters with no code change; Milind has to create the TMDB account. VOX and ROXY extras depend on the weekly routine, which may also be blocked from those sites, so they are best-effort.
+
 - Journal: there are no article pages yet for `Read more` to link to.
 
 
@@ -60,6 +78,16 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 - Lighthouse `valid-source-maps` flags a third-party library map; it doesn't affect the score categories that matter (production: 90 / 100 / 100).
 
 ## Work log (newest first)
+
+### 2026-10-02 — Media tracker section
+
+- The brief, sources and rules are in "Media tracker" above. Built `/api/media` (`handleMedia`, `reelFilms`, `akilFilms`, optional `tmdbPoster`), `worker/media-picks.json`, the Media section in `index.html` (REF. 04; Playlists is now 05 and Gigs 06; nav, cues and back links renumbered) and `.v2-media-*` CSS. The gig rail's state and countdown code became `createCardRail`, shared by both sections. Versions: `ui-v2.css?v=20`, `ui-v2.js?v=17`.
+- Research: probed every venue with curl, a Cloudflare Worker and Chrome. Reel and Akil expose data that Workers can read; VOX and ROXY don't. ROXY K-Fest showtimes per venue were read in Chrome.
+- Tested:
+  - Remote-preview harness (`?path=/api/media`): 80 items. All image URLs return 200 with real images. Language set {English, Korean, Japanese}. Dates from 2026-10-01 (released within the last week) to 2026-12-31.
+  - Headless Edge with a fixture, at ten sizes: no panel overlaps or section overflow, no page errors; titles stay within 2 lines. Posters were checked on screen at 1920 and 390.
+  - Paging: 7 sections, PageDown ×4 lands on `#v2-media` with the nav underlined.
+  - Gig rail unchanged (14 batches); Enter on the Media Next button advances the batch.
 
 ### 2026-10-02 — Coca-Cola Arena musicals, photo credits, cache TTL, Enter key
 
