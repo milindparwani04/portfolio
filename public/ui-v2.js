@@ -553,28 +553,15 @@
       value.replaceChildren(String(payload.bpm), unit);
       value.classList.remove('v2-placeholder');
       renderHeartFoot();
-      renderStepsFoot();
     } catch (_) {
       renderHeartFoot();
     }
   }
 
-  // Steps card: today's total via /api/steps against a 10,000 goal. Same Google Health sync as
-  // the heart rate, so the foot uses the same "Latest reading / age" wording.
+  // Steps card: today's total via /api/steps against a 10,000 goal. The markup holds the fixed
+  // "/10,000"; only the count, goal line and bar change.
   const STEPS_GOAL = 10000;
   const stepsNumber = new Intl.NumberFormat('en-GB');
-  let stepsReading = null;
-
-  // The tracker logs no step points while sitting still, so the newest step can be older than
-  // the sync itself. Both cards come from the same sync: show the newer of the two times.
-  function renderStepsFoot() {
-    const foot = byId('v2StepsFoot');
-    if (!foot || !stepsReading) return;
-    const times = [stepsReading.updatedAt, heartReading && heartReading.sampledAt].filter(Boolean);
-    const latest = times.sort((a, b) => new Date(b) - new Date(a))[0];
-    const age = latest ? timeAgo(latest) : '';
-    foot.textContent = age ? `Latest reading / ${age}` : 'No sync in the last 24 h';
-  }
 
   async function loadSteps() {
     const card = byId('v2Steps');
@@ -587,18 +574,16 @@
       if (!response.ok) throw new Error('Steps request failed');
       const payload = await response.json();
       if (!Number.isFinite(payload.steps)) throw new Error('Steps missing');
-      stepsReading = payload;
       const done = payload.steps >= STEPS_GOAL;
       const percent = Math.min(100, Math.floor((payload.steps / STEPS_GOAL) * 100));
-      value.textContent = `${stepsNumber.format(payload.steps)}/${stepsNumber.format(STEPS_GOAL)}`;
-      value.classList.remove('v2-placeholder');
+      value.textContent = stepsNumber.format(payload.steps);
+      value.parentElement.classList.remove('v2-placeholder');
       goal.textContent = done ? 'Daily goal reached' : `${percent}% of daily goal`;
       bar.style.width = `${percent}%`;
       card.classList.toggle('v2-steps--done', done);
     } catch (_) {
-      // Keep the last good total on a failed poll; only the age moves on.
+      // Keep the last good total on a failed poll.
     }
-    renderStepsFoot();
   }
 
   loadNowPlaying();

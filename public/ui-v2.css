@@ -149,17 +149,19 @@ body.locked { overflow: auto !important; height: auto !important; }
 .v2-spotify h3 { flex: 0 0 auto; }
 .v2-spotify-state, .v2-spotify-status { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-/* Steps card: the number sizes from the card itself (container units) so "10,000/10,000" never
-   clips; the goal line, hairline and number turn green once the goal is reached. */
+/* Steps card (Codex's oversized-count variant): small label, then the count as large as the card
+   allows with "/10,000" on its baseline, a full-width progress line and the goal line under it.
+   Sizes come from the card itself (container units), so "10,000/10,000" never clips. The count,
+   goal line and bar turn green once the goal is reached. */
 .v2-steps { grid-area: steps; container-type: size; }
-.v2-steps-body { margin: auto 0; display: flex; flex-direction: column; align-items: center; gap: clamp(.3rem, 3cqh, .7rem); }
-.v2-steps-value { font-family: var(--display); font-size: clamp(1.4rem, min(24cqh, 14cqw), 4.6rem); line-height: 1; white-space: nowrap; }
-.v2-steps-goal { color: var(--v2-dim); font-size: clamp(.54rem, min(5cqh, 4.4cqw), .78rem); letter-spacing: .05em; text-transform: uppercase; }
-.v2-steps-bar { width: min(70%, 22rem); height: 1px; background: var(--v2-soft-line); }
+.v2-steps-label { margin-top: auto; color: var(--v2-dim); font-size: clamp(.54rem, min(5cqh, 4cqw), .8rem); letter-spacing: .08em; text-transform: uppercase; }
+.v2-steps-value { margin: clamp(.1rem, 2cqh, .5rem) 0 clamp(.5rem, 6.5cqh, 1.2rem); font-family: var(--display); font-size: clamp(2rem, min(48cqh, 26cqw), 11rem); line-height: .9; white-space: nowrap; }
+.v2-steps-value small { margin-left: .12em; font-size: .4em; }
+.v2-steps-bar { flex: 0 0 auto; height: 3px; background: var(--v2-soft-line); }
 .v2-steps-bar span { display: block; width: 0; height: 100%; background: var(--v2-fg); transition: width .6s ease; }
+.v2-steps-goal { margin: clamp(.3rem, 3.5cqh, .8rem) 0 auto; color: var(--v2-dim); font-size: clamp(.54rem, min(5cqh, 4cqw), .8rem); letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .v2-steps--done .v2-steps-value, .v2-steps--done .v2-steps-goal { color: var(--v2-green); }
 .v2-steps--done .v2-steps-bar span { background: var(--v2-green); }
-.v2-steps .v2-metric-foot { flex: 0 0 auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .v2-about-date { flex: 0 0 auto; color: var(--v2-dim); font-size: clamp(.54rem, 1.25vh, .7rem); letter-spacing: .05em; text-transform: uppercase; }
 
 .v2-dissertation { grid-area: diss; }
@@ -429,7 +431,7 @@ body.locked { overflow: auto !important; height: auto !important; }
   .v2-footer-rule { display: none; }
   /* Phones: no small print below 12px. */
   .v2-index-row, .v2-ref, .v2-scroll-prev, .v2-scroll-next, .v2-card-foot, .v2-metric-foot, .v2-spotify-state, .v2-spotify-status,
-  .v2-steps-goal, .v2-about-date,.v2-bottom-card p, .v2-news-desc, .v2-journal-card p, .v2-journal-foot, .v2-review-meta,
+  .v2-steps-label, .v2-steps-goal, .v2-about-date, .v2-bottom-card p, .v2-news-desc, .v2-journal-card p, .v2-journal-foot, .v2-review-meta,
   .v2-journal-media figcaption, .v2-journal-more, .v2-journal-credit, .v2-gig-credit, .v2-project p, .v2-tool-copy p, .v2-playlist-copy p, .v2-track-row, .v2-top-toggle button,
   .v2-gig p, .v2-gig-link, .v2-gig-controls, .v2-strip, .v2-footer { font-size: .75rem; }
 }

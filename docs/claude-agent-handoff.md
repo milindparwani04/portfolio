@@ -12,13 +12,13 @@
 
 ## Current assignment
 
-Status: **Home Steps card live with real data 2026-10-02 (Codex's mockup, with Milind's two changes).** Previous wrap-up: Shipped today: Gig Finder (Dubai/Abu Dhabi, photos, credits, Chicago), Journal redesign, Enter-key fix, Cloudflare cache TTL fix, Media tracker. Open items: article pages for the Journal, an optional TMDB key for sharper posters. Two weekly routines run on Mondays (Gig Finder 06:00, Media 06:30 Dubai).
+Status: **Home Steps card live with real data, restyled 2026-10-02 to Codex's selected oversized-count design.** Previous wrap-up: Shipped today: Gig Finder (Dubai/Abu Dhabi, photos, credits, Chicago), Journal redesign, Enter-key fix, Cloudflare cache TTL fix, Media tracker. Open items: article pages for the Journal, an optional TMDB key for sharper posters. Two weekly routines run on Mondays (Gig Finder 06:00, Media 06:30 Dubai).
 
 Areas Claude has most recently owned (coordinate before Codex changes these):
 
 | Area | Files | Notes |
 |---|---|---|
-| Visible portfolio UI | `public/index.html` (the `.portfolio-v2` block only), `public/ui-v2.css`, `public/ui-v2.js` | Grey-box design from the Soft Monolith mockups. Cache-bust versions: `ui-v2.css?v=22`, `ui-v2.js?v=20` — bump on every change. Journal redesign implemented 2026-10-02 from Codex's mockup. |
+| Visible portfolio UI | `public/index.html` (the `.portfolio-v2` block only), `public/ui-v2.css`, `public/ui-v2.js` | Grey-box design from the Soft Monolith mockups. Cache-bust versions: `ui-v2.css?v=23`, `ui-v2.js?v=21` — bump on every change. Journal redesign implemented 2026-10-02 from Codex's mockup. |
 | Worker routes and data | `worker/index.js`, `worker/gig-picks.json`, `migrations/` | Spotify listening data, heart rate, steps, gigs. Gig Finder rebuilt 2026-10-02. |
 
 ## Media tracker (how it works, for the next session and the weekly routine)
@@ -80,6 +80,13 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 - Lighthouse `valid-source-maps` flags a third-party library map; it doesn't affect the score categories that matter (production: 90 / 100 / 100).
 
 ## Work log (newest first)
+
+### 2026-10-02 — Steps card restyled to Codex's oversized-count design
+
+- Milind asked Claude to build the refinement Codex logged. The chosen mockup is `~/.codex/generated_images/01a0fb70-…/exec-c9959bec-….png` (14:50). The other three images from 14:50–14:51 are rejected variants (centred, split percentage, ledger).
+- This reverses two of Milind's earlier changes, as the new design asks: a small `DAILY STEPS` label is back (upper-left, dim monospace), and the `LATEST READING / age` footer is gone, along with `renderStepsFoot` and the code that used the newer of the step and heart times. `/api/steps` still returns `updatedAt`, so the footer can come back if wanted.
+- Markup: label, then `.v2-steps-value` (the count in `#v2StepsValue`, then `<small>/10,000</small>` at 0.4em on the same baseline), then a 3 px full-width track (`--v2-soft-line`) with the fill, then `#v2StepsGoal`. Everything is left-aligned. The count is `clamp(2rem, min(48cqh, 26cqw), 11rem)`, line-height .9. The green done state now covers the count, `/10,000`, the goal line and the bar.
+- Tested: `wrangler dev` with the `zz-test.html` shim at 2,587 and 10,000 steps. Iframes at 1912×956, 1366×700, 1280×640, 1024×700, 768×1024 and 390×844: `/10,000` always fits inside the card (worst case 3 px spare at 10,000 on 768/390 widths), and the goal line keeps ≥14 px below it. Screenshots match the mockup.
 
 ### 2026-10-02 — Steps card connected to real data
 

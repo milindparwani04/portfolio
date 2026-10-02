@@ -86,9 +86,11 @@ Priorities, in order:
 
 Shell: opens directly onto a clean `C:\PARWANI>` navigation bar and the `MY DIGITAL PORTFOLIO.` dashboard. The former ENTER/CRT boot gate, floating navigation and bottom status bar are no longer visible.
 
-Home dashboard: one CSS grid with named areas (`.v2-dashboard` in `public/ui-v2.css`), so cards cannot overlap. Headline card (text only, fitted on each rotation from `/api/news`); grey "About this space" card; heart rate from `/api/heart-rate`; Dubai weather from Open-Meteo (humidity/wind line hides when the card is short; temperature scales to the card); Spotify card with the cover centred, track and artist beneath and "Now playing / Last played" bottom-left from `/api/now-playing` (grey square until a cover loads); Steps card (`05 [ STEPS / TODAY ]`, since 2026-10-02) with today's total against 10,000 from `/api/steps`, a goal line, a hairline progress bar and the same "Latest reading / age" foot as Heart Rate; it all turns green at 10,000. The Dubai date sits at the foot of About this space; bottom row with dissertation, current focus (Sounds Like) and deploy date from `/api/last-updated`. Heart rate, steps and now-playing refresh every 30 s without a reload. Every API-backed card keeps its layout when data is unavailable. Card titles marked `data-fit` (`fitText` in `ui-v2.js`) shrink to fit their box instead of being cut off: one-line titles shrink down to 55%; the Spotify track name shrinks up to 30% on two lines, then may take a third line; playlist and gig titles wrap onto two lines.
+Home dashboard: one CSS grid with named areas (`.v2-dashboard` in `public/ui-v2.css`), so cards cannot overlap. Headline card (text only, fitted on each rotation from `/api/news`); grey "About this space" card; heart rate from `/api/heart-rate`; Dubai weather from Open-Meteo (humidity/wind line hides when the card is short; temperature scales to the card); Spotify card with the cover centred, track and artist beneath and "Now playing / Last played" bottom-left from `/api/now-playing` (grey square until a cover loads); Steps card (`05 [ STEPS / TODAY ]`, since 2026-10-02, oversized-count design): small `DAILY STEPS` label, today's total from `/api/steps` very large with `/10,000` on its baseline, a full-width progress line and the percent-of-goal line; no age footer. It all turns green at 10,000. The Dubai date sits at the foot of About this space; bottom row with dissertation, current focus (Sounds Like) and deploy date from `/api/last-updated`. Heart rate, steps and now-playing refresh every 30 s without a reload. Every API-backed card keeps its layout when data is unavailable. Card titles marked `data-fit` (`fitText` in `ui-v2.js`) shrink to fit their box instead of being cut off: one-line titles shrink down to 55%; the Spotify track name shrinks up to 30% on two lines, then may take a third line; playlist and gig titles wrap onto two lines.
 
 Home Steps direction (Codex approved mockup, **implemented by Claude 2026-10-02** with two changes from Milind: no centred `DAILY STEPS` heading, and a "Latest reading / age" foot like Heart Rate. Live with real data since 2026-10-02.) Original mockup record: preserve the live Heart Rate card exactly and replace the entire Time / Location card with a dedicated `05 [ STEPS / TODAY ]` card; remove every city clock and time-zone label. The Steps card shows centered `DAILY STEPS` and a dynamic `[current]/10,000` value. Before goal completion, `2,500/10,000`, `25% OF DAILY GOAL` and a 25%-filled hairline use the current restrained white/gray/accent treatment. At 10,000, the exact value becomes green, the metadata changes to `DAILY GOAL REACHED`, and the hairline fills green. Move `FRI, 02 OCT 2026` to the bottom of About This Space. Keep all existing card dimensions and grid positions; no clipping or overlap is acceptable. The live step-count source and refresh path have not yet been specified or verified. See [`codex-agent-handoff.md`](codex-agent-handoff.md) for the detailed mockup record.
+
+Selected Steps visual refinement (**approved 2026-10-02; implemented by Claude the same day**, see the Claude handoff): keep the existing live card shell and data behavior, but replace its sparse internal composition with Codex's oversized-metric variant. Keep `05` top-left and `[ STEPS / TODAY ]` top-right; add a small upper-left `DAILY STEPS`; render the current count (for example `2,500`) extremely large across the card with a smaller `/10,000` on the same baseline; place a nearly full-width proportional hairline immediately below; and put `25% OF DAILY GOAL` beneath it. Remove the current `LATEST READING / age` footer so the metric and progress treatment use the full card. At 10,000, retain the green completed state and fully filled green progress line. Do not change the card's outer dimensions or grid position, and verify no clipping or overlap. The alternate centered, split-percentage and ledger mockups are rejected/superseded.
 
 Section paging: on desktop/tablet (≥721 px wide and ≥620 px tall) every section is exactly one viewport under a fixed nav bar, and one wheel gesture or key press (PageUp/PageDown/arrows/Space/Home/End) moves one whole section (`initSectionPager` in `public/ui-v2.js`, CSS scroll-snap for touch/scrollbar). Moves are driven by a critically damped spring (requestAnimationFrame, ~0.6 s settle) with scroll-snap switched off while it runs; a new swipe, wheel notch or key press mid-move retargets the spring instead of being ignored. Jumps of more than one section (nav links, Home/End) fade the sections out for 0.15 s, move to the target's neighbour, and fade back in while the spring carries the last section. Nav links, scroll cues and Back to top use the same motion; reduced-motion users get an instant jump. Each section has a "↑ previous" cue top-right and a "SCROLL / X NEXT ↓" cue at the bottom; the nav underlines the current section and the URL hash follows it. Content scales with viewport height so nothing clips down to ~1100×620; a short-viewport tier (≤760 px tall) tightens spacing. Grids stay three columns down to 721 px so locked sections still fit. Phones (≤720 px wide) and short windows scroll continuously with no paging, and small print is at least 12 px.
 
@@ -121,6 +123,31 @@ Known issues / not done:
 Next session starts with:
 - ...
 ```
+
+### 2026-10-02 — Oversized Steps card built
+Agent: Claude · Model: Opus 5.5
+Done:
+- Restyled card 05 to Codex's selected design: small `DAILY STEPS` label, huge count with `/10,000` on its baseline, full-width progress line, `25% OF DAILY GOAL` below. The age footer was removed, as the design asks.
+Tested (how, result):
+- Local mocked data at 2,587 and 10,000 across six viewport sizes (desktop to phone): nothing clips or overlaps, and the green completed state works.
+Known issues / not done:
+- None.
+Next session starts with:
+- Nothing pending on the Steps card.
+
+### 2026-10-02 — Oversized Steps-card refinement selected
+Agent: Codex · Model: GPT-5
+Phase: Design handoff only
+Done:
+- Milind selected Codex's oversized current-count variant for the already-live Steps card: small `DAILY STEPS`, dominant current value, smaller `/10,000`, full-width proportional hairline and percentage metadata below.
+- The selected refinement removes the live card's `LATEST READING / age` footer and uses that space for the larger metric/progress composition while preserving the existing card shell and goal-state behavior.
+- Recorded that the other generated card-only variants are superseded and that Milind will continue implementation with the other agent.
+Tested (how, result):
+- Visually reviewed the isolated card mockup against a crop of the live Steps card; the selected composition uses substantially more of the available card area while retaining the site's existing type, palette and terminal/editorial treatment.
+Known issues / not done:
+- Not implemented by Codex. No site files, API, assets, commit, push or deployment changed in this selection pass.
+Next session starts with:
+- Other agent: restyle only the existing live Steps card to the selected oversized-metric composition and verify both unfinished/completed states without clipping or overlap.
 
 ### 2026-10-02 — Home Steps card built
 Agent: Claude · Model: Opus 5.5
