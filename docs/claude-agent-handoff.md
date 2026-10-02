@@ -35,7 +35,7 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 
 ### Media tracker refresh log
 
-- 2026-10-02 — initial list. Games (25) from the Game Informer 2026 schedule, filtered to notable releases (no indies, no plain Switch 2 ports). Films curated: ROXY Dubai Hills K-Fest (Dark Nuns 2 Oct, Revolver 3 Oct, No Other Choice 4 Oct; Exhuma played only at Al Khawaneej and City Walk, so it is excluded). VOX coming soon and what's on were checked in Chrome: no English/Japanese/Korean titles that Reel lacks, apart from spelling variants and K-pop concert broadcasts. Excluded "Verity - Her Night" (a ladies'-night screening).
+- 2026-10-02 — initial list. Games (25) from the Game Informer 2026 schedule, filtered to notable releases (no indies, no plain Switch 2 ports). Films curated: ROXY Dubai Hills K-Fest (Dark Nuns 2 Oct, Revolver 3 Oct, No Other Choice 4 Oct; Exhuma played only at Al Khawaneej and City Walk, so it is excluded). VOX coming soon and what's on were checked in Chrome: no English/Japanese/Korean titles that Reel lacks, apart from spelling variants and K-pop concert broadcasts. Excluded "Verity - Her Night" (a ladies'-night screening) and, at Milind's request, "Always Lalisa" (a K-pop concert film).
 
 ## Gig Finder (how it works, for the next session and the weekly routine)
 

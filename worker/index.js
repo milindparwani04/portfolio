@@ -1110,7 +1110,7 @@ function safeMediaImage(url) {
 
 async function handleMedia(env, ctx) {
   const cache = caches.default;
-  const cacheKey = new Request('https://milindparwani.com/__cache/media-v1');
+  const cacheKey = new Request('https://milindparwani.com/__cache/media-v2');
   const cached = await cache.match(cacheKey);
   if (cached) return cached;
 

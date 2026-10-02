@@ -51,7 +51,7 @@ Secrets (set with `wrangler secret bulk` from a temp file — piping into `secre
 | `/api/sample-search` | Sample Finder tool | Freesound | 1 hr |
 | `/api/spotify/authorize` | Owner-only OAuth start (key-gated) | Spotify | none |
 | `/api/spotify/callback` | OAuth callback, stores refresh token | Spotify | none |
-| `/api/media` | Media tracker: Dubai films (EN/JA/KO) from 7 days ago to 3 months ahead plus notable games. Reel Cinemas public Vista JSON (`Films.json` releases and languages; `Sessions.json` Dubai Mall screening days for re-releases) + Cinema Akil `/api/films` + curated `worker/media-picks.json` (games; VOX/ROXY screenings, since both block automated requests). Optional `TMDB_API_KEY` secret upgrades Reel's 300×450 posters. Returns `[{ kind, title, date, endDate?, rerelease?, location?, language?, platforms?, image }]` | Reel (Google Cloud Storage), Cinema Akil, TMDB (optional) | 3 h (fixed key `media-v1`; 5 min if a source failed) |
+| `/api/media` | Media tracker: Dubai films (EN/JA/KO) from 7 days ago to 3 months ahead plus notable games. Reel Cinemas public Vista JSON (`Films.json` releases and languages; `Sessions.json` Dubai Mall screening days for re-releases) + Cinema Akil `/api/films` + curated `worker/media-picks.json` (games; VOX/ROXY screenings, since both block automated requests). Optional `TMDB_API_KEY` secret upgrades Reel's 300×450 posters. Returns `[{ kind, title, date, endDate?, rerelease?, location?, language?, platforms?, image }]` | Reel (Google Cloud Storage), Cinema Akil, TMDB (optional) | 3 h (fixed key `media-v2`; 5 min if a source failed) |
 | `/api/gigs` | Dubai / Abu Dhabi events in Milind's categories (comedy, Dubai Opera musicals, English-language concerts at Coca-Cola Arena / Ushuaïa / big Abu Dhabi venues, Dubai DJs within 90 days, film-score concerts, F1): Ticketmaster UAE events classified in the Worker, merged with the curated `worker/gig-picks.json`. Returns `{ artist, category, venue, date, endDate?, image, url }` | Ticketmaster, Last.fm (language tags) | 1 hr (fixed key `gigs-v3`; 5 min while lookups are pending or Ticketmaster is down) |
 | `/api/health/authorize` | Owner-only Google Health OAuth start (`HEALTH_AUTH_KEY`, constant-time compare) | Google | none |
 | `/api/health/callback` | OAuth callback, stores `health_refresh_token` in `GIG_KV` | Google | none |
@@ -131,7 +131,7 @@ Tested (how, result):
 - Remote preview against live sources: 80 items (44 films, 8 re-releases, 3 Akil, 25 games); all 81 image URLs load; only English, Korean and Japanese films. Headless Edge at ten sizes: no overlaps, no page errors; PageDown paging reaches Media and the nav follows it; the gig rail still works; Enter works on the Media Next button.
 Known issues / not done:
 - Reel's posters are 300×450. Adding a free `TMDB_API_KEY` secret switches films to 780 px posters automatically.
-- "Always Lalisa" (a Korean concert film of the K-pop singer Lisa) is included because it is Korean-language; add it to `excludeTitles` if unwanted.
+- "Always Lalisa" (a K-pop concert film) is hidden via `excludeTitles` at Milind's request.
 
 ### 2026-10-02 — Chicago, photo credits, browser cache fix, Enter key
 Agent: Claude · Model: Opus 5.5
