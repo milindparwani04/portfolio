@@ -640,9 +640,10 @@ async function handleSteps(env, ctx) {
     const token = await refreshGoogleHealthAccessToken(env);
     const now = Date.now();
     const today = dubaiToday(now);
+    // CivilDateTime is { date: { year, month, day }, time? }; midnight when time is omitted.
     const civil = isoDate => {
       const [year, month, day] = isoDate.split('-').map(Number);
-      return { year, month, day };
+      return { date: { year, month, day } };
     };
     const stepsFetch = async (path, init) => {
       const res = await fetch(`${GOOGLE_HEALTH_API_BASE}/users/me/dataTypes/steps/${path}`, {
