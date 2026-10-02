@@ -12,13 +12,13 @@
 
 ## Current assignment
 
-Status: **Gig Finder: Dubai and Abu Dhabi only (2026-10-02) — pushed, awaiting Milind's review.** Ongoing: the weekly curated refresh routine below.
+Status: **Journal redesign (Codex's mockup) implemented and pushed 2026-10-02 — awaiting Milind's review.** Also live today: Gig Finder Dubai/Abu Dhabi and photos. Ongoing: the weekly curated refresh routine below.
 
 Areas Claude has most recently owned (coordinate before Codex changes these):
 
 | Area | Files | Notes |
 |---|---|---|
-| Visible portfolio UI | `public/index.html` (the `.portfolio-v2` block only), `public/ui-v2.css`, `public/ui-v2.js` | Grey-box design from the Soft Monolith mockups. Cache-bust versions: `ui-v2.css?v=16`, `ui-v2.js?v=15` — bump on every change. |
+| Visible portfolio UI | `public/index.html` (the `.portfolio-v2` block only), `public/ui-v2.css`, `public/ui-v2.js` | Grey-box design from the Soft Monolith mockups. Cache-bust versions: `ui-v2.css?v=17`, `ui-v2.js?v=15` — bump on every change. Journal redesign implemented 2026-10-02 from Codex's mockup. |
 | Worker routes and data | `worker/index.js`, `worker/gig-picks.json`, `migrations/` | Spotify listening data, heart rate, gigs. Gig Finder rebuilt 2026-10-02. |
 
 ## Gig Finder (how it works, for the next session and the weekly routine)
@@ -51,6 +51,8 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 
 ## Open follow-ups (Claude's areas)
 
+- Journal: the photos are CC BY / BY-SA, and the credits are only in this doc so far. A small visible credit (for example in the caption or the page footer) would fully satisfy the licences; Milind to decide. There are no article pages yet for `Read more` to link to.
+
 - Cache hits on `/api/*` reach browsers with `max-age=14400`. Check the zone's Browser Cache TTL ("Respect existing headers" would keep the Worker's TTLs).
 - Gig Finder: Chicago the Musical (Coca-Cola Arena, 16–20 Dec) is excluded by the "Dubai Opera musicals" rule; ask Milind whether he wants it. In headless Edge, pressing Enter on a focused gig Next button didn't change the batch, while Space and click did. This is existing code; check it in a real browser.
 
@@ -60,6 +62,24 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 - Lighthouse `valid-source-maps` flags a third-party library map; it doesn't affect the score categories that matter (production: 90 / 100 / 100).
 
 ## Work log (newest first)
+
+### 2026-10-02 — Journal redesign (Codex's mockup) implemented
+
+- Milind asked Claude to finish Codex's task: build the approved Journal UI. The final mockup is `~/.codex/generated_images/01a0fb70-…/exec-8d3cff83-….png` (11:24). The 11:17 and 11:20 images show older states with `Read more` links. Codex's rule is that all three entries are unfinished and none shows `Read more`.
+- **Markup:** each card in `public/index.html` has an index row, a `figure.v2-journal-media` (photo plus top-left caption), a `.v2-journal-copy` (h3 `data-fit="2"`, or a `.v2-review-head` with title, year and `.v2-score` badge, then the description), and a `.v2-journal-foot` with the status in yellow. An HTML comment above the grid explains how to mark an entry finished: set the status to `Completed` and add `a.v2-journal-more` as the last child of the foot. It also lists the badge colour classes `v2-score--red/--yellow/--green/--purple`.
+- **CSS:** the grid has 4 shared rows (`auto minmax(90px,1fr) auto auto`), and cards use `grid-template-rows: subgrid`, so the photos are the same height and the status rows line up even when titles wrap differently. The photo row gives way on short screens. Phones (≤720 px) switch cards to flex columns with 220 px photos. The badge is a 48-point `clip-path` polygon sized `clamp(64px, min(7vw,13vh), 124px)`, with a 92 px badge on phones. The old `.v2-journal-meta`, `.v2-journal-status` and diagonal-stripe placeholder rules were removed. The strip now reads "03 entries" (the mockup still said "01 entry"). The scroll cue stays "Projects next" to match the other sections, rather than the mockup's text.
+- **Photos** (Wikimedia Commons, 1280 px thumbnails resized to 1000 px wide at mozjpeg q78, 108–163 KB each, in `public/assets/journal/`):
+  - `karoshi-marunouchi.jpg`: "Marunouchi skyscrapers" by KimonBerlin, CC BY-SA 2.0.
+  - `attention-shibuya.jpg`: "Japan (15608018214)" by Moyan Brenn, CC BY 2.0 (credit watermark visible bottom-left).
+  - `shawshank-reformatory.jpg`: "Ohio State Reformatory-4" by Marianodemiguel, CC BY-SA 4.0. The film was shot at this reformatory.
+  - These licences require attribution. Credits are recorded here; adding a visible credit line on the site is a follow-up for Milind to decide.
+- **Tested** in headless Edge at 2560×1300, 1920×969, 1440×789, 1366×657, 1280×720, 1100×620, 1024×700, 768×1024, 390×844 and 360×740:
+  - no panel overlaps, child overflow or section overflow, and no page or request errors;
+  - all three photos the same height at every size;
+  - titles stay within 2 lines, and no description is cut off;
+  - no `Read more` links.
+  - A temporary `Completed` state at 1440×789 keeps the link inside its card.
+  - A phone bug was found and fixed: the flex-column foot shrank to content width. On phones it now stretches to the full card width.
 
 ### 2026-10-02 — Gig Finder: high-quality photo on every card
 

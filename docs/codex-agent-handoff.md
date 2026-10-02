@@ -13,9 +13,9 @@
 
 ## Current assignment
 
-Status: Phase 1 full-site mockup complete — Soft Monolith selected; awaiting approval to spec implementation.
+Status: Journal redesign mockup complete — latest card states approved; awaiting an explicit implementation assignment.
 
-Scope: Explore a less boxy UI without changing the current element placement or by-section scrolling. Mockups only until Milind selects a direction and approves an implementation phase.
+Scope: Refine the Journal section within the selected Soft Monolith direction without changing the strict section-by-section viewport structure. Mockups only until Milind explicitly assigns implementation.
 
 Files changed:
 
@@ -30,6 +30,18 @@ Validation:
 - Rendered eight mockup variants, the refined Soft Monolith home, and the complete six-section mock site; verified every section navigation target, responsive reflow, and an error-free browser console.
 
 ## Work log
+
+### 2026-10-02 — Journal article and review card states
+
+- Reworked the Journal mockup into a three-card editorial grid: two writing cards and one media-review card, with each image contained at the top of its card rather than placed beside the copy.
+- Established Journal as the parent section for both writing and reviews. The review example uses *The Shawshank Redemption* (1994), an introductory paragraph, a film label, and a tight many-point circular `10/10` badge with a purple field and white score. Future review badge colours are red for 1–5, yellow for 6–7, green for 8–9, and purple for 10; game reviews additionally need the platform played.
+- Replaced the second planned article with “The Attention Economy,” about industries competing to capture finite attention as a revenue-generating currency.
+- Removed duplicated topic metadata from card footers because the topic already appears at the card top.
+- Finalized the conditional action rule: unfinished entries show only their current status anchored at the bottom and must not render a disabled, hidden-space, or placeholder `READ MORE` action. Only a finished entry changes its status to `COMPLETED` and reveals the borderless, underlined `READ MORE ›` editorial link beneath it.
+- Milind confirmed that every currently shown Journal entry is unfinished. The intended current states are Karoshi `RESEARCHING`, The Attention Economy `PLANNED`, and The Shawshank Redemption review `WRITING`; therefore none should show `READ MORE` in the implementation until Milind explicitly marks it complete.
+- Preserved the full-viewport Journal chapter, three-column desktop fit, square corners, monochrome terminal/editorial system, condensed display titles, monospace metadata, and the existing restrained accent palette.
+- Generated and visually reviewed iterative screenshot concepts only. No site files, configuration, assets, commit, push, or deployment changed.
+- Next action: wait for Milind to explicitly assign the Journal implementation; when assigned, use the unfinished state for all three current entries.
 
 ### 2026-10-01 — Final static screenshot handoff
 

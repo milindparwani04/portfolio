@@ -89,7 +89,9 @@ Home dashboard: one CSS grid with named areas (`.v2-dashboard` in `public/ui-v2.
 
 Section paging: on desktop/tablet (≥721 px wide and ≥620 px tall) every section is exactly one viewport under a fixed nav bar, and one wheel gesture or key press (PageUp/PageDown/arrows/Space/Home/End) moves one whole section (`initSectionPager` in `public/ui-v2.js`, CSS scroll-snap for touch/scrollbar). Moves are driven by a critically damped spring (requestAnimationFrame, ~0.6 s settle) with scroll-snap switched off while it runs; a new swipe, wheel notch or key press mid-move retargets the spring instead of being ignored. Jumps of more than one section (nav links, Home/End) fade the sections out for 0.15 s, move to the target's neighbour, and fade back in while the spring carries the last section. Nav links, scroll cues and Back to top use the same motion; reduced-motion users get an instant jump. Each section has a "↑ previous" cue top-right and a "SCROLL / X NEXT ↓" cue at the bottom; the nav underlines the current section and the URL hash follows it. Content scales with viewport height so nothing clips down to ~1100×620; a short-viewport tier (≤760 px tall) tightens spacing. Grids stay three columns down to 721 px so locked sections still fit. Phones (≤720 px wide) and short windows scroll continuously with no paging, and small print is at least 12 px.
 
-Sections: Journal (REF. 01, Karoshi copy card with status/topic rows beside a grey diagonal-stripe image placeholder, plus info strip), Projects (REF. 02, text-only 3×2 cards plus one full-width card, each ending in a status / action footer), Toolbox (REF. 03, text-only 3×3 grid of all nine tools; Sample Finder, PDF Editor and Signature Creator show a disabled "Still being built"), Playlists (REF. 04, three playlist cards with real Spotify covers and track counts, plus "Top this month" — name / artist / bar / plays with a Tracks / Artists toggle), and Gig Finder (REF. 05, Dubai and Abu Dhabi events with a category tag, artist photo where available and ticket link; Ticketmaster plus a curated list refreshed every Monday by a Claude cloud routine; 10-second countdown, hover/focus pause; an honest empty state replaces the old invented fallback list; footer with © / Back to top / LinkedIn / Spotify). The placeholder photography in `public/assets/ui/` has been removed. A privacy page lives at `/privacy`. The local music player is no longer exposed. The modal code for the three unfinished tools remains in the hidden legacy shell.
+Sections: Journal (REF. 01, writing and reviews: three cards, each with a photo on top, then title and copy, then status, with the rows lined up across cards; see below), Projects (REF. 02, text-only 3×2 cards plus one full-width card, each ending in a status / action footer), Toolbox (REF. 03, text-only 3×3 grid of all nine tools; Sample Finder, PDF Editor and Signature Creator show a disabled "Still being built"), Playlists (REF. 04, three playlist cards with real Spotify covers and track counts, plus "Top this month" — name / artist / bar / plays with a Tracks / Artists toggle), and Gig Finder (REF. 05, Dubai and Abu Dhabi events with a category tag, artist photo where available and ticket link; Ticketmaster plus a curated list refreshed every Monday by a Claude cloud routine; 10-second countdown, hover/focus pause; an honest empty state replaces the old invented fallback list; footer with © / Back to top / LinkedIn / Spotify). The placeholder photography in `public/assets/ui/` has been removed. A privacy page lives at `/privacy`. The local music player is no longer exposed. The modal code for the three unfinished tools remains in the hidden legacy shell.
+
+Journal redesign (Codex's approved mockup, **implemented by Claude 2026-10-02**; see the Claude handoff for markup and CSS notes): Journal encompasses both writing and media reviews in a three-card desktop grid, with imagery at the top of each card and copy/metadata below. Article topics appear only in the card header. Reviews use a distinct many-point circular score badge: red for 1–5, yellow for 6–7, green for 8–9 and purple for 10, with a white number; game reviews also list the platform played. Entry actions are conditional: unfinished entries show only their bottom-anchored status and no `READ MORE` placeholder; an entry marked `COMPLETED` additionally reveals a borderless, underlined `READ MORE ›` link. All current mockup entries are unfinished — Karoshi `RESEARCHING`, The Attention Economy `PLANNED`, and The Shawshank Redemption review `WRITING` — so none should currently expose `READ MORE`. See [`codex-agent-handoff.md`](codex-agent-handoff.md) for the detailed design record.
 
 Backend endpoints live: news, last-updated, BPM/key lookup, audio features, sample search, gigs, Spotify owner OAuth, now-playing, playlists, listening, Google Health owner OAuth, heart-rate, plus the 30-minute play-log cron.
 
@@ -114,6 +116,30 @@ Known issues / not done:
 Next session starts with:
 - ...
 ```
+
+### 2026-10-02 — Journal redesign implemented
+Agent: Claude · Model: Opus 5.5
+Done:
+- Milind asked Claude to build Codex's approved Journal mockup (entry below). Changed: the Journal block in `public/index.html`, the Journal rules in `public/ui-v2.css` (`?v=17`), and three new photos in `public/assets/journal/`. All three entries are unfinished, so no `Read more` link is shown. Codex's mockup used AI concept images, so the cards use real Wikimedia Commons photos in the same mood (licences and credits are in the Claude handoff).
+- Committed Codex's pending doc entries (this file and `codex-agent-handoff.md`) unchanged in the same push.
+Tested (how, result):
+- Headless Edge at ten sizes from 2560×1300 to 360×740: no overlaps or overflow, no page errors, photos the same height in every card, no description cut off. A temporary `Completed` state shows the `Read more ›` link inside the card.
+Known issues / not done:
+- Article pages behind `Read more` don't exist yet; the content format is still to decide (SC-01).
+
+### 2026-10-02 — Journal writing/review card direction
+Agent: Codex · Model: GPT-5
+Phase: Mockup only
+Done:
+- Finalized the approved Journal mockup direction: a three-card grid for writing and media reviews, top-contained imagery, non-duplicated topic labels, and a distinct colour-coded jagged score badge for reviews.
+- Defined conditional card actions: unfinished entries show status only; completed entries show `STATUS  COMPLETED` plus the borderless `READ MORE ›` link.
+- Confirmed every current Journal entry is unfinished, so the intended present state contains no `READ MORE` links.
+Tested (how, result):
+- Iterated and visually reviewed generated desktop screenshots while preserving the strict full-viewport section layout. No repository implementation was changed.
+Known issues / not done:
+- The live Journal remains in its existing implementation. The approved redesign is documented but has not been coded, committed, pushed, or deployed.
+Next session starts with:
+- Implement only if Milind explicitly assigns the Journal build; initialize Karoshi as `RESEARCHING`, The Attention Economy as `PLANNED`, and The Shawshank Redemption review as `WRITING`, with no `READ MORE` links.
 
 ### 2026-10-02 — Gig Finder photos
 Agent: Claude · Model: Opus 5.5

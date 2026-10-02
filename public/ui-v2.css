@@ -190,24 +190,43 @@ body.locked { overflow: auto !important; height: auto !important; }
 .v2-card-foot a:hover, .v2-card-foot a:focus-visible, .v2-card-foot button:not(:disabled):hover, .v2-card-foot button:not(:disabled):focus-visible { text-decoration: underline; text-underline-offset: .3em; }
 .v2-card-foot button:disabled { cursor: default; }
 
-/* Journal: copy card beside a grey diagonal placeholder panel (no photography yet). */
-.v2-journal-grid { flex: 1 1 auto; min-height: 380px; display: grid; grid-template-columns: minmax(0, .43fr) minmax(0, .57fr); gap: 10px; }
-.v2-journal-card { min-width: 0; min-height: 0; overflow: hidden; padding: clamp(.6rem, 1.5vh, .9rem) clamp(.7rem, 1vw, .95rem); display: flex; flex-direction: column; }
-.v2-journal-card h3 { margin: clamp(.6rem, 2.4vh, 1.5rem) 0 clamp(.5rem, 1.6vh, 1rem); font-family: var(--display); font-weight: 400; font-size: clamp(1.8rem, min(4.2vw, 8vh), 4.8rem); text-transform: uppercase; line-height: .95; }
-.v2-journal-card p { margin: 0; color: var(--v2-fg); font-size: clamp(.66rem, 1.55vh, .88rem); line-height: 1.6; max-width: 58ch; }
-.v2-journal-meta { margin: clamp(.6rem, 2.2vh, 1.4rem) 0 0; }
-.v2-journal-meta div { display: flex; justify-content: space-between; gap: 1rem; padding: clamp(.45rem, 1.6vh, .95rem) 0; border-top: 1px solid var(--v2-soft-line); font-size: clamp(.56rem, 1.25vh, .72rem); letter-spacing: .05em; text-transform: uppercase; }
-.v2-journal-meta div:last-child { border-bottom: 1px solid var(--v2-soft-line); }
-.v2-journal-meta dt { color: var(--v2-dim); }
-.v2-journal-meta dd { margin: 0; }
-.v2-journal-status { margin-top: clamp(.5rem, 1.8vh, 1.1rem); color: var(--v2-dim); font-size: clamp(.56rem, 1.25vh, .72rem); letter-spacing: .05em; text-transform: uppercase; }
-.v2-journal-media {
-  position: relative;
-  min-width: 0;
-  min-height: 0;
-  background: linear-gradient(146deg, #3a3a3a 0%, #262626 30%, #121212 30% 55%, #626262 55% 57.5%, #121212 57.5% 72%, #464646 72% 100%);
+/* Journal (Codex mockup, 2026-10-02): three cards — writing and reviews — each with its photo on
+   top, title and copy below, and the status pinned to the bottom. The photo is the part that
+   gives way on short screens. */
+/* The cards share one set of rows (subgrid), so photos, titles and status lines line up across
+   all three even when one title wraps and another doesn't. */
+.v2-journal-grid { flex: 1 1 auto; min-height: 520px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: auto minmax(90px, 1fr) auto auto; column-gap: 10px; row-gap: 0; }
+.v2-journal-card { min-width: 0; min-height: 0; overflow: hidden; padding: clamp(.6rem, 1.5vh, .9rem) clamp(.7rem, 1vw, .95rem); display: grid; grid-row: span 4; grid-template-rows: subgrid; row-gap: 0; }
+.v2-journal-media { position: relative; min-height: 0; margin: clamp(.45rem, 1.4vh, .8rem) 0 0; overflow: hidden; background: var(--v2-panel-raised); }
+.v2-journal-media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+.v2-journal-media::after { content: ''; position: absolute; inset: 0 0 auto; height: 4.5em; background: linear-gradient(rgba(0, 0, 0, .6), transparent); pointer-events: none; }
+.v2-journal-media figcaption { position: absolute; z-index: 1; left: clamp(.6rem, 1vw, .9rem); top: clamp(.5rem, 1.4vh, .8rem); color: var(--v2-fg); font-size: clamp(.56rem, 1.2vh, .7rem); letter-spacing: .05em; text-transform: uppercase; text-shadow: 0 1px 4px rgba(0, 0, 0, .9); }
+.v2-journal-card h3 { margin: clamp(.55rem, 1.8vh, 1.1rem) 0 clamp(.3rem, 1vh, .6rem); font-family: var(--display); font-weight: 400; font-size: clamp(1.5rem, min(2.8vw, 6vh), 3.6rem); text-transform: uppercase; line-height: .95; }
+.v2-journal-copy { min-height: 0; overflow: hidden; }
+.v2-journal-card p { margin: 0; color: var(--v2-fg); font-size: clamp(.62rem, 1.45vh, .84rem); line-height: 1.55; display: -webkit-box; -webkit-line-clamp: 7; -webkit-box-orient: vertical; overflow: hidden; }
+.v2-journal-foot { align-self: end; display: flex; flex-wrap: wrap; justify-content: space-between; column-gap: 1rem; margin-top: clamp(.5rem, 1.6vh, 1rem); padding-top: clamp(.45rem, 1.4vh, .85rem); border-top: 1px solid var(--v2-soft-line); color: var(--v2-dim); font-size: clamp(.56rem, 1.25vh, .72rem); letter-spacing: .05em; text-transform: uppercase; }
+.v2-journal-state { color: var(--v2-yellow); }
+/* Finished entries only: a plain underlined link on its own line under the status. */
+.v2-journal-more { flex: 0 0 100%; margin-top: clamp(.4rem, 1.2vh, .7rem); color: var(--v2-fg); font-size: clamp(.66rem, 1.5vh, .9rem); letter-spacing: .06em; text-transform: uppercase; text-decoration: underline; text-underline-offset: .35em; }
+.v2-journal-more:hover, .v2-journal-more:focus-visible { color: var(--v2-dim); }
+
+/* Review: title and year beside a jagged round score badge. */
+.v2-review-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: clamp(.5rem, 1vw, 1rem); margin: clamp(.55rem, 1.8vh, 1.1rem) 0 clamp(.3rem, 1vh, .6rem); }
+.v2-review-head h3 { margin: 0; }
+.v2-review-meta { display: block; margin-top: .35rem; color: var(--v2-dim); font-size: clamp(.56rem, 1.25vh, .72rem); letter-spacing: .05em; }
+.v2-score {
+  --v2-score-size: clamp(64px, min(7vw, 13vh), 124px);
+  width: var(--v2-score-size); height: var(--v2-score-size); flex: 0 0 auto;
+  display: inline-flex; align-items: baseline; justify-content: center; padding-top: calc(var(--v2-score-size) * .26);
+  color: #fff; font-family: var(--display); line-height: 1;
+  clip-path: polygon(50% 0%, 56% 4.4%, 62.9% 1.7%, 67.6% 7.5%, 75% 6.7%, 78% 13.5%, 85.4% 14.6%, 86.5% 22%, 93.3% 25%, 92.5% 32.4%, 98.3% 37.1%, 95.6% 44%, 100% 50%, 95.6% 56%, 98.3% 62.9%, 92.5% 67.6%, 93.3% 75%, 86.5% 78%, 85.4% 85.4%, 78% 86.5%, 75% 93.3%, 67.6% 92.5%, 62.9% 98.3%, 56% 95.6%, 50% 100%, 44% 95.6%, 37.1% 98.3%, 32.4% 92.5%, 25% 93.3%, 22% 86.5%, 14.6% 85.4%, 13.5% 78%, 6.7% 75%, 7.5% 67.6%, 1.7% 62.9%, 4.4% 56%, 0% 50%, 4.4% 44%, 1.7% 37.1%, 7.5% 32.4%, 6.7% 25%, 13.5% 22%, 14.6% 14.6%, 22% 13.5%, 25% 6.7%, 32.4% 7.5%, 37.1% 1.7%, 44% 4.4%);
 }
-.v2-journal-media span { position: absolute; left: clamp(.7rem, 1.4vw, 1.1rem); bottom: clamp(.6rem, 2vh, 1.1rem); font-size: clamp(.56rem, 1.25vh, .72rem); letter-spacing: .05em; text-transform: uppercase; }
+.v2-score b { font-weight: 400; font-size: calc(var(--v2-score-size) * .44); }
+.v2-score small { margin-left: .15em; font-family: var(--mono); font-size: calc(var(--v2-score-size) * .11); }
+.v2-score--red { background: #e5484d; }
+.v2-score--yellow { background: var(--v2-yellow); color: #111; }
+.v2-score--green { background: #1f9d55; }
+.v2-score--purple { background: #5b21ff; }
 
 /* Projects */
 .v2-project-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
@@ -370,8 +389,12 @@ body.locked { overflow: auto !important; height: auto !important; }
   .v2-bottom-card h3 { font-size: 1.3rem; }
   .v2-project-grid, .v2-tool-grid, .v2-playlists { grid-template-columns: 1fr; }
   .v2-gigs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .v2-journal-grid { grid-template-columns: 1fr; grid-template-rows: auto 220px; }
+  .v2-journal-grid { grid-template-columns: 1fr; grid-template-rows: none; row-gap: 10px; min-height: 0; }
+  .v2-journal-card { display: flex; flex-direction: column; grid-row: auto; }
+  .v2-journal-foot { align-self: stretch; }
+  .v2-journal-media { flex: 0 0 auto; height: 220px; }
   .v2-journal-card h3 { font-size: clamp(2.2rem, 9vw, 3.3rem); }
+  .v2-score { --v2-score-size: 92px; }
   .v2-project-wide { grid-column: 1; display: flex; }
   .v2-project-wide .v2-project-copy { display: block; }
   .v2-project-wide h3 { margin: .8rem 0 .35rem; }
@@ -387,8 +410,8 @@ body.locked { overflow: auto !important; height: auto !important; }
   .v2-footer-rule { display: none; }
   /* Phones: no small print below 12px. */
   .v2-index-row, .v2-ref, .v2-scroll-prev, .v2-scroll-next, .v2-card-foot, .v2-metric-foot, .v2-spotify-state, .v2-spotify-status,
-  .v2-cities li > span, .v2-time-date, .v2-bottom-card p, .v2-news-desc, .v2-journal-card p, .v2-journal-meta div, .v2-journal-status,
-  .v2-journal-media span, .v2-project p, .v2-tool-copy p, .v2-playlist-copy p, .v2-track-row, .v2-top-toggle button,
+  .v2-cities li > span, .v2-time-date, .v2-bottom-card p, .v2-news-desc, .v2-journal-card p, .v2-journal-foot, .v2-review-meta,
+  .v2-journal-media figcaption, .v2-journal-more, .v2-project p, .v2-tool-copy p, .v2-playlist-copy p, .v2-track-row, .v2-top-toggle button,
   .v2-gig p, .v2-gig-link, .v2-gig-controls, .v2-strip, .v2-footer { font-size: .75rem; }
 }
 

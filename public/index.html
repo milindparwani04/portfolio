@@ -972,7 +972,7 @@
     .tools{ grid-template-columns:1fr; }
   }
 </style>
-<link rel="stylesheet" href="/ui-v2.css?v=16">
+<link rel="stylesheet" href="/ui-v2.css?v=17">
 </head>
 <body class="locked">
 
@@ -1060,20 +1060,45 @@
     <section class="v2-section" id="v2-journal">
       <div class="v2-section-head"><div class="v2-ref-row"><span class="v2-ref">Ref. 01 / Journal</span><a class="v2-scroll-prev" href="#v2-home">&#8593;&nbsp; Home</a></div><h2 class="v2-section-title">Journal</h2><p class="v2-section-kicker">Writing on economics, work and the way we live.</p></div>
       <div class="v2-stage v2-journal-stage">
+        <!-- Journal entries: writing and reviews. An unfinished entry shows only its status. When an
+             entry is finished, set its status to "Completed" and add
+             <a class="v2-journal-more" href="...">Read more <span aria-hidden="true">&#8250;</span></a>
+             as the last child of its v2-journal-foot — never a disabled or placeholder link. Review score badges take
+             v2-score--red (1–5), --yellow (6–7), --green (8–9) or --purple (10); game reviews also
+             list the platform in the meta line. Photo credits: docs/claude-agent-handoff.md. -->
         <div class="v2-journal-grid">
           <article class="v2-panel v2-journal-card">
             <div class="v2-index-row"><span>01&nbsp; &mdash; &nbsp;Latest entry</span><span class="v2-tag">[ Culture / Society ]</span></div>
-            <h3>Karoshi: An Enquiry Into Japan's Work Culture</h3>
-            <p>Exploring the cultural, economic and psychological forces behind karoshi, and what it reveals about modern work, value and human limits.</p>
-            <dl class="v2-journal-meta">
-              <div><dt>Status</dt><dd>Researching</dd></div>
-              <div><dt>Topic</dt><dd>Culture / Society</dd></div>
-            </dl>
-            <span class="v2-journal-status">Article in progress &#8594;</span>
+            <figure class="v2-journal-media"><img src="/assets/journal/karoshi-marunouchi.jpg" alt="Tokyo office towers lit up at night" width="1000" height="720" loading="lazy" decoding="async"><figcaption>Tokyo / Work culture</figcaption></figure>
+            <div class="v2-journal-copy">
+              <h3 data-fit="2">Karoshi: An Enquiry Into Japan's Work Culture</h3>
+              <p>Exploring the cultural, economic and psychological forces behind karoshi, and what it reveals about modern work, value and human limits.</p>
+            </div>
+            <div class="v2-journal-foot"><span>Status</span><span class="v2-journal-state">Researching</span></div>
           </article>
-          <div class="v2-panel v2-journal-media" role="img" aria-label="Article image placeholder"><span>Tokyo / Article image</span></div>
+          <article class="v2-panel v2-journal-card">
+            <div class="v2-index-row"><span>02&nbsp; &mdash; &nbsp;Planned article</span><span class="v2-tag">[ Attention / Economy ]</span></div>
+            <figure class="v2-journal-media"><img src="/assets/journal/attention-shibuya.jpg" alt="A crowd crossing beneath advertising screens in Shibuya at night" width="1000" height="602" loading="lazy" decoding="async"><figcaption>Screens / Crowds</figcaption></figure>
+            <div class="v2-journal-copy">
+              <h3 data-fit="2">The Attention Economy</h3>
+              <p>Every industry is competing for the same finite resource: our attention. The new currency that converts focus into revenue.</p>
+            </div>
+            <div class="v2-journal-foot"><span>Status</span><span class="v2-journal-state">Planned</span></div>
+          </article>
+          <article class="v2-panel v2-journal-card v2-journal-review">
+            <div class="v2-index-row"><span>03&nbsp; &mdash; &nbsp;Review</span><span class="v2-tag">[ Review / Film ]</span></div>
+            <figure class="v2-journal-media"><img src="/assets/journal/shawshank-reformatory.jpg" alt="A cell block inside the Ohio State Reformatory, where The Shawshank Redemption was filmed" width="1000" height="663" loading="lazy" decoding="async"><figcaption>Prison / Redemption</figcaption></figure>
+            <div class="v2-journal-copy">
+              <div class="v2-review-head">
+                <div class="v2-review-title"><h3 data-fit="2">The Shawshank Redemption</h3><span class="v2-review-meta">1994</span></div>
+                <span class="v2-score v2-score--purple" role="img" aria-label="Score: 10 out of 10"><b>10</b><small>/10</small></span>
+              </div>
+              <p>A quiet, profound story about hope, friendship and the human spirit, reminding us that freedom lives on, even in the darkest places.</p>
+            </div>
+            <div class="v2-journal-foot"><span>Status</span><span class="v2-journal-state">Writing</span></div>
+          </article>
         </div>
-        <div class="v2-strip"><span>01 entry</span><span>New writing appears here as it's finished</span><span>Economics / Work / Culture</span></div>
+        <div class="v2-strip"><span>03 entries</span><span>New writing + reviews appear here as they're published</span><span>Economics / Work / Culture / Film</span></div>
       </div>
       <a class="v2-scroll-next" href="#v2-projects"><span></span>Scroll&nbsp; / &nbsp;Projects next&nbsp; &#8595;<span></span></a>
     </section>
