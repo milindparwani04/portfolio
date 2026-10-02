@@ -122,6 +122,7 @@ Done:
 - Ticketmaster can't see Dubai Opera, Ushuaïa, Soho Garden or Live Nation ME (no public API on Platinumlist / venue sites), so those events are curated. A weekly Claude cloud routine, "Gig Finder weekly curated refresh" (`trig_01V5wXhtAzpJkHrW11is9yt2`, Mondays 06:00 Dubai), researches new events, edits only `worker/gig-picks.json` plus a log line in each handoff, and pushes to `main` (= production deploy).
 - No new secrets, bindings or config. Security doc updated (generic gig error, new KV prefixes, routine).
 Tested (how, result):
+- Production after deploy (`c2aec6f`): `/api/gigs` returns 65 events; the page renders category tags at 1920×969, 1280×720 and 390×844 with no page errors.
 - Remote preview with real secrets: 65 events, Tarkan/Bocelli/Turkish/Arabic/Filipino/K-pop acts filtered, Trevor Noah merged to 25–29 Nov; missing key → 503, bad key → curated list only. Headless Edge at ten sizes with and without data: no overlaps or spill, no page errors. Details in [`claude-agent-handoff.md`](claude-agent-handoff.md).
 Known issues / not done:
 - Some curated cards have no photo (grey square) where Ticketmaster has no attraction image. Chicago the Musical (Coca-Cola Arena, 16–20 Dec) is excluded because the rule is Dubai Opera musicals only.
