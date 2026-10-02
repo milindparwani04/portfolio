@@ -499,8 +499,14 @@ async function refreshSpotifyUserAccessToken(env) {
 // (single user, under Google's 100-user cap) — Testing mode would expire the token every 7 days.
 const GOOGLE_HEALTH_API_BASE = 'https://health.googleapis.com/v4';
 const GOOGLE_HEALTH_REDIRECT_URI = 'https://milindparwani.com/api/health/callback';
-const GOOGLE_HEALTH_SCOPE = 'https://www.googleapis.com/auth/googlehealth.health_metrics_and_measurements.readonly';
+// Heart rate sits under health_metrics; steps need activity_and_fitness. Adding a scope means the
+// owner re-runs /api/health/authorize once, since the stored refresh token only carries old grants.
+const GOOGLE_HEALTH_SCOPE = [
+  'https://www.googleapis.com/auth/googlehealth.health_metrics_and_measurements.readonly',
+  'https://www.googleapis.com/auth/googlehealth.activity_and_fitness.readonly',
+].join(' ');
 const HEART_RATE_CACHE_TTL_SECONDS = 30;
+const STEPS_CACHE_TTL_SECONDS = 30;
 // The Air only uploads when it syncs with the phone app; anything older than this is shown as
 // "no recent reading" rather than a stale number.
 const HEART_RATE_LOOKBACK_MS = 24 * 60 * 60 * 1000;
@@ -620,6 +626,48 @@ async function handleHeartRate(env, ctx) {
       bpm: Math.round(bpm),
       sampledAt: (reading.sampleTime && reading.sampleTime.physicalTime) || null,
       motion: reading.motionContext || null,
+    };
+  });
+}
+
+// Steps: today's total (Dubai calendar day) from dailyRollUp, which Google recommends over summing
+// raw points because it handles time-zone changes. The newest raw point gives the sync time, so
+// the card can say how old the total is, like the heart-rate card does.
+// Response: { steps, updatedAt } — steps is 0 and updatedAt null when nothing synced in 24 h.
+async function handleSteps(env, ctx) {
+  if (!googleHealthConfigured(env)) return jsonResponse({ error: 'Lookup is not configured' }, 503);
+  return serveCached('steps', STEPS_CACHE_TTL_SECONDS, ctx, async () => {
+    const token = await refreshGoogleHealthAccessToken(env);
+    const now = Date.now();
+    const today = dubaiToday(now);
+    const civil = isoDate => {
+      const [year, month, day] = isoDate.split('-').map(Number);
+      return { year, month, day };
+    };
+    const stepsFetch = async (path, init) => {
+      const res = await fetch(`${GOOGLE_HEALTH_API_BASE}/users/me/dataTypes/steps/${path}`, {
+        ...init,
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        signal: AbortSignal.timeout(SPOTIFY_TIMEOUT_MS),
+      });
+      if (!res.ok) throw new Error(`Google Health steps returned ${res.status}: ${(await res.text()).slice(0, 200)}`);
+      return res.json();
+    };
+    const since = new Date(now - HEART_RATE_LOOKBACK_MS).toISOString();
+    const [rollup, latest] = await Promise.all([
+      stepsFetch('dataPoints:dailyRollUp', {
+        method: 'POST',
+        body: JSON.stringify({ range: { start: civil(today), end: civil(addDays(today, 1)) }, windowSizeDays: 1 }),
+      }),
+      stepsFetch(`dataPoints?${new URLSearchParams({ pageSize: '1', filter: `steps.interval.start_time >= "${since}"` })}`),
+    ]);
+    const day = rollup.rollupDataPoints && rollup.rollupDataPoints[0];
+    const sum = day && day.steps ? Number(day.steps.countSum ?? day.steps.count_sum) : NaN;
+    const point = latest.dataPoints && latest.dataPoints[0];
+    const interval = point && point.steps && point.steps.interval;
+    return {
+      steps: Number.isFinite(sum) ? Math.round(sum) : 0,
+      updatedAt: (interval && (interval.endTime || interval.startTime)) || null,
     };
   });
 }
@@ -1518,6 +1566,9 @@ export default {
     }
     if (url.pathname === '/api/heart-rate') {
       return handleHeartRate(env, ctx);
+    }
+    if (url.pathname === '/api/steps') {
+      return handleSteps(env, ctx);
     }
     if (url.pathname.startsWith('/audio/')) {
       return handleAsset(request, env);

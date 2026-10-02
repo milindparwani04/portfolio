@@ -110,7 +110,7 @@ body.locked { overflow: auto !important; height: auto !important; }
   grid-template-rows: minmax(180px, 1fr) minmax(220px, 1.25fr) minmax(96px, .5fr);
   grid-template-areas:
     "news about heart heart weather"
-    "news about spotify time time"
+    "news about spotify steps steps"
     "diss focus focus updated updated";
   gap: 10px;
 }
@@ -149,12 +149,18 @@ body.locked { overflow: auto !important; height: auto !important; }
 .v2-spotify h3 { flex: 0 0 auto; }
 .v2-spotify-state, .v2-spotify-status { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-.v2-time { grid-area: time; container-type: size; }
-.v2-cities { list-style: none; margin: auto 0; padding: 0; display: flex; flex-direction: column; align-items: center; gap: 2.2cqh; }
-.v2-cities li { display: flex; flex-direction: column; align-items: center; }
-.v2-cities strong { font-family: var(--display); font-weight: 400; font-size: clamp(1.1rem, min(14.5cqh, 20cqw), 3.6rem); line-height: 1; }
-.v2-cities li > span { font-size: clamp(.5rem, min(4.6cqh, 4cqw), .78rem); letter-spacing: .05em; text-transform: uppercase; }
-.v2-time-date { text-align: center; font-size: clamp(.54rem, min(5cqh, 4.4cqw), .84rem); letter-spacing: .05em; text-transform: uppercase; }
+/* Steps card: the number sizes from the card itself (container units) so "10,000/10,000" never
+   clips; the goal line, hairline and number turn green once the goal is reached. */
+.v2-steps { grid-area: steps; container-type: size; }
+.v2-steps-body { margin: auto 0; display: flex; flex-direction: column; align-items: center; gap: clamp(.3rem, 3cqh, .7rem); }
+.v2-steps-value { font-family: var(--display); font-size: clamp(1.4rem, min(24cqh, 14cqw), 4.6rem); line-height: 1; white-space: nowrap; }
+.v2-steps-goal { color: var(--v2-dim); font-size: clamp(.54rem, min(5cqh, 4.4cqw), .78rem); letter-spacing: .05em; text-transform: uppercase; }
+.v2-steps-bar { width: min(70%, 22rem); height: 1px; background: var(--v2-soft-line); }
+.v2-steps-bar span { display: block; width: 0; height: 100%; background: var(--v2-fg); transition: width .6s ease; }
+.v2-steps--done .v2-steps-value, .v2-steps--done .v2-steps-goal { color: var(--v2-green); }
+.v2-steps--done .v2-steps-bar span { background: var(--v2-green); }
+.v2-steps .v2-metric-foot { flex: 0 0 auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.v2-about-date { flex: 0 0 auto; color: var(--v2-dim); font-size: clamp(.54rem, 1.25vh, .7rem); letter-spacing: .05em; text-transform: uppercase; }
 
 .v2-dissertation { grid-area: diss; }
 .v2-focus { grid-area: focus; }
@@ -393,7 +399,7 @@ body.locked { overflow: auto !important; height: auto !important; }
   .v2-dashboard {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     grid-template-rows: 300px 170px 165px 250px 105px 105px;
-    grid-template-areas: "news news" "about about" "heart weather" "spotify time" "diss diss" "focus updated";
+    grid-template-areas: "news news" "about about" "heart weather" "spotify steps" "diss diss" "focus updated";
   }
   .v2-about p { max-width: none; font-size: 1rem; }
   .v2-value { font-size: 2.6rem; }
@@ -423,7 +429,7 @@ body.locked { overflow: auto !important; height: auto !important; }
   .v2-footer-rule { display: none; }
   /* Phones: no small print below 12px. */
   .v2-index-row, .v2-ref, .v2-scroll-prev, .v2-scroll-next, .v2-card-foot, .v2-metric-foot, .v2-spotify-state, .v2-spotify-status,
-  .v2-cities li > span, .v2-time-date, .v2-bottom-card p, .v2-news-desc, .v2-journal-card p, .v2-journal-foot, .v2-review-meta,
+  .v2-steps-goal, .v2-about-date,.v2-bottom-card p, .v2-news-desc, .v2-journal-card p, .v2-journal-foot, .v2-review-meta,
   .v2-journal-media figcaption, .v2-journal-more, .v2-journal-credit, .v2-gig-credit, .v2-project p, .v2-tool-copy p, .v2-playlist-copy p, .v2-track-row, .v2-top-toggle button,
   .v2-gig p, .v2-gig-link, .v2-gig-controls, .v2-strip, .v2-footer { font-size: .75rem; }
 }

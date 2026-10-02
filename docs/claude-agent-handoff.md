@@ -12,14 +12,14 @@
 
 ## Current assignment
 
-Status: **Idle — session wrapped 2026-10-02; awaiting Milind's next assignment.** Shipped today: Gig Finder (Dubai/Abu Dhabi, photos, credits, Chicago), Journal redesign, Enter-key fix, Cloudflare cache TTL fix, Media tracker. Open items: article pages for the Journal, an optional TMDB key for sharper posters. Two weekly routines run on Mondays (Gig Finder 06:00, Media 06:30 Dubai).
+Status: **Home Steps card shipped 2026-10-02 (Codex's mockup, with Milind's two changes). Waiting on Milind to re-run `/api/health/authorize` so the card gets real step data.** Shipped today: Gig Finder (Dubai/Abu Dhabi, photos, credits, Chicago), Journal redesign, Enter-key fix, Cloudflare cache TTL fix, Media tracker. Open items: article pages for the Journal, an optional TMDB key for sharper posters. Two weekly routines run on Mondays (Gig Finder 06:00, Media 06:30 Dubai).
 
 Areas Claude has most recently owned (coordinate before Codex changes these):
 
 | Area | Files | Notes |
 |---|---|---|
-| Visible portfolio UI | `public/index.html` (the `.portfolio-v2` block only), `public/ui-v2.css`, `public/ui-v2.js` | Grey-box design from the Soft Monolith mockups. Cache-bust versions: `ui-v2.css?v=20`, `ui-v2.js?v=18` — bump on every change. Journal redesign implemented 2026-10-02 from Codex's mockup. |
-| Worker routes and data | `worker/index.js`, `worker/gig-picks.json`, `migrations/` | Spotify listening data, heart rate, gigs. Gig Finder rebuilt 2026-10-02. |
+| Visible portfolio UI | `public/index.html` (the `.portfolio-v2` block only), `public/ui-v2.css`, `public/ui-v2.js` | Grey-box design from the Soft Monolith mockups. Cache-bust versions: `ui-v2.css?v=22`, `ui-v2.js?v=19` — bump on every change. Journal redesign implemented 2026-10-02 from Codex's mockup. |
+| Worker routes and data | `worker/index.js`, `worker/gig-picks.json`, `migrations/` | Spotify listening data, heart rate, steps, gigs. Gig Finder rebuilt 2026-10-02. |
 
 ## Media tracker (how it works, for the next session and the weekly routine)
 
@@ -68,6 +68,8 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 
 ## Open follow-ups (Claude's areas)
 
+- Steps: `/api/steps` returns 502 until Milind re-runs `/api/health/authorize?key=<HEALTH_AUTH_KEY>` and accepts the new `activity_and_fitness.readonly` scope (add it under Data access on the Google Cloud consent screen first if Google refuses it). Then check production: the total matches the Fitbit app, and the steps age matches the heart-rate age.
+
 - Media: Reel posters are 300×450. A free TMDB API key, stored with `wrangler secret bulk` as `TMDB_API_KEY`, turns on 780 px posters with no code change; Milind has to create the TMDB account. VOX and ROXY extras depend on the weekly routine, which may also be blocked from those sites, so they are best-effort.
 
 - Journal: there are no article pages yet for `Read more` to link to.
@@ -79,6 +81,14 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 - Lighthouse `valid-source-maps` flags a third-party library map; it doesn't affect the score categories that matter (production: 90 / 100 / 100).
 
 ## Work log (newest first)
+
+### 2026-10-02 — Home Steps card (Codex's mockup) implemented
+
+- Milind asked Claude to build Codex's approved Steps card. He made two changes to the mockup: no centred `DAILY STEPS` heading (the `[ STEPS / TODAY ]` tag already says it), and the card gets the same update line as Heart Rate.
+- **Worker:** `/api/steps` returns `{ steps, updatedAt }`. Two parallel Google Health calls: `dataPoints:dailyRollUp` for today's Dubai civil day (Google recommends this over summing raw points, because it handles time zones), and `dataPoints?pageSize=1` filtered on `steps.interval.start_time` over the last 24 h for the newest point's `interval.endTime`. 30 s versioned edge cache and a generic 502, like heart rate. `GOOGLE_HEALTH_SCOPE` now also asks for `googlehealth.activity_and_fitness.readonly`, so the stored refresh token must be re-issued once. The rollup reads `countSum` and falls back to `count_sum`, because the docs show both spellings.
+- **UI:** card 05 is `.v2-steps` (grid area `steps`; the old `time` area, clocks and `.v2-cities` rules are gone). It shows the value `2,500/10,000` (Anton, sized by container units `min(24cqh, 14cqw)`), then `25% OF DAILY GOAL`, a 1 px bar and the foot `LATEST READING / 4M AGO` in the Heart Rate style. At 10,000 or more the card gets `.v2-steps--done`: the value, `DAILY GOAL REACHED` and the bar turn `--v2-green`, and the bar is capped at 100%. It polls every 30 s with heart rate and on tab focus. A failed poll keeps the last total. The Dubai date moved to `.v2-about-date` at the foot of About, and it ticks once a minute instead of every second.
+- **Tested:** `wrangler dev` with a `zz-test.html` fetch shim (2,500, 10,000 and 12,345 steps), deleted before the commit. Chrome at 1912 px wide shows both states as in the mockup. Iframes at 390×844, 1280×640 and 1366×700: no element extends outside card 05, the value is green at 10,000, and the date sits inside About. Live Google data is untested until the re-authorization.
+
 
 ### 2026-10-02 — Re-releases name their cinemas
 

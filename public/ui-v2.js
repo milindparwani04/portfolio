@@ -97,39 +97,21 @@
     fitText();
   });
 
-  // Dubai has no common abbreviation in Intl ("GMT+4"), so its label stays GST in the markup.
-  // London (GMT/BST) and Sydney (AEST/AEDT) follow daylight saving from Intl.
-  const clockCities = [
-    { timeZone: 'Asia/Dubai', time: 'v2TimeDubai' },
-    { timeZone: 'Europe/London', time: 'v2TimeLondon', zone: 'v2ZoneLondon', locale: 'en-GB' },
-    { timeZone: 'Australia/Sydney', time: 'v2TimeSydney', zone: 'v2ZoneSydney', locale: 'en-AU' }
-  ].map((city) => ({
-    ...city,
-    timeFormat: new Intl.DateTimeFormat('en-GB', { timeZone: city.timeZone, hour: '2-digit', minute: '2-digit', hour12: false }),
-    zoneFormat: city.zone ? new Intl.DateTimeFormat(city.locale, { timeZone: city.timeZone, timeZoneName: 'short' }) : null
-  }));
+  // Dubai date at the foot of the About card; a minute tick is enough to roll over at midnight.
+  const dubaiDate = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Asia/Dubai',
+    weekday: 'short',
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric'
+  });
 
-  function updateDubaiClock() {
-    const now = new Date();
-    clockCities.forEach((city) => {
-      const time = byId(city.time);
-      if (time) time.textContent = city.timeFormat.format(now);
-      const zone = city.zone && byId(city.zone);
-      const name = city.zoneFormat && city.zoneFormat.formatToParts(now).find((part) => part.type === 'timeZoneName');
-      if (zone && name) zone.textContent = name.value.toUpperCase();
-    });
-    const date = new Intl.DateTimeFormat('en-GB', {
-      timeZone: 'Asia/Dubai',
-      weekday: 'short',
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric'
-    }).format(now).toUpperCase();
-    if (byId('v2Date')) byId('v2Date').textContent = date;
+  function updateDubaiDate() {
+    if (byId('v2Date')) byId('v2Date').textContent = dubaiDate.format(new Date()).toUpperCase();
   }
 
-  updateDubaiClock();
-  window.setInterval(updateDubaiClock, 1000);
+  updateDubaiDate();
+  window.setInterval(updateDubaiDate, 60000);
 
   async function loadLastUpdated() {
     const target = byId('v2LastUpdated');
@@ -576,19 +558,60 @@
     }
   }
 
+  // Steps card: today's total via /api/steps against a 10,000 goal. Same Google Health sync as
+  // the heart rate, so the foot uses the same "Latest reading / age" wording.
+  const STEPS_GOAL = 10000;
+  const stepsNumber = new Intl.NumberFormat('en-GB');
+  let stepsReading = null;
+
+  function renderStepsFoot() {
+    const foot = byId('v2StepsFoot');
+    if (!foot || !stepsReading) return;
+    const age = stepsReading.updatedAt ? timeAgo(stepsReading.updatedAt) : '';
+    foot.textContent = age ? `Latest reading / ${age}` : 'No sync in the last 24 h';
+  }
+
+  async function loadSteps() {
+    const card = byId('v2Steps');
+    const value = byId('v2StepsValue');
+    const goal = byId('v2StepsGoal');
+    const bar = byId('v2StepsBar');
+    if (!card || !value || !goal || !bar) return;
+    try {
+      const response = await fetch('/api/steps', { cache: 'no-store' });
+      if (!response.ok) throw new Error('Steps request failed');
+      const payload = await response.json();
+      if (!Number.isFinite(payload.steps)) throw new Error('Steps missing');
+      stepsReading = payload;
+      const done = payload.steps >= STEPS_GOAL;
+      const percent = Math.min(100, Math.floor((payload.steps / STEPS_GOAL) * 100));
+      value.textContent = `${stepsNumber.format(payload.steps)}/${stepsNumber.format(STEPS_GOAL)}`;
+      value.classList.remove('v2-placeholder');
+      goal.textContent = done ? 'Daily goal reached' : `${percent}% of daily goal`;
+      bar.style.width = `${percent}%`;
+      card.classList.toggle('v2-steps--done', done);
+    } catch (_) {
+      // Keep the last good total on a failed poll; only the age moves on.
+    }
+    renderStepsFoot();
+  }
+
   loadNowPlaying();
   loadPlaylists();
   loadListening();
   loadHeartRate();
+  loadSteps();
   window.setInterval(() => {
     if (document.hidden) return;
     loadNowPlaying();
     loadHeartRate();
+    loadSteps();
   }, 30000);
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) return;
     loadNowPlaying();
     loadHeartRate();
+    loadSteps();
   });
 
   loadLastUpdated();

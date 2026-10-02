@@ -86,7 +86,9 @@ Priorities, in order:
 
 Shell: opens directly onto a clean `C:\PARWANI>` navigation bar and the `MY DIGITAL PORTFOLIO.` dashboard. The former ENTER/CRT boot gate, floating navigation and bottom status bar are no longer visible.
 
-Home dashboard: one CSS grid with named areas (`.v2-dashboard` in `public/ui-v2.css`), so cards cannot overlap. Headline card (text only, fitted on each rotation from `/api/news`); grey "About this space" card; heart rate from `/api/heart-rate`; Dubai weather from Open-Meteo (humidity/wind line hides when the card is short; temperature scales to the card); Spotify card with the cover centred, track and artist beneath and "Now playing / Last played" bottom-left from `/api/now-playing` (grey square until a cover loads); Time / Location with Dubai, London and Sydney clocks (London/Sydney zone names follow daylight saving) sized from the card's own height via container units; bottom row with dissertation, current focus (Sounds Like) and deploy date from `/api/last-updated`. Heart rate and now-playing refresh every 30 s without a reload. Every API-backed card keeps its layout when data is unavailable. Card titles marked `data-fit` (`fitText` in `ui-v2.js`) shrink to fit their box instead of being cut off: one-line titles shrink down to 55%; the Spotify track name shrinks up to 30% on two lines, then may take a third line; playlist and gig titles wrap onto two lines.
+Home dashboard: one CSS grid with named areas (`.v2-dashboard` in `public/ui-v2.css`), so cards cannot overlap. Headline card (text only, fitted on each rotation from `/api/news`); grey "About this space" card; heart rate from `/api/heart-rate`; Dubai weather from Open-Meteo (humidity/wind line hides when the card is short; temperature scales to the card); Spotify card with the cover centred, track and artist beneath and "Now playing / Last played" bottom-left from `/api/now-playing` (grey square until a cover loads); Steps card (`05 [ STEPS / TODAY ]`, since 2026-10-02) with today's total against 10,000 from `/api/steps`, a goal line, a hairline progress bar and the same "Latest reading / age" foot as Heart Rate; it all turns green at 10,000. The Dubai date sits at the foot of About this space; bottom row with dissertation, current focus (Sounds Like) and deploy date from `/api/last-updated`. Heart rate, steps and now-playing refresh every 30 s without a reload. Every API-backed card keeps its layout when data is unavailable. Card titles marked `data-fit` (`fitText` in `ui-v2.js`) shrink to fit their box instead of being cut off: one-line titles shrink down to 55%; the Spotify track name shrinks up to 30% on two lines, then may take a third line; playlist and gig titles wrap onto two lines.
+
+Home Steps direction (Codex approved mockup, **implemented by Claude 2026-10-02** with two changes from Milind: no centred `DAILY STEPS` heading, and a "Latest reading / age" foot like Heart Rate. Live data needs one re-authorization of Google Health for the new `activity_and_fitness` scope.) Original mockup record: preserve the live Heart Rate card exactly and replace the entire Time / Location card with a dedicated `05 [ STEPS / TODAY ]` card; remove every city clock and time-zone label. The Steps card shows centered `DAILY STEPS` and a dynamic `[current]/10,000` value. Before goal completion, `2,500/10,000`, `25% OF DAILY GOAL` and a 25%-filled hairline use the current restrained white/gray/accent treatment. At 10,000, the exact value becomes green, the metadata changes to `DAILY GOAL REACHED`, and the hairline fills green. Move `FRI, 02 OCT 2026` to the bottom of About This Space. Keep all existing card dimensions and grid positions; no clipping or overlap is acceptable. The live step-count source and refresh path have not yet been specified or verified. See [`codex-agent-handoff.md`](codex-agent-handoff.md) for the detailed mockup record.
 
 Section paging: on desktop/tablet (≥721 px wide and ≥620 px tall) every section is exactly one viewport under a fixed nav bar, and one wheel gesture or key press (PageUp/PageDown/arrows/Space/Home/End) moves one whole section (`initSectionPager` in `public/ui-v2.js`, CSS scroll-snap for touch/scrollbar). Moves are driven by a critically damped spring (requestAnimationFrame, ~0.6 s settle) with scroll-snap switched off while it runs; a new swipe, wheel notch or key press mid-move retargets the spring instead of being ignored. Jumps of more than one section (nav links, Home/End) fade the sections out for 0.15 s, move to the target's neighbour, and fade back in while the spring carries the last section. Nav links, scroll cues and Back to top use the same motion; reduced-motion users get an instant jump. Each section has a "↑ previous" cue top-right and a "SCROLL / X NEXT ↓" cue at the bottom; the nav underlines the current section and the URL hash follows it. Content scales with viewport height so nothing clips down to ~1100×620; a short-viewport tier (≤760 px tall) tightens spacing. Grids stay three columns down to 721 px so locked sections still fit. Phones (≤720 px wide) and short windows scroll continuously with no paging, and small print is at least 12 px.
 
@@ -119,6 +121,32 @@ Known issues / not done:
 Next session starts with:
 - ...
 ```
+
+### 2026-10-02 — Home Steps card built
+Agent: Claude · Model: Opus 5.5
+Done:
+- Card 05 is now Steps: no city clocks, no "Daily Steps" heading. It shows today's total out of 10,000, the percent of goal, a hairline bar and a "Latest reading / 4m ago" foot like Heart Rate. It all turns green at 10,000. The date moved to the About card.
+- New `/api/steps` (Google Health daily rollup for the Dubai day plus the newest sync time). The OAuth scope adds `googlehealth.activity_and_fitness.readonly`.
+Tested (how, result):
+- Local `wrangler dev` with mocked data: both goal states look as intended at desktop, 1280×640, 1366×700 and phone width, and nothing extends outside card 05.
+Known issues / not done:
+- Real step data needs Milind to re-run `/api/health/authorize?key=…` once and accept the new scope. Until then the card shows "Awaiting health data source".
+Next session starts with:
+- Confirm that `/api/steps` returns real totals after the re-authorization.
+
+### 2026-10-02 — Home Steps card direction
+Agent: Codex · Model: GPT-5
+Phase: Mockup only
+Done:
+- Finalized two current-live-style Home screenshots in which card 05 is exclusively for Steps and the Heart Rate card remains unchanged.
+- Approved the unfinished state (`2,500/10,000` in white with 25% metadata/hairline) and completed state (`10,000/10,000` plus `DAILY GOAL REACHED` and a green full hairline).
+- Moved the date from the removed Time / Location content to the bottom of About This Space in both mockups.
+Tested (how, result):
+- Used a fresh screenshot of the production Home section as the visual source of truth; reviewed both generated states for the existing grid/style and for a fully contained card 05 with no overlap or clipping.
+Known issues / not done:
+- This direction is not implemented. No site code, API, assets, commit, push or deployment changed. The live source and refresh behavior for daily steps still need implementation planning.
+Next session starts with:
+- Implement only if Milind explicitly assigns it: preserve Heart Rate, replace Time / Location with Steps, move the date to About, and verify unfinished/completed states at supported viewport sizes.
 
 ### 2026-10-02 — Media: re-releases show their cinemas
 Agent: Claude · Model: Opus 5.5
