@@ -12,13 +12,13 @@
 
 ## Current assignment
 
-Status: **Home Steps card shipped 2026-10-02 (Codex's mockup, with Milind's two changes). Waiting on Milind to re-run `/api/health/authorize` so the card gets real step data.** Shipped today: Gig Finder (Dubai/Abu Dhabi, photos, credits, Chicago), Journal redesign, Enter-key fix, Cloudflare cache TTL fix, Media tracker. Open items: article pages for the Journal, an optional TMDB key for sharper posters. Two weekly routines run on Mondays (Gig Finder 06:00, Media 06:30 Dubai).
+Status: **Home Steps card live with real data 2026-10-02 (Codex's mockup, with Milind's two changes).** Previous wrap-up: Shipped today: Gig Finder (Dubai/Abu Dhabi, photos, credits, Chicago), Journal redesign, Enter-key fix, Cloudflare cache TTL fix, Media tracker. Open items: article pages for the Journal, an optional TMDB key for sharper posters. Two weekly routines run on Mondays (Gig Finder 06:00, Media 06:30 Dubai).
 
 Areas Claude has most recently owned (coordinate before Codex changes these):
 
 | Area | Files | Notes |
 |---|---|---|
-| Visible portfolio UI | `public/index.html` (the `.portfolio-v2` block only), `public/ui-v2.css`, `public/ui-v2.js` | Grey-box design from the Soft Monolith mockups. Cache-bust versions: `ui-v2.css?v=22`, `ui-v2.js?v=19` — bump on every change. Journal redesign implemented 2026-10-02 from Codex's mockup. |
+| Visible portfolio UI | `public/index.html` (the `.portfolio-v2` block only), `public/ui-v2.css`, `public/ui-v2.js` | Grey-box design from the Soft Monolith mockups. Cache-bust versions: `ui-v2.css?v=22`, `ui-v2.js?v=20` — bump on every change. Journal redesign implemented 2026-10-02 from Codex's mockup. |
 | Worker routes and data | `worker/index.js`, `worker/gig-picks.json`, `migrations/` | Spotify listening data, heart rate, steps, gigs. Gig Finder rebuilt 2026-10-02. |
 
 ## Media tracker (how it works, for the next session and the weekly routine)
@@ -68,7 +68,6 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 
 ## Open follow-ups (Claude's areas)
 
-- Steps: `/api/steps` returns 502 until Milind re-runs `/api/health/authorize?key=<HEALTH_AUTH_KEY>` and accepts the new `activity_and_fitness.readonly` scope (add it under Data access on the Google Cloud consent screen first if Google refuses it). Then check production: the total matches the Fitbit app, and the steps age matches the heart-rate age.
 
 - Media: Reel posters are 300×450. A free TMDB API key, stored with `wrangler secret bulk` as `TMDB_API_KEY`, turns on 780 px posters with no code change; Milind has to create the TMDB account. VOX and ROXY extras depend on the weekly routine, which may also be blocked from those sites, so they are best-effort.
 
@@ -81,6 +80,12 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 - Lighthouse `valid-source-maps` flags a third-party library map; it doesn't affect the score categories that matter (production: 90 / 100 / 100).
 
 ## Work log (newest first)
+
+### 2026-10-02 — Steps card connected to real data
+
+- Google Health was re-authorized with both scopes. The Cloud consent screen got `activity_and_fitness.readonly` under Data access (done in Chrome). Milind had lost `HEALTH_AUTH_KEY`, so he set a new random one with `wrangler secret put` and opened the authorize link himself. Auto mode blocks Claude from writing secrets. The new key wasn't saved anywhere; to re-authorize again, set a fresh one the same way.
+- Bug fixed (`d7c2f5c`): a `dailyRollUp` range needs `CivilDateTime` = `{ date: { year, month, day } }`. The flat date returned 400 "Unknown name year at range.start". Production then returned `{"steps":2587,...}`.
+- The tracker logs no step points while you sit still, so the newest step (10:47) was older than the heart reading (10:58) from the same sync. The Steps foot now shows the newer of the two times (`ui-v2.js?v=20`), so both cards read the same age, as Milind asked.
 
 ### 2026-10-02 — Home Steps card (Codex's mockup) implemented
 

@@ -553,6 +553,7 @@
       value.replaceChildren(String(payload.bpm), unit);
       value.classList.remove('v2-placeholder');
       renderHeartFoot();
+      renderStepsFoot();
     } catch (_) {
       renderHeartFoot();
     }
@@ -564,10 +565,14 @@
   const stepsNumber = new Intl.NumberFormat('en-GB');
   let stepsReading = null;
 
+  // The tracker logs no step points while sitting still, so the newest step can be older than
+  // the sync itself. Both cards come from the same sync: show the newer of the two times.
   function renderStepsFoot() {
     const foot = byId('v2StepsFoot');
     if (!foot || !stepsReading) return;
-    const age = stepsReading.updatedAt ? timeAgo(stepsReading.updatedAt) : '';
+    const times = [stepsReading.updatedAt, heartReading && heartReading.sampledAt].filter(Boolean);
+    const latest = times.sort((a, b) => new Date(b) - new Date(a))[0];
+    const age = latest ? timeAgo(latest) : '';
     foot.textContent = age ? `Latest reading / ${age}` : 'No sync in the last 24 h';
   }
 
