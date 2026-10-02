@@ -18,12 +18,12 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 
 | Area | Files | Notes |
 |---|---|---|
-| Visible portfolio UI | `public/index.html` (the `.portfolio-v2` block only), `public/ui-v2.css`, `public/ui-v2.js` | Grey-box design from the Soft Monolith mockups. Cache-bust versions: `ui-v2.css?v=17`, `ui-v2.js?v=15` — bump on every change. Journal redesign implemented 2026-10-02 from Codex's mockup. |
+| Visible portfolio UI | `public/index.html` (the `.portfolio-v2` block only), `public/ui-v2.css`, `public/ui-v2.js` | Grey-box design from the Soft Monolith mockups. Cache-bust versions: `ui-v2.css?v=19`, `ui-v2.js?v=16` — bump on every change. Journal redesign implemented 2026-10-02 from Codex's mockup. |
 | Worker routes and data | `worker/index.js`, `worker/gig-picks.json`, `migrations/` | Spotify listening data, heart rate, gigs. Gig Finder rebuilt 2026-10-02. |
 
 ## Gig Finder (how it works, for the next session and the weekly routine)
 
-- **Milind's criteria (2026-10-02), Dubai and Abu Dhabi only:** comedians in either city (any language); musicals at Dubai Opera only; concerts at Coca-Cola Arena and Ushuaïa Dubai by artists who sing in English (no K-pop, Filipino, Arabic, Bollywood, Turkish etc.); big English-language artists and DJs at the major Abu Dhabi venues, plus the F1 weekend and its after-race concerts; DJs at Dubai clubs, only within the next 3 months; film/TV composer concerts (Zimmer, Djawadi, Göransson, Williams…, including Candlelight tributes) but no other orchestral shows.
+- **Milind's criteria (2026-10-02), Dubai and Abu Dhabi only:** comedians in either city (any language); musicals at Dubai Opera and Coca-Cola Arena (Chicago added 2026-10-02); concerts at Coca-Cola Arena and Ushuaïa Dubai by artists who sing in English (no K-pop, Filipino, Arabic, Bollywood, Turkish etc.); big English-language artists and DJs at the major Abu Dhabi venues, plus the F1 weekend and its after-race concerts; DJs at Dubai clubs, only within the next 3 months; film/TV composer concerts (Zimmer, Djawadi, Göransson, Williams…, including Candlelight tributes) but no other orchestral shows.
 - **Sources:** `fetchTicketmasterUaeEvents` (Discovery API, `countryCode=AE`) → `classifyTicketmasterEvent` applies the rules by city, venue regex, TM genre and title. Concerts then need Last.fm `artist.gettoptags`: any non-English scene tag drops the act, no tags at all drops it too, and club tags (house/techno/trance/edm) in the top 3 reclassify it as DJ. `worker/gig-picks.json` holds curated events from sellers with no API (Dubai Opera, Ushuaïa, Soho Garden, Live Nation ME, Fever, abudhabigp.com); it is bundled into the Worker, so changing it needs a deploy (= a push). `excludeArtists` / `includeArtists` override the filters by name; `imageArtist` names the act to look up a photo for when `artist` is a combined name.
 - **Merging:** curated entries win over a Ticketmaster duplicate of the same artist and date; nights by the same artist at the same venue within a week collapse to one card with `endDate`. Past events drop out by Dubai date; DJ nights beyond 90 days are held back until they come into range.
 - **Probed on 2026-10-02:** Ticketmaster UAE had 88 events. It carries Etihad Arena, Abu Dhabi Comedy Week, part of the Dubai Comedy Festival, Pacha ICONS / Bohemia / The Penthouse, Hans Zimmer Live and a few Coca-Cola Arena shows. It does not carry Dubai Opera, Ushuaïa, Soho Garden, WHITE, or Live Nation ME (Trevor Noah, Mo Gilligan). Platinumlist's API needs a partner token (401) and its site sits behind Queue-it; dubaiopera.com and coca-cola-arena.com serve Cloudflare bot challenges.
@@ -51,10 +51,8 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 
 ## Open follow-ups (Claude's areas)
 
-- Journal: the photos are CC BY / BY-SA, and the credits are only in this doc so far. A small visible credit (for example in the caption or the page footer) would fully satisfy the licences; Milind to decide. There are no article pages yet for `Read more` to link to.
+- Journal: there are no article pages yet for `Read more` to link to.
 
-- Cache hits on `/api/*` reach browsers with `max-age=14400`. Check the zone's Browser Cache TTL ("Respect existing headers" would keep the Worker's TTLs).
-- Gig Finder: Chicago the Musical (Coca-Cola Arena, 16–20 Dec) is excluded by the "Dubai Opera musicals" rule; ask Milind whether he wants it. In headless Edge, pressing Enter on a focused gig Next button didn't change the batch, while Space and click did. This is existing code; check it in a real browser.
 
 - A pathological Spotify title (~60 characters) on a 768 px portrait tablet still ends in "…" at the minimum size; normal titles fit everywhere.
 - Playlist descriptions are empty on Spotify, so the cards read "Playlist on Spotify." They fill in automatically if Milind adds descriptions on Spotify.
@@ -62,6 +60,18 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 - Lighthouse `valid-source-maps` flags a third-party library map; it doesn't affect the score categories that matter (production: 90 / 100 / 100).
 
 ## Work log (newest first)
+
+### 2026-10-02 — Coca-Cola Arena musicals, photo credits, cache TTL, Enter key
+
+- **Musicals:** Milind asked for musicals at Coca-Cola Arena as well as Dubai Opera (`GIG_MUSICAL_VENUES`; cache key `gigs-v5`). Chicago the Musical now shows as one card for 16–20 Dec, merged from 8 Ticketmaster listings. Its Ticketmaster poster would have its text cut off, so `imageOverrides` uses the Commons "Chicago the Musical Banners on Broadway" photo instead. The routine's prompt was updated to cover Coca-Cola Arena musicals.
+- **Photo credits:**
+  - Journal: each photo has an `a.v2-journal-credit` bottom-right ("Photo: Author / Licence", linked to the Commons page).
+  - Gig cards: `gig-picks.json` has a new `imageCredits` map keyed by the exact image URL. The Worker adds `credit: {text, url}` to a gig only while that photo is shown, and `ui-v2.js` renders `a.v2-gig-credit`. Credited now: Chicago, Vir Das, Enissa Amani, F1.
+  - The routine must add a credit for every Wikimedia photo (step 5b).
+  - Credits are .62rem on desktop and 12 px on phones, where they wrap so they aren't cut off.
+- **Browser cache:** the Cloudflare zone's Browser Cache TTL was "4 hours", which overrode every Worker `Cache-Control` on cache hits. Changed to "Respect Existing Headers" in the dashboard via Claude in Chrome (Caching → Configuration). Verified: `/api/gigs` now sends `max-age=3600`, `/api/now-playing` `max-age=20`, and assets keep `max-age=0, must-revalidate`.
+- **Enter key:** tested in real Chrome. The first Enter on the focused gig Next button did nothing and reset the page scroll; a second Enter worked. Cause: the legacy boot-gate keydown handler in `index.html` still swallowed the first Enter or Space and called `enterSite()`, even though `#boot` is hidden. It now acts only while the boot screen is actually displayed.
+- Tested: remote-preview harness returned 66 events, Chicago as `musical` with its credit, and 4 credited cards. Headless Edge: the credit stays inside the photo at 1440×789 and 390×844, with no page errors; Journal credits fit with no cropping. Versions: `ui-v2.css?v=19`, `ui-v2.js?v=16`.
 
 ### 2026-10-02 — Journal redesign (Codex's mockup) implemented
 
@@ -94,7 +104,7 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 - Milind's brief is above. Replaced the Spotify top-artists / Last.fm chart / MusicBrainz pipeline in `handleGigs` with the Ticketmaster-UAE + curated design; removed `resolveGigArtist`, `fetchTicketmasterSoonestShow`, `isTributeEvent`, `DECEASED_ARTISTS` and the MusicBrainz constants (nothing else used them). Errors are now generic (S-04 for this route), and a Ticketmaster failure falls back to the curated list. Frontend: category tag, `formatGigDate(date, endDate)` with ranges and a year when it isn't this year, kicker "Dubai and Abu Dhabi. Five at a time."
 - Testing approach: a scratch harness Worker named `portfolio` (so `wrangler dev --remote` gets the real secrets) imports `worker/index.js` and swaps `GIG_KV` for an in-memory map; the real `GIG_KV` has no `preview_id`, so it can't be used in remote dev.
 - Tested: cold run returned 65 events in 2.9 s with a 5-min cache while lookups were pending, then 1 h. Tags dropped Tarkan, Andrea Bocelli and Ebru Gündeş. Ghostly Kisses stayed a concert after "electronic" was taken out of the DJ tags, and Anyma became a DJ. Chicago the Musical and PFL were left out of comedy, F1 ticket tiers and Golden Circle upgrades were skipped, Jan Blomqvist and Jonas Blue were each shown once, and Trevor Noah merged to 25–29 Nov. No Ticketmaster key gave 503; a bad key gave 31 curated events with a 5-min cache. Date formatter unit check: 9 cases. Headless Edge with a fixture at 2560×1300 → 360×740 (ten sizes) with and without data: 0 overlaps, 0 spill, 0 page errors. Next/Prev by click and Space rotate batches. `wrangler deploy --dry-run` bundles the JSON import.
-- Production (`c2aec6f`): the new `?v=15` was live after about 30 s, and `/api/gigs` returns the same 65 events. The first responses were cached while photo lookups were still pending (19 without a photo); they fill in once the cache expires. The edge serves cache hits with `Cache-Control: max-age=14400`, not the Worker's 300/3600, which looks like a zone Browser Cache TTL setting. Visitors may therefore keep an older list for up to 4 h. Not changed here; see follow-ups.
+- Production (`c2aec6f`): the new `?v=15` was live after about 30 s, and `/api/gigs` returns the same 65 events. The first responses were cached while photo lookups were still pending (19 without a photo); they fill in once the cache expires. The edge serves cache hits with `Cache-Control: max-age=14400`, not the Worker's 300/3600, which looks like a zone Browser Cache TTL setting. Visitors may therefore keep an older list for up to 4 h. Fixed later the same day: Browser Cache TTL is now "Respect Existing Headers".
 - One slip: escapes in an ad-hoc node script put backspace characters into two regexes. Caught by `file` reporting "overstriking" and fixed; `grep -P '\x08'` is clean.
 
 ### 2026-10-01 — Feed-style section scrolling (live)

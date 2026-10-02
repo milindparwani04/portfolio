@@ -624,7 +624,7 @@ async function handleHeartRate(env, ctx) {
 }
 
 // Gig Finder: Dubai and Abu Dhabi only, limited to what Milind asked for (2026-10-02) — comedians
-// in either city, musicals at Dubai Opera, English-language concerts at Coca-Cola Arena, Ushuaïa
+// in either city, musicals at Dubai Opera and Coca-Cola Arena, English-language concerts at Coca-Cola Arena, Ushuaïa
 // and the big Abu Dhabi venues, DJs at Dubai clubs within the next 90 days, film/TV composer
 // concerts, and the F1 weekend. Two sources are merged:
 //   1. Ticketmaster's Discovery API for the UAE (countryCode=AE), classified by the rules below.
@@ -644,7 +644,7 @@ const GIG_DJ_WINDOW_DAYS = 90;
 // Concert venues Milind follows. Ushuaïa isn't on Ticketmaster today but is listed in case it moves.
 const GIG_DUBAI_CONCERT_VENUES = /coca[- ]cola arena|ushua/i;
 const GIG_ABU_DHABI_BIG_VENUES = /etihad arena|etihad park|etihad live|yas gateway|yas marina|space ?42/i;
-const GIG_MUSICAL_VENUES = /dubai opera/i;
+const GIG_MUSICAL_VENUES = /dubai opera|coca[- ]cola arena/i;
 // Composers who write for film and TV. Concerts of their music count, including Candlelight-style
 // tribute nights (Milind asked for those specifically).
 const GIG_COMPOSERS = ['hans zimmer', 'ramin djawadi', 'ludwig goransson', 'john williams', 'howard shore',
@@ -869,9 +869,9 @@ async function handleGigs(request, env, ctx) {
   }
 
   // Fixed, versioned key: query strings can't bypass the cache (S-03), and bumping the version
-  // retires a cached response when the gig logic changes (v4: larger photos).
+  // retires a cached response when the gig logic changes (v5: Coca-Cola Arena musicals).
   const cache = caches.default;
-  const cacheKey = new Request('https://milindparwani.com/__cache/gigs-v4');
+  const cacheKey = new Request('https://milindparwani.com/__cache/gigs-v5');
   const cached = await cache.match(cacheKey);
   if (cached) return cached;
 
@@ -884,6 +884,10 @@ async function handleGigs(request, env, ctx) {
     const imageOverrides = new Map(Object.entries(GIG_PICKS.imageOverrides || {})
       .filter(([, url]) => typeof url === 'string' && url.startsWith('https://'))
       .map(([artist, url]) => [normalizeArtistName(artist), url]));
+    // Attribution for photos whose licence asks for it (Wikimedia CC BY / BY-SA), keyed by image URL
+    // so the credit only appears while that exact photo is shown.
+    const imageCredits = new Map(Object.entries(GIG_PICKS.imageCredits || {})
+      .filter(([, c]) => c && typeof c.text === 'string' && typeof c.url === 'string' && c.url.startsWith('https://')));
     const tagBudget = { left: GIG_MAX_TAG_LOOKUPS };
     const imageBudget = { left: GIG_MAX_IMAGE_LOOKUPS };
     let pending = false;
@@ -943,13 +947,16 @@ async function handleGigs(request, env, ctx) {
         else gig.image = found.image;
       }
 
+      const image = typeof gig.image === 'string' && gig.image.startsWith('https://') ? gig.image : null;
+      const credit = image && imageCredits.get(image);
       kept.push({
         artist: gig.artist,
         category: gig.category,
         venue: gig.venue,
         date: gig.date,
         endDate: gig.endDate,
-        image: typeof gig.image === 'string' && gig.image.startsWith('https://') ? gig.image : null,
+        image,
+        credit: credit ? { text: credit.text.slice(0, 80), url: credit.url } : undefined,
         url: typeof gig.url === 'string' && gig.url.startsWith('https://') ? gig.url : null,
       });
     }

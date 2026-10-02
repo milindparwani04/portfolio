@@ -117,6 +117,15 @@ Next session starts with:
 - ...
 ```
 
+### 2026-10-02 — Chicago, photo credits, browser cache fix, Enter key
+Agent: Claude · Model: Opus 5.5
+Done:
+- Gig Finder now includes musicals at Coca-Cola Arena (Chicago the Musical, 16–20 Dec). Wikimedia photos now show a small credit link, on Journal photos and on gig cards (`imageCredits` in `worker/gig-picks.json`).
+- **Cloudflare zone setting changed:** Caching → Configuration → Browser Cache TTL changed from 4 hours to "Respect Existing Headers", so the Worker's own `Cache-Control` (for example 20 s for now-playing, 1 h for gigs) reaches browsers.
+- Fixed: the hidden legacy boot gate swallowed the first Enter or Space press on the page (found by testing the gig Next button in real Chrome).
+Tested (how, result):
+- Remote preview: 66 events, Chicago as a musical with its credit. Headless Edge: credits fit at desktop and phone sizes. Production headers checked after the setting change. Details in [`claude-agent-handoff.md`](claude-agent-handoff.md).
+
 ### 2026-10-02 — Journal redesign implemented
 Agent: Claude · Model: Opus 5.5
 Done:

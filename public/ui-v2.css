@@ -201,6 +201,9 @@ body.locked { overflow: auto !important; height: auto !important; }
 .v2-journal-media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
 .v2-journal-media::after { content: ''; position: absolute; inset: 0 0 auto; height: 4.5em; background: linear-gradient(rgba(0, 0, 0, .6), transparent); pointer-events: none; }
 .v2-journal-media figcaption { position: absolute; z-index: 1; left: clamp(.6rem, 1vw, .9rem); top: clamp(.5rem, 1.4vh, .8rem); color: var(--v2-fg); font-size: clamp(.56rem, 1.2vh, .7rem); letter-spacing: .05em; text-transform: uppercase; text-shadow: 0 1px 4px rgba(0, 0, 0, .9); }
+/* Photo credit (Wikimedia Commons licences require attribution): bottom-right, quiet, links to the source page. */
+.v2-journal-credit, .v2-gig-credit { position: absolute; z-index: 1; right: .45rem; bottom: .35rem; max-width: calc(100% - .9rem); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; color: rgba(244, 243, 239, .8); font-size: .62rem; letter-spacing: .03em; text-decoration: none; text-shadow: 0 1px 3px rgba(0, 0, 0, .95); }
+.v2-journal-credit:hover, .v2-journal-credit:focus-visible, .v2-gig-credit:hover, .v2-gig-credit:focus-visible { color: var(--v2-fg); text-decoration: underline; }
 .v2-journal-card h3 { margin: clamp(.55rem, 1.8vh, 1.1rem) 0 clamp(.3rem, 1vh, .6rem); font-family: var(--display); font-weight: 400; font-size: clamp(1.5rem, min(2.8vw, 6vh), 3.6rem); text-transform: uppercase; line-height: .95; }
 .v2-journal-copy { min-height: 0; overflow: hidden; }
 .v2-journal-card p { margin: 0; color: var(--v2-fg); font-size: clamp(.62rem, 1.45vh, .84rem); line-height: 1.55; display: -webkit-box; -webkit-line-clamp: 7; -webkit-box-orient: vertical; overflow: hidden; }
@@ -289,7 +292,7 @@ body.locked { overflow: auto !important; height: auto !important; }
 .v2-gig-progress span { display: block; width: 0; height: 100%; background: var(--v2-fg); transition: width 1s linear; }
 .v2-gigs { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; min-height: 0; }
 .v2-gig { min-width: 0; min-height: 0; padding: clamp(.55rem, 1.4vh, .85rem) clamp(.6rem, .9vw, .85rem); display: flex; flex-direction: column; overflow: hidden; }
-.v2-gig-art { aspect-ratio: 1.05; min-height: 0; margin-top: clamp(.4rem, 1.4vh, .8rem); background: var(--v2-panel-raised); overflow: hidden; }
+.v2-gig-art { position: relative; aspect-ratio: 1.05; min-height: 0; margin-top: clamp(.4rem, 1.4vh, .8rem); background: var(--v2-panel-raised); overflow: hidden; }
 .v2-gig-art img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .v2-gig h3 { flex: 0 0 auto; margin: clamp(.45rem, 1.5vh, .85rem) 0 .25rem; font-family: var(--display); font-weight: 400; font-size: clamp(1.05rem, min(2vw, 4.2vh), 2.2rem); line-height: 1; text-transform: uppercase; }
 .v2-gig p { flex: 0 0 auto; margin: 0; font-size: clamp(.52rem, 1.15vh, .66rem); letter-spacing: .04em; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -405,13 +408,14 @@ body.locked { overflow: auto !important; height: auto !important; }
   .v2-track-row { grid-template-columns: minmax(0, 1fr) 4.5rem 2rem; gap: .7rem; }
   .v2-track-row > span:nth-child(2) { display: none; }
   .v2-gig-controls { grid-template-columns: 1fr auto; }
+  .v2-gig-credit { left: .45rem; white-space: normal; text-align: right; line-height: 1.25; }
   .v2-gig-timer { display: none; }
   .v2-footer { flex-wrap: wrap; justify-content: space-between; white-space: normal; }
   .v2-footer-rule { display: none; }
   /* Phones: no small print below 12px. */
   .v2-index-row, .v2-ref, .v2-scroll-prev, .v2-scroll-next, .v2-card-foot, .v2-metric-foot, .v2-spotify-state, .v2-spotify-status,
   .v2-cities li > span, .v2-time-date, .v2-bottom-card p, .v2-news-desc, .v2-journal-card p, .v2-journal-foot, .v2-review-meta,
-  .v2-journal-media figcaption, .v2-journal-more, .v2-project p, .v2-tool-copy p, .v2-playlist-copy p, .v2-track-row, .v2-top-toggle button,
+  .v2-journal-media figcaption, .v2-journal-more, .v2-journal-credit, .v2-gig-credit, .v2-project p, .v2-tool-copy p, .v2-playlist-copy p, .v2-track-row, .v2-top-toggle button,
   .v2-gig p, .v2-gig-link, .v2-gig-controls, .v2-strip, .v2-footer { font-size: .75rem; }
 }
 

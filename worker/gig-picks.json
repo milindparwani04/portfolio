@@ -1,6 +1,6 @@
 {
   "updated": "2026-10-02",
-  "notes": "Photos: an event's optional `image` gives it a fixed high-quality photo (official festival artwork, Deezer 1000x1000, Wikimedia 1280px); `imageOverrides` (artist -> URL) replaces the photo for any card, Ticketmaster ones included, when the listing image is a logo or a cropped poster; otherwise the Worker looks one up on Ticketmaster, then Deezer. Aim for at least 600px on the short side.Curated Gig Finder events that Ticketmaster's Discovery API doesn't list (Dubai Opera, Ushuaia, Soho Garden, Live Nation ME, Fever, F1). Every entry is a real, dated event checked against its official listing or a current news source. The Worker merges these with Ticketmaster's UAE events, drops past dates, and only shows DJ nights within the next 90 days. Categories: comedy, musical, concert, dj, film-score, major. Refreshed weekly; see docs/claude-agent-handoff.md.",
+  "notes": "Photos: an event's optional `image` gives it a fixed high-quality photo (official festival artwork, Deezer 1000x1000, Wikimedia 1280px); `imageOverrides` (artist -> URL) replaces the photo for any card, Ticketmaster ones included, when the listing image is a logo or a cropped poster; otherwise the Worker looks one up on Ticketmaster, then Deezer. Aim for at least 600px on the short side. Wikimedia (CC BY / BY-SA) photos need an `imageCredits` entry keyed by the exact image URL: {text: 'Photo: Author / Licence', url: Commons file page}; it shows as a small link on the card. Curated Gig Finder events that Ticketmaster's Discovery API doesn't list (Dubai Opera, Ushuaia, Soho Garden, Live Nation ME, Fever, F1). Every entry is a real, dated event checked against its official listing or a current news source. The Worker merges these with Ticketmaster's UAE events, drops past dates, and only shows DJ nights within the next 90 days. Categories: comedy, musical, concert, dj, film-score, major. Refreshed weekly; see docs/claude-agent-handoff.md.",
   "excludeArtists": [],
   "includeArtists": [],
   "imageOverrides": {
@@ -10,7 +10,14 @@
     "Hans Zimmer": "https://cdn-images.dzcdn.net/images/artist/1bd0b9f7a3cf12e01bdcc26fa69673f7/1000x1000-000000-80-0-0.jpg",
     "Neema Naz": "https://images.squarespace-cdn.com/content/v1/5f5f17c209963914a64dbe14/3c368ac0-a8f3-4acc-ae47-53f19f89f610/Neema_NazA1.png?format=1000w",
     "Shane Todd": "https://images.squarespace-cdn.com/content/v1/5f5f17c209963914a64dbe14/bec4235c-a397-4432-9ff8-6eba757d8d1f/shane_Post-Sale-02.png?format=1000w",
-    "Rafi Bastos": "https://images.squarespace-cdn.com/content/v1/5f5f17c209963914a64dbe14/92bffcc9-a825-4d5d-8bda-68397b1d3bde/DCF26_RafiBastos_KV_KV.png?format=1000w"
+    "Rafi Bastos": "https://images.squarespace-cdn.com/content/v1/5f5f17c209963914a64dbe14/92bffcc9-a825-4d5d-8bda-68397b1d3bde/DCF26_RafiBastos_KV_KV.png?format=1000w",
+    "Chicago the Musical": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/Chicago_the_Musical_Banners_on_Broadway_%286284881463%29.jpg/1280px-Chicago_the_Musical_Banners_on_Broadway_%286284881463%29.jpg"
+  },
+  "imageCredits": {
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/Chicago_the_Musical_Banners_on_Broadway_%286284881463%29.jpg/1280px-Chicago_the_Musical_Banners_on_Broadway_%286284881463%29.jpg": { "text": "Photo: Broadway Tour / CC BY-SA 2.0", "url": "https://commons.wikimedia.org/wiki/File:Chicago_the_Musical_Banners_on_Broadway_(6284881463).jpg" },
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/Vir_Das_at_the_2024_Edinburgh_Festival_Fringe_%28cropped%29.jpg/1280px-Vir_Das_at_the_2024_Edinburgh_Festival_Fringe_%28cropped%29.jpg": { "text": "Photo: Kevin Payravi / CC BY-SA 4.0", "url": "https://commons.wikimedia.org/wiki/File:Vir_Das_at_the_2024_Edinburgh_Festival_Fringe_(cropped).jpg" },
+    "https://upload.wikimedia.org/wikipedia/commons/f/f5/Hart_aber_fair_-_2018-04-09-8843.jpg": { "text": "Photo: Raimond Spekking / CC BY-SA 4.0", "url": "https://commons.wikimedia.org/wiki/File:Hart_aber_fair_-_2018-04-09-8843.jpg" },
+    "https://upload.wikimedia.org/wikipedia/commons/5/51/2015_Abu_Dhabi_Grand_Prix_-_Race_start_%2822882439484%29.jpg": { "text": "Photo: Berik from United Kingdom / CC BY-SA 2.0", "url": "https://commons.wikimedia.org/wiki/File:2015_Abu_Dhabi_Grand_Prix_-_Race_start_(22882439484).jpg" }
   },
   "events": [
     { "category": "concert", "artist": "Richard Marx", "venue": "Coca-Cola Arena, Dubai", "date": "2026-10-03", "url": "https://www.visitdubai.com/en/festivals-and-events/dubai-events-calendar/richard-marx" },

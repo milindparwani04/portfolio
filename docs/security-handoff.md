@@ -25,7 +25,7 @@ Covers the `portfolio` Worker on milindparwani.com, its static assets, the `GIG_
 - [x] Edge caching on every read endpoint (5 min to 1 hr) limits upstream quota burn.
 - [x] Audio Range header parsed strictly by regex; invalid ranges return 416.
 - [x] Ticketmaster queries bounded to future dates; tribute acts filtered.
-- [x] Gig Finder (rebuilt 2026-10-02): one Ticketmaster UAE events query (≤ 3 pages) plus capped, KV-cached lookups — Last.fm artist tags (`gig_tags:v1:*`, ≤ 15 per run) and photos for curated events from the Ticketmaster attraction, then Deezer's public artist search with no key (`gig_image:v2:*`, ≤ 10 per run, at most 2 subrequests each). Since 2026-10-02 the photos can be hotlinked from Ticketmaster, Deezer, Wikimedia, Squarespace (Dubai Comedy Festival) and Fever, all over `https://`, 30-day TTL — so a cold run stays well under the 50-subrequest limit. MusicBrainz and the Spotify top-artists call are no longer used by this route. `/api/gigs` takes no input, uses a fixed versioned cache key (`gigs-v3`), and now returns a generic `{"error":"Gig lookup failed"}` (detail logged with `console.error`); a Ticketmaster outage still serves the curated list with a 5-minute cache. Curated events come from `worker/gig-picks.json`, bundled at deploy (not fetched at runtime). Image and ticket URLs are accepted only if `https://`, and the frontend escapes them and re-checks the scheme before rendering. A weekly Claude cloud routine (`trig_01V5wXhtAzpJkHrW11is9yt2`) edits that JSON and pushes to `main`, which deploys production — review its commits like any other.
+- [x] Gig Finder (rebuilt 2026-10-02): one Ticketmaster UAE events query (≤ 3 pages) plus capped, KV-cached lookups — Last.fm artist tags (`gig_tags:v1:*`, ≤ 15 per run) and photos for curated events from the Ticketmaster attraction, then Deezer's public artist search with no key (`gig_image:v2:*`, ≤ 10 per run, at most 2 subrequests each). Since 2026-10-02 the photos can be hotlinked from Ticketmaster, Deezer, Wikimedia, Squarespace (Dubai Comedy Festival) and Fever, all over `https://`, 30-day TTL — so a cold run stays well under the 50-subrequest limit. MusicBrainz and the Spotify top-artists call are no longer used by this route. `/api/gigs` takes no input, uses a fixed versioned cache key (`gigs-v3`), and now returns a generic `{"error":"Gig lookup failed"}` (detail logged with `console.error`); a Ticketmaster outage still serves the curated list with a 5-minute cache. Curated events come from `worker/gig-picks.json`, bundled at deploy (not fetched at runtime). Image, ticket and photo-credit URLs (`imageCredits`, 2026-10-02) are accepted only if `https://`, and the frontend escapes them and re-checks the scheme before rendering. A weekly Claude cloud routine (`trig_01V5wXhtAzpJkHrW11is9yt2`) edits that JSON and pushes to `main`, which deploys production — review its commits like any other.
 - [x] Privacy page at `/privacy` (required for the Google consent screen); its claims — no cookies, no analytics/trackers — were checked against `public/` and the Worker on 2026-09-30. Keep it accurate if either changes.
 
 ## 3. Cloudflare zone baseline (verify in dashboard)
@@ -38,6 +38,9 @@ Covers the `portfolio` Worker on milindparwani.com, its static assets, the `GIG_
 - [ ] Always Use HTTPS: on. Automatic HTTPS Rewrites: on.
 - [ ] Minimum TLS version 1.2; TLS 1.3 on.
 - [ ] HSTS enabled (max-age ≥ 6 months, include subdomains) once HTTPS is confirmed everywhere.
+
+**Caching**
+- [x] Browser Cache TTL: "Respect Existing Headers" (changed from 4 hours on 2026-10-02 and verified in the dashboard), so the Worker's `Cache-Control` values reach browsers, e.g. `/api/now-playing` 20 s and `/api/gigs` 1 h.
 
 **DNS**
 - [ ] DNSSEC enabled.

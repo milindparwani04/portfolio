@@ -972,7 +972,7 @@
     .tools{ grid-template-columns:1fr; }
   }
 </style>
-<link rel="stylesheet" href="/ui-v2.css?v=17">
+<link rel="stylesheet" href="/ui-v2.css?v=19">
 </head>
 <body class="locked">
 
@@ -1065,11 +1065,11 @@
              <a class="v2-journal-more" href="...">Read more <span aria-hidden="true">&#8250;</span></a>
              as the last child of its v2-journal-foot — never a disabled or placeholder link. Review score badges take
              v2-score--red (1–5), --yellow (6–7), --green (8–9) or --purple (10); game reviews also
-             list the platform in the meta line. Photo credits: docs/claude-agent-handoff.md. -->
+             list the platform in the meta line. Every photo carries a v2-journal-credit link (author / licence / source page). -->
         <div class="v2-journal-grid">
           <article class="v2-panel v2-journal-card">
             <div class="v2-index-row"><span>01&nbsp; &mdash; &nbsp;Latest entry</span><span class="v2-tag">[ Culture / Society ]</span></div>
-            <figure class="v2-journal-media"><img src="/assets/journal/karoshi-marunouchi.jpg" alt="Tokyo office towers lit up at night" width="1000" height="720" loading="lazy" decoding="async"><figcaption>Tokyo / Work culture</figcaption></figure>
+            <figure class="v2-journal-media"><img src="/assets/journal/karoshi-marunouchi.jpg" alt="Tokyo office towers lit up at night" width="1000" height="720" loading="lazy" decoding="async"><figcaption>Tokyo / Work culture</figcaption><a class="v2-journal-credit" href="https://commons.wikimedia.org/wiki/File:Marunouchi_skyscrapers_(2074578901).jpg" target="_blank" rel="noopener noreferrer">Photo: KimonBerlin / CC BY-SA 2.0</a></figure>
             <div class="v2-journal-copy">
               <h3 data-fit="2">Karoshi: An Enquiry Into Japan's Work Culture</h3>
               <p>Exploring the cultural, economic and psychological forces behind karoshi, and what it reveals about modern work, value and human limits.</p>
@@ -1078,7 +1078,7 @@
           </article>
           <article class="v2-panel v2-journal-card">
             <div class="v2-index-row"><span>02&nbsp; &mdash; &nbsp;Planned article</span><span class="v2-tag">[ Attention / Economy ]</span></div>
-            <figure class="v2-journal-media"><img src="/assets/journal/attention-shibuya.jpg" alt="A crowd crossing beneath advertising screens in Shibuya at night" width="1000" height="602" loading="lazy" decoding="async"><figcaption>Screens / Crowds</figcaption></figure>
+            <figure class="v2-journal-media"><img src="/assets/journal/attention-shibuya.jpg" alt="A crowd crossing beneath advertising screens in Shibuya at night" width="1000" height="602" loading="lazy" decoding="async"><figcaption>Screens / Crowds</figcaption><a class="v2-journal-credit" href="https://commons.wikimedia.org/wiki/File:Japan_(15608018214).jpg" target="_blank" rel="noopener noreferrer">Photo: Moyan Brenn / CC BY 2.0</a></figure>
             <div class="v2-journal-copy">
               <h3 data-fit="2">The Attention Economy</h3>
               <p>Every industry is competing for the same finite resource: our attention. The new currency that converts focus into revenue.</p>
@@ -1087,7 +1087,7 @@
           </article>
           <article class="v2-panel v2-journal-card v2-journal-review">
             <div class="v2-index-row"><span>03&nbsp; &mdash; &nbsp;Review</span><span class="v2-tag">[ Review / Film ]</span></div>
-            <figure class="v2-journal-media"><img src="/assets/journal/shawshank-reformatory.jpg" alt="A cell block inside the Ohio State Reformatory, where The Shawshank Redemption was filmed" width="1000" height="663" loading="lazy" decoding="async"><figcaption>Prison / Redemption</figcaption></figure>
+            <figure class="v2-journal-media"><img src="/assets/journal/shawshank-reformatory.jpg" alt="A cell block inside the Ohio State Reformatory, where The Shawshank Redemption was filmed" width="1000" height="663" loading="lazy" decoding="async"><figcaption>Prison / Redemption</figcaption><a class="v2-journal-credit" href="https://commons.wikimedia.org/wiki/File:Ohio_State_Reformatory-4.jpg" target="_blank" rel="noopener noreferrer">Photo: Marianodemiguel / CC BY-SA 4.0</a></figure>
             <div class="v2-journal-copy">
               <div class="v2-review-head">
                 <div class="v2-review-title"><h3 data-fit="2">The Shawshank Redemption</h3><span class="v2-review-meta">1994</span></div>
@@ -1956,8 +1956,10 @@
     });
   }
   bootScreen.addEventListener('click', enterSite);
+  // The boot gate is hidden by ui-v2.css (#boot display:none). Without the visibility check this
+  // swallowed the first Enter/Space on the page — e.g. a keyboard press on the gig Next button.
   document.addEventListener('keydown', (e) => {
-    if(!entered && (e.key === 'Enter' || e.key === ' ')){ e.preventDefault(); enterSite(); }
+    if(!entered && (e.key === 'Enter' || e.key === ' ') && bootScreen.isConnected && getComputedStyle(bootScreen).display !== 'none'){ e.preventDefault(); enterSite(); }
   });
 
   const WEEKDAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
@@ -5034,7 +5036,7 @@
 
 </script>
 
-<script src="/ui-v2.js?v=15"></script>
+<script src="/ui-v2.js?v=16"></script>
 
 </body>
 </html>
