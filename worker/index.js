@@ -1038,7 +1038,9 @@ async function reelFilms(today, from, to) {
     fetchJson(`${REEL_VISTA_JSON}/Sessions.json`, 'Reel Sessions.json'),
   ]);
   const dubaiMall = new Map();
+  const scheduled = new Set();
   for (const s of sessions.value || []) {
+    scheduled.add(s.ScheduledFilmId);
     if (s.CinemaId !== REEL_DUBAI_MALL_ID || typeof s.Showtime !== 'string') continue;
     const day = s.Showtime.slice(0, 10);
     const span = dubaiMall.get(s.ScheduledFilmId);
@@ -1057,10 +1059,11 @@ async function reelFilms(today, from, to) {
     const film = { kind: 'film', title: cleanFilmTitle(f.Title), language, image: `${REEL_POSTER_BASE}/${encodeURIComponent(f.ID)}.jpg` };
     if (MEDIA_RERELEASE.test(f.Title || '')) {
       // An old film back for a limited run: the range Dubai Mall is screening it, or its
-      // announced date when its sessions aren't on sale yet.
+      // announced date while Reel hasn't put it on sale anywhere yet (venue not known). Runs at
+      // other Reel cinemas only are skipped: Dubai Mall is the one Milind follows.
       const span = dubaiMall.get(f.ID);
-      if (span && span.last >= today && span.first <= to) out.push({ ...film, rerelease: true, date: span.first, endDate: span.last });
-      else if (!span && opening >= today && opening <= to) out.push({ ...film, rerelease: true, date: opening });
+      if (span && span.last >= today && span.first <= to) out.push({ ...film, rerelease: true, date: span.first, endDate: span.last, location: 'Reel Dubai Mall' });
+      else if (!span && !scheduled.has(f.ID) && opening >= today && opening <= to) out.push({ ...film, rerelease: true, date: opening, location: 'Reel Cinemas · venue TBC' });
     } else if (opening >= from && opening <= to) {
       out.push({ ...film, date: opening });
     }
@@ -1110,7 +1113,7 @@ function safeMediaImage(url) {
 
 async function handleMedia(env, ctx) {
   const cache = caches.default;
-  const cacheKey = new Request('https://milindparwani.com/__cache/media-v2');
+  const cacheKey = new Request('https://milindparwani.com/__cache/media-v3');
   const cached = await cache.match(cacheKey);
   if (cached) return cached;
 
@@ -1126,7 +1129,8 @@ async function handleMedia(env, ctx) {
     akilFilms(today, to).catch(err => { console.error('media: Cinema Akil failed', { message: err.message }); pending = true; return []; }),
   ]);
 
-  // Chain releases (Reel + curated VOX/ROXY) appear once per film, without a venue.
+  // Chain releases (Reel + curated VOX/ROXY) appear once per film, without a venue. Re-releases
+  // are the exception: they name every followed cinema showing them, across the widest date range.
   const chain = new Map();
   for (const f of [...reel, ...(picks.films || []).map(p => ({ ...p, kind: 'film' }))]) {
     if (!f || !f.title || !/^\d{4}-\d{2}-\d{2}$/.test(f.date || '')) continue;
@@ -1134,7 +1138,16 @@ async function handleMedia(env, ctx) {
     const end = f.endDate || f.date;
     if (end < (f.rerelease ? today : from) || f.date > to) continue;
     const key = mediaKey(f.title);
-    if (!chain.has(key)) chain.set(key, f);
+    const prev = chain.get(key);
+    if (!prev) chain.set(key, { ...f });
+    else if (prev.rerelease && f.rerelease) {
+      // A known venue replaces "venue TBC".
+      const places = [...new Set([prev.location, f.location].filter(Boolean).join(' / ').split(' / '))];
+      const known = places.filter(p => !/venue TBC/.test(p));
+      prev.location = (known.length ? known : places).join(' / ');
+      if (f.date < prev.date) prev.date = f.date;
+      if ((f.endDate || f.date) > (prev.endDate || prev.date)) prev.endDate = f.endDate || f.date;
+    }
   }
   // Cinema Akil keeps its own card unless the same film is a current chain release.
   const films = [...chain.values(), ...akil.filter(f => !chain.has(mediaKey(f.title)))];

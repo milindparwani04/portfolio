@@ -303,6 +303,9 @@ body.locked { overflow: auto !important; height: auto !important; }
    image (contain) over a blurred, dimmed copy that fills the panel, rather than cropping it square. */
 .v2-media-art img { position: relative; object-fit: contain; }
 .v2-media-art .v2-media-blur { position: absolute; inset: 0; object-fit: cover; filter: blur(18px) brightness(.45); transform: scale(1.15); }
+/* Re-release cards name their cinemas: up to three lines, more on narrow screens. */
+.v2-media .v2-gig-venue { white-space: normal; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; line-height: 1.35; }
+@media (max-width: 900px) { .v2-media .v2-gig-venue { -webkit-line-clamp: 6; } }
 .v2-media-status, .v2-media-status:hover { color: var(--v2-dim); text-decoration: none; }
 .v2-gig-empty { grid-column: 1 / -1; min-height: 200px; display: flex; align-items: center; justify-content: center; padding: 2rem; color: var(--v2-dim); font-size: clamp(.6rem, 1.4vh, .78rem); letter-spacing: .05em; text-align: center; text-transform: uppercase; }
 
@@ -414,6 +417,7 @@ body.locked { overflow: auto !important; height: auto !important; }
   .v2-track-row > span:nth-child(2) { display: none; }
   .v2-gig-controls { grid-template-columns: 1fr auto; }
   .v2-gig-credit { left: .45rem; white-space: normal; text-align: right; line-height: 1.25; }
+  .v2-media .v2-gig-venue { -webkit-line-clamp: 6; }
   .v2-gig-timer { display: none; }
   .v2-footer { flex-wrap: wrap; justify-content: space-between; white-space: normal; }
   .v2-footer-rule { display: none; }

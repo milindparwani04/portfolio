@@ -120,6 +120,13 @@ Next session starts with:
 - ...
 ```
 
+### 2026-10-02 — Media: re-releases show their cinemas
+Agent: Claude · Model: Opus 5.5
+Done:
+- Re-release cards now name the cinemas showing them, e.g. Avengers Endgame: Encore at Reel Dubai Mall / VOX BurJuman, Mall of the Emirates, Mercato / ROXY Dubai Hills. Shawshank reads "Reel Cinemas · venue TBC" until Reel assigns a cinema. `worker/index.js`, `worker/media-picks.json`, `public/ui-v2.css` (`?v=21`).
+Tested (how, result):
+- Remote preview: every re-release has a location. Headless Edge at ten sizes: no clipping or overflow.
+
 ### 2026-10-02 — Media tracker (new section)
 Agent: Claude · Model: Opus 5.5
 Done:

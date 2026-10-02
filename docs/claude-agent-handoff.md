@@ -28,6 +28,7 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
   - Reel publishes the JSON its own site uses at `storage.googleapis.com/eeg-prod-reelcinema-sb/web/vista/json/`: `Films.json` (title, `Language`, `OpeningDate`, `IsComingSoon`), `Sessions.json` (`CinemaId` `0001` is Dubai Mall; `Showtime`), `Cinemas.json`. Posters are `.../movie_images/{ID}.jpg` (300×450).
   - Cinema Akil: `https://www.cinemaakil.com/api/films?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD` gives `films.Records[]` with `movie_languages`, `datesArray` (a day is a screening if it has `formats`) and `movie_content[].original_artwork` (about 966×1451).
   - VOX (`uae.voxcinemas.com`) and ROXY (`theroxycinemas.com`) return 403 to Workers and hang or return 403 to curl, so they are curated. In Chrome they render normally: VOX lists show "Language:" in the page text, and on ROXY movie pages the showtimes are `input[cinema-name][date]` elements.
+- **Re-release locations:** re-release cards name their cinemas (Reel Dubai Mall / VOX … / ROXY Dubai Hills, or "Reel Cinemas · venue TBC"). Curated entries need `location`; duplicates merge.
 - **Rules in code (`handleMedia`):** re-release = title matches `(YYYY)`, "re-release", "encore" or "anniversary". Its range is the first to last Dubai Mall session; if nothing is on sale yet, its announced date. Royal Ballet / Royal Opera broadcasts are excluded as not films. Chain films are deduplicated by normalised title (Reel first, then curated). An Akil card is dropped when the same film is a current chain release (e.g. Digger). Akil Q&A screenings fold into the film. Games come only from `media-picks.json`. `excludeTitles` hides anything by name. With a `TMDB_API_KEY` secret set, film posters are swapped for TMDB w780 posters (KV `media_poster:v1:*`, at most 12 lookups a run).
 - **Games:** Game Informer's schedule (`gameinformer.com/2026`, `/2027`) is parseable HTML (`span.calendar_entry` with `time[datetime]`). Box art: the product page's `/styles/product_box_art/public/...webp` has a 1440×2160 original without the style path. Covers are resized to 600 px wide (mozjpeg q78) in `public/assets/media/games/`. GameSpot and VGC block automated requests.
 - **Frontend:** `createCardRail({url, ids, noun, renderCard})` in `ui-v2.js` drives both rails. Media cards reuse the `.v2-gig` card with `.v2-media-art`: the poster is shown whole (contain) over a blurred copy. Status line: Coming soon / In cinemas / Limited run / Out now.
@@ -78,6 +79,15 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 - Lighthouse `valid-source-maps` flags a third-party library map; it doesn't affect the score categories that matter (production: 90 / 100 / 100).
 
 ## Work log (newest first)
+
+### 2026-10-02 — Re-releases name their cinemas
+
+- Milind asked where the Shawshank re-release is showing. Every re-release card now lists the followed cinemas showing it:
+  - Reel: "Reel Dubai Mall" when Dubai Mall has sessions; "Reel Cinemas · venue TBC" while Reel lists the film but hasn't put it on sale anywhere (Shawshank, from 15 Oct). Reel re-releases running only at other Reel cinemas are dropped.
+  - Curated VOX/ROXY entries carry a `location`. When the same re-release comes from several sources, they merge into one card: locations joined (a known venue replaces "venue TBC") and the widest date range.
+  - Example: Avengers Endgame: Encore reads "Reel Dubai Mall / VOX BurJuman, Mall of the Emirates, Mercato / ROXY Dubai Hills", 2–7 Oct, checked in Chrome on the VOX and ROXY film pages.
+- The venue line on media cards wraps: up to 3 lines, 6 at ≤900 px. Cache key `media-v3`, `ui-v2.css?v=21`. The routine brief now asks for `location` on re-releases.
+- Tested in remote preview: 79 items, and every re-release has a location. Headless Edge at ten sizes: the Endgame venue line is never cut off and no card overflows; 0 page errors.
 
 ### 2026-10-02 — Media tracker section
 
