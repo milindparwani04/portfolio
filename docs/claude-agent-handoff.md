@@ -12,7 +12,7 @@
 
 ## Current assignment
 
-Status: **Media tracker (new section) pushed 2026-10-02 — awaiting Milind's review.** Also live today: Journal redesign, Gig Finder changes. Ongoing: two weekly routines (Gig Finder and Media).
+Status: **Idle — session wrapped 2026-10-02; awaiting Milind's next assignment.** Shipped today: Gig Finder (Dubai/Abu Dhabi, photos, credits, Chicago), Journal redesign, Enter-key fix, Cloudflare cache TTL fix, Media tracker. Open items: article pages for the Journal, an optional TMDB key for sharper posters. Two weekly routines run on Mondays (Gig Finder 06:00, Media 06:30 Dubai).
 
 Areas Claude has most recently owned (coordinate before Codex changes these):
 
