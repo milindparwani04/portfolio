@@ -253,10 +253,20 @@
   let gigBatch = 0;
   let gigPaused = false;
 
-  function formatGigDate(value) {
-    const date = new Date(`${value}T12:00:00`);
-    if (Number.isNaN(date.getTime())) return value || 'Date TBC';
-    return new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: 'short' }).format(date).toUpperCase();
+  const GIG_CATEGORY_LABELS = { comedy: 'Comedy', musical: 'Musical', concert: 'Concert', dj: 'DJ', 'film-score': 'Film score', major: 'Big event' };
+
+  // "12 OCT", "25–29 NOV", "30 NOV – 02 DEC"; the year is added when it isn't this year.
+  function formatGigDate(value, endValue) {
+    const start = new Date(`${value}T12:00:00`);
+    if (Number.isNaN(start.getTime())) return value || 'Date TBC';
+    const end = endValue ? new Date(`${endValue}T12:00:00`) : null;
+    const day = (d) => String(d.getDate()).padStart(2, '0');
+    const month = (d) => new Intl.DateTimeFormat('en-GB', { month: 'short' }).format(d).toUpperCase();
+    const last = end && !Number.isNaN(end.getTime()) && end > start ? end : start;
+    const year = last.getFullYear() !== new Date().getFullYear() ? ` ${last.getFullYear()}` : '';
+    if (last === start) return `${day(start)} ${month(start)}${year}`;
+    if (start.getMonth() === last.getMonth()) return `${day(start)}–${day(last)} ${month(last)}${year}`;
+    return `${day(start)} ${month(start)} – ${day(last)} ${month(last)}${year}`;
   }
 
   function renderGigs() {
@@ -280,10 +290,10 @@
         ? gig.url
         : `https://www.google.com/search?q=${encodeURIComponent(`${gig.artist} ${gig.venue} tickets`)}`;
       return `<article class="v2-panel v2-gig">
-        <div class="v2-index-row"><span>${String(gigBatch * 5 + index + 1).padStart(2, '0')}</span><span class="v2-tag">[ Event ]</span></div>
+        <div class="v2-index-row"><span>${String(gigBatch * 5 + index + 1).padStart(2, '0')}</span><span class="v2-tag">[ ${escapeHtml(GIG_CATEGORY_LABELS[gig.category] || 'Event')} ]</span></div>
         <div class="v2-gig-art">${image ? `<img src="${escapeHtml(image)}" alt="${escapeHtml(gig.artist)}" loading="lazy" decoding="async">` : ''}</div>
         <h3 data-fit="2" title="${escapeHtml(gig.artist)}">${escapeHtml(gig.artist)}</h3>
-        <p class="v2-gig-venue" title="${escapeHtml(gig.venue)}">${escapeHtml(gig.venue)}</p><p class="v2-gig-date">${escapeHtml(formatGigDate(gig.date))}</p>
+        <p class="v2-gig-venue" title="${escapeHtml(gig.venue)}">${escapeHtml(gig.venue)}</p><p class="v2-gig-date">${escapeHtml(formatGigDate(gig.date, gig.endDate))}</p>
         <a class="v2-gig-link" href="${escapeHtml(link)}" target="_blank" rel="noopener noreferrer">Open details &#8599;</a>
       </article>`;
     }).join('');

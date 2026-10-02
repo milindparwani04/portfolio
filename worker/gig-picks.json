@@ -1,0 +1,43 @@
+{
+  "updated": "2026-10-02",
+  "notes": "Curated Gig Finder events that Ticketmaster's Discovery API doesn't list (Dubai Opera, Ushuaia, Soho Garden, Live Nation ME, Fever, F1). Every entry is a real, dated event checked against its official listing or a current news source. The Worker merges these with Ticketmaster's UAE events, drops past dates, and only shows DJ nights within the next 90 days. Categories: comedy, musical, concert, dj, film-score, major. Refreshed weekly; see docs/claude-agent-handoff.md.",
+  "excludeArtists": [],
+  "includeArtists": [],
+  "events": [
+    { "category": "concert", "artist": "Richard Marx", "venue": "Coca-Cola Arena, Dubai", "date": "2026-10-03", "url": "https://www.visitdubai.com/en/festivals-and-events/dubai-events-calendar/richard-marx" },
+
+    { "category": "comedy", "artist": "Ahmed Ahmed & Friends", "imageArtist": "Ahmed Ahmed", "venue": "Pepperoni Comedy Club, Dubai", "date": "2026-10-09", "endDate": "2026-10-10", "url": "https://dubai.platinumlist.net/event-tickets/108640/ahmed-ahemd-friends-live-at-dubai-comedy-festival" },
+    { "category": "comedy", "artist": "Jamie Lever", "venue": "Emirates Theatre, Jumeirah, Dubai", "date": "2026-10-10", "url": "https://dubai.platinumlist.net/event-tickets/106983/jamie-lever-live-in-dubai" },
+    { "category": "comedy", "artist": "Munawar Faruqui", "venue": "Dubai Opera, Dubai", "date": "2026-10-11", "url": "https://www.dubaiopera.com/en/events/comedy/munawar-faruqui-live-at-dubai-comedy-festival" },
+    { "category": "comedy", "artist": "Mo Gilligan", "venue": "Dubai Opera, Dubai", "date": "2026-10-12", "url": "https://www.dubaiopera.com/en/events/comedy/mo-gilligan-live-at-dubai-comedy-festival" },
+    { "category": "comedy", "artist": "Katherine Ryan", "venue": "Dubai Opera, Dubai", "date": "2026-10-12", "url": "https://www.dubaiopera.com/en/events/comedy/katherine-ryan-live-at-dubai-comedy-festival" },
+    { "category": "comedy", "artist": "Imad Kehdy", "venue": "New Covent Garden Theatre, Dubai", "date": "2026-10-12", "url": "https://dubai.platinumlist.net/event-tickets/108247/imad-kehdy-live-at-dubai-comedy-festival" },
+    { "category": "comedy", "artist": "Enissa Amani", "venue": "New Covent Garden Theatre, Dubai", "date": "2026-10-13", "url": "https://dubai.platinumlist.net/event-tickets/108301/enissa-amani-live-at-dubai-comedy-festival" },
+    { "category": "comedy", "artist": "Mario Bassil & Friends", "imageArtist": "Mario Bassil", "venue": "New Covent Garden Theatre, Dubai", "date": "2026-10-14", "url": "https://dubai.platinumlist.net/event-tickets/108307/mario-basil-friends-live-at-dubai-comedy-festival" },
+    { "category": "comedy", "artist": "Alexander Merkul", "venue": "New Covent Garden Theatre, Dubai", "date": "2026-10-15", "url": "https://dubai.platinumlist.net/event-tickets/106503/alexander-merkul-live-at-dubai-comedy-festival" },
+    { "category": "comedy", "artist": "Abbas Bukhari", "venue": "New Covent Garden Theatre, Dubai", "date": "2026-10-16", "url": "https://dubai.platinumlist.net/event-tickets/107641/abbas-bukhari-live-at-dubai-comedy-festival" },
+    { "category": "comedy", "artist": "Zarna Garg", "venue": "Dubai Opera, Dubai", "date": "2026-10-16", "url": "https://www.dubaiopera.com/en/events/comedy/zarna-garg-live-at-dubai-comedy-festival" },
+    { "category": "comedy", "artist": "John Achkar", "venue": "Dubai Opera, Dubai", "date": "2026-10-17", "endDate": "2026-10-18", "url": "https://www.dubaiopera.com/en/events/comedy/john-achkar-feena-nehke-live-at-dubai-comedy-festival" },
+    { "category": "comedy", "artist": "Amit Tandon", "venue": "Dubai Opera, Dubai", "date": "2026-10-18", "url": "https://www.dubaicomedyfest.ae/shows" },
+    { "category": "comedy", "artist": "Aries Spears", "venue": "Etihad Arena, Abu Dhabi", "date": "2026-11-21", "url": "https://www.etihadarena.ae/en/event-booking/aries-spears-live" },
+    { "category": "comedy", "artist": "Trevor Noah", "venue": "Dubai Opera, Dubai", "date": "2026-11-25", "endDate": "2026-11-29", "url": "https://www.livenation.me/event/trevor-noah-live-at-dubai-opera-dubai-tickets-edp1688637" },
+
+    { "category": "dj", "artist": "Black Coffee", "venue": "Ushuaïa Dubai Harbour, Dubai", "date": "2026-10-24", "url": "https://www.ushuaiadubai.com/" },
+    { "category": "dj", "artist": "Adriatique", "venue": "Ushuaïa Dubai Harbour, Dubai", "date": "2026-11-14", "url": "https://www.ushuaiadubai.com/" },
+    { "category": "dj", "artist": "Boris Brejcha", "venue": "Soho Garden DXB, Meydan, Dubai", "date": "2026-11-27", "url": "https://www.factmagazines.com/uae/dubai/soho-garden-festival" },
+    { "category": "dj", "artist": "ARTBAT", "venue": "Ushuaïa Dubai Harbour, Dubai", "date": "2026-11-28", "url": "https://www.ushuaiadubai.com/" },
+    { "category": "dj", "artist": "Charlotte de Witte", "venue": "Soho Garden DXB, Meydan, Dubai", "date": "2026-12-04", "url": "https://www.factmagazines.com/uae/dubai/soho-garden-festival" },
+    { "category": "dj", "artist": "Mahmut Orhan", "venue": "Ushuaïa Dubai Harbour, Dubai", "date": "2026-12-12", "url": "https://www.ushuaiadubai.com/" },
+    { "category": "dj", "artist": "Indira Paganotto", "venue": "Soho Garden DXB, Meydan, Dubai", "date": "2026-12-12", "url": "https://www.factmagazines.com/uae/dubai/soho-garden-festival" },
+    { "category": "dj", "artist": "Argy", "venue": "Ushuaïa Dubai Harbour, Dubai", "date": "2026-12-31", "url": "https://www.ushuaiadubai.com/" },
+
+    { "category": "film-score", "artist": "Candlelight: Hans Zimmer", "imageArtist": "Hans Zimmer", "venue": "Emirates Palace Mandarin Oriental, Abu Dhabi", "date": "2026-10-30", "url": "https://feverup.com/m/191852" },
+    { "category": "film-score", "artist": "Candlelight: Hans Zimmer", "imageArtist": "Hans Zimmer", "venue": "Emirates Palace Mandarin Oriental, Abu Dhabi", "date": "2027-01-16", "url": "https://feverup.com/m/191852" },
+    { "category": "film-score", "artist": "Harry Potter in Concert", "venue": "Etihad Arena, Abu Dhabi", "date": "2027-02-05", "endDate": "2027-02-06", "url": "https://feverup.com/m/418094" },
+
+    { "category": "major", "artist": "F1 Abu Dhabi Grand Prix", "venue": "Yas Marina Circuit, Abu Dhabi", "date": "2026-12-03", "endDate": "2026-12-06", "url": "https://www.abudhabigp.com/en/" },
+    { "category": "concert", "artist": "Lewis Capaldi & Zara Larsson", "imageArtist": "Lewis Capaldi", "venue": "Etihad Park, Abu Dhabi", "date": "2026-12-03", "url": "https://www.abudhabigp.com/yasalam-after-race-concerts.html" },
+    { "category": "concert", "artist": "Imagine Dragons", "venue": "Etihad Live, Abu Dhabi", "date": "2026-12-05", "url": "https://www.abudhabigp.com/yasalam-after-race-concerts.html" },
+    { "category": "concert", "artist": "The Chainsmokers & The Script", "imageArtist": "The Chainsmokers", "venue": "Etihad Live, Abu Dhabi", "date": "2026-12-06", "url": "https://www.abudhabigp.com/yasalam-after-race-concerts.html" }
+  ]
+}

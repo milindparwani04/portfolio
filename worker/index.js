@@ -1,3 +1,5 @@
+import GIG_PICKS from './gig-picks.json';
+
 const FEED_URL = 'https://feeds.bbci.co.uk/news/world/rss.xml';
 const CACHE_TTL_SECONDS = 300;
 const MAX_HEADLINES = 12;
@@ -392,23 +394,9 @@ async function handleSampleSearch(request, env, ctx) {
 }
 
 const SPOTIFY_REDIRECT_URI = 'https://milindparwani.com/api/spotify/callback';
-// Spotify killed its public Charts API, and — confirmed against Spotify's own docs, not just
-// trial-and-error — /v1/playlists/{id}/tracks is restricted to playlists owned by or
-// collaborated on by the authenticated user, for ANY auth type. That kills "read a curated
-// editorial playlist via Client Credentials" as an approach entirely, not just for Spotify-owned
-// playlists. Last.fm's chart.gettopartists (public, free API key, no OAuth) is the replacement
-// trending source — a genuine global top-artists chart, not a workaround.
+// Last.fm (public, free API key, no OAuth): the Gig Finder reads artists' top tags to judge
+// whether a concert is English-language.
 const LASTFM_API_BASE = 'https://ws.audioscrobbler.com/2.0/';
-// Last.fm's chart is streaming-driven, not touring-driven — deceased legends still chart
-// (Michael Jackson, Elvis Presley routinely place). Every real Ticketmaster result for them is
-// necessarily an impersonator/tribute show, and the isTributeEvent() keyword heuristic can't
-// catch every naming convention (seen live: French "hommage", "Club 90's: Michael Jackson
-// Night", "ELVIS PRESLEY by Steve Ryckier & The Graceland Orchestra" — none contain
-// "tribute"/"impersonat"). This is a small, stable fact (death doesn't reverse) rather than a
-// heuristic, so it's cheaper and more exact to exclude these names from the pool entirely than
-// to keep expanding a regex arms race against creative event titles.
-const DECEASED_ARTISTS = new Set(['michael jackson', 'elvis presley']);
-const GIG_POOL_MAX = 25;
 const GIGS_CACHE_TTL_SECONDS = 3600;
 
 async function exchangeSpotifyToken(env, params) {
@@ -635,46 +623,58 @@ async function handleHeartRate(env, ctx) {
   });
 }
 
-// Bandsintown's public REST API turned out to be dead (blanket 403, "explicit deny in an
-// identity-based policy" — confirmed even against their own documented example app_id, so this
-// isn't a config issue, they've locked it to partners). Ticketmaster's Discovery API replaced it:
-// self-serve API key, instant approval, actively maintained. Returns the soonest upcoming show
-// for one artist, or null if none found — most artists in a top-artists list aren't touring
-// right now, that's normal, not an error.
-// Keyword search was far too loose: it matched tribute acts ("Rumours of Fleetwood Mac"),
-// venue names ("Drake" -> The Drake Hotel) and unrelated titles ("salute"). So each artist is
-// first resolved to their own Ticketmaster *attraction* by exact name, and only events booked for
-// that attraction are considered — tribute bands have their own attraction IDs. Shows that still
-// tag the real attraction (candlelight concerts, "The Music of …", orchestral nights) are caught
-// by the title pattern below, tested with the artist's own name removed so an artist whose name
-// happens to match (e.g. "Salute") isn't excluded. Heuristic, not exact — but seen live, the
-// remaining false positives all carried one of these words.
-const TRIBUTE_PATTERN = /tribute|impersonat|candlelight|hommage|homenaje|homage|\bmusic of\b|\bsongs of\b|\bcelebrat|\blegacy\b|\bexperience\b|\bsalute\b|\bsound of\b|\bstory of\b|\bsymphon|\borchestra|\bthe musical\b|\bnight of\b/i;
+// Gig Finder: Dubai and Abu Dhabi only, limited to what Milind asked for (2026-10-02) — comedians
+// in either city, musicals at Dubai Opera, English-language concerts at Coca-Cola Arena, Ushuaïa
+// and the big Abu Dhabi venues, DJs at Dubai clubs within the next 90 days, film/TV composer
+// concerts, and the F1 weekend. Two sources are merged:
+//   1. Ticketmaster's Discovery API for the UAE (countryCode=AE), classified by the rules below.
+//      It carries Etihad Arena, the comedy weeks, Pacha ICONS / Bohemia / The Penthouse and a few
+//      Coca-Cola Arena shows, but not Dubai Opera, Ushuaïa, Soho Garden or Live Nation ME.
+//   2. worker/gig-picks.json — real, checked events from those other sellers. Platinumlist, the
+//      venues' sites and Live Nation ME have no public API (Queue-it / bot challenges / partner
+//      keys), so the list is curated and refreshed weekly.
+// No source tags a concert's language, so "English-language only" is judged from the artist's
+// Last.fm tags: an artist with a non-English scene tag (k-pop, opm, arabic, bollywood…) is
+// dropped, and one with no tags at all is dropped too, since it can't be checked.
+// gig-picks.json can force an artist in (includeArtists) or out (excludeArtists).
+
 const TICKETMASTER_API_BASE = 'https://app.ticketmaster.com/discovery/v2';
-const MUSICBRAINZ_API_BASE = 'https://musicbrainz.org/ws/2';
-// MusicBrainz asks for an identifying User-Agent and at most ~1 request/second.
-const MUSICBRAINZ_USER_AGENT = 'PARWANI-site/1.0 ( https://milindparwani.com )';
-const GIG_ARTIST_CACHE_PREFIX = 'gig_artist:v2:';
-const GIG_ARTIST_CACHE_TTL_SECONDS = 30 * 24 * 60 * 60;
-// Each uncached artist costs two subrequests (Ticketmaster attraction + MusicBrainz) plus a 1.1 s
-// MusicBrainz pause; capping per run keeps a cold cache under the 50-subrequest limit. Uncached
-// artists beyond the cap are skipped this hour and resolved on later runs.
-const GIG_MAX_RESOLVES_PER_RUN = 6;
+const GIG_CITIES = new Set(['dubai', 'abu dhabi']);
+const GIG_DJ_WINDOW_DAYS = 90;
+// Concert venues Milind follows. Ushuaïa isn't on Ticketmaster today but is listed in case it moves.
+const GIG_DUBAI_CONCERT_VENUES = /coca[- ]cola arena|ushua/i;
+const GIG_ABU_DHABI_BIG_VENUES = /etihad arena|etihad park|etihad live|yas gateway|yas marina|space ?42/i;
+const GIG_MUSICAL_VENUES = /dubai opera/i;
+// Composers who write for film and TV. Concerts of their music count, including Candlelight-style
+// tribute nights (Milind asked for those specifically).
+const GIG_COMPOSERS = ['hans zimmer', 'ramin djawadi', 'ludwig goransson', 'john williams', 'howard shore',
+  'michael giacchino', 'danny elfman', 'joe hisaishi', 'alan silvestri', 'james newton howard',
+  'thomas newman', 'alexandre desplat', 'hildur gudnadottir', 'lorne balfe', 'harry gregson williams',
+  'junkie xl', 'bear mccreary', 'nicholas britell', 'justin hurwitz', 'ennio morricone',
+  'john powell', 'james horner', 'max richter', 'daniel pemberton', 'kris bowers', 'jeremy soule',
+  'yoko kanno', 'hiroyuki sawano', 'gustavo santaolalla', 'brian tyler', 'rachel portman',
+  'patrick doyle', 'clint mansell', 'trent reznor', 'atticus ross', 'cliff martinez'];
+// Ticket add-ons and ticket tiers rather than shows (F1 grandstands, Golden Circle upgrades, tables).
+const GIG_NOT_A_SHOW = /upgrade|vip table|after party|grandstand|terrace|lounge|\bpass\b|parking|hospitality|paddock/i;
+const GIG_NOT_COMEDY = /\bmusical\b|\bpfl\b|\bufc\b|\bvs\.?\b|\bfight|\bslap\b/i;
+// Ticketmaster attractions that are series, festivals or venues rather than the performer.
+const GIG_CONTAINER_ATTRACTION = /festival|comedy (week|season)|pacha|bohemia|penthouse|grand prix|after race|icons|yasalam|series|national orchestra|\bdopa\b/i;
+const GIG_NON_ENGLISH_TAGS = /k-?pop|korean|j-?pop|japanese|c-?pop|mandopop|cantopop|chinese|\bopm\b|filipino|pinoy|tagalog|\bp-?pop\b|arab|khaleeji|egyptian|lebanese|levant|turkish|bollywood|hindi|punjabi|bhangra|\bdesi\b|indian|urdu|pakistani|filmi|tamil|telugu|malayalam|kannada|russian|persian|iranian|latin|reggaeton|spanish|italian|^french$|french pop|chanson|opera|classical|tenor|greek|kurdish/i;
+// Club-music tags only: "electronic" alone also covers synth-pop and dream-pop bands (Ghostly Kisses).
+const GIG_ELECTRONIC_TAGS = /house|techno|\bedm\b|trance|dubstep|drum and bass/i;
+const GIG_TAGS_CACHE_PREFIX = 'gig_tags:v1:';
+const GIG_IMAGE_CACHE_PREFIX = 'gig_image:v1:';
+const GIG_LOOKUP_CACHE_TTL_SECONDS = 30 * 24 * 60 * 60;
+// Each uncached Last.fm / Ticketmaster lookup is one subrequest; caps keep a cold run well under
+// the Workers Free plan's 50-subrequest limit. Anything skipped resolves on a later run, and the
+// response is cached for only 5 minutes while lookups are pending.
+const GIG_MAX_TAG_LOOKUPS = 15;
+const GIG_MAX_IMAGE_LOOKUPS = 10;
+const GIGS_PENDING_CACHE_TTL_SECONDS = 300;
 
 function normalizeArtistName(name) {
   return String(name || '').toLowerCase().normalize('NFKD').replace(/[̀-ͯ]/g, '')
     .replace(/&/g, 'and').replace(/[^a-z0-9]+/g, ' ').trim();
-}
-
-function isTributeEvent(ev, artistName) {
-  const title = normalizeArtistName(ev.name);
-  const ownName = normalizeArtistName(artistName);
-  const titleWithoutArtist = ownName ? title.split(ownName).join(' ') : title;
-  if (TRIBUTE_PATTERN.test(titleWithoutArtist)) return true;
-  const cls = ev.classifications && ev.classifications[0];
-  if (cls && TRIBUTE_PATTERN.test((cls.subType && cls.subType.name) || '')) return true;
-  const attractions = (ev._embedded && ev._embedded.attractions) || [];
-  return attractions.some(a => /tribute|impersonat/i.test(a.name || ''));
 }
 
 // Ticketmaster images carry ratio/width and a `fallback` flag for generic placeholders. The gig
@@ -689,94 +689,159 @@ function pickTicketmasterImage(images) {
   return real.length ? real[0].url : null;
 }
 
-// Returns { attractionId, upcoming, image, ended } for an artist. `ended` is true when MusicBrainz
-// lists the artist's life-span as ended (person died / group dissolved). Cached in KV by caller.
-async function resolveGigArtist(artistName, env) {
-  const params = new URLSearchParams({
-    keyword: artistName,
-    classificationName: 'music',
-    size: '10',
-    apikey: env.TICKETMASTER_API_KEY,
-  });
-  const res = await fetch(`${TICKETMASTER_API_BASE}/attractions.json?${params}`, { signal: AbortSignal.timeout(SPOTIFY_TIMEOUT_MS) });
-  if (!res.ok) throw new Error(`Ticketmaster attractions returned ${res.status}`);
-  const data = await res.json();
-  const target = normalizeArtistName(artistName);
-  const matches = ((data._embedded && data._embedded.attractions) || [])
-    .filter(a => normalizeArtistName(a.name) === target)
-    .sort((a, b) => ((b.upcomingEvents && b.upcomingEvents._total) || 0) - ((a.upcomingEvents && a.upcomingEvents._total) || 0));
-  const attraction = matches[0];
-
-  let ended = false;
-  try {
-    const mbParams = new URLSearchParams({ query: `artist:"${artistName.replace(/"/g, '')}"`, limit: '5', fmt: 'json' });
-    const mbRes = await fetch(`${MUSICBRAINZ_API_BASE}/artist?${mbParams}`, {
-      headers: { 'User-Agent': MUSICBRAINZ_USER_AGENT, Accept: 'application/json' },
-      signal: AbortSignal.timeout(SPOTIFY_TIMEOUT_MS),
-    });
-    if (mbRes.ok) {
-      const mb = await mbRes.json();
-      // Only trust the top-ranked result: several artists can share a name (MusicBrainz has
-      // multiple "Queen"s, some ended), and the most relevant one is the famous act.
-      const top = (mb.artists || [])[0];
-      const hit = top && top.score === 100 && normalizeArtistName(top.name) === target ? top : null;
-      ended = Boolean(hit && hit['life-span'] && hit['life-span'].ended);
-    }
-  } catch (err) {
-    console.error('MusicBrainz lookup failed', { artist: artistName, message: err.message });
-  }
-
-  return {
-    attractionId: attraction ? attraction.id : null,
-    upcoming: attraction ? (attraction.upcomingEvents && attraction.upcomingEvents._total) || 0 : 0,
-    image: attraction ? pickTicketmasterImage(attraction.images) : null,
-    ended,
-  };
+function dubaiToday(now) {
+  return new Date(now + DUBAI_UTC_OFFSET_MS).toISOString().slice(0, 10);
 }
 
-// Soonest real show for a resolved attraction, or null. Most artists aren't touring — not an error.
-async function fetchTicketmasterSoonestShow(artistName, attraction, env) {
-  try {
+function addDays(isoDate, days) {
+  const d = new Date(`${isoDate}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + days);
+  return d.toISOString().slice(0, 10);
+}
+
+function matchComposer(text) {
+  const normalized = ` ${normalizeArtistName(text)} `;
+  return GIG_COMPOSERS.find(name => normalized.includes(` ${name} `)) || null;
+}
+
+// "Bryson Tiller & Central Cee" → both names, so each can be checked on Last.fm.
+function splitArtists(name) {
+  return String(name).split(/\s*(?:&|,|\bx\b|\band\b|\bb2b\b)\s*/i).map(s => s.trim()).filter(Boolean);
+}
+
+async function fetchTicketmasterUaeEvents(env) {
+  const events = [];
+  for (let page = 0; page < 3; page += 1) {
     const params = new URLSearchParams({
-      attractionId: attraction.attractionId,
+      countryCode: 'AE',
       sort: 'date,asc',
-      size: '10',
-      // Without a lower bound Ticketmaster can surface past-dated listings even sorted ascending.
+      size: '200',
+      page: String(page),
       startDateTime: new Date().toISOString().split('.')[0] + 'Z',
       apikey: env.TICKETMASTER_API_KEY,
     });
     const res = await fetch(`${TICKETMASTER_API_BASE}/events.json?${params}`, { signal: AbortSignal.timeout(SPOTIFY_TIMEOUT_MS) });
-    if (!res.ok) return null;
+    if (!res.ok) throw new Error(`Ticketmaster events returned ${res.status}`);
     const data = await res.json();
-    const events = (data._embedded && data._embedded.events) || [];
-    const ev = events.find(e => !isTributeEvent(e, artistName));
-    if (!ev) return null;
+    events.push(...((data._embedded && data._embedded.events) || []));
+    if (!data.page || page + 1 >= data.page.totalPages) break;
+  }
+  return events;
+}
 
-    const localDate = ev.dates && ev.dates.start && ev.dates.start.localDate;
-    const venueObj = ev._embedded && ev._embedded.venues && ev._embedded.venues[0];
-    const venueLabel = venueObj && [venueObj.name, venueObj.city && venueObj.city.name].filter(Boolean).join(', ');
-    if (!localDate || !venueLabel) return null;
-    // Prefer the artist's own Ticketmaster photo: event listing images are often festival
-    // posters or venue shots (seen live: a racetrack for a show at an F1 circuit).
-    return {
-      venue: venueLabel,
-      date: localDate,
-      image: attraction.image || pickTicketmasterImage(ev.images),
-      url: typeof ev.url === 'string' && ev.url.startsWith('https://') ? ev.url : null,
-    };
-  } catch {
-    return null;
+// Turns one Ticketmaster event into a candidate gig, or null if it's outside Milind's categories.
+// Concerts come back with `needsTags`: their language/genre check happens after Last.fm lookups.
+function classifyTicketmasterEvent(ev) {
+  const venue = ev._embedded && ev._embedded.venues && ev._embedded.venues[0];
+  const city = venue && venue.city && venue.city.name;
+  const date = ev.dates && ev.dates.start && ev.dates.start.localDate;
+  if (!venue || !city || !date || !GIG_CITIES.has(city.toLowerCase())) return null;
+  const title = String(ev.name || '');
+  if (GIG_NOT_A_SHOW.test(title)) return null;
+
+  const attractions = (ev._embedded && ev._embedded.attractions) || [];
+  // The performer is listed first; series, festivals and the F1 race are tagged as extra attractions.
+  const performer = attractions.find(a => {
+    const c = (a.classifications && a.classifications[0]) || {};
+    const aSegment = (c.segment && c.segment.name) || '';
+    const aGenre = (c.genre && c.genre.name) || '';
+    return a.name && !GIG_CONTAINER_ATTRACTION.test(a.name) && aSegment !== 'Sports'
+      && aGenre !== 'Fairs & Festivals' && aGenre !== 'Undefined';
+  });
+  const artist = (performer && performer.name) || title;
+  const cls = (ev.classifications && ev.classifications[0]) || {};
+  const segment = (cls.segment && cls.segment.name) || '';
+  const genre = (cls.genre && cls.genre.name) || '';
+  const isDubai = city.toLowerCase() === 'dubai';
+
+  let category = null;
+  let needsTags = false;
+  const composer = matchComposer(title) || attractions.map(a => matchComposer(a.name)).find(Boolean);
+  if (composer) category = 'film-score';
+  else if (/\bmusical\b/i.test(title)) category = GIG_MUSICAL_VENUES.test(venue.name) ? 'musical' : null;
+  else if (genre === 'Comedy' && !GIG_NOT_COMEDY.test(title)) category = 'comedy';
+  else if (segment === 'Music' && isDubai && genre === 'Dance/Electronic') category = 'dj';
+  else if (segment === 'Music' && (isDubai ? GIG_DUBAI_CONCERT_VENUES : GIG_ABU_DHABI_BIG_VENUES).test(venue.name)) {
+    category = 'concert';
+    needsTags = true;
+  }
+  if (!category) return null;
+
+  return {
+    artist,
+    category,
+    needsTags,
+    // Some venues are entered in capitals ("YAS GATEWAY PARK NORTH").
+    venue: `${venue.name === venue.name.toUpperCase() ? venue.name.toLowerCase().replace(/\b\w/g, c => c.toUpperCase()) : venue.name}, ${city}`,
+    date,
+    image: pickTicketmasterImage((performer && performer.images) || []) || pickTicketmasterImage(ev.images),
+    url: typeof ev.url === 'string' && ev.url.startsWith('https://') ? ev.url : null,
+  };
+}
+
+// Cached KV lookup with a per-run budget. Returns undefined when the budget is spent.
+async function cachedGigLookup(env, ctx, key, budget, produce) {
+  const hit = await env.GIG_KV.get(key, 'json');
+  if (hit) return hit;
+  if (budget.left <= 0) return undefined;
+  budget.left -= 1;
+  try {
+    const value = await produce();
+    ctx.waitUntil(env.GIG_KV.put(key, JSON.stringify(value), { expirationTtl: GIG_LOOKUP_CACHE_TTL_SECONDS }));
+    return value;
+  } catch (err) {
+    console.error('gig lookup failed', { key, message: err.message });
+    return undefined;
   }
 }
 
-// Backs the Gig Finder rail. Mixes two artist sources into one pool (personal Spotify top
-// artists via the user-auth flow above, plus Last.fm's global top-artists chart for the
-// trending half), dedupes case-insensitively, caps at GIG_POOL_MAX to stay well under the
-// Workers Free-plan 50-subrequest-per-invocation limit (pool + the handful of Spotify/Last.fm
-// calls stays under 30), then looks up each artist's soonest show via Ticketmaster.
-// Response is a bare array (not {results:...}/{headlines:...} like the other routes) — the
-// client already consumes GIGS as a plain [{artist,venue,date}] array, this matches that shape
-// exactly rather than making the frontend unwrap a wrapper key.
+function lastfmArtistTags(name, env) {
+  return async () => {
+    const params = new URLSearchParams({ method: 'artist.gettoptags', artist: name, autocorrect: '1', api_key: env.LASTFM_API_KEY, format: 'json' });
+    const res = await fetch(`${LASTFM_API_BASE}?${params}`, { signal: AbortSignal.timeout(SPOTIFY_TIMEOUT_MS) });
+    if (!res.ok) throw new Error(`Last.fm artist.gettoptags returned ${res.status}`);
+    const data = await res.json();
+    const tags = ((data.toptags && data.toptags.tag) || []).filter(t => Number(t.count) >= 10).slice(0, 10).map(t => String(t.name).toLowerCase());
+    return { tags };
+  };
+}
+
+// Artist photo for a curated event: the exact-name Ticketmaster attraction's image, if any.
+function ticketmasterArtistImage(name, env) {
+  return async () => {
+    const params = new URLSearchParams({ keyword: name, size: '10', apikey: env.TICKETMASTER_API_KEY });
+    const res = await fetch(`${TICKETMASTER_API_BASE}/attractions.json?${params}`, { signal: AbortSignal.timeout(SPOTIFY_TIMEOUT_MS) });
+    if (!res.ok) throw new Error(`Ticketmaster attractions returned ${res.status}`);
+    const data = await res.json();
+    const target = normalizeArtistName(name);
+    const match = ((data._embedded && data._embedded.attractions) || []).find(a => normalizeArtistName(a.name) === target);
+    return { image: match ? pickTicketmasterImage(match.images) : null };
+  };
+}
+
+// Merges listings for the same artist: identical dates collapse to one, and consecutive or
+// repeated nights at the same venue (Trevor Noah, Chicago) become one card with a date range.
+function mergeGigs(gigs) {
+  const groups = new Map();
+  for (const gig of gigs) {
+    const key = `${normalizeArtistName(gig.artist)}|${normalizeArtistName(gig.venue).split(' ').slice(0, 2).join(' ')}`;
+    const prev = groups.get(key);
+    const end = gig.endDate || gig.date;
+    // A gap of more than a week means a separate run (e.g. Candlelight in October and January).
+    if (prev && gig.date <= addDays(prev.endDate || prev.date, 7)) {
+      if (end > (prev.endDate || prev.date)) prev.endDate = end;
+      prev.image = prev.image || gig.image;
+      prev.url = prev.url || gig.url;
+      continue;
+    }
+    if (prev) groups.set(`${key}|${gig.date}`, prev);
+    groups.set(key, { ...gig, endDate: gig.endDate && gig.endDate !== gig.date ? gig.endDate : undefined });
+  }
+  return [...groups.values()].map(g => (g.endDate && g.endDate !== g.date ? g : { ...g, endDate: undefined }));
+}
+
+// Backs the Gig Finder section. Response is a bare array of
+// { artist, category, venue, date, endDate?, image, url }, sorted by date.
 async function handleGigs(request, env, ctx) {
   if (!env.LASTFM_API_KEY || !env.TICKETMASTER_API_KEY) {
     return new Response(JSON.stringify({ error: 'Lookup is not configured' }), {
@@ -786,78 +851,100 @@ async function handleGigs(request, env, ctx) {
   }
 
   // Fixed, versioned key: query strings can't bypass the cache (S-03), and bumping the version
-  // retires a cached response when the gig logic changes (v2: attraction-verified artists).
+  // retires a cached response when the gig logic changes (v3: Dubai / Abu Dhabi categories).
   const cache = caches.default;
-  const cacheKey = new Request('https://milindparwani.com/__cache/gigs-v2');
+  const cacheKey = new Request('https://milindparwani.com/__cache/gigs-v3');
   const cached = await cache.match(cacheKey);
   if (cached) return cached;
 
   try {
-    const userToken = await refreshSpotifyUserAccessToken(env);
-    const topRes = await fetch('https://api.spotify.com/v1/me/top/artists?limit=25&time_range=medium_term', {
-      headers: { Authorization: `Bearer ${userToken}` },
-    });
-    if (!topRes.ok) throw new Error(`Spotify top artists returned ${topRes.status}`);
-    const topData = await topRes.json();
-    const personalArtists = (topData.items || []).map(a => a.name).filter(Boolean);
+    const today = dubaiToday(Date.now());
+    const djCutoff = addDays(today, GIG_DJ_WINDOW_DAYS);
+    const exclude = new Set((GIG_PICKS.excludeArtists || []).map(normalizeArtistName));
+    const include = new Set((GIG_PICKS.includeArtists || []).map(normalizeArtistName));
+    const tagBudget = { left: GIG_MAX_TAG_LOOKUPS };
+    const imageBudget = { left: GIG_MAX_IMAGE_LOOKUPS };
+    let pending = false;
 
-    const lastfmRes = await fetch(
-      `${LASTFM_API_BASE}?method=chart.gettopartists&api_key=${env.LASTFM_API_KEY}&format=json&limit=25`
-    );
-    if (!lastfmRes.ok) throw new Error(`Last.fm chart.gettopartists returned ${lastfmRes.status}`);
-    const lastfmData = await lastfmRes.json();
-    const trendingArtists = ((lastfmData.artists && lastfmData.artists.artist) || [])
-      .map(a => a.name)
-      .filter(Boolean);
-
-    const seen = new Set();
-    const pool = [];
-    for (const name of [...personalArtists, ...trendingArtists]) {
-      const key = name.toLowerCase();
-      if (seen.has(key) || DECEASED_ARTISTS.has(key)) continue;
-      seen.add(key);
-      pool.push(name);
-      if (pool.length >= GIG_POOL_MAX) break;
+    // A Ticketmaster outage still leaves the curated events, cached briefly so it recovers soon.
+    const candidates = [];
+    let ticketmasterEvents = [];
+    try {
+      ticketmasterEvents = await fetchTicketmasterUaeEvents(env);
+    } catch (err) {
+      console.error('gigs: Ticketmaster failed', { message: err.message });
+      pending = true;
+    }
+    for (const ev of ticketmasterEvents) {
+      const gig = classifyTicketmasterEvent(ev);
+      if (gig) candidates.push(gig);
+    }
+    for (const pick of GIG_PICKS.events || []) {
+      if (!pick || !pick.artist || !pick.venue || !/^\d{4}-\d{2}-\d{2}$/.test(pick.date || '')) continue;
+      candidates.push({ ...pick, needsTags: false, fromPicks: true });
     }
 
-    // Resolve each artist to a Ticketmaster attraction + MusicBrainz status (KV-cached 30 days).
-    // Uncached lookups run one at a time with a pause, per MusicBrainz's rate limit.
-    const resolved = new Map();
-    let resolvesLeft = GIG_MAX_RESOLVES_PER_RUN;
-    for (const artist of pool) {
-      const kvKey = GIG_ARTIST_CACHE_PREFIX + normalizeArtistName(artist);
-      const cachedArtist = await env.GIG_KV.get(kvKey, 'json');
-      if (cachedArtist) { resolved.set(artist, cachedArtist); continue; }
-      if (resolvesLeft <= 0) continue;
-      resolvesLeft -= 1;
-      try {
-        const info = await resolveGigArtist(artist, env);
-        resolved.set(artist, info);
-        ctx.waitUntil(env.GIG_KV.put(kvKey, JSON.stringify(info), { expirationTtl: GIG_ARTIST_CACHE_TTL_SECONDS }));
-      } catch (err) {
-        console.error('gig artist resolve failed', { artist, message: err.message });
+    // Curated picks go first so they win over a Ticketmaster duplicate of the same night (the
+    // same DJ is often listed at two FIVE Palm venues for one show).
+    candidates.sort((a, b) => Number(Boolean(b.fromPicks)) - Number(Boolean(a.fromPicks)));
+    const seenNights = new Set();
+    const kept = [];
+    for (const gig of candidates) {
+      const name = normalizeArtistName(gig.artist);
+      const end = gig.endDate || gig.date;
+      if (exclude.has(name) || end < today || seenNights.has(`${name}|${gig.date}`)) continue;
+      seenNights.add(`${name}|${gig.date}`);
+      if (gig.category === 'dj' && gig.date > djCutoff) continue;
+
+      if (gig.needsTags && !include.has(name)) {
+        const parts = splitArtists(gig.artist);
+        const results = [];
+        for (const part of parts) {
+          results.push(await cachedGigLookup(env, ctx, GIG_TAGS_CACHE_PREFIX + normalizeArtistName(part), tagBudget, lastfmArtistTags(part, env)));
+        }
+        if (results.some(r => r === undefined)) { pending = true; continue; }
+        const allTags = results.flatMap(r => r.tags);
+        if (!results.some(r => r.tags.length) || allTags.some(t => GIG_NON_ENGLISH_TAGS.test(t))) continue;
+        // Big electronic acts at the Abu Dhabi venues (Anyma) read as DJ nights, not concerts.
+        const electronic = allTags.slice(0, 3).some(t => GIG_ELECTRONIC_TAGS.test(t));
+        if (electronic) {
+          if (gig.date > djCutoff) continue;
+          gig.category = 'dj';
+        }
       }
-      if (resolvesLeft > 0) await new Promise(r => setTimeout(r, 1100));
+
+      if (!gig.image && gig.fromPicks) {
+        const lookupName = gig.imageArtist || gig.artist;
+        const found = await cachedGigLookup(env, ctx, GIG_IMAGE_CACHE_PREFIX + normalizeArtistName(lookupName), imageBudget, ticketmasterArtistImage(lookupName, env));
+        if (found === undefined) pending = true;
+        else gig.image = found.image;
+      }
+
+      kept.push({
+        artist: gig.artist,
+        category: gig.category,
+        venue: gig.venue,
+        date: gig.date,
+        endDate: gig.endDate,
+        image: typeof gig.image === 'string' && gig.image.startsWith('https://') ? gig.image : null,
+        url: typeof gig.url === 'string' && gig.url.startsWith('https://') ? gig.url : null,
+      });
     }
 
-    const withShows = await Promise.all(pool.map(async artist => {
-      const info = resolved.get(artist);
-      if (!info || !info.attractionId || info.ended || !info.upcoming) return null;
-      const show = await fetchTicketmasterSoonestShow(artist, info, env);
-      return show ? { artist, venue: show.venue, date: show.date, image: show.image, url: show.url } : null;
-    }));
-    const gigs = withShows.filter(Boolean).sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
+    kept.sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
+    const gigs = mergeGigs(kept).sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
 
     const response = new Response(JSON.stringify(gigs), {
       headers: {
         'Content-Type': 'application/json',
-        'Cache-Control': `public, max-age=${GIGS_CACHE_TTL_SECONDS}`,
+        'Cache-Control': `public, max-age=${pending ? GIGS_PENDING_CACHE_TTL_SECONDS : GIGS_CACHE_TTL_SECONDS}`,
       },
     });
     ctx.waitUntil(cache.put(cacheKey, response.clone()));
     return response;
   } catch (err) {
-    return new Response(JSON.stringify({ error: err.message }), {
+    console.error('gigs failed', { message: err.message });
+    return new Response(JSON.stringify({ error: 'Gig lookup failed' }), {
       status: 502,
       headers: { 'Content-Type': 'application/json' },
     });
