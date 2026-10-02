@@ -663,7 +663,8 @@ const GIG_NON_ENGLISH_TAGS = /k-?pop|korean|j-?pop|japanese|c-?pop|mandopop|cant
 // Club-music tags only: "electronic" alone also covers synth-pop and dream-pop bands (Ghostly Kisses).
 const GIG_ELECTRONIC_TAGS = /house|techno|\bedm\b|trance|dubstep|drum and bass/i;
 const GIG_TAGS_CACHE_PREFIX = 'gig_tags:v1:';
-const GIG_IMAGE_CACHE_PREFIX = 'gig_image:v1:';
+// v2: v1 cached the 305×225 thumbnails.
+const GIG_IMAGE_CACHE_PREFIX = 'gig_image:v2:';
 const GIG_LOOKUP_CACHE_TTL_SECONDS = 30 * 24 * 60 * 60;
 // Each uncached Last.fm / Ticketmaster lookup is one subrequest; caps keep a cold run well under
 // the Workers Free plan's 50-subrequest limit. Anything skipped resolves on a later run, and the
@@ -677,16 +678,31 @@ function normalizeArtistName(name) {
     .replace(/&/g, 'and').replace(/[^a-z0-9]+/g, ' ').trim();
 }
 
-// Ticketmaster images carry ratio/width and a `fallback` flag for generic placeholders. The gig
-// card crops to roughly square, so prefer 4:3, then 3:2, then 16:9, at the smallest width >= 500.
+// Ticketmaster images carry width/height and a `fallback` flag for generic placeholders. The gig
+// card crops to roughly square, so height is what matters: take the smallest image at least
+// GIG_IMAGE_MIN_HEIGHT tall (1136×639 for most acts), else the tallest. Ratio is ignored — the only
+// 4:3 variant is a 305×225 thumbnail, which looked soft on the cards. `_SOURCE` originals are
+// skipped: they're full-size uploads with no size cap.
+const GIG_IMAGE_MIN_HEIGHT = 600;
 function pickTicketmasterImage(images) {
-  const real = (images || []).filter(img => img && img.url && !img.fallback && img.url.startsWith('https://'));
-  for (const ratio of ['4_3', '3_2', '16_9']) {
-    const sized = real.filter(img => img.ratio === ratio).sort((a, b) => (a.width || 0) - (b.width || 0));
-    const pick = sized.find(img => (img.width || 0) >= 500) || sized[sized.length - 1];
-    if (pick) return pick.url;
-  }
-  return real.length ? real[0].url : null;
+  const real = (images || [])
+    .filter(img => img && img.url && !img.fallback && img.url.startsWith('https://') && !/_SOURCE$/.test(img.url))
+    .sort((a, b) => (a.height || 0) - (b.height || 0));
+  const pick = real.find(img => (img.height || 0) >= GIG_IMAGE_MIN_HEIGHT) || real[real.length - 1];
+  return pick ? pick.url : null;
+}
+
+// Fallback photo for a curated act with no Ticketmaster image: Deezer's 1000×1000 artist picture
+// (public API, no key), exact name match only, most-followed first.
+async function deezerArtistImage(name) {
+  const res = await fetch(`https://api.deezer.com/search/artist?${new URLSearchParams({ q: name, limit: '10' })}`, { signal: AbortSignal.timeout(SPOTIFY_TIMEOUT_MS) });
+  if (!res.ok) throw new Error(`Deezer search returned ${res.status}`);
+  const data = await res.json();
+  const target = normalizeArtistName(name);
+  const match = (data.data || [])
+    .filter(a => normalizeArtistName(a.name) === target && a.picture_xl && !/\/artist\/\/|images\/artist\/d41d8cd98f00b204e9800998ecf8427e/.test(a.picture_xl))
+    .sort((a, b) => (b.nb_fan || 0) - (a.nb_fan || 0))[0];
+  return match && match.picture_xl.startsWith('https://') ? match.picture_xl : null;
 }
 
 function dubaiToday(now) {
@@ -806,8 +822,9 @@ function lastfmArtistTags(name, env) {
   };
 }
 
-// Artist photo for a curated event: the exact-name Ticketmaster attraction's image, if any.
-function ticketmasterArtistImage(name, env) {
+// Artist photo for a curated event without its own `image`: the exact-name Ticketmaster
+// attraction's image, else Deezer's. Two subrequests at most, cached together.
+function curatedArtistImage(name, env) {
   return async () => {
     const params = new URLSearchParams({ keyword: name, size: '10', apikey: env.TICKETMASTER_API_KEY });
     const res = await fetch(`${TICKETMASTER_API_BASE}/attractions.json?${params}`, { signal: AbortSignal.timeout(SPOTIFY_TIMEOUT_MS) });
@@ -815,7 +832,8 @@ function ticketmasterArtistImage(name, env) {
     const data = await res.json();
     const target = normalizeArtistName(name);
     const match = ((data._embedded && data._embedded.attractions) || []).find(a => normalizeArtistName(a.name) === target);
-    return { image: match ? pickTicketmasterImage(match.images) : null };
+    const image = match ? pickTicketmasterImage(match.images) : null;
+    return { image: image || await deezerArtistImage(name) };
   };
 }
 
@@ -851,9 +869,9 @@ async function handleGigs(request, env, ctx) {
   }
 
   // Fixed, versioned key: query strings can't bypass the cache (S-03), and bumping the version
-  // retires a cached response when the gig logic changes (v3: Dubai / Abu Dhabi categories).
+  // retires a cached response when the gig logic changes (v4: larger photos).
   const cache = caches.default;
-  const cacheKey = new Request('https://milindparwani.com/__cache/gigs-v3');
+  const cacheKey = new Request('https://milindparwani.com/__cache/gigs-v4');
   const cached = await cache.match(cacheKey);
   if (cached) return cached;
 
@@ -862,6 +880,10 @@ async function handleGigs(request, env, ctx) {
     const djCutoff = addDays(today, GIG_DJ_WINDOW_DAYS);
     const exclude = new Set((GIG_PICKS.excludeArtists || []).map(normalizeArtistName));
     const include = new Set((GIG_PICKS.includeArtists || []).map(normalizeArtistName));
+    // Hand-picked photos that replace a weak listing image (a logo, or a poster whose text gets cropped).
+    const imageOverrides = new Map(Object.entries(GIG_PICKS.imageOverrides || {})
+      .filter(([, url]) => typeof url === 'string' && url.startsWith('https://'))
+      .map(([artist, url]) => [normalizeArtistName(artist), url]));
     const tagBudget = { left: GIG_MAX_TAG_LOOKUPS };
     const imageBudget = { left: GIG_MAX_IMAGE_LOOKUPS };
     let pending = false;
@@ -913,9 +935,10 @@ async function handleGigs(request, env, ctx) {
         }
       }
 
+      if (imageOverrides.has(name)) gig.image = imageOverrides.get(name);
       if (!gig.image && gig.fromPicks) {
         const lookupName = gig.imageArtist || gig.artist;
-        const found = await cachedGigLookup(env, ctx, GIG_IMAGE_CACHE_PREFIX + normalizeArtistName(lookupName), imageBudget, ticketmasterArtistImage(lookupName, env));
+        const found = await cachedGigLookup(env, ctx, GIG_IMAGE_CACHE_PREFIX + normalizeArtistName(lookupName), imageBudget, curatedArtistImage(lookupName, env));
         if (found === undefined) pending = true;
         else gig.image = found.image;
       }

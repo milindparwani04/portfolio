@@ -115,6 +115,13 @@ Next session starts with:
 - ...
 ```
 
+### 2026-10-02 — Gig Finder photos
+Agent: Claude · Model: Opus 5.5
+Done:
+- Every gig card now has a high-quality photo. Ticketmaster images are picked at 1136×639 instead of the 305×225 thumbnail. Curated acts get a fixed `image` or a Deezer 1000×1000 fallback. A new `imageOverrides` map in `worker/gig-picks.json` swaps out logos and cropped posters. Only `worker/index.js` and `worker/gig-picks.json` changed. The weekly routine now adds photos for new events.
+Tested (how, result):
+- Remote preview: 65/65 cards have a photo, all loaded, smallest short side 639 px; all crops checked by eye. Details in [`claude-agent-handoff.md`](claude-agent-handoff.md).
+
 ### 2026-10-02 — Gig Finder: Dubai and Abu Dhabi only
 Agent: Claude · Model: Opus 5.5
 Done:
@@ -125,7 +132,7 @@ Tested (how, result):
 - Production after deploy (`c2aec6f`): `/api/gigs` returns 65 events; the page renders category tags at 1920×969, 1280×720 and 390×844 with no page errors.
 - Remote preview with real secrets: 65 events, Tarkan/Bocelli/Turkish/Arabic/Filipino/K-pop acts filtered, Trevor Noah merged to 25–29 Nov; missing key → 503, bad key → curated list only. Headless Edge at ten sizes with and without data: no overlaps or spill, no page errors. Details in [`claude-agent-handoff.md`](claude-agent-handoff.md).
 Known issues / not done:
-- Some curated cards have no photo (grey square) where Ticketmaster has no attraction image. Chicago the Musical (Coca-Cola Arena, 16–20 Dec) is excluded because the rule is Dubai Opera musicals only.
+- Chicago the Musical (Coca-Cola Arena, 16–20 Dec) is excluded because the rule is Dubai Opera musicals only.
 - Concert language is judged from Last.fm tags, so an unusual artist could be misjudged; `excludeArtists` / `includeArtists` in the JSON override it.
 
 ### 2026-10-01 — Feed-style section scrolling

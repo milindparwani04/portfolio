@@ -52,7 +52,7 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 ## Open follow-ups (Claude's areas)
 
 - Cache hits on `/api/*` reach browsers with `max-age=14400`. Check the zone's Browser Cache TTL ("Respect existing headers" would keep the Worker's TTLs).
-- Gig Finder: about 13 curated cards have no photo, because Ticketmaster has no attraction image for those acts. Chicago the Musical (Coca-Cola Arena, 16–20 Dec) is excluded by the "Dubai Opera musicals" rule; ask Milind whether he wants it. In headless Edge, pressing Enter on a focused gig Next button didn't change the batch, while Space and click did. This is existing code; check it in a real browser.
+- Gig Finder: Chicago the Musical (Coca-Cola Arena, 16–20 Dec) is excluded by the "Dubai Opera musicals" rule; ask Milind whether he wants it. In headless Edge, pressing Enter on a focused gig Next button didn't change the batch, while Space and click did. This is existing code; check it in a real browser.
 
 - A pathological Spotify title (~60 characters) on a 768 px portrait tablet still ends in "…" at the minimum size; normal titles fit everywhere.
 - Playlist descriptions are empty on Spotify, so the cards read "Playlist on Spotify." They fill in automatically if Milind adds descriptions on Spotify.
@@ -60,6 +60,14 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 - Lighthouse `valid-source-maps` flags a third-party library map; it doesn't affect the score categories that matter (production: 90 / 100 / 100).
 
 ## Work log (newest first)
+
+### 2026-10-02 — Gig Finder: high-quality photo on every card
+
+- Milind: some cards had no photo and many looked soft. Cause: `pickTicketmasterImage` preferred the 4:3 ratio, and Ticketmaster's only 4:3 image is a 305×225 `_CUSTOM` thumbnail. It now picks by height: the smallest image at least 600 px tall, which is 1136×639 `RETINA_LANDSCAPE` for every act checked. `_SOURCE` originals are skipped.
+- Curated events without a photo now look up the exact-name Ticketmaster attraction, then fall back to Deezer's 1000×1000 `picture_xl` (exact name, most fans) (`curatedArtistImage`). The cache keys were bumped to `gig_image:v2:*` and `gigs-v4`.
+- `gig-picks.json` changes: 14 events got a fixed `image`, from Deezer, the Dubai Comedy Festival's official Squarespace artwork (`?format=1000w`), Wikimedia (thumbnails must use standard widths such as `1280px`; 1200/1600 return errors) and a Fever og:image (`f_auto,c_fill,w_1000,h_1000`). A new top-level `imageOverrides` map (artist → URL) replaces the photo on any card, Ticketmaster cards included. It is used for Marco Carola (Ticketmaster had only a logo), Vir Das, Bryson Tiller & Central Cee, Hans Zimmer, Neema Naz, Shane Todd and Rafi Bastos (posters whose text was cut off by the square crop).
+- The weekly routine's prompt now requires a photo for every new entry, using the same sources and rules, at least 600 px, checked with curl.
+- Tested: remote-preview harness returned 65 events, all with a photo. Every image loaded in headless Edge, and the smallest short side is 639 px (it was 225 px). A contact sheet of all 65 crops was checked by eye; each shows the right act, with no logos or cut-off text left. Frontend and CSS unchanged.
 
 ### 2026-10-02 — Gig Finder: Dubai and Abu Dhabi only
 
