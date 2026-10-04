@@ -113,25 +113,35 @@
   updateDubaiDate();
   window.setInterval(updateDubaiDate, 60000);
 
-  async function loadLastUpdated() {
-    const target = byId('v2LastUpdated');
+  // Location card: a coarse label (Home, Work, Out, In Transit, a friend's house, a mall or a
+  // restaurant), pushed by iPhone automations and shown 30 minutes late. The Worker builds the label.
+  // Phone cards are too narrow for a long mall or restaurant name on one line, so the title may wrap
+  // to two there; on wider screens a second line would push the foot out of the card.
+  const narrowLocation = window.matchMedia('(max-width: 720px)');
+  function fitLocation() {
+    const target = byId('v2Location');
     if (!target) return;
-    try {
-      const response = await fetch('/api/last-updated');
-      if (!response.ok) throw new Error('Last-updated request failed');
-      const payload = await response.json();
-      const date = new Date(payload.lastUpdated);
-      if (Number.isNaN(date.getTime())) throw new Error('Invalid last-updated value');
-      target.textContent = new Intl.DateTimeFormat('en-GB', {
-        timeZone: 'Asia/Dubai',
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric'
-      }).format(date).toUpperCase();
-    } catch (_) {
-      target.textContent = 'LOCAL PREVIEW';
-    }
+    target.dataset.fit = narrowLocation.matches ? '2' : '1';
     fitText(target);
+  }
+  narrowLocation.addEventListener('change', fitLocation);
+
+  async function loadLocation() {
+    const target = byId('v2Location');
+    const foot = byId('v2LocationFoot');
+    if (!target || !foot) return;
+    try {
+      const response = await fetch('/api/location', { cache: 'no-store' });
+      if (!response.ok) throw new Error('Location request failed');
+      const payload = await response.json();
+      const label = typeof payload.label === 'string' ? payload.label.slice(0, 60) : '';
+      target.textContent = label || 'Somewhere';
+      foot.textContent = label ? 'Shown 30 min late' : 'No recent update';
+    } catch (_) {
+      // Keep the last good label on a failed poll.
+      if (target.textContent === '----') foot.textContent = 'Location unavailable';
+    }
+    fitLocation();
   }
 
   const fallbackHeadlines = [
@@ -591,20 +601,21 @@
   loadListening();
   loadHeartRate();
   loadSteps();
+  loadLocation();
   window.setInterval(() => {
     if (document.hidden) return;
     loadNowPlaying();
     loadHeartRate();
     loadSteps();
+    loadLocation();
   }, 30000);
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) return;
     loadNowPlaying();
     loadHeartRate();
     loadSteps();
+    loadLocation();
   });
-
-  loadLastUpdated();
 
   // One wheel gesture or key press moves exactly one section. CSS scroll-snap handles touch
   // swipes and scrollbar drags; this handles wheel/trackpad (so momentum can't skip sections)

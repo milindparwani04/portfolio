@@ -673,6 +673,77 @@ async function handleSteps(env, ctx) {
   });
 }
 
+// Location: a coarse label pushed by iPhone Shortcuts automations when Milind arrives at or leaves
+// a geofence, or connects to the car. Only a label is sent, never coordinates, and it is shown 30
+// minutes late so the card can't be used to time his movements. The last few events are kept in
+// KV; the public card shows the newest one that is at least LOCATION_DELAY_MS old.
+// POST body: {"place":"home"} or, for named places, {"place":"mall","name":"Dubai Mall"}, with
+// header `Authorization: Bearer <LOCATION_KEY>`. A friend's house is sent as
+// {"place":"friend","name":"Sam"} and shown as "Sam's House" — never the address or area.
+// GET response: { place, label } — both null until an event has aged past the delay, or when the
+// newest visible event is older than LOCATION_STALE_MS (phone off, automation broken). "In transit"
+// reverts to "Out" after LOCATION_TRANSIT_MAX_MS, since a trip that ends somewhere without a
+// geofence sends no arrival.
+const LOCATION_FIXED_LABELS = { home: 'Home', work: 'Work', out: 'Out', transit: 'In Transit' };
+const LOCATION_NAMED_PLACES = new Set(['friend', 'mall', 'restaurant']);
+// Letters (any script), digits, spaces and a little punctuation; nothing that could be markup.
+const LOCATION_NAME_PATTERN = /^[\p{L}\p{N}][\p{L}\p{N} '’&.-]{0,39}$/u;
+const LOCATION_DELAY_MS = 30 * 60 * 1000;
+const LOCATION_TRANSIT_MAX_MS = 2 * 60 * 60 * 1000;
+const LOCATION_STALE_MS = 7 * 24 * 60 * 60 * 1000;
+const LOCATION_MAX_EVENTS = 20;
+const LOCATION_KV_KEY = 'location_events';
+const LOCATION_CACHE_TTL_SECONDS = 60;
+
+function locationLabel(place, name) {
+  if (place === 'friend') return `${name}'s House`;
+  return LOCATION_NAMED_PLACES.has(place) ? name : LOCATION_FIXED_LABELS[place];
+}
+
+async function handleLocationUpdate(request, env) {
+  if (!env.LOCATION_KEY) return jsonResponse({ error: 'Not configured' }, 503);
+  const auth = request.headers.get('Authorization') || '';
+  if (!ownerKeyMatches(auth.startsWith('Bearer ') ? auth.slice(7) : '', env.LOCATION_KEY)) {
+    return jsonResponse({ error: 'Forbidden' }, 403);
+  }
+  let place;
+  let name;
+  try {
+    const text = await request.text();
+    if (text.length > 300) throw new Error('too long');
+    const body = JSON.parse(text);
+    place = String(body.place || '').trim().toLowerCase();
+    name = String(body.name || '').trim().replace(/\s+/g, ' ');
+  } catch (_) {
+    return jsonResponse({ error: 'Bad request' }, 400);
+  }
+  const event = { place, at: Date.now() };
+  if (LOCATION_NAMED_PLACES.has(place)) {
+    if (!LOCATION_NAME_PATTERN.test(name)) return jsonResponse({ error: 'Bad request' }, 400);
+    event.name = name;
+  } else if (!LOCATION_FIXED_LABELS[place]) {
+    return jsonResponse({ error: 'Bad request' }, 400);
+  }
+
+  const events = (await env.GIG_KV.get(LOCATION_KV_KEY, 'json')) || [];
+  events.push(event);
+  await env.GIG_KV.put(LOCATION_KV_KEY, JSON.stringify(events.slice(-LOCATION_MAX_EVENTS)));
+  return jsonResponse({ ok: true, label: locationLabel(place, event.name) });
+}
+
+function handleLocation(env, ctx) {
+  return serveCached('location', LOCATION_CACHE_TTL_SECONDS, ctx, async () => {
+    const now = Date.now();
+    const events = (await env.GIG_KV.get(LOCATION_KV_KEY, 'json')) || [];
+    const visible = events.filter(e => e.at <= now - LOCATION_DELAY_MS).pop();
+    if (!visible || now - visible.at > LOCATION_STALE_MS) return { place: null, label: null };
+    if (visible.place === 'transit' && now - visible.at > LOCATION_TRANSIT_MAX_MS) {
+      return { place: 'out', label: LOCATION_FIXED_LABELS.out };
+    }
+    return { place: visible.place, label: locationLabel(visible.place, visible.name) };
+  });
+}
+
 // Gig Finder: Dubai and Abu Dhabi only, limited to what Milind asked for (2026-10-02) — comedians
 // in either city, musicals at Dubai Opera and Coca-Cola Arena, English-language concerts at Coca-Cola Arena, Ushuaïa
 // and the big Abu Dhabi venues, DJs at Dubai clubs within the next 90 days, film/TV composer
@@ -1570,6 +1641,11 @@ export default {
     }
     if (url.pathname === '/api/steps') {
       return handleSteps(env, ctx);
+    }
+    if (url.pathname === '/api/location') {
+      if (request.method === 'POST') return handleLocationUpdate(request, env);
+      if (request.method !== 'GET' && request.method !== 'HEAD') return jsonResponse({ error: 'Method not allowed' }, 405);
+      return handleLocation(env, ctx);
     }
     if (url.pathname.startsWith('/audio/')) {
       return handleAsset(request, env);

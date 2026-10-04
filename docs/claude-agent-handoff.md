@@ -12,14 +12,27 @@
 
 ## Current assignment
 
-Status: **Home Steps card live with real data, restyled 2026-10-02 to Codex's selected oversized-count design.** Previous wrap-up: Shipped today: Gig Finder (Dubai/Abu Dhabi, photos, credits, Chicago), Journal redesign, Enter-key fix, Cloudflare cache TTL fix, Media tracker. Open items: article pages for the Journal, an optional TMDB key for sharper posters. Two weekly routines run on Mondays (Gig Finder 06:00, Media 06:30 Dubai).
+Status: **Location card (08, replaces Site Updated) built 2026-10-04; waiting on Milind's iPhone automations.** Before that: Home Steps card live with real data, restyled 2026-10-02 to Codex's selected oversized-count design. Previous wrap-up: Shipped today: Gig Finder (Dubai/Abu Dhabi, photos, credits, Chicago), Journal redesign, Enter-key fix, Cloudflare cache TTL fix, Media tracker. Open items: article pages for the Journal, an optional TMDB key for sharper posters. Two weekly routines run on Mondays (Gig Finder 06:00, Media 06:30 Dubai).
 
 Areas Claude has most recently owned (coordinate before Codex changes these):
 
 | Area | Files | Notes |
 |---|---|---|
-| Visible portfolio UI | `public/index.html` (the `.portfolio-v2` block only), `public/ui-v2.css`, `public/ui-v2.js` | Grey-box design from the Soft Monolith mockups. Cache-bust versions: `ui-v2.css?v=23`, `ui-v2.js?v=21` — bump on every change. Journal redesign implemented 2026-10-02 from Codex's mockup. |
-| Worker routes and data | `worker/index.js`, `worker/gig-picks.json`, `migrations/` | Spotify listening data, heart rate, steps, gigs. Gig Finder rebuilt 2026-10-02. |
+| Visible portfolio UI | `public/index.html` (the `.portfolio-v2` block only), `public/ui-v2.css`, `public/ui-v2.js` | Grey-box design from the Soft Monolith mockups. Cache-bust versions: `ui-v2.css?v=24`, `ui-v2.js?v=22` — bump on every change. Journal redesign implemented 2026-10-02 from Codex's mockup. |
+| Worker routes and data | `worker/index.js`, `worker/gig-picks.json`, `migrations/` | Spotify listening data, heart rate, steps, gigs, location. Gig Finder rebuilt 2026-10-02. |
+
+## Location card (how it works, for the next session)
+
+- **Milind's brief (2026-10-04):** replace the Site Updated box with his location, from his iPhone, never precise: "Home" / "Work", not the building. Friends' houses show as "[Friend Name]'s House" without the location; malls and restaurants are named; constant movement is "In Transit". Shown 30 minutes late (his choice).
+- **Worker:** `handleLocationUpdate` / `handleLocation` in `worker/index.js`. The phone decides the label; the Worker only validates and stores it (`LOCATION_FIXED_LABELS`, `LOCATION_NAMED_PLACES`, `LOCATION_NAME_PATTERN`). The label is built server-side by `locationLabel()`. Delay, transit fallback (2 h) and stale cut-off (7 days) are constants beside them.
+- **Frontend:** `loadLocation()` in `ui-v2.js`, polled with the other live cards every 30 s. `fitLocation()` sets `data-fit="2"` at ≤720 px so long names wrap on phones, `"1"` elsewhere (a second line pushed the foot out of the desktop card).
+- **iPhone setup (Milind does this):** each automation is Shortcuts → Automation → + → trigger → Run Immediately (notify off) → *Get Contents of URL*: `https://milindparwani.com/api/location`, POST, header `Authorization: Bearer <LOCATION_KEY>`, JSON body.
+  - Arrive Home `{"place":"home"}`, Arrive Work `{"place":"work"}`.
+  - Arrive at a friend's house `{"place":"friend","name":"Sam"}`, a mall `{"place":"mall","name":"Dubai Mall"}`, a restaurant `{"place":"restaurant","name":"Zuma"}`.
+  - Leave any of these `{"place":"transit"}`.
+  - Car: Bluetooth connects to the car `{"place":"transit"}`; disconnects `{"place":"out"}`.
+- **Limits:** only places with their own automation get named; elsewhere the card reads Out (transit times out after 2 h). Keep the list to regular spots, since iOS may not run large numbers of location automations reliably. `LOCATION_KEY` was generated 2026-10-04 and given to Milind in chat; if it's lost or leaked, generate a new one with `wrangler secret bulk` and update every automation.
+- **Tested 2026-10-04:** see the session log entry of the same date.
 
 ## Media tracker (how it works, for the next session and the weekly routine)
 
