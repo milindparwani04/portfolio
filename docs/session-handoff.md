@@ -135,9 +135,9 @@ Tested (how, result):
 - Worker handler against mocked PSN and Steam: Steam playing beats PSN idle, PSN playing beats Steam idle, idle picks the newer last-played, either source down still serves the other, both down 502, none configured or bad STEAM_ID 503.
 - Layout via iframes at 1920×1080, 1440×900, 1280×720, 1100×620 and 390×844 with Steam cover, long title, missing cover (fell back to header) and PSN: art inside, no overlap with the index row, title baseline level with the neighbouring cards. Fixed: at 1100×620 a short title pushed the text up into the index row; `align-self: safe end` now lets it overflow downward like the neighbours.
 Known issues / not done:
-- Steam is live only once Milind adds `STEAM_API_KEY` and `STEAM_ID` and makes his Steam game details public.
+- Steam connected the same day: key valid, profile public, 121 games visible (latest: Call of Duty: Black Ops III, 2026-09-13). PlayStation was played more recently, so the card shows it; production logs show no Steam errors. Not yet seen: the card switching to Steam during a live session.
 Next session starts with:
-- Verify `/api/game` with real Steam data once the key is in.
+- When Milind next plays on Steam, check `/api/game` shows `source: "steam"` and the portrait cover.
 
 ### 2026-10-04 — PlayStation card replaces Site Updated
 Agent: Claude · Model: Opus 5.5

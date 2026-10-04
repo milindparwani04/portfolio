@@ -12,7 +12,7 @@
 
 ## Current assignment
 
-Status: **Game card (08: PlayStation or Steam) replaced Site Updated on 2026-10-04; Steam awaits its key.** Home Steps card live with real data, restyled 2026-10-02 to Codex's selected oversized-count design. 2026-10-04: a Location card was built (`fb2fabb`) and reverted the same day at Milind's request; it's a settled removal (see the session log). Previous wrap-up: Shipped today: Gig Finder (Dubai/Abu Dhabi, photos, credits, Chicago), Journal redesign, Enter-key fix, Cloudflare cache TTL fix, Media tracker. Open items: article pages for the Journal, an optional TMDB key for sharper posters. Two weekly routines run on Mondays (Gig Finder 06:00, Media 06:30 Dubai).
+Status: **Game card (08: PlayStation or Steam) replaced Site Updated on 2026-10-04; both sources connected.** Home Steps card live with real data, restyled 2026-10-02 to Codex's selected oversized-count design. 2026-10-04: a Location card was built (`fb2fabb`) and reverted the same day at Milind's request; it's a settled removal (see the session log). Previous wrap-up: Shipped today: Gig Finder (Dubai/Abu Dhabi, photos, credits, Chicago), Journal redesign, Enter-key fix, Cloudflare cache TTL fix, Media tracker. Open items: article pages for the Journal, an optional TMDB key for sharper posters. Two weekly routines run on Mondays (Gig Finder 06:00, Media 06:30 Dubai).
 
 Areas Claude has most recently owned (coordinate before Codex changes these):
 
