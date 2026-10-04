@@ -111,7 +111,7 @@ body.locked { overflow: auto !important; height: auto !important; }
   grid-template-areas:
     "news about heart heart weather"
     "news about spotify steps steps"
-    "diss focus focus location location";
+    "diss focus focus updated updated";
   gap: 10px;
 }
 .v2-dashboard > .v2-panel { min-width: 0; min-height: 0; overflow: hidden; padding: clamp(.6rem, 1.5vh, .9rem) clamp(.65rem, 1vw, .9rem); display: flex; flex-direction: column; }
@@ -166,7 +166,7 @@ body.locked { overflow: auto !important; height: auto !important; }
 
 .v2-dissertation { grid-area: diss; }
 .v2-focus { grid-area: focus; }
-.v2-location { grid-area: location; }
+.v2-updated { grid-area: updated; }
 .v2-dashboard > .v2-bottom-card { justify-content: space-between; }
 .v2-bottom-card h3 { margin: 0 0 .25rem; font-family: var(--display); font-weight: 400; font-size: clamp(1.05rem, min(2.1vw, 4.4vh), 2.45rem); line-height: 1; text-transform: uppercase; }
 .v2-bottom-card p { margin: 0; color: var(--v2-dim); font-size: clamp(.54rem, 1.25vh, .72rem); text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -401,7 +401,7 @@ body.locked { overflow: auto !important; height: auto !important; }
   .v2-dashboard {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     grid-template-rows: 300px 170px 165px 250px 105px 105px;
-    grid-template-areas: "news news" "about about" "heart weather" "spotify steps" "diss diss" "focus location";
+    grid-template-areas: "news news" "about about" "heart weather" "spotify steps" "diss diss" "focus updated";
   }
   .v2-about p { max-width: none; font-size: 1rem; }
   .v2-value { font-size: 2.6rem; }
