@@ -136,7 +136,8 @@ Tested (how, result):
 - Worker handlers against mocked Sony responses: wrong key 403, bad NPSSO 400, other methods 405, success stores tokens, idle/playing shapes, access token reused from KV, Sony down 502 generic, no secret 503.
 - Layout in Chrome at 1920×1080, 1440×900, 1280×720, 1100×620 and 390×844: art inside the card, title on one line, nothing clipped.
 Known issues / not done:
-- Re-connect about every 10 days. The endpoints are unofficial and may change.
+- Re-connect about every 10 days (first connect 2026-10-04, so next by ~2026-10-14). The endpoints are unofficial and may change.
+- Production check after connecting: `/api/playstation` 200 with the real game, and the card shows box art, title and `Last played / 22m ago / PS5`.
 Next session starts with:
 - If the card shows `PS5 / Offline`, re-submit `/api/psn/authorize` with a fresh NPSSO.
 
