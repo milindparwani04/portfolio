@@ -133,6 +133,7 @@ Done:
 - The expiry is recorded only when the refresh token is new, because a refresh returns the same token with a full lifetime. Seeded for the current token as 2026-10-14T10:20Z.
 Tested (how, result):
 - Cron against mocked KV/ntfy over a simulated timeline: silent until 2 days before, one push per Dubai day, none at night, "has expired" after expiry, none without the secret, silent again after a reconnect; a same-token refresh doesn't move the expiry.
+- Live: a test push to the production topic reached Milind's phone (ntfy 200, confirmed by Milind).
 Next session starts with:
 - If Milind says the reminder never arrived, check `npx wrangler tail` for "PSN reminder failed".
 
