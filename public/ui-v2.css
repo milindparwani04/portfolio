@@ -166,10 +166,13 @@ body.locked { overflow: auto !important; height: auto !important; }
 
 .v2-dissertation { grid-area: diss; }
 .v2-focus { grid-area: focus; }
-/* PlayStation card: square box art the card's full height on the left; index row and text on the right. */
-.v2-dashboard > .v2-psn { grid-area: updated; display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); column-gap: clamp(.55rem, 1vw, .9rem); }
-.v2-psn-art { grid-row: 1 / 3; height: 100%; aspect-ratio: 1; object-fit: cover; display: block; background: var(--v2-panel-raised); }
-.v2-psn-text { align-self: end; min-width: 0; }
+/* Game card: art the card's full height on the left (square for PlayStation, a 2:3 cover for
+   Steam); index row and text on the right. */
+.v2-dashboard > .v2-game { grid-area: updated; display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); column-gap: clamp(.55rem, 1vw, .9rem); }
+.v2-game-art { grid-row: 1 / 3; height: 100%; aspect-ratio: 1; object-fit: cover; display: block; background: var(--v2-panel-raised); }
+.v2-game-art--portrait { aspect-ratio: 2 / 3; }
+/* safe: on short cards the text overflows into the bottom padding, like its neighbours, not up into the index row. */
+.v2-game-text { align-self: safe end; min-width: 0; }
 .v2-dashboard > .v2-bottom-card { justify-content: space-between; }
 .v2-bottom-card h3 { margin: 0 0 .25rem; font-family: var(--display); font-weight: 400; font-size: clamp(1.05rem, min(2.1vw, 4.4vh), 2.45rem); line-height: 1; text-transform: uppercase; }
 .v2-bottom-card p { margin: 0; color: var(--v2-dim); font-size: clamp(.54rem, 1.25vh, .72rem); text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

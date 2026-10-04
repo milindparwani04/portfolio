@@ -12,14 +12,14 @@
 
 ## Current assignment
 
-Status: **PlayStation card (08) replaced Site Updated on 2026-10-04.** Home Steps card live with real data, restyled 2026-10-02 to Codex's selected oversized-count design. 2026-10-04: a Location card was built (`fb2fabb`) and reverted the same day at Milind's request; it's a settled removal (see the session log). Previous wrap-up: Shipped today: Gig Finder (Dubai/Abu Dhabi, photos, credits, Chicago), Journal redesign, Enter-key fix, Cloudflare cache TTL fix, Media tracker. Open items: article pages for the Journal, an optional TMDB key for sharper posters. Two weekly routines run on Mondays (Gig Finder 06:00, Media 06:30 Dubai).
+Status: **Game card (08: PlayStation or Steam) replaced Site Updated on 2026-10-04; Steam awaits its key.** Home Steps card live with real data, restyled 2026-10-02 to Codex's selected oversized-count design. 2026-10-04: a Location card was built (`fb2fabb`) and reverted the same day at Milind's request; it's a settled removal (see the session log). Previous wrap-up: Shipped today: Gig Finder (Dubai/Abu Dhabi, photos, credits, Chicago), Journal redesign, Enter-key fix, Cloudflare cache TTL fix, Media tracker. Open items: article pages for the Journal, an optional TMDB key for sharper posters. Two weekly routines run on Mondays (Gig Finder 06:00, Media 06:30 Dubai).
 
 Areas Claude has most recently owned (coordinate before Codex changes these):
 
 | Area | Files | Notes |
 |---|---|---|
-| Visible portfolio UI | `public/index.html` (the `.portfolio-v2` block only), `public/ui-v2.css`, `public/ui-v2.js` | Grey-box design from the Soft Monolith mockups. Cache-bust versions: `ui-v2.css?v=24`, `ui-v2.js?v=22` — bump on every change. Journal redesign implemented 2026-10-02 from Codex's mockup. |
-| Worker routes and data | `worker/index.js`, `worker/gig-picks.json`, `migrations/` | Spotify listening data, heart rate, steps, gigs, PlayStation. Gig Finder rebuilt 2026-10-02. |
+| Visible portfolio UI | `public/index.html` (the `.portfolio-v2` block only), `public/ui-v2.css`, `public/ui-v2.js` | Grey-box design from the Soft Monolith mockups. Cache-bust versions: `ui-v2.css?v=25`, `ui-v2.js?v=23` — bump on every change. Journal redesign implemented 2026-10-02 from Codex's mockup. |
+| Worker routes and data | `worker/index.js`, `worker/gig-picks.json`, `migrations/` | Spotify listening data, heart rate, steps, gigs, Game card (PlayStation + Steam). Gig Finder rebuilt 2026-10-02. |
 
 ## Media tracker (how it works, for the next session and the weekly routine)
 
@@ -81,6 +81,14 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 - Lighthouse `valid-source-maps` flags a third-party library map; it doesn't affect the score categories that matter (production: 90 / 100 / 100).
 
 ## Work log (newest first)
+
+### 2026-10-04 — Game card: PlayStation or Steam
+
+- Milind asked for Steam too: show whichever is active (never both at once), card renamed `[ Game ]`.
+- Worker: `handlePlayStation` split into `playStationActivity` and `steamActivity` (each returns the same shape plus `source` and `imageFallback`, or null), combined by `handleGame` with `Promise.allSettled`: a running game wins, else the newest `lastPlayedAt`. Route `/api/game`; `/api/playstation` is gone. Cache name `game`, TTL `GAME_CACHE_TTL_SECONDS` (60).
+- Steam: no last-played time in `GetRecentlyPlayedGames`, so `GetOwnedGames` with `include_appinfo=1&include_played_free_games=1` is used for `rtime_last_played`. Portrait art exists even for appid 10 and 220 (checked); apps with only hashed asset paths would 404, hence the header fallback, then a blank square.
+- Front end: ids `v2Game*`, classes `.v2-game*`, `.v2-game-art--portrait` (2:3) for Steam; `setGameArt` handles the fallback through `onerror`. `.v2-game-text` uses `align-self: safe end` (see the session log for why).
+- Testing tip: Claude in Chrome iframes can report `document.hidden = true` when the window loses focus, which makes the dashboard's visibility-gated loaders skip. Override it with `Object.defineProperty(iframe.contentDocument, 'hidden', { get: () => false })` before dispatching `visibilitychange`, and keep each `javascript_exec` under 45 s.
 
 ### 2026-10-04 — PlayStation card (08) replaces Site Updated
 

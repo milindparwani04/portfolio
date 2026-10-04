@@ -673,12 +673,12 @@ async function handleSteps(env, ctx) {
   });
 }
 
-// PlayStation: the dashboard's PS5 card shows the game Milind is playing, else the last one played.
+// PlayStation: one of the two sources for the dashboard's Game card (with Steam, below).
 // Sony has no public PSN API; this uses the same private endpoints as the PlayStation mobile app
 // (the approach of the `psn-api` library), so it can break without notice. Auth starts from an
 // NPSSO cookie (64 chars, from https://ca.account.sony.com/api/v1/ssocookie while signed in at
 // playstation.com), pasted into the owner-only form at /api/psn/authorize. It is traded for a
-// refresh token (~60 days), kept in KV; when that expires the form has to be used again.
+// refresh token (10 days, measured 2026-10-04), kept in KV; when that expires the form has to be used again.
 // The client id/secret below are the PlayStation app's own public values, not secrets of ours.
 const PSN_AUTH_BASE = 'https://ca.account.sony.com/api/authz/v3/oauth';
 const PSN_CLIENT_ID = '09515159-7237-4370-9b40-3806e67c0891';
@@ -686,7 +686,7 @@ const PSN_BASIC_AUTH = 'Basic MDk1MTUxNTktNzIzNy00MzcwLTliNDAtMzgwNmU2N2MwODkxOn
 const PSN_REDIRECT_URI = 'com.scee.psxandroid.scecompcall://redirect';
 const PSN_SCOPE = 'psn:mobile.v2.core psn:clientapp';
 const PSN_API_BASE = 'https://m.np.playstation.com/api';
-const PLAYSTATION_CACHE_TTL_SECONDS = 60;
+const GAME_CACHE_TTL_SECONDS = 60;
 
 async function exchangePsnToken(params) {
   params.set('token_format', 'jwt');
@@ -806,31 +806,99 @@ function psnHours(duration) {
   return Number(m[1] || 0) * 24 + Number(m[2] || 0) + (Number(m[3] || 0) >= 30 ? 1 : 0);
 }
 
-// Response: { isPlaying, title, image, platform, hoursPlayed, lastPlayedAt }. Online status alone
-// is not exposed: the card only says "playing" while a game is running.
-async function handlePlayStation(env, ctx) {
-  if (!env.PSN_AUTH_KEY) return jsonResponse({ error: 'Lookup is not configured' }, 503);
-  return serveCached('playstation', PLAYSTATION_CACHE_TTL_SECONDS, ctx, async () => {
-    const token = await psnAccessToken(env);
-    const [presence, played] = await Promise.all([
-      psnGet('/userProfile/v1/internal/users/me/basicPresences?type=primary', token),
-      psnGet('/gamelist/v2/users/me/titles?categories=ps4_game,ps5_native_game&limit=10&offset=0', token),
-    ]);
-    const basic = (presence && presence.basicPresence) || {};
-    const platformInfo = basic.primaryPlatformInfo || {};
-    const running = platformInfo.onlineStatus === 'online' && (basic.gameTitleInfoList || [])[0];
-    const titles = (played && played.titles) || [];
-    const entry = running ? titles.find(t => t.titleId === running.npTitleId || t.name === running.titleName) : titles[0];
-    if (!running && !entry) return { isPlaying: false, title: null, image: null, platform: null, hoursPlayed: null, lastPlayedAt: null };
-    return {
-      isPlaying: Boolean(running),
-      title: running ? running.titleName : (entry.localizedName || entry.name),
-      image: safePsnImage(entry && (entry.localizedImageUrl || entry.imageUrl))
-        || safePsnImage(running && (running.conceptIconUrl || running.npTitleIconUrl)),
-      platform: running ? (running.launchPlatform || platformInfo.platform || null) : (entry.category === 'ps4_game' ? 'PS4' : 'PS5'),
-      hoursPlayed: entry ? psnHours(entry.playDuration) : null,
-      lastPlayedAt: running ? null : entry.lastPlayedDateTime || null,
-    };
+// The PS5's running game, else its most recently played one; null when nothing has been played.
+// Online status alone is not trusted or exposed: presence says "online" while the PS5 idles.
+async function playStationActivity(env) {
+  const token = await psnAccessToken(env);
+  const [presence, played] = await Promise.all([
+    psnGet('/userProfile/v1/internal/users/me/basicPresences?type=primary', token),
+    psnGet('/gamelist/v2/users/me/titles?categories=ps4_game,ps5_native_game&limit=10&offset=0', token),
+  ]);
+  const basic = (presence && presence.basicPresence) || {};
+  const platformInfo = basic.primaryPlatformInfo || {};
+  const running = platformInfo.onlineStatus === 'online' && (basic.gameTitleInfoList || [])[0];
+  const titles = (played && played.titles) || [];
+  const entry = running ? titles.find(t => t.titleId === running.npTitleId || t.name === running.titleName) : titles[0];
+  if (!running && !entry) return null;
+  return {
+    source: 'playstation',
+    isPlaying: Boolean(running),
+    title: running ? running.titleName : (entry.localizedName || entry.name),
+    image: safePsnImage(entry && (entry.localizedImageUrl || entry.imageUrl))
+      || safePsnImage(running && (running.conceptIconUrl || running.npTitleIconUrl)),
+    imageFallback: null,
+    platform: running ? (running.launchPlatform || platformInfo.platform || null) : (entry.category === 'ps4_game' ? 'PS4' : 'PS5'),
+    hoursPlayed: entry ? psnHours(entry.playDuration) : null,
+    lastPlayedAt: running ? null : entry.lastPlayedDateTime || null,
+  };
+}
+
+// Steam: the official Web API with a key from steamcommunity.com/dev/apikey (STEAM_API_KEY) and
+// the account's SteamID64 (STEAM_ID). The profile and its "Game details" must be public, or
+// Steam returns no running game and no library. GetPlayerSummaries gives the running game
+// (gameid/gameextrainfo); GetOwnedGames gives rtime_last_played and playtime per game.
+const STEAM_API_BASE = 'https://api.steampowered.com';
+const STEAM_ART_BASE = 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps';
+
+function steamConfigured(env) {
+  return Boolean(env.STEAM_API_KEY && /^\d{17}$/.test(env.STEAM_ID || ''));
+}
+
+async function steamGet(path, env, params) {
+  const query = new URLSearchParams({ key: env.STEAM_API_KEY, steamid: env.STEAM_ID, format: 'json', ...params });
+  const res = await fetch(`${STEAM_API_BASE}${path}?${query}`, { signal: AbortSignal.timeout(SPOTIFY_TIMEOUT_MS) });
+  if (!res.ok) throw new Error(`Steam ${path} returned ${res.status}`);
+  return res.json();
+}
+
+async function steamActivity(env) {
+  const [summary, owned] = await Promise.all([
+    steamGet('/ISteamUser/GetPlayerSummaries/v2/', env, { steamids: env.STEAM_ID }),
+    steamGet('/IPlayerService/GetOwnedGames/v1/', env, { include_appinfo: '1', include_played_free_games: '1' }),
+  ]);
+  const player = summary && summary.response && summary.response.players && summary.response.players[0];
+  const games = (owned && owned.response && owned.response.games) || [];
+  const runningId = player && /^\d+$/.test(player.gameid || '') ? Number(player.gameid) : null;
+  const entry = runningId
+    ? games.find(g => g.appid === runningId)
+    : games.filter(g => g.rtime_last_played > 0).sort((a, b) => b.rtime_last_played - a.rtime_last_played)[0];
+  const appId = runningId || (entry && entry.appid);
+  if (!appId) return null;
+  return {
+    source: 'steam',
+    isPlaying: Boolean(runningId),
+    title: (runningId && player.gameextrainfo) || (entry && entry.name) || null,
+    // Portrait cover; the header image is the fallback for the few apps without one.
+    image: `${STEAM_ART_BASE}/${appId}/library_600x900.jpg`,
+    imageFallback: `${STEAM_ART_BASE}/${appId}/header.jpg`,
+    platform: 'Steam',
+    hoursPlayed: entry && Number.isFinite(entry.playtime_forever) ? Math.round(entry.playtime_forever / 60) : null,
+    lastPlayedAt: !runningId && entry ? new Date(entry.rtime_last_played * 1000).toISOString() : null,
+  };
+}
+
+// Game card: whichever of PlayStation and Steam is running a game, else whichever was played
+// most recently. One source failing (e.g. the 10-day PSN token lapsing) leaves the other working.
+// Response: { source, isPlaying, title, image, imageFallback, platform, hoursPlayed, lastPlayedAt }.
+async function handleGame(env, ctx) {
+  const sources = [];
+  if (env.PSN_AUTH_KEY) sources.push(['PlayStation', playStationActivity]);
+  if (steamConfigured(env)) sources.push(['Steam', steamActivity]);
+  if (!sources.length) return jsonResponse({ error: 'Lookup is not configured' }, 503);
+  return serveCached('game', GAME_CACHE_TTL_SECONDS, ctx, async () => {
+    const results = await Promise.allSettled(sources.map(([, load]) => load(env)));
+    const found = [];
+    results.forEach((result, i) => {
+      if (result.status === 'fulfilled') {
+        if (result.value) found.push(result.value);
+      } else {
+        console.error(`${sources[i][0]} activity failed`, { message: result.reason && result.reason.message });
+      }
+    });
+    if (!found.length && results.every(r => r.status === 'rejected')) throw new Error('All game sources failed');
+    const latest = found.find(g => g.isPlaying)
+      || found.sort((a, b) => (Date.parse(b.lastPlayedAt) || 0) - (Date.parse(a.lastPlayedAt) || 0))[0];
+    return latest || { source: null, isPlaying: false, title: null, image: null, imageFallback: null, platform: null, hoursPlayed: null, lastPlayedAt: null };
   });
 }
 
@@ -1735,8 +1803,8 @@ export default {
     if (url.pathname === '/api/psn/authorize') {
       return handlePsnAuthorize(request, env);
     }
-    if (url.pathname === '/api/playstation') {
-      return handlePlayStation(env, ctx);
+    if (url.pathname === '/api/game') {
+      return handleGame(env, ctx);
     }
     if (url.pathname.startsWith('/audio/')) {
       return handleAsset(request, env);

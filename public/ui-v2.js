@@ -566,43 +566,57 @@
     }
   }
 
-  // PlayStation card: the game running now, else the last one played, via /api/playstation.
-  // Keeps the last good game on a failed poll; "PS5 / Offline" stays until one loads.
-  let psnGame = null;
+  // Game card: whichever of PlayStation and Steam is running a game, else the one played most
+  // recently, via /api/game. Keeps the last good game on a failed poll.
+  const BLANK_IMAGE = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
+  let currentGame = null;
 
-  function renderPsnState() {
-    const state = byId('v2PsnState');
-    if (!state || !psnGame) return;
-    const platform = psnGame.platform || 'PS5';
-    const age = psnGame.lastPlayedAt ? timeAgo(psnGame.lastPlayedAt) : '';
-    state.textContent = psnGame.isPlaying
-      ? `Playing now / ${platform}`
+  function renderGameState() {
+    const state = byId('v2GameState');
+    if (!state || !currentGame) return;
+    const platform = currentGame.platform || '';
+    const age = currentGame.lastPlayedAt ? timeAgo(currentGame.lastPlayedAt) : '';
+    state.textContent = currentGame.isPlaying
+      ? ['Playing now', platform].filter(Boolean).join(' / ')
       : ['Last played', age, platform].filter(Boolean).join(' / ');
   }
 
-  async function loadPlayStation() {
-    const title = byId('v2PsnTitle');
-    const art = byId('v2PsnArt');
+  // Steam covers are portrait; a missing cover falls back to the landscape header, cropped square.
+  function setGameArt(art, game) {
+    const image = safeUrl(game.image);
+    if (!image || art.dataset.src === image) return;
+    art.dataset.src = image;
+    art.dataset.fallback = safeUrl(game.imageFallback);
+    art.classList.toggle('v2-game-art--portrait', game.source === 'steam');
+    art.onerror = () => {
+      const fallback = art.dataset.fallback;
+      art.dataset.fallback = '';
+      art.classList.remove('v2-game-art--portrait');
+      art.src = fallback || BLANK_IMAGE;
+    };
+    art.src = image;
+    art.alt = `${game.title} art`;
+  }
+
+  async function loadGame() {
+    const title = byId('v2GameTitle');
+    const art = byId('v2GameArt');
     if (!title || !art) return;
     try {
-      const response = await fetch('/api/playstation', { cache: 'no-store' });
-      if (!response.ok) throw new Error('PlayStation request failed');
+      const response = await fetch('/api/game', { cache: 'no-store' });
+      if (!response.ok) throw new Error('Game request failed');
       const payload = await response.json();
       if (!payload.title) throw new Error('No game');
-      if (!psnGame || psnGame.title !== payload.title) {
+      if (!currentGame || currentGame.title !== payload.title) {
         title.textContent = payload.title;
         fitText(title);
       }
-      const image = safeUrl(payload.image);
-      if (image && art.getAttribute('src') !== image) {
-        art.src = image;
-        art.alt = `${payload.title} art`;
-      }
-      psnGame = payload;
+      setGameArt(art, payload);
+      currentGame = payload;
     } catch (_) {
       // Keep the last good game.
     }
-    renderPsnState();
+    renderGameState();
   }
 
   loadNowPlaying();
@@ -610,20 +624,20 @@
   loadListening();
   loadHeartRate();
   loadSteps();
-  loadPlayStation();
+  loadGame();
   window.setInterval(() => {
     if (document.hidden) return;
     loadNowPlaying();
     loadHeartRate();
     loadSteps();
-    loadPlayStation();
+    loadGame();
   }, 30000);
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) return;
     loadNowPlaying();
     loadHeartRate();
     loadSteps();
-    loadPlayStation();
+    loadGame();
   });
 
   // One wheel gesture or key press moves exactly one section. CSS scroll-snap handles touch
