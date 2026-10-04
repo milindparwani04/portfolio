@@ -113,26 +113,6 @@
   updateDubaiDate();
   window.setInterval(updateDubaiDate, 60000);
 
-  async function loadLastUpdated() {
-    const target = byId('v2LastUpdated');
-    if (!target) return;
-    try {
-      const response = await fetch('/api/last-updated');
-      if (!response.ok) throw new Error('Last-updated request failed');
-      const payload = await response.json();
-      const date = new Date(payload.lastUpdated);
-      if (Number.isNaN(date.getTime())) throw new Error('Invalid last-updated value');
-      target.textContent = new Intl.DateTimeFormat('en-GB', {
-        timeZone: 'Asia/Dubai',
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric'
-      }).format(date).toUpperCase();
-    } catch (_) {
-      target.textContent = 'LOCAL PREVIEW';
-    }
-    fitText(target);
-  }
 
   const fallbackHeadlines = [
     { title: 'Global markets steady as new data arrives', description: 'Investors assess the latest economic data as markets turn their attention to the months ahead.' },
@@ -586,25 +566,65 @@
     }
   }
 
+  // PlayStation card: the game running now, else the last one played, via /api/playstation.
+  // Keeps the last good game on a failed poll; "PS5 / Offline" stays until one loads.
+  let psnGame = null;
+
+  function renderPsnState() {
+    const state = byId('v2PsnState');
+    if (!state || !psnGame) return;
+    const platform = psnGame.platform || 'PS5';
+    const age = psnGame.lastPlayedAt ? timeAgo(psnGame.lastPlayedAt) : '';
+    state.textContent = psnGame.isPlaying
+      ? `Playing now / ${platform}`
+      : ['Last played', age, platform].filter(Boolean).join(' / ');
+  }
+
+  async function loadPlayStation() {
+    const title = byId('v2PsnTitle');
+    const art = byId('v2PsnArt');
+    if (!title || !art) return;
+    try {
+      const response = await fetch('/api/playstation', { cache: 'no-store' });
+      if (!response.ok) throw new Error('PlayStation request failed');
+      const payload = await response.json();
+      if (!payload.title) throw new Error('No game');
+      if (!psnGame || psnGame.title !== payload.title) {
+        title.textContent = payload.title;
+        fitText(title);
+      }
+      const image = safeUrl(payload.image);
+      if (image && art.getAttribute('src') !== image) {
+        art.src = image;
+        art.alt = `${payload.title} art`;
+      }
+      psnGame = payload;
+    } catch (_) {
+      // Keep the last good game.
+    }
+    renderPsnState();
+  }
+
   loadNowPlaying();
   loadPlaylists();
   loadListening();
   loadHeartRate();
   loadSteps();
+  loadPlayStation();
   window.setInterval(() => {
     if (document.hidden) return;
     loadNowPlaying();
     loadHeartRate();
     loadSteps();
+    loadPlayStation();
   }, 30000);
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) return;
     loadNowPlaying();
     loadHeartRate();
     loadSteps();
+    loadPlayStation();
   });
-
-  loadLastUpdated();
 
   // One wheel gesture or key press moves exactly one section. CSS scroll-snap handles touch
   // swipes and scrollbar drags; this handles wheel/trackpad (so momentum can't skip sections)

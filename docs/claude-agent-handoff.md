@@ -12,14 +12,14 @@
 
 ## Current assignment
 
-Status: **Home Steps card live with real data, restyled 2026-10-02 to Codex's selected oversized-count design.** 2026-10-04: a Location card was built (`fb2fabb`) and reverted the same day at Milind's request; it's a settled removal (see the session log). Previous wrap-up: Shipped today: Gig Finder (Dubai/Abu Dhabi, photos, credits, Chicago), Journal redesign, Enter-key fix, Cloudflare cache TTL fix, Media tracker. Open items: article pages for the Journal, an optional TMDB key for sharper posters. Two weekly routines run on Mondays (Gig Finder 06:00, Media 06:30 Dubai).
+Status: **PlayStation card (08) replaced Site Updated on 2026-10-04.** Home Steps card live with real data, restyled 2026-10-02 to Codex's selected oversized-count design. 2026-10-04: a Location card was built (`fb2fabb`) and reverted the same day at Milind's request; it's a settled removal (see the session log). Previous wrap-up: Shipped today: Gig Finder (Dubai/Abu Dhabi, photos, credits, Chicago), Journal redesign, Enter-key fix, Cloudflare cache TTL fix, Media tracker. Open items: article pages for the Journal, an optional TMDB key for sharper posters. Two weekly routines run on Mondays (Gig Finder 06:00, Media 06:30 Dubai).
 
 Areas Claude has most recently owned (coordinate before Codex changes these):
 
 | Area | Files | Notes |
 |---|---|---|
-| Visible portfolio UI | `public/index.html` (the `.portfolio-v2` block only), `public/ui-v2.css`, `public/ui-v2.js` | Grey-box design from the Soft Monolith mockups. Cache-bust versions: `ui-v2.css?v=23`, `ui-v2.js?v=21` — bump on every change. Journal redesign implemented 2026-10-02 from Codex's mockup. |
-| Worker routes and data | `worker/index.js`, `worker/gig-picks.json`, `migrations/` | Spotify listening data, heart rate, steps, gigs. Gig Finder rebuilt 2026-10-02. |
+| Visible portfolio UI | `public/index.html` (the `.portfolio-v2` block only), `public/ui-v2.css`, `public/ui-v2.js` | Grey-box design from the Soft Monolith mockups. Cache-bust versions: `ui-v2.css?v=24`, `ui-v2.js?v=22` — bump on every change. Journal redesign implemented 2026-10-02 from Codex's mockup. |
+| Worker routes and data | `worker/index.js`, `worker/gig-picks.json`, `migrations/` | Spotify listening data, heart rate, steps, gigs, PlayStation. Gig Finder rebuilt 2026-10-02. |
 
 ## Media tracker (how it works, for the next session and the weekly routine)
 
@@ -72,6 +72,7 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 - Media: Reel posters are 300×450. A free TMDB API key, stored with `wrangler secret bulk` as `TMDB_API_KEY`, turns on 780 px posters with no code change; Milind has to create the TMDB account. VOX and ROXY extras depend on the weekly routine, which may also be blocked from those sites, so they are best-effort.
 
 - Journal: there are no article pages yet for `Read more` to link to.
+- PlayStation: the PSN refresh token lasts 10 days, so Milind re-submits `/api/psn/authorize` with a fresh NPSSO about every 10 days. If that becomes a chore, the alternative he turned down was storing the NPSSO in KV (~60-day life, but it is effectively his Sony login).
 
 
 - A pathological Spotify title (~60 characters) on a 768 px portrait tablet still ends in "…" at the minimum size; normal titles fit everywhere.
@@ -80,6 +81,13 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 - Lighthouse `valid-source-maps` flags a third-party library map; it doesn't affect the score categories that matter (production: 90 / 100 / 100).
 
 ## Work log (newest first)
+
+### 2026-10-04 — PlayStation card (08) replaces Site Updated
+
+- Milind asked to show his PS5 activity in place of Site Updated, with box art. He chose to re-connect every 10 days rather than store the NPSSO.
+- Worker (`handlePsnAuthorize`, `psnAccessToken`, `handlePlayStation` after `handleSteps`): the `psn-api` library's flow done by hand. GET `ca.account.sony.com/api/authz/v3/oauth/authorize` with `Cookie: npsso=…` and `redirect: 'manual'`; the `Location` holds `?code=v3.…`; POST `/token` with the app's Basic auth and `token_format=jwt`. Data: `m.np.playstation.com/api/userProfile/v1/internal/users/me/basicPresences?type=primary` (the running game is `gameTitleInfoList[0]`, only present while playing) and `/gamelist/v2/users/me/titles?categories=ps4_game,ps5_native_game&limit=10` (newest first; `imageUrl`, `playDuration` ISO 8601, `lastPlayedDateTime`). `me` works on both, so no account id is stored. Probe on 2026-10-04: presence said `online` with no game while the PS5 was idle, so online alone isn't trusted or exposed.
+- Front end: `.v2-psn` is a 2-column grid (art spanning both rows at `height: 100%`, then index row and text); `loadPlayStation` / `renderPsnState` in `ui-v2.js` join the 30 s poll. Phones: the dashboard gets a 7th 105 px row so Focus and PlayStation are full-width. `loadLastUpdated` removed from `ui-v2.js`; the hidden legacy shell still has its own.
+- Tested: live probe with a throwaway script (NPSSO read from a scratch file, deleted after); handler tests against a `wrangler deploy --dry-run` bundle with mocked Sony (`crypto.subtle.timingSafeEqual` needs a Node polyfill); layout via same-origin iframes at 1920×1080, 1440×900, 1280×720, 1100×620 and 390×844 with the real box art (art 48–99 px, title one line, nothing clipped).
 
 ### 2026-10-02 — Steps card restyled to Codex's oversized-count design
 

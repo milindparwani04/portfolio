@@ -673,6 +673,167 @@ async function handleSteps(env, ctx) {
   });
 }
 
+// PlayStation: the dashboard's PS5 card shows the game Milind is playing, else the last one played.
+// Sony has no public PSN API; this uses the same private endpoints as the PlayStation mobile app
+// (the approach of the `psn-api` library), so it can break without notice. Auth starts from an
+// NPSSO cookie (64 chars, from https://ca.account.sony.com/api/v1/ssocookie while signed in at
+// playstation.com), pasted into the owner-only form at /api/psn/authorize. It is traded for a
+// refresh token (~60 days), kept in KV; when that expires the form has to be used again.
+// The client id/secret below are the PlayStation app's own public values, not secrets of ours.
+const PSN_AUTH_BASE = 'https://ca.account.sony.com/api/authz/v3/oauth';
+const PSN_CLIENT_ID = '09515159-7237-4370-9b40-3806e67c0891';
+const PSN_BASIC_AUTH = 'Basic MDk1MTUxNTktNzIzNy00MzcwLTliNDAtMzgwNmU2N2MwODkxOnVjUGprYTV0bnRCMktxc1A=';
+const PSN_REDIRECT_URI = 'com.scee.psxandroid.scecompcall://redirect';
+const PSN_SCOPE = 'psn:mobile.v2.core psn:clientapp';
+const PSN_API_BASE = 'https://m.np.playstation.com/api';
+const PLAYSTATION_CACHE_TTL_SECONDS = 60;
+
+async function exchangePsnToken(params) {
+  params.set('token_format', 'jwt');
+  const res = await fetch(`${PSN_AUTH_BASE}/token`, {
+    method: 'POST',
+    headers: { Authorization: PSN_BASIC_AUTH, 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: params.toString(),
+    signal: AbortSignal.timeout(SPOTIFY_TIMEOUT_MS),
+  });
+  if (!res.ok) throw new Error(`PSN token endpoint returned ${res.status}`);
+  const data = await res.json();
+  if (!data.access_token) throw new Error('PSN token endpoint returned no access token');
+  return data;
+}
+
+// Access tokens last an hour; caching one in KV keeps Sony's auth server to ~1 call an hour
+// instead of one per cache miss. The refresh token is replaced whenever Sony sends a new one.
+async function psnAccessToken(env) {
+  const cached = await env.GIG_KV.get('psn_access_token');
+  if (cached) return cached;
+  const refreshToken = await env.GIG_KV.get('psn_refresh_token');
+  if (!refreshToken) throw new Error('PlayStation not connected — use /api/psn/authorize first');
+  const data = await exchangePsnToken(new URLSearchParams({
+    grant_type: 'refresh_token',
+    refresh_token: refreshToken,
+    scope: PSN_SCOPE,
+  }));
+  await storePsnTokens(env, data);
+  return data.access_token;
+}
+
+async function storePsnTokens(env, data) {
+  const writes = [env.GIG_KV.put('psn_access_token', data.access_token, {
+    expirationTtl: Math.max(60, Number(data.expires_in || 3600) - 120),
+  })];
+  if (data.refresh_token) writes.push(env.GIG_KV.put('psn_refresh_token', data.refresh_token));
+  await Promise.all(writes);
+}
+
+// GET shows a form; POST takes the owner key and the NPSSO in the body, so neither lands in a URL,
+// log or browser history (unlike the Spotify/Health key in S-07). Fixed messages only (S-01).
+async function handlePsnAuthorize(request, env) {
+  const html = (body, status = 200) => new Response(
+    `<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>PSN</title><body style="font:16px monospace;background:#070707;color:#eee;padding:24px">${body}</body>`,
+    { status, headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' } },
+  );
+  if (!env.PSN_AUTH_KEY) return html('<p>Not configured.</p>', 503);
+  if (request.method === 'GET') {
+    return html(`<form method="post" style="display:grid;gap:12px;max-width:420px">
+<label>Owner key <input name="key" type="password" autocomplete="off" required></label>
+<label>NPSSO <input name="npsso" type="password" autocomplete="off" required></label>
+<button>Connect PlayStation</button></form>`);
+  }
+  if (request.method !== 'POST') return new Response('Method not allowed', { status: 405 });
+
+  const form = await request.formData().catch(() => null);
+  const key = form && form.get('key');
+  if (!ownerKeyMatches(typeof key === 'string' ? key : '', env.PSN_AUTH_KEY)) return html('<p>Forbidden.</p>', 403);
+  let npsso = form.get('npsso');
+  npsso = typeof npsso === 'string' ? npsso.trim() : '';
+  // Accept the whole {"npsso":"..."} response from the ssocookie page as well as the bare value.
+  const wrapped = npsso.match(/"npsso"\s*:\s*"([^"]+)"/);
+  if (wrapped) npsso = wrapped[1];
+  if (!/^[A-Za-z0-9]{64}$/.test(npsso)) return html('<p>That does not look like an NPSSO token.</p>', 400);
+
+  try {
+    const authUrl = new URL(`${PSN_AUTH_BASE}/authorize`);
+    authUrl.search = new URLSearchParams({
+      access_type: 'offline',
+      client_id: PSN_CLIENT_ID,
+      redirect_uri: PSN_REDIRECT_URI,
+      response_type: 'code',
+      scope: PSN_SCOPE,
+    }).toString();
+    const res = await fetch(authUrl, {
+      headers: { Cookie: `npsso=${npsso}` },
+      redirect: 'manual',
+      signal: AbortSignal.timeout(SPOTIFY_TIMEOUT_MS),
+    });
+    const location = res.headers.get('Location') || '';
+    const code = location.startsWith(PSN_REDIRECT_URI) ? new URL(location).searchParams.get('code') : null;
+    if (!code) throw new Error(`PSN authorize returned ${res.status} without a code`);
+    const data = await exchangePsnToken(new URLSearchParams({
+      grant_type: 'authorization_code',
+      code,
+      redirect_uri: PSN_REDIRECT_URI,
+    }));
+    if (!data.refresh_token) throw new Error('PSN did not return a refresh token');
+    await storePsnTokens(env, data);
+    return html('<p>Connected. You can close this tab.</p>');
+  } catch (err) {
+    console.error('PSN authorization failed', { message: err.message });
+    return html('<p>Connection failed. The NPSSO may have expired: sign in again and fetch a new one.</p>', 502);
+  }
+}
+
+async function psnGet(path, token) {
+  const res = await fetch(`${PSN_API_BASE}${path}`, {
+    headers: { Authorization: `Bearer ${token}` },
+    signal: AbortSignal.timeout(SPOTIFY_TIMEOUT_MS),
+  });
+  if (!res.ok) throw new Error(`PSN ${path.split('?')[0]} returned ${res.status}`);
+  return res.json();
+}
+
+// Sony's art lives on image.api.playstation.com; anything else is dropped rather than shown.
+// The originals are ~1 MB squares; the image server resizes with ?w= (440 px is ~60 KB).
+function safePsnImage(url) {
+  if (typeof url !== 'string' || !url.startsWith('https://image.api.playstation.com/')) return null;
+  return `${url.split('?')[0]}?w=440`;
+}
+
+// ISO 8601 duration such as "PT228H56M33S" → whole hours.
+function psnHours(duration) {
+  const m = typeof duration === 'string' && duration.match(/^P(?:(\d+)D)?T?(?:(\d+)H)?(?:(\d+)M)?/);
+  if (!m) return null;
+  return Number(m[1] || 0) * 24 + Number(m[2] || 0) + (Number(m[3] || 0) >= 30 ? 1 : 0);
+}
+
+// Response: { isPlaying, title, image, platform, hoursPlayed, lastPlayedAt }. Online status alone
+// is not exposed: the card only says "playing" while a game is running.
+async function handlePlayStation(env, ctx) {
+  if (!env.PSN_AUTH_KEY) return jsonResponse({ error: 'Lookup is not configured' }, 503);
+  return serveCached('playstation', PLAYSTATION_CACHE_TTL_SECONDS, ctx, async () => {
+    const token = await psnAccessToken(env);
+    const [presence, played] = await Promise.all([
+      psnGet('/userProfile/v1/internal/users/me/basicPresences?type=primary', token),
+      psnGet('/gamelist/v2/users/me/titles?categories=ps4_game,ps5_native_game&limit=10&offset=0', token),
+    ]);
+    const basic = (presence && presence.basicPresence) || {};
+    const platformInfo = basic.primaryPlatformInfo || {};
+    const running = platformInfo.onlineStatus === 'online' && (basic.gameTitleInfoList || [])[0];
+    const titles = (played && played.titles) || [];
+    const entry = running ? titles.find(t => t.titleId === running.npTitleId || t.name === running.titleName) : titles[0];
+    if (!running && !entry) return { isPlaying: false, title: null, image: null, platform: null, hoursPlayed: null, lastPlayedAt: null };
+    return {
+      isPlaying: Boolean(running),
+      title: running ? running.titleName : (entry.localizedName || entry.name),
+      image: safePsnImage(entry && (entry.localizedImageUrl || entry.imageUrl))
+        || safePsnImage(running && (running.conceptIconUrl || running.npTitleIconUrl)),
+      platform: running ? (running.launchPlatform || platformInfo.platform || null) : (entry.category === 'ps4_game' ? 'PS4' : 'PS5'),
+      hoursPlayed: entry ? psnHours(entry.playDuration) : null,
+      lastPlayedAt: running ? null : entry.lastPlayedDateTime || null,
+    };
+  });
+}
+
 // Gig Finder: Dubai and Abu Dhabi only, limited to what Milind asked for (2026-10-02) — comedians
 // in either city, musicals at Dubai Opera and Coca-Cola Arena, English-language concerts at Coca-Cola Arena, Ushuaïa
 // and the big Abu Dhabi venues, DJs at Dubai clubs within the next 90 days, film/TV composer
@@ -1570,6 +1731,12 @@ export default {
     }
     if (url.pathname === '/api/steps') {
       return handleSteps(env, ctx);
+    }
+    if (url.pathname === '/api/psn/authorize') {
+      return handlePsnAuthorize(request, env);
+    }
+    if (url.pathname === '/api/playstation') {
+      return handlePlayStation(env, ctx);
     }
     if (url.pathname.startsWith('/audio/')) {
       return handleAsset(request, env);
