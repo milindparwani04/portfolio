@@ -72,7 +72,7 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 - Media: Reel posters are 300×450. A free TMDB API key, stored with `wrangler secret bulk` as `TMDB_API_KEY`, turns on 780 px posters with no code change; Milind has to create the TMDB account. VOX and ROXY extras depend on the weekly routine, which may also be blocked from those sites, so they are best-effort.
 
 - Journal: there are no article pages yet for `Read more` to link to.
-- PlayStation: the PSN refresh token lasts 10 days, so Milind re-submits `/api/psn/authorize` with a fresh NPSSO about every 10 days. If that becomes a chore, the alternative he turned down was storing the NPSSO in KV (~60-day life, but it is effectively his Sony login).
+- PlayStation: the PSN refresh token lasts 10 days, so Milind re-submits `/api/psn/authorize` with a fresh NPSSO about every 10 days; since 2026-10-04 the cron pushes an ntfy reminder from 2 days before expiry (`checkPsnExpiry`). Open question: whether the refresh token's lifetime actually resets on each refresh. If Milind gets a reminder and the card still works days after the recorded expiry, the token slides and the reminder can be dropped. If that becomes a chore, the alternative he turned down was storing the NPSSO in KV (~60-day life, but it is effectively his Sony login).
 
 
 - A pathological Spotify title (~60 characters) on a 768 px portrait tablet still ends in "…" at the minimum size; normal titles fit everywhere.

@@ -38,9 +38,9 @@ Shared rules:
 
 Front end: a framework-free HTML/CSS/JS site served as Worker static assets (`env.ASSETS`). The visible portfolio interface lives in `public/index.html`, `public/ui-v2.css`, and `public/ui-v2.js`; full-resolution editorial images live in `public/assets/ui/`. The earlier shell remains in the document but is hidden while its working toolbox modals are reused.
 
-Back end: one Cloudflare Worker (`worker/index.js`) acting as an API proxy so no third-party key ever reaches the browser. Storage is one KV namespace, `GIG_KV`, holding OAuth state tokens (10-minute TTL, prefixes `oauth_state:` for Spotify and `health_oauth_state:` for Google), the owner refresh tokens (`spotify_refresh_token`, `health_refresh_token`, `psn_refresh_token` plus a cached `psn_access_token` with a ~1 h TTL) and the Gig Finder's lookup caches (`gig_tags:v1:*` Last.fm artist tags and `gig_image:v1:*` artist photos, 30 days; old `gig_artist:v2:*` entries expire on their own), plus one D1 database, `portfolio-plays` (binding `PLAYS_DB`, schema in `migrations/`), holding the Spotify play log. A Cron Trigger (`*/30 * * * *`) runs `scheduled()`, which copies the latest 50 plays from Spotify recently-played into `PLAYS_DB`. Deploy timestamp comes from the `CF_VERSION_METADATA` binding.
+Back end: one Cloudflare Worker (`worker/index.js`) acting as an API proxy so no third-party key ever reaches the browser. Storage is one KV namespace, `GIG_KV`, holding OAuth state tokens (10-minute TTL, prefixes `oauth_state:` for Spotify and `health_oauth_state:` for Google), the owner refresh tokens (`spotify_refresh_token`, `health_refresh_token`, `psn_refresh_token` plus a cached `psn_access_token` with a ~1 h TTL, `psn_refresh_expires_at` and daily `psn_reminder_sent:<date>` flags for the reconnect reminder) and the Gig Finder's lookup caches (`gig_tags:v1:*` Last.fm artist tags and `gig_image:v1:*` artist photos, 30 days; old `gig_artist:v2:*` entries expire on their own), plus one D1 database, `portfolio-plays` (binding `PLAYS_DB`, schema in `migrations/`), holding the Spotify play log. A Cron Trigger (`*/30 * * * *`) runs `scheduled()`, which copies the latest 50 plays from Spotify recently-played into `PLAYS_DB` and, since 2026-10-04, runs `checkPsnExpiry`: from 2 days before the PSN refresh token expires it pushes a "Reconnect PlayStation" notification to Milind's phone through ntfy.sh, once per Dubai day between 09:00 and 21:00. Deploy timestamp comes from the `CF_VERSION_METADATA` binding.
 
-Secrets (set with `wrangler secret bulk` from a temp file — piping into `secret put` from PowerShell 5.1 corrupted a value — never in code): `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET`, `SPOTIFY_AUTH_KEY`, `GOOGLE_HEALTH_CLIENT_ID`, `GOOGLE_HEALTH_CLIENT_SECRET`, `HEALTH_AUTH_KEY`, `FREESOUND_API_KEY`, `LASTFM_API_KEY`, `TICKETMASTER_API_KEY`, `PSN_AUTH_KEY`, `STEAM_API_KEY`, `STEAM_ID` (the SteamID64; not secret, kept with the key for convenience). If a secret is missing the route returns 503 "Lookup is not configured" rather than crashing.
+Secrets (set with `wrangler secret bulk` from a temp file — piping into `secret put` from PowerShell 5.1 corrupted a value — never in code): `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET`, `SPOTIFY_AUTH_KEY`, `GOOGLE_HEALTH_CLIENT_ID`, `GOOGLE_HEALTH_CLIENT_SECRET`, `HEALTH_AUTH_KEY`, `FREESOUND_API_KEY`, `LASTFM_API_KEY`, `TICKETMASTER_API_KEY`, `PSN_AUTH_KEY`, `STEAM_API_KEY`, `STEAM_ID` (the SteamID64; not secret, kept with the key for convenience), `NTFY_TOPIC` (private ntfy.sh topic Milind's phone subscribes to). If a secret is missing the route returns 503 "Lookup is not configured" rather than crashing.
 
 | Route | Purpose | Upstream | Edge cache |
 |---|---|---|---|
@@ -125,6 +125,16 @@ Known issues / not done:
 Next session starts with:
 - ...
 ```
+
+### 2026-10-04 — PlayStation reconnect reminder on Milind's phone
+Agent: Claude · Model: Opus 5.5
+Done:
+- Milind asked for a text reminder; there's no SMS without a paid Twilio account, so he chose ntfy push notifications. The 30-minute cron now checks `psn_refresh_expires_at` and, from 2 days before expiry, pushes once a day (09:00–21:00 Dubai) to the `NTFY_TOPIC` secret's topic, with a tap-through to `/api/psn/authorize`. Reconnecting moves the expiry and stops the reminders.
+- The expiry is recorded only when the refresh token is new, because a refresh returns the same token with a full lifetime. Seeded for the current token as 2026-10-14T10:20Z.
+Tested (how, result):
+- Cron against mocked KV/ntfy over a simulated timeline: silent until 2 days before, one push per Dubai day, none at night, "has expired" after expiry, none without the secret, silent again after a reconnect; a same-token refresh doesn't move the expiry.
+Next session starts with:
+- If Milind says the reminder never arrived, check `npx wrangler tail` for "PSN reminder failed".
 
 ### 2026-10-04 — Game card: PlayStation or Steam
 Agent: Claude · Model: Opus 5.5

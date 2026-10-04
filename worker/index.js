@@ -714,16 +714,55 @@ async function psnAccessToken(env) {
     refresh_token: refreshToken,
     scope: PSN_SCOPE,
   }));
-  await storePsnTokens(env, data);
+  await storePsnTokens(env, data, refreshToken);
   return data.access_token;
 }
 
-async function storePsnTokens(env, data) {
+// The refresh token's expiry is recorded only when the token itself is new (a fresh connect, or
+// Sony rotating it): a refresh grant hands back the same token with a full lifetime, and it isn't
+// known whether that lifetime really resets. checkPsnExpiry reads it to remind the owner.
+async function storePsnTokens(env, data, previousRefreshToken = null) {
   const writes = [env.GIG_KV.put('psn_access_token', data.access_token, {
     expirationTtl: Math.max(60, Number(data.expires_in || 3600) - 120),
   })];
-  if (data.refresh_token) writes.push(env.GIG_KV.put('psn_refresh_token', data.refresh_token));
+  if (data.refresh_token) {
+    writes.push(env.GIG_KV.put('psn_refresh_token', data.refresh_token));
+    const lifetime = Number(data.refresh_token_expires_in);
+    if (data.refresh_token !== previousRefreshToken && lifetime > 0) {
+      writes.push(env.GIG_KV.put('psn_refresh_expires_at', new Date(Date.now() + lifetime * 1000).toISOString()));
+    }
+  }
   await Promise.all(writes);
+}
+
+// Reconnect reminder: from 2 days before the PSN refresh token expires, push a notification to the
+// owner's phone through ntfy.sh (topic in the NTFY_TOPIC secret; anyone who knows the topic can
+// read it, so it is random and the message holds no credentials). At most once per Dubai day.
+const PSN_REMINDER_LEAD_MS = 2 * 24 * 60 * 60 * 1000;
+
+async function checkPsnExpiry(env, now = Date.now()) {
+  if (!env.NTFY_TOPIC) return;
+  const expiresAt = Date.parse(await env.GIG_KV.get('psn_refresh_expires_at'));
+  if (!Number.isFinite(expiresAt) || now < expiresAt - PSN_REMINDER_LEAD_MS) return;
+  // Daytime only (09:00–21:00 Dubai), so the first run after midnight doesn't ping at 1 am.
+  const dubaiHour = new Date(now + DUBAI_UTC_OFFSET_MS).getUTCHours();
+  if (dubaiHour < 9 || dubaiHour >= 21) return;
+  const sentKey = `psn_reminder_sent:${dubaiToday(now)}`;
+  if (await env.GIG_KV.get(sentKey)) return;
+  const hoursLeft = Math.round((expiresAt - now) / 3600000);
+  const when = hoursLeft <= 0 ? 'has expired' : hoursLeft < 24 ? `expires in ${hoursLeft} h` : `expires in ${Math.round(hoursLeft / 24)} days`;
+  const res = await fetch(`https://ntfy.sh/${encodeURIComponent(env.NTFY_TOPIC)}`, {
+    method: 'POST',
+    headers: {
+      Title: 'Reconnect PlayStation',
+      Tags: 'video_game',
+      Click: 'https://milindparwani.com/api/psn/authorize',
+    },
+    body: `The PSN link for the Game card ${when}. Tap to reconnect with a fresh NPSSO.`,
+    signal: AbortSignal.timeout(SPOTIFY_TIMEOUT_MS),
+  });
+  if (!res.ok) throw new Error(`ntfy returned ${res.status}`);
+  await env.GIG_KV.put(sentKey, '1', { expirationTtl: 2 * 24 * 60 * 60 });
 }
 
 // GET shows a form; POST takes the owner key and the NPSSO in the body, so neither lands in a URL,
@@ -775,7 +814,7 @@ async function handlePsnAuthorize(request, env) {
       redirect_uri: PSN_REDIRECT_URI,
     }));
     if (!data.refresh_token) throw new Error('PSN did not return a refresh token');
-    await storePsnTokens(env, data);
+    await storePsnTokens(env, data, null);
     return html('<p>Connected. You can close this tab.</p>');
   } catch (err) {
     console.error('PSN authorization failed', { message: err.message });
@@ -1815,6 +1854,9 @@ export default {
   async scheduled(controller, env, ctx) {
     ctx.waitUntil(recordRecentPlays(env).catch(err => {
       console.error('play log cron failed', { message: err.message });
+    }));
+    ctx.waitUntil(checkPsnExpiry(env).catch(err => {
+      console.error('PSN reminder failed', { message: err.message });
     }));
   },
 };
