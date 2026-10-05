@@ -38,7 +38,7 @@ Shared rules:
 
 Front end: a framework-free HTML/CSS/JS site served as Worker static assets (`env.ASSETS`). The visible portfolio interface lives in `public/index.html`, `public/ui-v2.css`, and `public/ui-v2.js`; full-resolution editorial images live in `public/assets/ui/`. The earlier shell remains in the document but is hidden while its working toolbox modals are reused.
 
-Back end: one Cloudflare Worker (`worker/index.js`) acting as an API proxy so no third-party key ever reaches the browser. Storage is one KV namespace, `GIG_KV`, holding OAuth state tokens (10-minute TTL, prefixes `oauth_state:` for Spotify and `health_oauth_state:` for Google), the owner refresh tokens (`spotify_refresh_token`, `health_refresh_token`, `psn_refresh_token` plus a cached `psn_access_token` with a ~1 h TTL, `psn_refresh_expires_at` and daily `psn_reminder_sent:<date>` flags for the reconnect reminder) and the Gig Finder's lookup caches (`gig_tags:v1:*` Last.fm artist tags and `gig_image:v1:*` artist photos, 30 days; old `gig_artist:v2:*` entries expire on their own), plus one D1 database, `portfolio-plays` (binding `PLAYS_DB`, schema in `migrations/`), holding the Spotify play log. A Cron Trigger (`*/30 * * * *`) runs `scheduled()`, which copies the latest 50 plays from Spotify recently-played into `PLAYS_DB` and, since 2026-10-04, runs `checkPsnExpiry`: from 2 days before the PSN refresh token expires it pushes a "Reconnect PlayStation" notification to Milind's phone through ntfy.sh, once per Dubai day between 09:00 and 21:00. Deploy timestamp comes from the `CF_VERSION_METADATA` binding.
+Back end: one Cloudflare Worker (`worker/index.js`) acting as an API proxy so no third-party key ever reaches the browser. Storage is one KV namespace, `GIG_KV`, holding OAuth state tokens (10-minute TTL, prefixes `oauth_state:` for Spotify and `health_oauth_state:` for Google), the owner refresh tokens (`spotify_refresh_token`, `health_refresh_token`, `psn_refresh_token` plus a cached `psn_access_token` with a ~1 h TTL, `psn_refresh_expires_at` and daily `psn_reminder_sent:<date>` flags for the reconnect reminder, `reminder_sent:<id>:<date>` flags for the daily reminders) and the Gig Finder's lookup caches (`gig_tags:v1:*` Last.fm artist tags and `gig_image:v1:*` artist photos, 30 days; old `gig_artist:v2:*` entries expire on their own), plus one D1 database, `portfolio-plays` (binding `PLAYS_DB`, schema in `migrations/`), holding the Spotify play log. A Cron Trigger (`*/30 * * * *`) runs `scheduled()`, which copies the latest 50 plays from Spotify recently-played into `PLAYS_DB` and, since 2026-10-04, runs `checkPsnExpiry`: from 2 days before the PSN refresh token expires it pushes a "Reconnect PlayStation" notification to Milind's phone through ntfy.sh, once per Dubai day between 09:00 and 21:00. Since 2026-10-05 it also runs `sendDailyReminders`, which pushes each active entry in `worker/reminders.json` (Milind's general reminders, each with `from`/`until` dates) to the same topic once per Dubai day from 12:00. Deploy timestamp comes from the `CF_VERSION_METADATA` binding.
 
 Secrets (set with `wrangler secret bulk` from a temp file — piping into `secret put` from PowerShell 5.1 corrupted a value — never in code): `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET`, `SPOTIFY_AUTH_KEY`, `GOOGLE_HEALTH_CLIENT_ID`, `GOOGLE_HEALTH_CLIENT_SECRET`, `HEALTH_AUTH_KEY`, `FREESOUND_API_KEY`, `LASTFM_API_KEY`, `TICKETMASTER_API_KEY`, `PSN_AUTH_KEY`, `STEAM_API_KEY`, `STEAM_ID` (the SteamID64; not secret, kept with the key for convenience), `NTFY_TOPIC` (private ntfy.sh topic Milind's phone subscribes to). If a secret is missing the route returns 503 "Lookup is not configured" rather than crashing.
 
@@ -125,6 +125,17 @@ Known issues / not done:
 Next session starts with:
 - ...
 ```
+
+### 2026-10-05 — General daily reminders through ntfy
+Agent: Claude · Model: Opus 5.5
+Done:
+- Milind wants a general daily reminder channel on his phone. A cloud routine couldn't reach ntfy.sh (the routine sandbox's egress proxy returned 403 even after he allowed the domain), so reminders now run in the Worker cron, which already reaches ntfy for the PSN reminder.
+- `worker/reminders.json` lists reminders (`id`, `title`, `message`, `tags`, `click`, `from`, `until`). `sendDailyReminders` pushes each active one to `NTFY_TOPIC` once per Dubai day from 12:00 (stops at 21:00), keyed by `reminder_sent:<id>:<date>` in KV. Expired entries do nothing and can be pruned later.
+- First entry: check Reel/VOX for The Shawshank Redemption tickets for 15 Oct, daily 2026-10-05 to 2026-10-15.
+Tested (how, result):
+- `sendDailyReminders` against mocked KV/ntfy over a simulated timeline: nothing before `from` or before 12:00, one push at 12:00, no repeat the same day, none at 21:00, one on the next day and on the `until` day, none after it, none without the secret.
+Next session starts with:
+- To add a reminder, append to `worker/reminders.json` and push. If one doesn't arrive, check `npx wrangler tail` for "daily reminder failed".
 
 ### 2026-10-04 — PlayStation reconnect reminder on Milind's phone
 Agent: Claude · Model: Opus 5.5

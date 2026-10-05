@@ -1,5 +1,6 @@
 import GIG_PICKS from './gig-picks.json';
 import MEDIA_PICKS from './media-picks.json';
+import REMINDERS from './reminders.json';
 
 const FEED_URL = 'https://feeds.bbci.co.uk/news/world/rss.xml';
 const CACHE_TTL_SECONDS = 300;
@@ -763,6 +764,31 @@ async function checkPsnExpiry(env, now = Date.now()) {
   });
   if (!res.ok) throw new Error(`ntfy returned ${res.status}`);
   await env.GIG_KV.put(sentKey, '1', { expirationTtl: 2 * 24 * 60 * 60 });
+}
+
+// General daily reminders from worker/reminders.json, pushed to the same ntfy topic. Each entry
+// fires once per Dubai day from 12:00 while today is within its from/until dates (inclusive).
+async function sendDailyReminders(env, now = Date.now()) {
+  if (!env.NTFY_TOPIC) return;
+  const dubaiHour = new Date(now + DUBAI_UTC_OFFSET_MS).getUTCHours();
+  if (dubaiHour < 12 || dubaiHour >= 21) return;
+  const today = dubaiToday(now);
+  for (const r of REMINDERS) {
+    if (today < r.from || today > r.until) continue;
+    const sentKey = `reminder_sent:${r.id}:${today}`;
+    if (await env.GIG_KV.get(sentKey)) continue;
+    const headers = { Title: r.title };
+    if (r.tags) headers.Tags = r.tags;
+    if (r.click) headers.Click = r.click;
+    const res = await fetch(`https://ntfy.sh/${encodeURIComponent(env.NTFY_TOPIC)}`, {
+      method: 'POST',
+      headers,
+      body: r.message,
+      signal: AbortSignal.timeout(SPOTIFY_TIMEOUT_MS),
+    });
+    if (!res.ok) throw new Error(`ntfy returned ${res.status}`);
+    await env.GIG_KV.put(sentKey, '1', { expirationTtl: 2 * 24 * 60 * 60 });
+  }
 }
 
 // GET shows a form; POST takes the owner key and the NPSSO in the body, so neither lands in a URL,
@@ -1857,6 +1883,9 @@ export default {
     }));
     ctx.waitUntil(checkPsnExpiry(env).catch(err => {
       console.error('PSN reminder failed', { message: err.message });
+    }));
+    ctx.waitUntil(sendDailyReminders(env).catch(err => {
+      console.error('daily reminder failed', { message: err.message });
     }));
   },
 };
