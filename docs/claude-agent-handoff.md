@@ -72,7 +72,7 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 - Media: Reel posters are 300×450. A free TMDB API key, stored with `wrangler secret bulk` as `TMDB_API_KEY`, turns on 780 px posters with no code change; Milind has to create the TMDB account. VOX and ROXY extras depend on the weekly routine, which may also be blocked from those sites, so they are best-effort.
 
 - Journal: there are no article pages yet for `Read more` to link to.
-- Reminders: `worker/reminders.json` holds Milind's general daily phone reminders (added 2026-10-05); `sendDailyReminders` in the cron pushes each active one to `NTFY_TOPIC` once per Dubai day from 12:00. Add entries there when he asks for a reminder; prune expired ones occasionally.
+- Reminders: `worker/reminders.json` holds Milind's general daily phone reminders (added 2026-10-05); `sendDailyReminders` in the cron pushes each active one to the `REMINDERS_TOPIC` secret (`shawshankreminder`) once per Dubai day from 12:00. Add entries there when he asks for a reminder; prune expired ones occasionally.
 - PlayStation: the PSN refresh token lasts 10 days, so Milind re-submits `/api/psn/authorize` with a fresh NPSSO about every 10 days; since 2026-10-04 the cron pushes an ntfy reminder from 2 days before expiry (`checkPsnExpiry`). Open question: whether the refresh token's lifetime actually resets on each refresh. If Milind gets a reminder and the card still works days after the recorded expiry, the token slides and the reminder can be dropped. If that becomes a chore, the alternative he turned down was storing the NPSSO in KV (~60-day life, but it is effectively his Sony login).
 
 

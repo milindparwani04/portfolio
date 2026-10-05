@@ -766,10 +766,11 @@ async function checkPsnExpiry(env, now = Date.now()) {
   await env.GIG_KV.put(sentKey, '1', { expirationTtl: 2 * 24 * 60 * 60 });
 }
 
-// General daily reminders from worker/reminders.json, pushed to the same ntfy topic. Each entry
-// fires once per Dubai day from 12:00 while today is within its from/until dates (inclusive).
+// General daily reminders from worker/reminders.json, pushed to the ntfy topic in the
+// REMINDERS_TOPIC secret (separate from the PSN topic). Each entry fires once per Dubai day from
+// 12:00 while today is within its from/until dates (inclusive).
 async function sendDailyReminders(env, now = Date.now()) {
-  if (!env.NTFY_TOPIC) return;
+  if (!env.REMINDERS_TOPIC) return;
   const dubaiHour = new Date(now + DUBAI_UTC_OFFSET_MS).getUTCHours();
   if (dubaiHour < 12 || dubaiHour >= 21) return;
   const today = dubaiToday(now);
@@ -780,7 +781,7 @@ async function sendDailyReminders(env, now = Date.now()) {
     const headers = { Title: r.title };
     if (r.tags) headers.Tags = r.tags;
     if (r.click) headers.Click = r.click;
-    const res = await fetch(`https://ntfy.sh/${encodeURIComponent(env.NTFY_TOPIC)}`, {
+    const res = await fetch(`https://ntfy.sh/${encodeURIComponent(env.REMINDERS_TOPIC)}`, {
       method: 'POST',
       headers,
       body: r.message,
