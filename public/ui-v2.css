@@ -162,58 +162,103 @@ body.locked { overflow: auto !important; height: auto !important; }
 .v2-scroll-next span { height: 1px; flex: 1; background: var(--v2-soft-line); }
 .v2-scroll-next:hover { color: var(--v2-yellow); }
 
-/* Home dashboard: one grid with named areas, so no card can overlap another. Every cell is
-   min-size 0 and clips its own content; type scales with viewport height and width. */
-.v2-dashboard {
-  display: grid;
-  grid-template-columns: minmax(0, 1.72fr) minmax(0, 1fr) minmax(0, .72fr) minmax(0, .24fr) minmax(0, 1.02fr);
-  grid-template-rows: minmax(180px, 1fr) minmax(220px, 1.25fr) minmax(96px, .5fr);
-  grid-template-areas:
-    "news about heart heart weather"
-    "news about spotify steps steps"
-    "diss focus focus updated updated";
-  gap: 10px;
+/* Parwani-DOS Home (Phase 2, 2026-10-07): a title + about.txt row, a 3x2 grid of tiles that
+   jump to each section (pixel icons land in Phase 8 — .pdos-tile-icon is reserved empty space
+   for now), an extras row, and a right-hand column of small "window" widgets wired to the same
+   Worker endpoints as before (every #id and data-bound class below is unchanged from the old
+   dashboard, so none of the fetch/render JS needed to change — only the surrounding markup). */
+.pdos-home { flex: 1 1 auto; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) minmax(220px, 330px); gap: 10px; }
+.pdos-home-left { min-width: 0; min-height: 0; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; gap: 10px; }
+.pdos-home-right { min-width: 0; min-height: 0; display: grid; grid-template-rows: auto auto auto minmax(0, 1fr) auto auto; gap: 8px; }
+
+.pdos-title-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(220px, 380px); gap: 10px; align-items: stretch; }
+.pdos-title-cell { min-width: 0; display: flex; align-items: flex-end; overflow: hidden; }
+.v2-display { margin: 0; font-family: var(--display); font-weight: 400; text-transform: uppercase; line-height: 1.02; letter-spacing: -.02em; white-space: nowrap; font-size: 12vw; }
+
+/* Generic "window": a filled title bar (filename + index) over a flat body. Every Home widget
+   shares this shell; #ids inside keep working exactly as before. */
+.pdos-widget { min-width: 0; min-height: 0; display: flex; flex-direction: column; }
+.pdos-widget-head { flex: 0 0 auto; height: 26px; background: var(--v2-panel-raised); display: flex; align-items: center; justify-content: space-between; padding: 0 .6rem; font-size: .66rem; letter-spacing: .04em; text-transform: uppercase; }
+.pdos-widget-tag { color: var(--v2-dim); }
+.pdos-widget-tag--warn { color: var(--v2-yellow); }
+.pdos-widget-body { flex: 1 1 auto; min-height: 0; background: var(--v2-panel); padding: clamp(.55rem, 1.4vh, .85rem) clamp(.6rem, 1vw, .8rem); display: flex; flex-direction: column; overflow: hidden; }
+.pdos-widget-foot { flex: 0 0 auto; background: var(--v2-panel); padding: 0 clamp(.6rem, 1vw, .8rem) clamp(.4rem, 1vh, .6rem); color: var(--v2-dim); font-size: clamp(.54rem, 1.2vh, .68rem); text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pdos-widget-label { color: var(--v2-dim); font-size: .66rem; text-transform: uppercase; }
+
+.pdos-about-body p { margin: auto 0; max-width: 24ch; font-size: clamp(.78rem, min(1.3vw, 2.3vh), 1.2rem); line-height: 1.45; }
+.pdos-boot-log { display: flex; flex-direction: column; gap: .15rem; margin-top: .5rem; padding-top: .5rem; border-top: 1px solid var(--v2-soft-line); color: var(--v2-dim); font-size: .62rem; line-height: 1.6; text-transform: none; letter-spacing: 0; }
+.pdos-ok { color: var(--v2-green); }
+.pdos-warn { color: var(--v2-yellow); }
+.v2-about-date { flex: 0 0 auto; margin-top: .5rem; color: var(--v2-dim); font-size: clamp(.54rem, 1.25vh, .7rem); letter-spacing: .05em; text-transform: uppercase; }
+
+/* Six tiles jump straight to their section; hover fills the tile with its colour (spec table). */
+.pdos-tiles { min-height: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.pdos-tile {
+  min-width: 0; min-height: 0; overflow: hidden; display: flex; flex-direction: column;
+  background: var(--v2-panel); color: var(--v2-fg); padding: clamp(.6rem, 1.4vh, .85rem); cursor: pointer;
+  transition: background .15s ease, color .15s ease;
 }
-.v2-dashboard > .v2-panel { min-width: 0; min-height: 0; overflow: hidden; padding: clamp(.6rem, 1.5vh, .9rem) clamp(.65rem, 1vw, .9rem); display: flex; flex-direction: column; }
-.v2-news { grid-area: news; }
-.v2-news h2 { flex: 1 1 0; min-height: 0; overflow: hidden; margin: clamp(.5rem, 1.8vh, 1.1rem) 0 .5rem; font-family: var(--display); font-weight: 400; font-size: 4rem; line-height: .93; text-transform: uppercase; overflow-wrap: anywhere; }
-.v2-news-desc { flex: 0 0 auto; max-height: 4.5em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; margin: 0; max-width: 52ch; color: var(--v2-fg); font-size: clamp(.6rem, 1.4vh, .78rem); line-height: 1.5; }
+.pdos-tile-head { flex: 0 0 auto; display: flex; align-items: center; justify-content: space-between; gap: .5rem; font-size: .66rem; text-transform: uppercase; letter-spacing: .03em; }
+.pdos-tile-head > span:nth-child(2) { flex: 1 1 auto; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.pdos-tile-glyph { flex: 0 0 auto; width: .85em; height: .85em; background: currentColor; }
+.pdos-tile-glyph--round { border-radius: 50%; }
+.pdos-tile-glyph--diamond { transform: rotate(45deg); width: .6em; height: .6em; margin: .12em; }
+.pdos-tile-glyph--ring { border-radius: 50%; border: 3px solid currentColor; background: none; box-sizing: border-box; }
+.pdos-tile-glyph--frame { border: 2px solid currentColor; background: none; box-sizing: border-box; }
+.pdos-tile-glyph--bars { flex: 0 0 auto; display: flex; gap: 2px; width: auto; height: .85em; }
+.pdos-tile-glyph--bars span { display: block; width: 4px; height: 100%; background: currentColor; }
+.pdos-tile-key { flex: 0 0 auto; border: 1px solid currentColor; padding: 0 .35rem; }
+.pdos-tile-title { flex: 0 0 auto; margin-top: .5rem; font-family: var(--display); font-weight: 400; font-size: clamp(1.3rem, min(2.4vw, 4.6vh), 2.1rem); text-transform: uppercase; line-height: 1; }
+.pdos-tile-icon { flex: 1 1 auto; min-height: 0; }
+.pdos-tile-foot { flex: 0 0 auto; margin-top: auto; padding-top: clamp(.4rem, 1vh, .6rem); border-top: 1px solid currentColor; display: flex; flex-direction: column; gap: .15rem; font-size: .7rem; line-height: 1.3; }
+.pdos-tile-foot > span:first-child { font-size: .62rem; text-transform: uppercase; opacity: .7; }
+.pdos-tile-foot > span:last-child { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pdos-tile--journal:hover, .pdos-tile--journal:focus-visible { background: oklch(0.75 0.16 40); color: var(--on); }
+.pdos-tile--projects:hover, .pdos-tile--projects:focus-visible { background: oklch(0.72 0.16 290); color: var(--on); }
+.pdos-tile--toolbox:hover, .pdos-tile--toolbox:focus-visible { background: oklch(0.74 0.14 245); color: var(--on); }
+.pdos-tile--media:hover, .pdos-tile--media:focus-visible { background: oklch(0.74 0.16 0); color: var(--on); }
+.pdos-tile--playlists:hover, .pdos-tile--playlists:focus-visible { background: var(--ok); color: var(--on); }
+.pdos-tile--gigs:hover, .pdos-tile--gigs:focus-visible { background: #160a06; color: #ffd43b; }
 
-.v2-about { grid-area: about; background: var(--v2-panel-raised); }
-.v2-about p { margin: auto 0; max-width: 22ch; font-size: clamp(.85rem, min(1.45vw, 2.7vh), 1.4rem); line-height: 1.45; }
+/* Extras: Champion Run and Crack, both jump to Projects (the windows themselves are Phase 4/5). */
+.pdos-extras { flex: 0 0 auto; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; font-size: .72rem; text-transform: uppercase; letter-spacing: .04em; }
+.pdos-extra { display: flex; align-items: center; justify-content: space-between; gap: .75rem; padding: .5rem .85rem; border: 1px solid var(--v2-soft-line); color: var(--v2-fg); transition: border-color .15s ease, color .15s ease; }
+.pdos-extra > span:first-of-type { display: flex; align-items: center; gap: .75rem; min-width: 0; }
+.pdos-extra-icon { flex: 0 0 auto; width: 1.4em; height: 1.4em; }
+.pdos-extra-label { color: var(--v2-dim); }
+.pdos-extra--champion:hover, .pdos-extra--champion:focus-visible { border-color: var(--warn); color: var(--warn); }
+.pdos-extra--crack:hover, .pdos-extra--crack:focus-visible { border-color: var(--ok); color: var(--ok); }
 
-.v2-heart { grid-area: heart; }
-.v2-weather { grid-area: weather; container-type: size; }
-.v2-metric > * { flex: 0 0 auto; }
-/* Short weather card (720p-class screens): drop the humidity/wind line rather than squeeze the heading. */
-@container (max-height: 175px) { #v2WeatherExtras { display: none; } }
-.v2-weather .v2-value { font-size: clamp(1.8rem, min(4.4vw, 8.6vh, 30cqh), 5.25rem); }
-.v2-metric h3 { margin: clamp(.4rem, 1.8vh, 1.1rem) 0 .1rem; font-family: var(--display); font-weight: 400; font-size: clamp(1.05rem, min(1.7vw, 3.3vh), 2rem); line-height: 1.1; text-transform: uppercase; }
+/* Right column widgets — ids/classes below this point are the same ones the fetch functions in
+   ui-v2.js already target; only their container markup changed. */
+.pdos-weather { container-type: size; }
+/* Short weather widget (720p-class screens): drop the humidity/wind line rather than squeeze the temperature. */
+@container (max-height: 120px) { #v2WeatherExtras { display: none; } }
+.pdos-weather-body { flex-direction: row; align-items: center; justify-content: space-between; gap: .6rem; }
+.pdos-weather .v2-value { font-size: clamp(1.6rem, min(3.6vw, 6.8vh, 26cqh), 2.6rem); }
 .v2-value { margin: .05rem 0; font-family: var(--display); font-size: clamp(2.1rem, min(4.4vw, 8.6vh), 5.25rem); line-height: 1.08; white-space: nowrap; }
 .v2-value small { font-size: .42em; }
 .v2-placeholder { color: var(--v2-dim); }
-.v2-metric-foot { margin: auto 0 0; color: var(--v2-dim); font-size: clamp(.54rem, 1.25vh, .7rem); text-transform: uppercase; line-height: 1.45; }
-.v2-metric .v2-metric-foot > span { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.v2-weather-main { display: flex; align-items: center; justify-content: space-between; gap: .6rem; }
-.v2-sun { width: clamp(28px, min(3vw, 6vh), 52px); height: clamp(28px, min(3vw, 6vh), 52px); color: var(--v2-yellow); flex: 0 0 auto; }
+.v2-metric-foot { margin: 0; color: var(--v2-dim); font-size: clamp(.54rem, 1.25vh, .7rem); text-transform: uppercase; line-height: 1.45; }
+.v2-metric-foot > span { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.v2-sun { width: clamp(24px, min(2.6vw, 5vh), 40px); height: clamp(24px, min(2.6vw, 5vh), 40px); color: var(--v2-yellow); flex: 0 0 auto; }
 
-.v2-spotify { grid-area: spotify; align-items: center; text-align: center; }
-.v2-spotify .v2-index-row, .v2-spotify-status { align-self: stretch; }
-.v2-spotify-art { flex: 1 1 0; min-height: 0; width: 100%; display: flex; justify-content: center; margin: clamp(.35rem, 1.3vh, .8rem) 0 clamp(.3rem, 1vh, .6rem); }
-.v2-spotify-cover { height: 100%; max-width: 100%; aspect-ratio: 1; object-fit: cover; display: block; background: var(--v2-panel-raised); }
-.v2-spotify h3 { max-width: 100%; margin: 0; font-family: var(--display); font-weight: 400; font-size: clamp(1rem, min(1.8vw, 3.6vh), 2.1rem); line-height: 1.05; text-transform: uppercase; }
+.pdos-spotify-body { flex-direction: row; align-items: center; gap: .7rem; }
+.v2-spotify-art { flex: 0 0 auto; width: clamp(36px, 10cqw, 52px); }
+.v2-spotify-cover { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; background: var(--v2-panel-raised); }
+.pdos-spotify-text { min-width: 0; }
+#v2NowTitle { margin: 0; max-width: 100%; font-family: var(--display); font-weight: 400; font-size: clamp(.95rem, min(1.6vw, 3vh), 1.5rem); line-height: 1.05; text-transform: uppercase; }
 .v2-spotify-label { color: var(--v2-green); }
-.v2-spotify-state { max-width: 100%; margin-top: .15rem; font-size: clamp(.54rem, 1.25vh, .7rem); text-transform: uppercase; }
-.v2-spotify-status { margin-top: clamp(.2rem, .8vh, .45rem); color: var(--v2-dim); font-size: clamp(.5rem, 1.15vh, .64rem); text-align: left; text-transform: uppercase; }
+.v2-spotify-state { max-width: 100%; margin-top: .15rem; font-size: clamp(.54rem, 1.25vh, .7rem); text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .v2-spotify-status:empty { display: none; }
-.v2-spotify h3 { flex: 0 0 auto; }
-.v2-spotify-state, .v2-spotify-status { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-/* Steps card (Codex's oversized-count variant): small label, then the count as large as the card
-   allows with "/10,000" on its baseline, a full-width progress line and the goal line under it.
-   Sizes come from the card itself (container units), so "10,000/10,000" never clips. The count,
-   goal line and bar turn green once the goal is reached. */
-.v2-steps { grid-area: steps; container-type: size; }
+.pdos-mini-grid { min-height: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.pdos-heart .v2-value, .pdos-heart .v2-metric-foot { margin-top: auto; }
+
+/* Steps widget (Codex's oversized-count variant, unchanged since 2026-10-02): small label, the
+   count as large as the box allows with "/10,000" on its baseline, a progress line and the goal
+   line. Sizes come from the box itself (container units), so "10,000/10,000" never clips. */
+.v2-steps { container-type: size; }
 .v2-steps-label { margin-top: auto; color: var(--v2-dim); font-size: clamp(.54rem, min(5cqh, 4cqw), .8rem); letter-spacing: .08em; text-transform: uppercase; }
 .v2-steps-value { margin: clamp(.1rem, 2cqh, .5rem) 0 clamp(.5rem, 6.5cqh, 1.2rem); font-family: var(--display); font-size: clamp(2rem, min(48cqh, 26cqw), 11rem); line-height: .9; white-space: nowrap; }
 .v2-steps-value small { margin-left: .12em; font-size: .4em; }
@@ -222,23 +267,25 @@ body.locked { overflow: auto !important; height: auto !important; }
 .v2-steps-goal { margin: clamp(.3rem, 3.5cqh, .8rem) 0 auto; color: var(--v2-dim); font-size: clamp(.54rem, min(5cqh, 4cqw), .8rem); letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .v2-steps--done .v2-steps-value, .v2-steps--done .v2-steps-goal { color: var(--v2-green); }
 .v2-steps--done .v2-steps-bar span { background: var(--v2-green); }
-.v2-about-date { flex: 0 0 auto; color: var(--v2-dim); font-size: clamp(.54rem, 1.25vh, .7rem); letter-spacing: .05em; text-transform: uppercase; }
 
-.v2-dissertation { grid-area: diss; }
-.v2-focus { grid-area: focus; }
-/* Game card: art the card's full height on the left (square for PlayStation, a 2:3 cover for
-   Steam); index row and text on the right. */
-.v2-dashboard > .v2-game { grid-area: updated; display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); column-gap: clamp(.55rem, 1vw, .9rem); }
-.v2-game-art { grid-row: 1 / 3; height: 100%; aspect-ratio: 1; object-fit: cover; display: block; background: var(--v2-panel-raised); }
+.pdos-headlines { min-height: 0; }
+.pdos-headlines-body { justify-content: center; gap: .5rem; }
+.pdos-headlines-body h2 { margin: 0; min-height: 0; overflow: hidden; font-family: var(--display); font-weight: 400; font-size: clamp(1.4rem, min(3.2vw, 5.6vh), 2.6rem); line-height: .98; text-transform: uppercase; overflow-wrap: anywhere; }
+.v2-news-desc { flex: 0 0 auto; max-height: 4.2em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; margin: 0; color: var(--v2-fg); font-size: clamp(.6rem, 1.3vh, .76rem); line-height: 1.5; }
+
+.pdos-game-body { flex-direction: row; align-items: center; gap: .6rem; }
+.v2-game-art { flex: 0 0 auto; width: clamp(34px, 10cqw, 48px); aspect-ratio: 1; object-fit: cover; display: block; background: var(--v2-panel-raised); }
 .v2-game-art--portrait { aspect-ratio: 2 / 3; }
-/* safe: on short cards the text overflows into the bottom padding, like its neighbours, not up into the index row. */
-.v2-game-text { align-self: safe end; min-width: 0; }
-.v2-dashboard > .v2-bottom-card { justify-content: space-between; }
-.v2-bottom-card h3 { margin: 0 0 .25rem; font-family: var(--display); font-weight: 400; font-size: clamp(1.05rem, min(2.1vw, 4.4vh), 2.45rem); line-height: 1; text-transform: uppercase; }
-.v2-bottom-card p { margin: 0; color: var(--v2-dim); font-size: clamp(.54rem, 1.25vh, .72rem); text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.v2-dissertation p { display: flex; gap: .8rem; }
-.v2-dissertation p > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-.v2-bottom-card a { flex: 0 0 auto; display: inline-block; color: var(--v2-fg); text-decoration: underline; text-underline-offset: .2em; }
+.v2-game-text { min-width: 0; }
+.v2-game-text h3 { margin: 0; font-family: var(--display); font-weight: 400; font-size: clamp(.85rem, min(1.4vw, 2.6vh), 1.2rem); line-height: 1.05; text-transform: uppercase; }
+.v2-game-text p { margin: .15rem 0 0; color: var(--v2-dim); font-size: .64rem; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.pdos-dissertation-body { flex-direction: row; align-items: flex-end; justify-content: space-between; gap: .6rem; }
+.pdos-dissertation-body h3 { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--display); font-weight: 400; font-size: clamp(.85rem, min(1.5vw, 2.8vh), 1.25rem); line-height: 1.05; text-transform: uppercase; }
+.pdos-dissertation-body a { flex: 0 0 auto; color: var(--v2-fg); font-size: .7rem; text-transform: uppercase; text-decoration: underline; text-underline-offset: .2em; }
+
+.pdos-status-bar { flex: 0 0 auto; margin-top: auto; padding-top: clamp(.6rem, 2vh, 1.4rem); display: flex; align-items: center; justify-content: space-between; gap: 1rem; color: var(--v2-dim); font-size: .7rem; text-transform: uppercase; letter-spacing: .04em; }
+.pdos-status-cmd { color: var(--v2-fg); white-space: nowrap; }
 
 /* Fit-to-box titles (fitText in ui-v2.js): the CSS size is the maximum; long text shrinks
    until it fits its line budget (data-fit="1" one line, "2" wraps onto a second line). The
@@ -462,6 +509,16 @@ body.locked { overflow: auto !important; height: auto !important; }
   .v2-section.is-active .pdos-crt-slide { transform: translateY(0); opacity: 1; }
   .v2-section.is-active .pdos-crt-line { transform: scaleX(1); opacity: 0; }
 
+  /* Scanline overlay (global shell, missed in Phase 1 — added here 2026-10-07): a very faint
+     CRT screen-door texture over every section, regardless of theme. */
+  .v2-section::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(0deg, rgba(255, 255, 255, .025) 0 1px, transparent 1px 3px);
+  }
+
   .pdos-crt-slide > .v2-scroll-next { margin-top: auto; padding-top: clamp(.6rem, 2vh, 1.4rem); }
   .pdos-crt-slide > .v2-footer { margin-top: auto; padding-top: clamp(.6rem, 2vh, 1.4rem); }
 
@@ -472,9 +529,6 @@ body.locked { overflow: auto !important; height: auto !important; }
   .v2-section-kicker { margin: 0 0 clamp(.5rem, 1.5vh, 1rem); font-size: clamp(.72rem, 1.9vh, 1.1rem); }
   .v2-stage { flex: 1 1 auto; min-height: 0; }
   .v2-index-row { font-size: clamp(.6rem, 1.35vh, .8rem); }
-
-  #v2-home .v2-display { flex: 0 0 auto; margin: 0 0 clamp(.4rem, 1.2vh, .9rem); line-height: .88; }
-  .v2-dashboard { flex: 1 1 auto; min-height: 0; grid-template-rows: minmax(0, 1fr) minmax(0, 1.25fr) minmax(0, .5fr); }
 
   .v2-journal-grid { min-height: 0; }
   .v2-strip { font-size: clamp(.62rem, 1.4vh, .78rem); padding: clamp(.45rem, 1.3vh, .8rem) 1rem; }
@@ -505,15 +559,28 @@ body.locked { overflow: auto !important; height: auto !important; }
   .pdos-theme-btn span:last-child { display: none; }
   .pdos-right { gap: .6rem; }
   .v2-display { font-size: clamp(3.25rem, 17vw, 6rem); white-space: normal; line-height: .92; }
-  /* Phones scroll normally: the dashboard becomes a two-column stack of fixed-height cards. */
-  .v2-dashboard {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    grid-template-rows: 300px 170px 165px 250px 105px 105px 105px;
-    grid-template-areas: "news news" "about about" "heart weather" "spotify steps" "diss diss" "focus focus" "updated updated";
-  }
-  .v2-about p { max-width: none; font-size: 1rem; }
+  /* Phones scroll normally: Home becomes a single stacked column — title, about, tiles (2x3),
+     extras, then every right-column widget full width, each given enough height to read. */
+  .pdos-home { grid-template-columns: 1fr; grid-template-rows: none; gap: 14px; }
+  .pdos-home-left { grid-template-rows: none; gap: 14px; }
+  .pdos-home-right { grid-template-rows: none; gap: 10px; }
+  .pdos-title-row { grid-template-columns: 1fr; gap: 10px; }
+  .pdos-title-cell { align-items: flex-start; }
+  .pdos-about-body { min-height: 120px; }
+  .pdos-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(3, minmax(150px, auto)); }
+  .pdos-tile-title { font-size: 1.5rem; }
+  .pdos-weather-body, .pdos-spotify-body, .pdos-game-body { min-height: 72px; }
+  .pdos-mini-grid { grid-template-rows: minmax(110px, auto); }
+  /* fitHeadline() (ui-v2.js) binary-searches a font size against this box's clientHeight, so it
+     needs a real ceiling here, not min-height — otherwise an auto-height box just grows to fit
+     whatever size it tries and the search never actually shrinks anything. */
+  .pdos-headlines-body { height: 170px; overflow: hidden; }
+  .pdos-headlines-body h2 { font-size: clamp(1.4rem, 7vw, 2rem); }
+  .pdos-dissertation-body { min-height: 56px; flex-direction: column; align-items: flex-start; gap: .3rem; }
   .v2-value { font-size: 2.6rem; }
-  .v2-bottom-card h3 { font-size: 1.3rem; }
+  .pdos-weather .v2-value { font-size: 1.8rem; }
+  .v2-game-text h3 { font-size: 1rem; }
+  .pdos-status-bar { flex-wrap: wrap; }
   .v2-project-grid, .v2-tool-grid, .v2-playlists { grid-template-columns: 1fr; }
   .v2-gigs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .v2-journal-grid { grid-template-columns: 1fr; grid-template-rows: none; row-gap: 10px; min-height: 0; }
@@ -541,7 +608,9 @@ body.locked { overflow: auto !important; height: auto !important; }
   .v2-index-row, .v2-ref, .v2-scroll-prev, .v2-scroll-next, .v2-card-foot, .v2-metric-foot, .v2-spotify-state, .v2-spotify-status,
   .v2-steps-label, .v2-steps-goal, .v2-about-date, .v2-bottom-card p, .v2-news-desc, .v2-journal-card p, .v2-journal-foot, .v2-review-meta,
   .v2-journal-media figcaption, .v2-journal-more, .v2-journal-credit, .v2-gig-credit, .v2-project p, .v2-tool-copy p, .v2-playlist-copy p, .v2-track-row, .v2-top-toggle button,
-  .v2-gig p, .v2-gig-link, .v2-gig-controls, .v2-strip, .v2-footer { font-size: .75rem; }
+  .v2-gig p, .v2-gig-link, .v2-gig-controls, .v2-strip, .v2-footer,
+  .pdos-widget-head, .pdos-widget-tag, .pdos-widget-foot, .pdos-tile-head, .pdos-tile-key, .pdos-tile-foot, .pdos-tile-foot > span:first-child,
+  .pdos-extra, .pdos-status-bar, .pdos-boot-log, .v2-game-text p { font-size: .75rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {

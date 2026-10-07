@@ -972,7 +972,7 @@
     .tools{ grid-template-columns:1fr; }
   }
 </style>
-<link rel="stylesheet" href="/ui-v2.css?v=27">
+<link rel="stylesheet" href="/ui-v2.css?v=28">
 </head>
 <body class="locked">
 
@@ -1014,68 +1014,140 @@
     </header>
 
     <section class="v2-section is-active" id="v2-home" data-sec="home"><div class="pdos-crt-clip"><div class="pdos-crt-slide">
-      <h1 class="v2-display">My Digital Portfolio.</h1>
-      <div class="v2-dashboard">
-        <article class="v2-panel v2-news">
-          <div class="v2-index-row"><span>01&nbsp; &mdash; &nbsp;World / Headlines</span><span id="v2HeadlineSource" class="v2-tag">[ Featured ]</span></div>
-          <h2 id="v2HeadlineTitle">Global markets steady as new data arrives</h2>
-          <p class="v2-news-desc" id="v2HeadlineDesc">Investors assess the latest economic data as markets turn their attention to the months ahead.</p>
-        </article>
-
-        <article class="v2-panel v2-about">
-          <div class="v2-index-row"><span>About this space</span><span class="v2-tag">[ 00 ]</span></div>
-          <p>No fixed brief. A growing collection of things I am curious enough to build, research or test right now.</p>
-          <span class="v2-about-date" id="v2Date">-- --- ----</span>
-        </article>
-
-        <article class="v2-panel v2-metric v2-heart">
-          <div class="v2-index-row"><span>02</span><span class="v2-tag">[ Health ]</span></div>
-          <h3 data-fit="1">Heart Rate</h3>
-          <div class="v2-value v2-placeholder" id="v2HeartValue">--<small> BPM</small></div>
-          <p class="v2-metric-foot" id="v2HeartFoot">Awaiting health data source</p>
-        </article>
-
-        <article class="v2-panel v2-metric v2-weather">
-          <div class="v2-index-row"><span>03</span><span class="v2-tag">[ Weather ]</span></div>
-          <h3 data-fit="1">Dubai Weather</h3>
-          <div class="v2-weather-main">
-            <div class="v2-value" id="v2WeatherTemp">--&deg;C</div>
-            <svg class="v2-sun" id="v2WeatherIcon" viewBox="0 0 64 64" aria-label="Weather icon"><circle cx="32" cy="32" r="10" fill="currentColor"/><g stroke="currentColor" stroke-width="3"><path d="M32 3v10M32 51v10M3 32h10M51 32h10M11.5 11.5l7 7M45.5 45.5l7 7M52.5 11.5l-7 7M18.5 45.5l-7 7"/></g></svg>
+      <div class="pdos-home">
+        <div class="pdos-home-left">
+          <div class="pdos-title-row">
+            <div class="pdos-title-cell"><h1 class="v2-display" data-fit="title">My Digital<br>Portfolio.</h1></div>
+            <div class="pdos-widget pdos-about">
+              <div class="pdos-widget-head"><span>about.txt</span><span class="pdos-widget-tag">00</span></div>
+              <div class="pdos-widget-body pdos-about-body">
+                <p>No fixed brief. A growing collection of things I am curious enough to build, research or test right now.</p>
+                <div class="pdos-boot-log">
+                  <div><span class="pdos-ok">[ OK ]</span> journal &middot; projects &middot; toolbox mounted</div>
+                  <div><span class="pdos-ok">[ OK ]</span> spotify.drv &middot; weather.drv ready</div>
+                  <div><span class="pdos-warn">[ !! ]</span> health.sys syncing from phone</div>
+                </div>
+                <span class="v2-about-date" id="v2Date">-- --- ----</span>
+              </div>
+            </div>
           </div>
-          <p class="v2-metric-foot"><span id="v2WeatherLabel">Loading conditions</span><span id="v2WeatherHighLow">High --&deg; / Low --&deg;</span><span id="v2WeatherExtras">Humidity --% / Wind -- km/h</span></p>
-        </article>
 
-        <article class="v2-panel v2-spotify">
-          <div class="v2-index-row"><span>04</span><span class="v2-spotify-label">[ Spotify ]</span></div>
-          <div class="v2-spotify-art"><img class="v2-spotify-cover" id="v2NowCover" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt=""></div>
-          <h3 id="v2NowTitle" data-fit="2" data-fit-max="3">Nothing Playing</h3>
-          <div class="v2-spotify-state" id="v2NowState">Listening data will appear here</div>
-          <div class="v2-spotify-status" id="v2NowStatus"></div>
-        </article>
+          <div class="pdos-tiles">
+            <a class="pdos-tile pdos-tile--journal" href="#v2-journal">
+              <div class="pdos-tile-head"><span class="pdos-tile-glyph pdos-tile-glyph--round" aria-hidden="true"></span><span>journal.log</span><span class="pdos-tile-key">1</span></div>
+              <div class="pdos-tile-title">Journal</div>
+              <div class="pdos-tile-icon" aria-hidden="true"></div>
+              <div class="pdos-tile-foot"><span>Latest &middot; Researching</span><span>Karoshi: An Enquiry Into Japan&rsquo;s Work Culture</span></div>
+            </a>
+            <a class="pdos-tile pdos-tile--projects" href="#v2-projects">
+              <div class="pdos-tile-head"><span class="pdos-tile-glyph" aria-hidden="true"></span><span>projects.vol</span><span class="pdos-tile-key">2</span></div>
+              <div class="pdos-tile-title">Projects</div>
+              <div class="pdos-tile-icon" aria-hidden="true"></div>
+              <div class="pdos-tile-foot"><span>Current focus &middot; Phase 02</span><span>Sounds Like &mdash; a similarity engine for music discovery</span></div>
+            </a>
+            <a class="pdos-tile pdos-tile--toolbox" href="#v2-tools">
+              <div class="pdos-tile-head"><span class="pdos-tile-glyph pdos-tile-glyph--diamond" aria-hidden="true"></span><span>toolbox.exe</span><span class="pdos-tile-key">3</span></div>
+              <div class="pdos-tile-title">Toolbox</div>
+              <div class="pdos-tile-icon" aria-hidden="true"></div>
+              <div class="pdos-tile-foot"><span>6 ready &middot; 3 being built</span><span>Image Converter &middot; Tempo Tap &middot; QR Code &middot; Password&hellip;</span></div>
+            </a>
+            <a class="pdos-tile pdos-tile--media" href="#v2-media">
+              <div class="pdos-tile-head"><span class="pdos-tile-glyph--bars" aria-hidden="true"><span></span><span></span><span></span></span><span>media.reel</span><span class="pdos-tile-key">4</span></div>
+              <div class="pdos-tile-title">Media</div>
+              <div class="pdos-tile-icon" aria-hidden="true"></div>
+              <div class="pdos-tile-foot"><span>Next three months</span><span>Films in Dubai cinemas and new games</span></div>
+            </a>
+            <a class="pdos-tile pdos-tile--playlists" href="#v2-playlists">
+              <div class="pdos-tile-head"><span class="pdos-tile-glyph pdos-tile-glyph--ring" aria-hidden="true"></span><span>playlists.fm</span><span class="pdos-tile-key">5</span></div>
+              <div class="pdos-tile-title">Playlists</div>
+              <div class="pdos-tile-icon" aria-hidden="true"></div>
+              <div class="pdos-tile-foot"><span>Three on repeat</span><span>pop &middot; Camon &middot; idk</span></div>
+            </a>
+            <a class="pdos-tile pdos-tile--gigs" href="#v2-gigs">
+              <div class="pdos-tile-head"><span class="pdos-tile-glyph pdos-tile-glyph--frame" aria-hidden="true"></span><span>gigs.map</span><span class="pdos-tile-key">6</span></div>
+              <div class="pdos-tile-title">Gigs</div>
+              <div class="pdos-tile-icon" aria-hidden="true"></div>
+              <div class="pdos-tile-foot"><span>Five at a time</span><span>Upcoming in Dubai and Abu Dhabi</span></div>
+            </a>
+          </div>
 
-        <article class="v2-panel v2-steps" id="v2Steps">
-          <div class="v2-index-row"><span>05</span><span class="v2-tag">[ Steps / Today ]</span></div>
-          <span class="v2-steps-label">Daily steps</span>
-          <div class="v2-steps-value v2-placeholder"><span id="v2StepsValue">--</span><small>/10,000</small></div>
-          <div class="v2-steps-bar" aria-hidden="true"><span id="v2StepsBar"></span></div>
-          <span class="v2-steps-goal" id="v2StepsGoal">Awaiting health data source</span>
-        </article>
+          <div class="pdos-extras">
+            <a class="pdos-extra pdos-extra--champion" href="#v2-projects"><span class="pdos-extra-icon" aria-hidden="true"></span><span><span class="pdos-extra-label">Extras /</span> champion_run.cart &mdash; insert cartridge</span><span aria-hidden="true">&#9656;</span></a>
+            <a class="pdos-extra pdos-extra--crack" href="#v2-projects"><span class="pdos-extra-icon" aria-hidden="true"></span><span><span class="pdos-extra-label">Extras /</span> crack.exe &mdash; play</span><span aria-hidden="true">&#9656;</span></a>
+          </div>
+        </div>
 
-        <article class="v2-panel v2-bottom-card v2-dissertation">
-          <div class="v2-index-row"><span>06</span><span class="v2-tag">[ Dissertation ]</span></div>
-          <div><h3 data-fit="1">Conflict &amp; Risk Preferences</h3><p><span>Undergraduate literature review</span><a href="/dissertation.pdf" target="_blank" rel="noopener noreferrer">Read PDF &#8594;</a></p></div>
-        </article>
-        <article class="v2-panel v2-bottom-card v2-focus">
-          <div class="v2-index-row"><span>07</span><span class="v2-tag">[ Current Focus ]</span></div>
-          <div><h3 data-fit="1">Sounds Like</h3><p>Phase 02 / Similarity engine</p></div>
-        </article>
-        <article class="v2-panel v2-bottom-card v2-game">
-          <img class="v2-game-art" id="v2GameArt" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="">
-          <div class="v2-index-row"><span>08</span><span class="v2-tag">[ Game ]</span></div>
-          <div class="v2-game-text"><h3 id="v2GameTitle" data-fit="1" data-fit-max="2">Nothing played</h3><p id="v2GameState">Awaiting game data</p></div>
-        </article>
+        <div class="pdos-home-right">
+          <div class="pdos-widget pdos-weather">
+            <div class="pdos-widget-head"><span>weather.drv</span><span class="pdos-widget-tag">03</span></div>
+            <div class="pdos-widget-body pdos-weather-body">
+              <div>
+                <div class="pdos-widget-label">Dubai</div>
+                <div class="v2-value" id="v2WeatherTemp">--&deg;C</div>
+              </div>
+              <svg class="v2-sun" id="v2WeatherIcon" viewBox="0 0 64 64" aria-label="Weather icon"><circle cx="32" cy="32" r="10" fill="currentColor"/><g stroke="currentColor" stroke-width="3"><path d="M32 3v10M32 51v10M3 32h10M51 32h10M11.5 11.5l7 7M45.5 45.5l7 7M52.5 11.5l-7 7M18.5 45.5l-7 7"/></g></svg>
+            </div>
+            <p class="v2-metric-foot pdos-widget-foot"><span id="v2WeatherLabel">Loading conditions</span><span id="v2WeatherHighLow">High --&deg; / Low --&deg;</span><span id="v2WeatherExtras">Humidity --% / Wind -- km/h</span></p>
+          </div>
+
+          <div class="pdos-widget pdos-spotify">
+            <div class="pdos-widget-head"><span class="v2-spotify-label">spotify.drv</span><span class="pdos-widget-tag">04</span></div>
+            <div class="pdos-widget-body pdos-spotify-body">
+              <div class="v2-spotify-art"><img class="v2-spotify-cover" id="v2NowCover" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt=""></div>
+              <div class="pdos-spotify-text">
+                <h3 id="v2NowTitle" data-fit="2" data-fit-max="3">Nothing Playing</h3>
+                <div class="v2-spotify-state" id="v2NowState">Listening data will appear here</div>
+              </div>
+            </div>
+            <div class="v2-spotify-status pdos-widget-foot" id="v2NowStatus"></div>
+          </div>
+
+          <div class="pdos-mini-grid">
+            <div class="pdos-widget pdos-heart">
+              <div class="pdos-widget-head"><span>heart.sys</span><span class="pdos-widget-tag">02</span></div>
+              <div class="pdos-widget-body">
+                <div class="v2-value v2-placeholder" id="v2HeartValue">--<small> BPM</small></div>
+                <p class="v2-metric-foot" id="v2HeartFoot">Awaiting health data source</p>
+              </div>
+            </div>
+            <div class="pdos-widget v2-steps" id="v2Steps">
+              <div class="pdos-widget-head"><span>steps.sys</span><span class="pdos-widget-tag">05</span></div>
+              <div class="pdos-widget-body">
+                <span class="v2-steps-label">Daily steps</span>
+                <div class="v2-steps-value v2-placeholder"><span id="v2StepsValue">--</span><small>/10,000</small></div>
+                <div class="v2-steps-bar" aria-hidden="true"><span id="v2StepsBar"></span></div>
+                <span class="v2-steps-goal" id="v2StepsGoal">Awaiting health data source</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="pdos-widget pdos-headlines">
+            <div class="pdos-widget-head"><span>headlines.feed</span><span class="pdos-widget-tag" id="v2HeadlineSource">[ Featured ]</span></div>
+            <div class="pdos-widget-body pdos-headlines-body">
+              <h2 id="v2HeadlineTitle">Global markets steady as new data arrives</h2>
+              <p class="v2-news-desc" id="v2HeadlineDesc">Investors assess the latest economic data as markets turn their attention to the months ahead.</p>
+            </div>
+            <div class="pdos-widget-foot"><span id="v2HeadlineCount">01 / 01</span></div>
+          </div>
+
+          <div class="pdos-widget pdos-game">
+            <div class="pdos-widget-head"><span>game.sys</span><span class="pdos-widget-tag">08</span></div>
+            <div class="pdos-widget-body pdos-game-body">
+              <img class="v2-game-art" id="v2GameArt" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="">
+              <div class="v2-game-text"><h3 id="v2GameTitle" data-fit="1" data-fit-max="2">Nothing played</h3><p id="v2GameState">Awaiting game data</p></div>
+            </div>
+          </div>
+
+          <div class="pdos-widget pdos-dissertation">
+            <div class="pdos-widget-head"><span>dissertation.pdf</span><span class="pdos-widget-tag pdos-widget-tag--warn">read-only</span></div>
+            <div class="pdos-widget-body pdos-dissertation-body">
+              <h3 data-fit="1">Conflict &amp; Risk Preferences</h3>
+              <a href="/dissertation.pdf" target="_blank" rel="noopener noreferrer">Read &#8594;</a>
+            </div>
+          </div>
+        </div>
       </div>
-      <a class="v2-scroll-next" href="#v2-journal"><span></span>Scroll&nbsp; / &nbsp;Journal next&nbsp; &#8595;<span></span></a>
+      <div class="pdos-status-bar"><span class="pdos-status-cmd">C:\PARWANI&gt;<span class="v2-cursor" aria-hidden="true"></span></span><span class="pdos-status-hint">Scroll, or press 1&ndash;7 to jump &middot; Esc closes a window</span></div>
     </div></div><div class="pdos-crt-line" aria-hidden="true"></div></section>
 
     <section class="v2-section" id="v2-journal" data-sec="journal"><div class="pdos-crt-clip"><div class="pdos-crt-slide">

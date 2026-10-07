@@ -28,7 +28,7 @@ An item only moves to `Live` after the Definition of Done in the [Rulebook](agen
 | ID | Item | Requirement | Status |
 |---|---|---|---|
 | SH-01 | Boot screen | Removed by design; the portfolio opens directly on the dashboard | Dropped |
-| SH-02 | Hero + top bar | Clean `C:\PARWANI>` navigation and oversized one-line/flowing portfolio title; live Dubai clock in dashboard | Built |
+| SH-02 | Hero + top bar | Clean `C:\PARWANI>` navigation and oversized one-line/flowing portfolio title; live Dubai clock in dashboard | Superseded 2026-10-07 by the Parwani-DOS top bar (R-DOS-1) and two-line title (R-DOS-3); the top bar's own clock shows the viewer's local time, not Dubai's — the Dubai *date* (not a clock) still lives in the about.txt widget, same as the old About card |
 | SH-03 | Headlines | Fixed-size card via `/api/news`; title text fits within its area, rotates every 10 seconds; preview copy and description follow each other | Built |
 | SH-04 | Status bar | Removed in favour of the clean sticky navigation | Dropped |
 | SH-05 | Sections | Journal, Projects, Toolbox, Playlists and Gigs retain Anton titles + Ref. stamps, with next-section cues at the bottom and previous-section cues top-right | Built |
@@ -55,7 +55,7 @@ Full spec and interactive reference: `design_handoff_parwani_dos/` (`README.md`,
 |---|---|---|
 | R-DOS-1 | Theme tokens (Mono / Paper / Night) + top bar + theme switcher (persisted) | Live 2026-10-07 |
 | R-DOS-2 | Scroll-snap shell, CRT transition, 1–7 / Esc keys, reduced-motion fallback | Live 2026-10-07 |
-| R-DOS-3 | Home tiles, extras, headline auto-fit | Planned |
+| R-DOS-3 | Home tiles, extras, headline auto-fit | Live 2026-10-07 — tile/extras icons are reserved empty space pending R-DOS-9 (Phase 8); headline auto-fit reuses the existing `fitHeadline()` unchanged |
 | R-DOS-4 | Journal list/detail with scroll-to-top on switch | Planned |
 | R-DOS-5 | Projects grid + overlay windows + scroll lock | Planned |
 | R-DOS-6 | Champion Run setup window (pool modes, gens, team of 6, modifiers, reward tiers) | Planned |
