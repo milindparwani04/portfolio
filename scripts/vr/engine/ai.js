@@ -9,7 +9,14 @@
 // Fake Out on the first turn, sensible Protect use, and penalties for hitting its own partner.
 const TYPES_IMMUNE_ABILITY = { Ground: ['Levitate', 'Earth Eater'], Water: ['Water Absorb', 'Storm Drain', 'Dry Skin'], Electric: ['Volt Absorb', 'Lightning Rod', 'Motor Drive'], Fire: ['Flash Fire', 'Well-Baked Body'], Grass: ['Sap Sipper'] };
 
-export function createAI(Dex, rand, level = 50) {
+// difficulty: how close to the best-scored action a choice must be ('easy' 25 points, 'normal' 8,
+// 'hard' 3). Lower margins play the best line more often; none of them read hidden information.
+const MARGIN = { easy: 25, normal: 8, hard: 3 };
+// When two of its Pokémon could Mega Evolve, the one it prefers (Mega Floette's Fairy Aura first).
+const MEGA_PREFERENCE = ['Floette-Eternal', 'Dragonite'];
+
+export function createAI(Dex, rand, level = 50, difficulty = 'normal') {
+  const margin = MARGIN[difficulty] ?? MARGIN.normal;
   const dex = Dex;
   const species = (name) => dex.species.get(name);
   const effectiveness = (moveType, defTypes) => {
@@ -71,6 +78,19 @@ export function createAI(Dex, rand, level = 50) {
     };
   }
 
+  function threatTo(user, view) {
+    let worst = 0;
+    for (const f of foeTargets(view).filter(Boolean)) {
+      const fs = species(f.species);
+      const physical = fs.baseStats.atk >= fs.baseStats.spa;
+      const foeAsUser = { species: f.species, stats: { atk: statAt(fs.baseStats.atk, 11, false, level), spa: statAt(fs.baseStats.spa, 11, false, level) }, boosts: f.boosts, item: f.item, ability: f.ability, level };
+      const meAsTarget = { species: user.species, hp: user.hp, boosts: user.boosts, ability: user.ability, level };
+      const moves = f.moves.length ? f.moves.map((m) => dex.moves.get(m)) : fs.types.map((t) => ({ type: t, basePower: 80, category: physical ? 'Physical' : 'Special', accuracy: 100, id: '' }));
+      for (const m of moves) worst = Math.max(worst, damagePct(m, foeAsUser, meAsTarget, 1, view));
+    }
+    return worst;
+  }
+
   function foeTargets(view) {
     return view.activeMons(view.foe).map((m, i) => (m && !m.fainted ? { ...m, loc: i + 1, level } : null));
   }
@@ -83,6 +103,7 @@ export function createAI(Dex, rand, level = 50) {
     if (move.id === 'protect' || move.id === 'detect') {
       let s = 8;
       if (user.hp < 40) s += 22;
+      if (threatTo(user, view) >= user.hp) s += 18; // likely knocked out this turn otherwise
       if (lastMove === move.name) s = -50; // consecutive Protect usually fails
       if (user.turnsActive === 0 && view.turn <= 1) s -= 10;
       options.push({ s, target: null });
@@ -121,7 +142,12 @@ export function createAI(Dex, rand, level = 50) {
     }
     for (const f of live) {
       let d = damagePct(move, user, f, 1, view);
-      if (move.id === 'suckerpunch') d *= 0.7; // fails if the target doesn't attack
+      // Sucker Punch fails unless the target attacks: trust it less against a Pokémon whose last move
+      // was a status move or Protect.
+      if (move.id === 'suckerpunch') {
+        const last = view.lastMove[f.key] ? dex.moves.get(view.lastMove[f.key]) : null;
+        d *= last && last.category === 'Status' ? 0.35 : 0.8;
+      }
       const left = Math.max(0, f.hp - (plannedDamage[f.loc] || 0));
       let s = Math.min(d, left) + (d >= left && left > 0 ? 35 : 0);
       if (move.priority > 0 && d >= left && left > 0) s += 15;
@@ -141,9 +167,15 @@ export function createAI(Dex, rand, level = 50) {
     const foes = foeTargets(view);
     const actives = req.active || [];
     const planned = {};
-    let megaUsed = false;
-    const parts = [];
     const own = actives.map((_, i) => ownMon(req, i, view));
+    let megaUsed = false;
+    const megaSlot = (() => {
+      const can = actives.map((a, i) => (a.canMegaEvo ? i : -1)).filter((i) => i >= 0);
+      if (!can.length) return -1;
+      const rank = (i) => { const sp = own[i] ? own[i].species : ''; const n = MEGA_PREFERENCE.indexOf(sp); return n < 0 ? 99 : n; };
+      return can.sort((a, b) => rank(a) - rank(b))[0];
+    })();
+    const parts = [];
     actives.forEach((act, i) => {
       const sideMon = req.side.pokemon.filter((m) => m.active)[i];
       if (!sideMon || sideMon.condition.endsWith(' fnt') || act.commanding) { parts.push('pass'); return; }
@@ -159,12 +191,12 @@ export function createAI(Dex, rand, level = 50) {
       if (!scored.length) { parts.push('move 1'); return; }
       scored.sort((a, b) => b.s - a.s);
       // Seeded variety: pick among actions within 8 points of the best.
-      const top = scored.filter((o) => o.s >= scored[0].s - 8);
+      const top = scored.filter((o) => o.s >= scored[0].s - margin);
       best = top[Math.floor(rand() * top.length)];
       if (best.target && best.dmg) planned[best.target] = (planned[best.target] || 0) + best.dmg;
       let choice = `move ${best.n}`;
       if (best.target && !['self', 'allAdjacentFoes', 'allAdjacent', 'allySide', 'foeSide', 'all', 'randomNormal', 'allies'].includes(best.move.target)) choice += ` ${best.target}`;
-      if (act.canMegaEvo && !megaUsed) { choice += ' mega'; megaUsed = true; }
+      if (act.canMegaEvo && !megaUsed && i === megaSlot) { choice += ' mega'; megaUsed = true; }
       parts.push(choice);
     });
     return parts.join(', ');

@@ -119,3 +119,45 @@ test('fuzz: 60 random player teams from the full pool play to a result without e
     assert.equal(ev.filter((e) => e.t === 'fatal').length, 0);
   }
 });
+
+// ---- Phase 3: champion fidelity ----
+test('champion stats follow the Pokemon Champions stat-point formula at Lv 50', () => {
+  const eng = E.createEngine({ seed: 2, exposeBattle: true, player: { name: 'You', team: SAMPLE_TEAM } }, () => {});
+  const mons = Object.fromEntries(eng._battle.sides[1].pokemon.map((p) => [p.species.name, p]));
+  // HP = base + points + 75; others = (base + points + 20) x nature.
+  assert.equal(mons.Kingambit.maxhp, 100 + 32 + 75);
+  assert.equal(mons.Sneasler.storedStats.spe, Math.floor((120 + 32 + 20) * 1.1));
+  assert.equal(mons['Floette-Eternal'].maxhp, 74 + 4 + 75);
+  assert.equal(mons.Dragonite.storedStats.spa, Math.floor((100 + 32 + 20) * 1.1));
+  assert.equal(mons.Garchomp.item, 'choicescarf');
+  assert.equal(mons.Basculegion.ability, 'adaptability');
+  const megaF = eng._battle.dex.species.get('Floette-Mega');
+  const megaD = eng._battle.dex.species.get('Dragonite-Mega');
+  assert.equal(megaF.abilities[0], 'Fairy Aura');
+  assert.equal(megaD.abilities[0], 'Multiscale');
+});
+
+test('when Floette and Dragonite could both Mega Evolve, the AI picks Floette', () => {
+  for (let seed = 1; seed <= 40; seed += 1) {
+    const megas = logOf(playBattle(E, { seed })).filter((l) => l.startsWith('|-mega|p2'));
+    megas.forEach((l) => assert.ok(/Floette|Dragonite/.test(l)));
+    const both = logOf(playBattle(E, { seed })).filter((l) => /^\|switch\|p2[ab]: (Floette|Dragonite)/.test(l));
+    if (megas.length && both.length >= 2 && both[0].includes('Floette') && both[1].includes('Dragonite')) assert.match(megas[0], /Floette/);
+  }
+});
+
+test('AI choices are deterministic for a seed and stay legal at every difficulty', () => {
+  for (const difficulty of ['easy', 'normal', 'hard']) {
+    const a = logOf(playBattle(E, { seed: 31, difficulty }));
+    const b = logOf(playBattle(E, { seed: 31, difficulty }));
+    assert.deepEqual(a, b);
+    const r = playBattle(E, { seed: 32, difficulty });
+    assert.ok(r.winner === 'p1' || r.winner === 'p2', difficulty);
+  }
+});
+
+test('the hard AI beats a first-legal-option player most of the time', () => {
+  let wins = 0;
+  for (let seed = 1; seed <= 20; seed += 1) if (playBattle(E, { seed }).winner === 'p2') wins += 1;
+  assert.ok(wins >= 14, `champion won ${wins}/20`);
+});

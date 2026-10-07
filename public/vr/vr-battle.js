@@ -9,7 +9,7 @@
 
   const C = window.VRCore;
   const VR = window.VictoryRoad;
-  const ENGINE_URL = '/vr/vr-engine.js?v=1';
+  const ENGINE_URL = '/vr/vr-engine.js?v=2';
   const CHAMP = { name: 'Takuma Yamazaki', short: 'Takuma', label: 'Takuma Yamazaki · Japan · 2026 VGC Masters World Champion' };
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const sleep = (ms) => new Promise((r) => window.setTimeout(r, reduceMotion.matches ? Math.min(ms, 60) : ms));

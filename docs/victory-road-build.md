@@ -42,8 +42,8 @@ Living record of the Victory Road build (spec: [`victory-road-master-prompt.md`]
 | 0 Discovery and architecture | Done 2026-10-07 (above) |
 | 1 Setup experience | Done 2026-10-07 — see below |
 | 2 Battle engine vertical slice | Done 2026-10-07 — see below |
-| 3 Champion fidelity | Next |
-| 4 Catalog integration + modifier behaviour | — |
+| 3 Champion fidelity | Done 2026-10-07 — see below |
+| 4 Catalog integration + modifier behaviour | Next |
 | 5 Presentation, audio, accessibility polish | — |
 | 6 Hardening and release | — |
 
@@ -69,3 +69,10 @@ Living record of the Victory Road build (spec: [`victory-road-master-prompt.md`]
 - **Battle screen** (`public/vr/vr-battle.js`, styles in `vr.css`): boot screen → champion intro (original pixel avatar + factual label) → team preview (pick four in order) → arena (his front sprites top right, yours from behind bottom left; cream HP boxes with exact HP for yours and % for his; status tags) → narrated text box (typewriter; Enter, Space or click skips) → per-slot menus Fight (type colour, PP, Mega toggle) / Bag / Pokémon / Forfeit, target selection, forced replacement → victory or defeat with the reward tier, Battle again, Back to setup. Synthesised sounds with a Sound on/off toggle; audio suspends when the tab is hidden. A live region narrates every message. Closing the window, Exit or a reload ends the battle (worker terminated).
 - **Tests:** `node --test tests/vr/*.test.mjs` — 20 pass: official team sheet, doubles + bring four, deterministic replay, at most one Mega (20 seeds), AI holds only public info, Potion heals / runs out / No Potions, No Switching + Chaotic Replacement, Level Cap 45, and a fuzz of 60 random full-pool teams battling to a result with no errors. Browser (headless Edge, `%TEMP%/pdos/vr2.js`): engine not fetched before Enter Battle; a full battle played through the UI to a result at 1440×900, 1366×657 (Level Cap + No Potions: Lv 45 shown, Bag disabled), 390×844 (Random Team revealed only at team preview) and with reduced motion; no overflow; Back to setup restores the setup; no page errors.
 - **Fixed while testing:** Showdown only emits output on `sendUpdates()`; HP strings can carry a colour suffix (`20/100y`); the Potion's data key must equal its id; the AI's Floette knocked itself out with Light of Ruin recoil (recoil penalty added); short screens cropped the arena (the stage now keeps its proportions).
+
+## Phase 3 — champion fidelity (2026-10-07)
+
+- **Verified in the engine** (tests): his six load with the official items, abilities, natures and moves; stats follow the Champions stat-point formula at Lv 50 (e.g. Kingambit HP 100 + 32 + 75 = 207; Sneasler Speed (120 + 32 + 20) × 1.1 = 189); Mega Floette (Fairy, Fairy Aura, 74/85/87/155/148/102) and Mega Dragonite (Dragon/Flying, Multiscale) come from Showdown's Reg M-B data; at most one Mega per battle. All six species' abilities, items and moves (Flower Veil, Adaptability + Life Orb, Defiant, Chople Berry, Multiscale, Choice Scarf lock, Rough Skin, Focus Sash, Poison Touch, Last Respects, Kowtow Cleave, Sucker Punch, Extreme Speed, Fake Out, Feint, Light of Ruin recoil, spread moves) are Showdown's implementations; none are re-implemented here.
+- **AI changes:** Mega preference Floette → Dragonite when both could Mega Evolve; Protect +18 when a foe on the field could knock the Pokémon out (threat from the foe's revealed moves, otherwise an 80-power attack of each of its types — no hidden info); Sucker Punch trusted less (×0.35) against a Pokémon whose last move was a status move; difficulty margins easy 25 / normal 8 / hard 3 points (`config.difficulty`, the champion uses hard).
+- **Intro and avatar** shipped in Phase 2: an original 16×19 pixel figure (no photo used, no invented traits) with the factual label "Takuma Yamazaki · Japan · 2026 VGC Masters World Champion", and the fan-project disclaimer on the battle screen.
+- **Tests:** 24 pass (Phase 3 adds: Champions stat formula and Mega data; Floette preferred for Mega; AI deterministic and legal at all three difficulties; the hard AI beats a first-legal-option player in ≥ 14 of 20 seeded battles).

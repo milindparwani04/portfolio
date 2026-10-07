@@ -62,7 +62,7 @@ export function createEngine(config, emit) {
   const viewP1 = createView('p1');
   const viewP2 = createView('p2');
   const dex = Dex.forFormat(FORMAT_ID);
-  const ai = createAI(dex, aiRand, 50);
+  const ai = createAI(dex, aiRand, 50, config.difficulty || 'hard');
   let pending = { p1: null, p2: null };
   let logBuffer = [];
   let ended = null;

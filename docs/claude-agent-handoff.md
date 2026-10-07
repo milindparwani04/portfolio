@@ -88,6 +88,10 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 
 ## Work log (newest first)
 
+### 2026-10-07 — Victory Road Phase 3 (champion fidelity)
+
+- Engine data verified against the official team sheet and the Champions stat formula; AI Mega preference, threat-aware Protect, Sucker Punch caution and difficulty margins. Detail in [`victory-road-build.md`](victory-road-build.md).
+
 ### 2026-10-07 — Victory Road Phase 2 (battle engine + battle screen)
 
 - Detail in [`victory-road-build.md`](victory-road-build.md). New: `scripts/vr/{package.json,build-sim.mjs,build-sets.mjs,engine/}`, `public/vr/{vr-engine.js,vr-battle.js,sets.json,movepools.json}`, `tests/vr/{harness.mjs,engine.test.mjs}`. Showdown checkout used: `%TEMP%/psim` (sparse clone at `c046106c`). `VR_VERSION` 3, `ui-v2.js?v=33`. `hideOverlay()` now dispatches `vr:dispose` on `.pdos-cr`, so closing the window ends a battle.
