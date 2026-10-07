@@ -18,7 +18,7 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 
 | Area | Files | Notes |
 |---|---|---|
-| Visible portfolio UI | `public/index.html` (the `.portfolio-v2` block only), `public/ui-v2.css`, `public/ui-v2.js`, `public/pdos-icons.js` | Parwani-DOS redesign (see `design_handoff_parwani_dos/`), every section migrated. Cache-bust versions: `ui-v2.css?v=30`, `ui-v2.js?v=26`, `pdos-icons.js?v=2` — bump on every change. The legacy tool modals further down `index.html` are still live: the Toolbox panel borrows them. |
+| Visible portfolio UI | `public/index.html` (the `.portfolio-v2` block only), `public/ui-v2.css`, `public/ui-v2.js`, `public/pdos-icons.js` | Parwani-DOS redesign (see `design_handoff_parwani_dos/`), every section migrated. Cache-bust versions: `ui-v2.css?v=31`, `ui-v2.js?v=27`, `pdos-icons.js?v=3` — bump on every change. The legacy tool modals further down `index.html` are still live: the Toolbox panel borrows them. |
 | Worker routes and data | `worker/index.js`, `worker/gig-picks.json`, `migrations/` | Spotify listening data, heart rate, steps, gigs, Game card (PlayStation + Steam). Gig Finder rebuilt 2026-10-02. Untouched by the Parwani-DOS redesign so far (Phase 1 is frontend-only). |
 
 ## Media tracker (how it works, for the next session and the weekly routine)
@@ -106,7 +106,7 @@ Milind: the landing title didn't fill the gap beside about.txt (screenshot at ~1
 
 **Phase 9 accessibility:** WCAG ratios computed per theme. Mono and Night pass everywhere. Paper's `--ok`/`--warn` are 1.4–1.7:1 as text, so Paper sets `--v2-green: #1d5e33`, `--v2-yellow: #6b4700` (≥ 4.9:1 on `--p2`) and `--dim: #55534c` (was 4.37:1 on `--p2`); the journal chips on photos use fixed light colours. Unbuilt tools use `--dim` text instead of 50% opacity (failed AA). Journal panels became `<div role=tabpanel>` (not allowed on `<article>`); the Spotify title is a `<p>` (it was an h3 before any h2). Dialogs are `role=dialog aria-modal` and labelled; icons are `aria-hidden`.
 
-Versions: `ui-v2.css?v=30`, `ui-v2.js?v=26`, `pdos-icons.js?v=2`.
+Versions (first push): `ui-v2.css?v=30`, `ui-v2.js?v=26`, `pdos-icons.js?v=2`.
 
 Tested (headless Edge via puppeteer-core in a temp folder, `wrangler dev`, production API fixtures; Claude in Chrome froze on a 2560px iframe in a background window, so the layout pass moved to puppeteer):
 - All 7 sections at 2560×1300, 1920×969, 1440×789, 1366×657, 1280×720, 1100×620, 1024×700, 768×1024, 390×844, 360×740: no window past its section, no child outside its card (the only flags left are intended: Media's scaled blur backdrop and a long track name clipped by its own ellipsis), titles not clipped, no page errors.
@@ -114,7 +114,8 @@ Tested (headless Edge via puppeteer-core in a temp folder, `wrangler dev`, produ
 - Champion Run: single/cross mode, gen chips, 7th pick refused, ×1.95 Silver with moves+potions, ×2.73 Gold with random, pool locked + Reroll, CTA message, saved to `localStorage`. Phone: window full-screen, every box readable.
 - Toolbox: Tempo Tap 4 taps 500ms apart → 60 BPM; switching to Password Generator returns Tempo's modal to `<body>` without `.open` and generates a 16-char password; a "still being built" tool shows its message with an empty slot; QR code renders for a URL. Phone: full-screen sheet.
 - Hover states of every icon checked by screenshot (book opens, board draws, lid opens, projector beam, Spotify glow, guitar fire, ball opens, safe opens). Paper theme screenshots of Projects and Toolbox.
-- Lighthouse (local `wrangler dev`, mobile): accessibility 100, best practices 96 (console errors are the local 503s from the API without secrets). Performance measured on production after deploy — see the session log.
+- Lighthouse (local `wrangler dev`, mobile): accessibility 100, best practices 96 (console errors are the local 503s from the API without secrets).
+- **Performance follow-up (same day, second push):** production Lighthouse after the first push was 75 (it was 90 before the redesign). Two causes, measured by blocking `pdos-icons.js`: the icons' idle animations (the guitar's flame layers toggle visibility on hundreds of cells, even while invisible) cost ~7.5 s of paint work, and the LCP element is the big title, which a script resized after the fonts loaded (~4 s render delay). Fixes: icon animations run only while hovered (`.is-on`) and never off screen (`.is-offscreen` via IntersectionObserver) — the Poké Ball still bobs all the time as the spec says; the title is now sized in CSS (`min(19.5cqw, 23.5vh, 340px)` on a `container-type: inline-size` cell, 15vh below 800px tall; "PORTFOLIO." is 5.07em wide in Pixelify), so `fitPortfolioTitle()` is gone; PixC got `font-display: swap`. Paint work went from 7.6 s to 0.6 s. Versions now `ui-v2.css?v=31`, `ui-v2.js?v=27`, `pdos-icons.js?v=3`.
 
 ### 2026-10-07 — Parwani-DOS redesign, Phase 3: Journal (+ Phase 2 widget fixes)
 

@@ -47,29 +47,6 @@
     }
   }
 
-  function fitPortfolioTitle() {
-    const title = document.querySelector('.v2-display');
-    if (!title) return;
-    if (window.innerWidth <= 720) {
-      title.style.fontSize = '';
-      return;
-    }
-    // The widest line fills the title cell. The element itself spans the cell, so its own
-    // scrollWidth says nothing about the text: measure the text with a Range instead. Pixel-font
-    // text scales linearly, so one measurement at 100px gives the size. Capped by height (two
-    // lines) so the tiles below keep their room.
-    const avail = title.parentElement.clientWidth;
-    if (!avail) return;
-    const range = document.createRange();
-    range.selectNodeContents(title);
-    title.style.fontSize = '100px';
-    const width = range.getBoundingClientRect().width;
-    if (!width) return;
-    // Short screens (< 800px tall) cap it lower so the tiles below keep room for their icons.
-    const cap = Math.min(window.innerHeight * (window.innerHeight < 800 ? .15 : .235), 340);
-    title.style.fontSize = `${Math.max(28, Math.min(cap, Math.floor(100 * avail / width * .99)))}px`;
-  }
-
   // Shrinks [data-fit] titles until they fit their box in data-fit lines (1 or 2), down to 70%
   // of the CSS size. Titles with data-fit-max may then take extra lines, shrinking to 55%.
   // Re-run whenever a title's text changes or the window resizes.
@@ -104,13 +81,11 @@
   window.addEventListener('resize', () => {
     window.cancelAnimationFrame(resizeFrame);
     resizeFrame = window.requestAnimationFrame(() => {
-      fitPortfolioTitle();
       fitHeadline();
       fitText();
     });
   });
   document.fonts?.ready.then(() => {
-    fitPortfolioTitle();
     fitHeadline();
     fitText();
   });

@@ -16,8 +16,8 @@
    .portfolio-v2 and alias the existing --v2-* tokens to the new --bg/--fg/--p1.../--ok/--warn
    set, so every component already wired to --v2-bg, --v2-panel etc. recolours with no changes
    of its own. "Mono" reproduces the old locked greyscale palette exactly. */
-@font-face { font-family: 'PixC'; src: url('/assets/fonts/PixC-400.otf') format('opentype'); font-weight: 400 599; unicode-range: U+0043, U+0063; }
-@font-face { font-family: 'PixC'; src: url('/assets/fonts/PixC-700.otf') format('opentype'); font-weight: 600 900; unicode-range: U+0043, U+0063; }
+@font-face { font-family: 'PixC'; src: url('/assets/fonts/PixC-400.otf') format('opentype'); font-weight: 400 599; font-display: swap; unicode-range: U+0043, U+0063; }
+@font-face { font-family: 'PixC'; src: url('/assets/fonts/PixC-700.otf') format('opentype'); font-weight: 600 900; font-display: swap; unicode-range: U+0043, U+0063; }
 
 .portfolio-v2 {
   --display: 'PixC', 'Pixelify Sans', sans-serif;
@@ -179,6 +179,17 @@ body.locked { overflow: auto !important; height: auto !important; }
 .pdos-title-cell { min-width: 0; display: flex; align-items: flex-end; overflow: hidden; }
 /* The title spans its whole cell so fitPortfolioTitle() fits the widest line to the cell, not to itself. */
 .pdos-title-cell .v2-display { flex: 1 1 auto; min-width: 0; }
+/* Title size: the widest line fills the cell. In Pixelify Sans "PORTFOLIO." is 5.07em wide, so
+   19.5cqw fills the cell. Capped by height (two lines) so the tiles keep their room, lower on
+   short screens so the tile icons stay visible. Pure CSS so the LCP element paints at its final
+   size without waiting for script. */
+@media (min-width: 721px) {
+  .pdos-title-cell { container-type: inline-size; }
+  .pdos-title-cell .v2-display { font-size: min(19.5cqw, 23.5vh, 340px); }
+}
+@media (min-width: 721px) and (max-height: 799px) {
+  .pdos-title-cell .v2-display { font-size: min(19.5cqw, 15vh, 340px); }
+}
 .v2-display { margin: 0; font-family: var(--display); font-weight: 400; text-transform: uppercase; line-height: 1.02; letter-spacing: -.02em; white-space: nowrap; font-size: 12vw; }
 
 /* Generic "window": a filled title bar (filename + index) over a flat body. Every Home widget
@@ -426,6 +437,7 @@ body.locked { overflow: auto !important; height: auto !important; }
 .pdos-icon { display: inline-flex; flex: 0 0 auto; }
 .pdos-icon--fit { position: relative; display: block; width: 100%; height: 100%; }
 .pdos-icon--fit > div { position: absolute !important; left: 50%; top: 50%; translate: -50% -50%; }
+.pdos-icon:not(.is-on):not([data-icon="ball"]) *, .pdos-icon.is-offscreen * { animation-play-state: paused !important; }
 .pdos-tile-icon { display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 4px 0; }
 
 /* Projects (Phase 4): six cards and the Champion Run cartridge; each opens a window. */

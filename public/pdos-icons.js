@@ -354,6 +354,7 @@
     const st = states.get(el);
     if (!st) return;
     st.hovered = on;
+    el.classList.toggle('is-on', on);
     if (on && !st.on) st.on = st.fn(st.P, true);
     st.live = sync(st.live, on ? st.on : st.off);
   }
@@ -382,6 +383,10 @@
       window.cancelAnimationFrame(frame);
       frame = window.requestAnimationFrame(() => icons.forEach(render));
     });
+    if ('IntersectionObserver' in window) {
+      const io = new IntersectionObserver((entries) => entries.forEach((entry) => entry.target.classList.toggle('is-offscreen', !entry.isIntersecting)));
+      icons.forEach((el) => io.observe(el));
+    }
     // Fitted icons whose box was hidden (0x0) at first render get sized once they appear.
     if ('ResizeObserver' in window) {
       const ro = new ResizeObserver((entries) => entries.forEach((entry) => render(entry.target)));
