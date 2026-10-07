@@ -18,7 +18,7 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 
 | Area | Files | Notes |
 |---|---|---|
-| Visible portfolio UI | `public/index.html` (the `.portfolio-v2` block only), `public/ui-v2.css`, `public/ui-v2.js`, `public/pdos-icons.js` | Parwani-DOS redesign (see `design_handoff_parwani_dos/`), every section migrated. Cache-bust versions: `ui-v2.css?v=37`, `ui-v2.js?v=30`, `pdos-icons.js?v=5` — bump on every change. The legacy tool modals further down `index.html` are still live: the Toolbox panel borrows them. |
+| Visible portfolio UI | `public/index.html` (the `.portfolio-v2` block only), `public/ui-v2.css`, `public/ui-v2.js`, `public/pdos-icons.js` | Parwani-DOS redesign (see `design_handoff_parwani_dos/`), every section migrated. Cache-bust versions: `ui-v2.css?v=38`, `ui-v2.js?v=30`, `pdos-icons.js?v=5` — bump on every change. The legacy tool modals further down `index.html` are still live: the Toolbox panel borrows them. |
 | Worker routes and data | `worker/index.js`, `worker/gig-picks.json`, `migrations/` | Spotify listening data, heart rate, steps, gigs, Game card (PlayStation + Steam). Gig Finder rebuilt 2026-10-02. Untouched by the Parwani-DOS redesign so far (Phase 1 is frontend-only). |
 
 ## Media tracker (how it works, for the next session and the weekly routine)
@@ -87,6 +87,10 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 - Lighthouse `valid-source-maps` flags a third-party library map; it doesn't affect the score categories that matter (production: 90 / 100 / 100).
 
 ## Work log (newest first)
+
+### 2026-10-07 — Victory Road card: Poké Ball centred
+
+- Milind: the Projects card's Poké Ball bobbed out of its box. `.pdos-champ-ball` now centres its sprite frame (`align-items/justify-content: center`), so the ball sits on the card's centre line and the bob stays inside. Measured over a full bob cycle at 1920×969, 1366×657 and 1100×620: ball always ≥12px inside the card. `ui-v2.css?v=38`.
 
 ### 2026-10-07 — Home matches the Claude Design mockup 1:1; Media and Gigs show six per batch
 

@@ -473,7 +473,9 @@ body.locked { overflow: auto !important; height: auto !important; }
 .pdos-champ-card.is-soon:hover { background: var(--v2-panel); color: var(--v2-fg); outline-color: var(--v2-soft-line); }
 .pdos-extra.is-soon:hover { border-color: var(--v2-soft-line); color: var(--v2-fg); }
 .pdos-champ-lockup { align-self: stretch; display: flex; align-items: center; gap: 20px; min-height: 0; }
-.pdos-champ-ball { width: clamp(56px, 6vw, 90px); align-self: stretch; }
+/* The sprite frame (ball + bob room + shadow) sits on the card's centre line, so the bob never
+   reaches the card edge. */
+.pdos-champ-ball { width: clamp(56px, 6vw, 90px); align-self: stretch; align-items: center; justify-content: center; }
 .pdos-champ-word { margin: 0; font-family: var(--display); font-weight: 700; font-size: clamp(1.9rem, min(4.2vw, 6.6vh), 3.9rem); line-height: .88; text-transform: uppercase; white-space: nowrap; }
 .pdos-champ-copy { min-width: 0; display: flex; flex-direction: column; gap: 8px; }
 .pdos-champ-meta { display: flex; gap: 10px; align-items: center; font-size: .69rem; text-transform: uppercase; }
