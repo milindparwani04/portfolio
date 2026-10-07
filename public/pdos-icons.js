@@ -351,6 +351,7 @@
   }
 
   function setOn(el, on) {
+    if (!states.has(el)) render(el);
     const st = states.get(el);
     if (!st) return;
     st.hovered = on;
@@ -365,11 +366,7 @@
 
   function init() {
     const icons = [...document.querySelectorAll('.pdos-icon[data-icon]')];
-    const hosts = new Set();
-    icons.forEach((el) => {
-      render(el);
-      hosts.add(hostOf(el));
-    });
+    const hosts = new Set(icons.map(hostOf));
     hosts.forEach((host) => {
       const mine = icons.filter((el) => hostOf(el) === host);
       const set = (on) => mine.forEach((el) => setOn(el, on));
@@ -378,18 +375,43 @@
       host.addEventListener('focusin', () => set(true));
       host.addEventListener('focusout', (event) => { if (!host.contains(event.relatedTarget) && !host.matches(':hover')) set(false); });
     });
+
+    // Drawn lazily: an icon is built when it comes within a screen of the viewport, one icon per
+    // task, so building ~4,000 sprite cells never blocks the page in one long task.
+    const queue = [];
+    const queued = new WeakSet();
+    let pumping = false;
+    const pump = () => {
+      const el = queue.shift();
+      if (el) render(el);
+      if (queue.length) window.setTimeout(pump, 0);
+      else pumping = false;
+    };
+    const enqueue = (el) => {
+      if (queued.has(el)) return;
+      queued.add(el);
+      queue.push(el);
+      if (!pumping) { pumping = true; window.setTimeout(pump, 0); }
+    };
+    if ('IntersectionObserver' in window) {
+      // Off-screen icons also pause their animations (.is-offscreen).
+      const io = new IntersectionObserver((entries) => entries.forEach((entry) => {
+        entry.target.classList.toggle('is-offscreen', !entry.isIntersecting);
+        if (entry.isIntersecting) enqueue(entry.target);
+      }), { rootMargin: '100% 0px' });
+      icons.forEach((el) => io.observe(el));
+    } else {
+      icons.forEach(enqueue);
+    }
+
     let frame = 0;
     window.addEventListener('resize', () => {
       window.cancelAnimationFrame(frame);
-      frame = window.requestAnimationFrame(() => icons.forEach(render));
+      frame = window.requestAnimationFrame(() => icons.forEach((el) => { if (states.has(el)) render(el); }));
     });
-    if ('IntersectionObserver' in window) {
-      const io = new IntersectionObserver((entries) => entries.forEach((entry) => entry.target.classList.toggle('is-offscreen', !entry.isIntersecting)));
-      icons.forEach((el) => io.observe(el));
-    }
-    // Fitted icons whose box was hidden (0x0) at first render get sized once they appear.
+    // Fitted icons whose box changes size (or was hidden at first) are redrawn at the new size.
     if ('ResizeObserver' in window) {
-      const ro = new ResizeObserver((entries) => entries.forEach((entry) => render(entry.target)));
+      const ro = new ResizeObserver((entries) => entries.forEach((entry) => { if (states.has(entry.target)) render(entry.target); }));
       icons.filter((el) => !el.dataset.iconP).forEach((el) => ro.observe(el));
     }
   }
