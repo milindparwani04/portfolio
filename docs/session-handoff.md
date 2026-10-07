@@ -80,7 +80,7 @@ Long-term goal: a portfolio that feels like an enterprise-quality product — fa
 Priorities, in order:
 
 1. Close the open security findings (see [Security Handoff](security-handoff.md) §4) before shipping new public endpoints. Most urgent operational item: confirm Workers Builds' non-production branch command is `npx wrangler versions upload` — until then every branch push deploys to production.
-2. **Next implementation:** Victory Road. Its master handoff is [`docs/victory-road-master-prompt.md`](victory-road-master-prompt.md); the next agent starts with the read-only Phase 0 discovery/architecture audit and does not implement until Milind approves the plan. The existing setup remains disabled as "Coming soon."
+2. **Next implementation:** Victory Road Phase 2 (battle engine vertical slice). Build record: [`victory-road-build.md`](victory-road-build.md). Entry points stay "Coming soon" until Phase 6; `?vr` opens it for testing.
 3. Finish API-integrated projects: Sounds Like, then Where Next (with Liveliness Index).
 4. Activate remaining Toolbox placeholders, client-side tools first (no new backend risk).
 5. Parked: real-time multiplayer "swipe to decide where to go out" — needs WebSockets/Durable Objects or Supabase, a places API and match logic. Do not start until 1–4 are done.
@@ -118,6 +118,14 @@ External accounts connected (owner-only): Spotify (re-authorize at `/api/spotify
 Settled removals (do not re-propose without flagging): YouTube to MP3/MP4/WAV converters (ToS and backend complexity), Seamless Set project, standalone Liveliness Index (merged into Where Next), public location card (built and dropped 2026-10-04: Milind judged showing his whereabouts not responsible).
 
 ## Session log (newest first)
+
+### 2026-10-07 — Victory Road Phase 0 + Phase 1 (setup), still hidden
+Agent: Claude · Model: Opus 5.5
+Done:
+- Phase 0 research and Milind's decisions recorded in [`victory-road-build.md`](victory-road-build.md): doubles bring 4, Level Cap 45, a 2-Potion bag, Showdown simulator, self-hosted PokeAPI sprites as a fan project, push each phase hidden.
+- Phase 1: the setup window now lists all 1,127 Pokémon and forms with sprites, has a reorderable six-slot team, a hidden random team and the nine modifiers. New files: `public/vr/`, `public/assets/vr/sprites/` (5 MB), `scripts/vr/build-dex.mjs`, `tests/vr/`. Loaded only when the window opens.
+- Entry points still say "Coming soon"; add `?vr` to the URL to open it.
+- Also: Victory Road card's Poké Ball centred so its bob stays in the card.
 
 ### 2026-10-07 — Victory Road master implementation handoff
 Agent: Codex

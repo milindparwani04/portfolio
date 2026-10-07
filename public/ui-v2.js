@@ -889,6 +889,8 @@
     const focusables = (el) => [...el.querySelectorAll('button:not(:disabled), a[href], iframe, input, select, textarea, [tabindex]:not([tabindex="-1"])')]
       .filter((node) => node.offsetParent !== null || node === document.activeElement);
 
+    const openVictoryRoad = initChampionRun(champOverlay);
+
     function showOverlay(overlay) {
       if (openOverlay) hideOverlay({ restoreFocus: false });
       returnFocus = document.activeElement;
@@ -909,7 +911,7 @@
     }
 
     function openProject(key) {
-      if (key === 'champion') { showOverlay(champOverlay); return; }
+      if (key === 'champion') { showOverlay(champOverlay); openVictoryRoad(); return; }
       const p = PDOS_PROJECTS[key];
       if (!p) return;
       projectOverlay.querySelector('.pdos-dialog').style.setProperty('--dialog-bar', p.color);
@@ -976,129 +978,52 @@
       else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
     });
 
-    initChampionRun(champOverlay);
     initToolbox((on) => setLock('tool', on), () => Boolean(openOverlay));
   }
 
-  // Champion Run setup (Phase 5): pool mode, generations, a team of up to 6, modifiers and the
-  // reward tier they add up to. The battle itself is a later spec; the setup is remembered.
+  // Victory Road (project 07). Its code and Pokédex load only the first time the window opens
+  // (/vr/*.js, /vr/vr.css, /vr/dex.json). The entry points stay "coming soon" until the battle ships;
+  // adding ?vr to the URL switches them on for testing.
+  const VR_VERSION = '1';
+  let vrLoading = null;
+  function loadVictoryRoad() {
+    if (!vrLoading) {
+      const css = document.createElement('link');
+      css.rel = 'stylesheet';
+      css.href = `/vr/vr.css?v=${VR_VERSION}`;
+      document.head.appendChild(css);
+      const script = (src) => new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = `${src}?v=${VR_VERSION}`;
+        s.onload = resolve;
+        s.onerror = reject;
+        document.body.appendChild(s);
+      });
+      vrLoading = script('/vr/vr-core.js').then(() => script('/vr/vr-setup.js')).catch((error) => { vrLoading = null; throw error; });
+    }
+    return vrLoading;
+  }
   function initChampionRun(overlay) {
-    const DEX = {
-      1: ['Bulbasaur', 'Charmander', 'Squirtle', 'Pikachu', 'Gengar', 'Dragonite', 'Snorlax', 'Lapras'],
-      2: ['Chikorita', 'Cyndaquil', 'Totodile', 'Ampharos', 'Scizor', 'Tyranitar', 'Umbreon', 'Heracross'],
-      3: ['Treecko', 'Torchic', 'Mudkip', 'Gardevoir', 'Aggron', 'Salamence', 'Metagross', 'Milotic'],
-      4: ['Turtwig', 'Chimchar', 'Piplup', 'Lucario', 'Garchomp', 'Togekiss', 'Weavile', 'Roserade'],
-      5: ['Snivy', 'Tepig', 'Oshawott', 'Excadrill', 'Hydreigon', 'Volcarona', 'Chandelure', 'Zoroark'],
-      6: ['Chespin', 'Fennekin', 'Froakie', 'Greninja', 'Aegislash', 'Sylveon', 'Talonflame', 'Goodra'],
-      7: ['Rowlet', 'Litten', 'Popplio', 'Mimikyu', 'Toxapex', 'Kommo-o', 'Decidueye', 'Lycanroc'],
-      8: ['Grookey', 'Scorbunny', 'Sobble', 'Dragapult', 'Corviknight', 'Toxtricity', 'Grimmsnarl', 'Cinderace'],
-      9: ['Sprigatito', 'Fuecoco', 'Quaxly', 'Kingambit', 'Gholdengo', 'Tinkaton', 'Baxcalibur', 'Annihilape']
-    };
-    const ROMAN = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX'];
-    const MODS = [
-      { k: 'random', label: 'Random team — all generations', note: 'Six Pokémon drawn from Gen I–IX. Pool locked.', m: 1.4 },
-      { k: 'moves', label: 'Random moves', note: 'Every moveset is rerolled.', m: 1.5 },
-      { k: 'potions', label: 'No potions', note: 'No healing items in battle.', m: 1.3 },
-      { k: 'cap', label: 'Level cap 50', note: 'Your team is capped. The champion is not.', m: 1.2 },
-      { k: 'noswitch', label: 'No switching', note: 'A Pokémon stays in until it faints.', m: 1.25 }
-    ];
-    const TIERS = [['Master', 4], ['Gold', 2.5], ['Silver', 1.75], ['Bronze', 1]];
-    const ALL = Object.values(DEX).flat();
-    const genOf = (name) => Number(Object.keys(DEX).find((g) => DEX[g].includes(name)));
-    const STORE = 'pdosChampionRun';
-
-    let st = { mode: 'cross', gen: 4, gens: [1, 4, 9], team: [], mods: { random: false, moves: false, potions: false, cap: false, noswitch: false } };
-    try {
-      const saved = JSON.parse(window.localStorage.getItem(STORE) || 'null');
-      if (saved && Array.isArray(saved.team) && Array.isArray(saved.gens)) st = { ...st, ...saved, mods: { ...st.mods, ...saved.mods } };
-    } catch (_) { /* private mode or bad data: start fresh */ }
-
-    const el = {
-      gens: byId('pdosCrGens'), pool: byId('pdosCrPool'), poolNote: byId('pdosCrPoolNote'), team: byId('pdosCrTeam'),
-      teamLabel: byId('pdosCrTeamLabel'), reroll: byId('pdosCrReroll'), mods: byId('pdosCrMods'), mult: byId('pdosCrMult'),
-      tier: byId('pdosCrTier'), cta: byId('pdosCrCta'), ctaText: byId('pdosCrCtaText'), status: byId('pdosCrStatus')
-    };
-    if (Object.values(el).some((node) => !node)) return;
-
-    const active = () => (st.mode === 'single' ? [st.gen] : st.gens);
-    const fitTeam = (team, gens) => (st.mods.random ? team : team.filter((n) => gens.includes(genOf(n))));
-    const rollTeam = () => [...ALL].sort(() => Math.random() - 0.5).slice(0, 6);
-    const button = (cls, html, onClick, pressed) => {
-      const b = document.createElement('button');
-      b.type = 'button';
-      if (cls) b.className = cls;
-      b.innerHTML = html;
-      if (pressed !== undefined) b.setAttribute('aria-pressed', String(pressed));
-      b.addEventListener('click', onClick);
-      return b;
-    };
-    const say = (text) => { el.status.textContent = text; };
-
-    function render() {
-      const gens = active();
-      const random = st.mods.random;
-      overlay.querySelectorAll('[data-cr-mode]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.crMode === st.mode)));
-      el.gens.replaceChildren(...[1, 2, 3, 4, 5, 6, 7, 8, 9].map((g) => button('', `Gen ${ROMAN[g]}`, () => {
-        if (st.mode === 'single') { st.gen = g; st.team = fitTeam(st.team, [g]); }
-        else {
-          st.gens = st.gens.includes(g) ? st.gens.filter((x) => x !== g) : [...st.gens, g].sort((a, b) => a - b);
-          if (!st.gens.length) st.gens = [g];
-          st.team = fitTeam(st.team, st.gens);
-        }
-        update();
-      }, gens.includes(g))));
-      el.pool.classList.toggle('is-locked', random);
-      el.poolNote.textContent = random ? 'Locked — random team is on' : (st.mode === 'single' ? `Gen ${ROMAN[st.gen]} only` : `${gens.length} gens mixed`);
-      el.pool.replaceChildren(...gens.flatMap((g) => DEX[g].map((name) => {
-        const b = button('', `<span>${escapeHtml(name)}</span><span>${ROMAN[g]}</span>`, () => {
-          if (st.team.includes(name)) st.team = st.team.filter((x) => x !== name);
-          else if (st.team.length < 6) st.team = [...st.team, name];
-          else { say('Team is full — remove one first.'); return; }
-          update();
-        }, st.team.includes(name));
-        b.disabled = random;
-        return b;
-      })));
-      el.teamLabel.textContent = `02 / Team ${st.team.length}/6`;
-      el.reroll.hidden = !random;
-      el.team.replaceChildren(...Array.from({ length: 6 }, (_, i) => {
-        const name = st.team[i];
-        const b = button(name ? 'is-filled' : '', `<span>${String(i + 1).padStart(2, '0')}</span><span>${name ? `${escapeHtml(name)} · ${ROMAN[genOf(name)]}` : 'Empty'}</span>`, () => {
-          if (!name || random) return;
-          st.team = st.team.filter((x) => x !== name);
-          update();
-        });
-        b.setAttribute('aria-label', name ? `Slot ${i + 1}: ${name}${random ? '' : ', remove'}` : `Slot ${i + 1}: empty`);
-        return b;
-      }));
-      el.mods.replaceChildren(...MODS.map((m) => button('pdos-cr-mod', `<span class="pdos-cr-mod-box" aria-hidden="true"></span><span class="pdos-cr-mod-text"><span>${m.label}</span><span>${m.note}</span></span><span class="pdos-cr-mod-x">×${m.m}</span>`, () => {
-        st.mods = { ...st.mods, [m.k]: !st.mods[m.k] };
-        if (m.k === 'random') st.team = st.mods.random ? rollTeam() : [];
-        update();
-      }, st.mods[m.k])));
-      const mult = MODS.reduce((acc, m) => acc * (st.mods[m.k] ? m.m : 1), 1);
-      el.mult.textContent = `×${mult.toFixed(2)}`;
-      el.mult.classList.toggle('is-up', mult > 1 && mult < 2.5);
-      el.mult.classList.toggle('is-gold', mult >= 2.5);
-      el.tier.textContent = `Reward multiplier · ${TIERS.find((t) => mult >= t[1])[0]} tier`;
-      el.ctaText.textContent = st.team.length ? `Enter battle · ${st.team.length} Pokémon` : 'Pick at least one Pokémon';
-      el.cta.disabled = !st.team.length;
+    if (new URLSearchParams(window.location.search).has('vr')) {
+      document.querySelectorAll('.pdos-champ-card.is-soon, .pdos-extra--champion.is-soon').forEach((el) => {
+        el.classList.remove('is-soon');
+        el.setAttribute('data-open-project', 'champion');
+        el.setAttribute('role', 'button');
+        el.setAttribute('tabindex', '0');
+        el.addEventListener('keydown', (event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); el.click(); } });
+        el.querySelector('.pdos-champ-insert')?.replaceChildren('Insert cartridge ▸');
+      });
     }
-
-    function update() {
-      say('');
-      try { window.localStorage.setItem(STORE, JSON.stringify(st)); } catch (_) { /* private mode */ }
-      render();
-    }
-
-    overlay.querySelectorAll('[data-cr-mode]').forEach((b) => b.addEventListener('click', () => {
-      st.mode = b.dataset.crMode;
-      st.team = fitTeam(st.team, active());
-      update();
-    }));
-    el.reroll.addEventListener('click', () => { st.team = rollTeam(); update(); });
-    el.cta.addEventListener('click', () => say('The battle isn’t built yet — your setup is saved for when it is.'));
-    render();
+    return () => {
+      const root = overlay.querySelector('.pdos-cr');
+      loadVictoryRoad().then(() => window.VictoryRoad.mount(root)).catch(() => {
+        if (root.querySelector('.vr-loading')) return;
+        const note = document.createElement('p');
+        note.className = 'vr-loading';
+        note.textContent = 'Victory Road didn’t load. Close the window and open it again to retry.';
+        root.appendChild(note);
+      });
+    };
   }
 
   // Toolbox (Phase 6): picking a tool shrinks the grid and slides in a panel. Working tools borrow

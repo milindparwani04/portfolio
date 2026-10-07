@@ -88,6 +88,12 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 
 ## Work log (newest first)
 
+### 2026-10-07 — Victory Road Phase 0 + Phase 1
+
+- Full detail (decisions, sources, Phase 1 build and tests) lives in [`victory-road-build.md`](victory-road-build.md); update it every phase.
+- `ui-v2.js`: `initChampionRun()` is now a lazy loader (`loadVictoryRoad`, `VR_VERSION`) plus the `?vr` test switch; the old inline setup code and its 72-name DEX are gone. The old `.pdos-cr-list` / `.pdos-cr-team` rules in `ui-v2.css` are now unused (left in place; remove in Phase 6). `index.html` keeps only the window's title row. `ui-v2.js?v=31`.
+- Testing without `wrangler dev` running: the leftover `workerd` processes on :8787 kept serving `public/` from disk; the browser test is `%TEMP%/pdos/vr1.js <WxH>`.
+
 ### 2026-10-07 — Victory Road card: Poké Ball centred
 
 - Milind: the Projects card's Poké Ball bobbed out of its box. `.pdos-champ-ball` now centres its sprite frame (`align-items/justify-content: center`), so the ball sits on the card's centre line and the bob stays inside. Measured over a full bob cycle at 1920×969, 1366×657 and 1100×620: ball always ≥12px inside the card. `ui-v2.css?v=38`.

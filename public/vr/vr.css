@@ -1,0 +1,89 @@
+/* Victory Road (project 07): setup window additions. Loaded on demand with /vr/vr-setup.js; the
+   window shell, title row, toggles, generation chips, modifier rows and CTA reuse the .pdos-cr-*
+   rules in ui-v2.css. Sprites are pixel art, so every <img> here renders pixelated. */
+
+.vr-loading { margin: 0; padding: 24px 0; color: var(--v2-dim); font-size: .75rem; letter-spacing: .05em; text-transform: uppercase; }
+.vr-sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.vr-sprite { display: block; width: 100%; height: auto; aspect-ratio: 1; image-rendering: pixelated; object-fit: contain; }
+.vr-sprite.is-missing { background:
+  linear-gradient(45deg, transparent 45%, var(--v2-soft-line) 45% 55%, transparent 55%),
+  linear-gradient(-45deg, transparent 45%, var(--v2-soft-line) 45% 55%, transparent 55%); }
+
+/* 01 Pool */
+.vr-pool-tools { display: flex; flex-wrap: wrap; gap: 6px; align-items: stretch; }
+.vr-search { flex: 1 1 160px; min-width: 0; padding: 6px 10px; border: 1px solid var(--v2-soft-line); border-radius: 0; background: var(--v2-panel); color: var(--v2-fg); font: inherit; font-size: .75rem; }
+.vr-search::placeholder { color: var(--v2-dim); }
+.vr-search:focus-visible { outline: 2px solid var(--v2-yellow); outline-offset: -1px; }
+.vr-pool { flex: 1 1 auto; min-height: 160px; overflow: auto; overscroll-behavior: contain; display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); grid-auto-rows: min-content; gap: 6px; padding-right: 2px; }
+.vr-pool.is-locked { opacity: .35; }
+.pdos-cr .vr-mon[hidden] { display: none; }
+.pdos-cr .vr-mon { min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 4px 6px 8px; background: var(--v2-panel); text-align: center; }
+.vr-mon .vr-sprite { width: 64px; height: 64px; }
+.vr-mon-name { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .69rem; text-transform: uppercase; }
+.vr-mon-meta { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--v2-dim); font-size: .56rem; letter-spacing: .03em; text-transform: uppercase; }
+.pdos-cr .vr-mon:hover:not(:disabled) { background: var(--p3); }
+.pdos-cr .vr-mon[aria-pressed="true"] { background: var(--p3); outline: 1px solid var(--v2-green); outline-offset: -1px; }
+.pdos-cr .vr-mon:disabled { cursor: default; }
+.vr-pool-count { margin: 0; color: var(--v2-dim); font-size: .62rem; letter-spacing: .05em; text-transform: uppercase; }
+
+/* 02 Team: six slots, each a floating sprite with a slot number, a grip and a remove button. */
+.vr-team-box { flex: 0 0 auto; }
+.vr-team { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.vr-slot { position: relative; min-width: 0; height: 104px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding: 6px 6px 7px; background: var(--v2-panel); }
+.vr-slot.is-empty { justify-content: center; background: transparent; outline: 1px dashed var(--v2-soft-line); outline-offset: -1px; }
+.vr-slot.is-empty .vr-slot-name { color: var(--v2-dim); }
+.vr-slot-n { position: absolute; left: 6px; bottom: 7px; color: var(--v2-dim); font-size: .56rem; }
+.vr-slot.is-empty .vr-slot-n { top: 6px; bottom: auto; }
+.vr-slot-name { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .62rem; text-transform: uppercase; }
+.vr-slot.is-filled .vr-slot-name { padding: 0 18px; }
+.vr-slot.is-target { outline: 2px solid var(--v2-green); outline-offset: -2px; }
+.vr-slot.is-lifted { outline: 2px solid var(--v2-yellow); outline-offset: -2px; }
+.vr-slot.is-dragging { opacity: .3; }
+
+.pdos-cr .vr-grip { position: absolute; z-index: 2; left: 3px; top: 3px; width: 24px; height: 24px; padding: 0; display: grid; place-items: center; background: none; cursor: grab; touch-action: none; }
+.vr-grip span { width: 10px; height: 14px; background: radial-gradient(circle, var(--v2-dim) 1.5px, transparent 1.6px) 0 0 / 5px 5px; }
+.pdos-cr .vr-grip:active { cursor: grabbing; }
+.vr-grip:hover span, .vr-grip:focus-visible span { background-image: radial-gradient(circle, var(--v2-fg) 1.5px, transparent 1.6px); }
+.vr-grip:focus-visible, .vr-remove:focus-visible { outline: 2px solid var(--v2-yellow); outline-offset: 0; }
+.pdos-cr .vr-remove { position: absolute; z-index: 2; right: 3px; top: 3px; width: 24px; height: 24px; padding: 3px; background: none; }
+.vr-x-icon { display: block; width: 18px; height: 18px; background: #f4f3ef; border-radius: 50%; }
+.vr-remove:hover .vr-x-icon { background: #ffd2c4; }
+
+/* The bob: an original take on a floating pickup — a slow rise and fall with the shadow
+   tightening as the sprite lifts, phase-shifted per slot so the row never moves in step. */
+.vr-bob { position: relative; flex: 1 1 auto; min-height: 0; width: 100%; display: grid; place-items: center; }
+.vr-bob::after { content: ''; position: absolute; left: 50%; bottom: 2px; width: 34px; height: 4px; margin-left: -17px; background: rgba(0, 0, 0, .35); animation: vrshadow 2.6s ease-in-out infinite; animation-delay: calc(var(--i) * -.43s); }
+.vr-bob > .vr-sprite, .vr-bob > .vr-q-icon { position: relative; z-index: 1; animation: vrbob 2.6s ease-in-out infinite; animation-delay: calc(var(--i) * -.43s); }
+.vr-bob > .vr-sprite { width: 68px; height: 68px; }
+.vr-q-icon { width: 30px; height: 45px; filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, .45)); }
+.vr-slot.is-hidden .vr-slot-name { color: #ffd43b; }
+@keyframes vrbob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+@keyframes vrshadow { 0%, 100% { transform: scaleX(1); opacity: 1; } 50% { transform: scaleX(.7); opacity: .6; } }
+
+.vr-ghost { position: fixed; left: 0; top: 0; z-index: 10000; pointer-events: none; list-style: none; opacity: .9; box-shadow: 6px 6px 0 rgba(0, 0, 0, .5); outline: 2px solid var(--v2-yellow); outline-offset: -2px; }
+.vr-ghost .vr-bob > * { animation: none; }
+
+.vr-team-hint, .vr-mod-notes { margin: 0; color: var(--v2-dim); font-size: .62rem; line-height: 1.45; }
+.vr-mod-notes { padding-top: 6px; color: var(--v2-yellow); }
+.vr-disclaimer { flex: 0 0 auto; margin: 0; color: var(--v2-dim); font-size: .58rem; line-height: 1.5; }
+
+@media (max-width: 720px) {
+  .vr-pool { max-height: 52vh; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); }
+  .vr-slot { height: 96px; }
+  .vr-slot.is-filled .vr-slot-name { padding: 0 0 0 14px; }
+  .vr-mon-meta, .vr-pool-count, .vr-team-hint, .vr-mod-notes, .vr-disclaimer, .vr-slot-name { font-size: .7rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .vr-bob > .vr-sprite, .vr-bob > .vr-q-icon, .vr-bob::after { animation: none; }
+}
+
+/* Modifiers always keep a usable height (the window scrolls if it must); short screens get
+   smaller team slots so the list keeps most of its room. */
+.pdos-cr .vr-team-box ~ .pdos-cr-mods { min-height: 150px; }
+@media (min-width: 721px) and (max-height: 800px) {
+  .vr-slot { height: 78px; padding-bottom: 5px; }
+  .vr-bob > .vr-sprite { width: 52px; height: 52px; }
+  .vr-team-hint { display: none; }
+  .pdos-cr-top .pdos-champ-word { font-size: 2rem; }
+  .pdos-cr-mult strong { font-size: 2.4rem; }
+}
