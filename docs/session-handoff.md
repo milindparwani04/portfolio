@@ -119,6 +119,13 @@ Settled removals (do not re-propose without flagging): YouTube to MP3/MP4/WAV co
 
 ## Session log (newest first)
 
+### 2026-10-07 — Home matched 1:1 to the Claude Design mockup; six per batch on Media / Gigs
+Agent: Claude · Model: Opus 5.5
+Done:
+- Home on desktop is drawn on the mockup's 1440-wide canvas and scaled to the window (`.pdos-stage`, `--pdos-s`), so proportions match the design preview at any size. Section edges are the mockup's 12px (scaled).
+- Media and Gigs rails show six cards per batch (six columns on desktop, 2×3 on phones).
+- Details and tests: claude-agent-handoff.md work log.
+
 ### 2026-10-07 — Media / Gigs filters; Victory Road coming soon
 Agent: Claude · Model: Opus 5.5
 Done:

@@ -18,7 +18,7 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 
 | Area | Files | Notes |
 |---|---|---|
-| Visible portfolio UI | `public/index.html` (the `.portfolio-v2` block only), `public/ui-v2.css`, `public/ui-v2.js`, `public/pdos-icons.js` | Parwani-DOS redesign (see `design_handoff_parwani_dos/`), every section migrated. Cache-bust versions: `ui-v2.css?v=32`, `ui-v2.js?v=28`, `pdos-icons.js?v=5` — bump on every change. The legacy tool modals further down `index.html` are still live: the Toolbox panel borrows them. |
+| Visible portfolio UI | `public/index.html` (the `.portfolio-v2` block only), `public/ui-v2.css`, `public/ui-v2.js`, `public/pdos-icons.js` | Parwani-DOS redesign (see `design_handoff_parwani_dos/`), every section migrated. Cache-bust versions: `ui-v2.css?v=37`, `ui-v2.js?v=30`, `pdos-icons.js?v=5` — bump on every change. The legacy tool modals further down `index.html` are still live: the Toolbox panel borrows them. |
 | Worker routes and data | `worker/index.js`, `worker/gig-picks.json`, `migrations/` | Spotify listening data, heart rate, steps, gigs, Game card (PlayStation + Steam). Gig Finder rebuilt 2026-10-02. Untouched by the Parwani-DOS redesign so far (Phase 1 is frontend-only). |
 
 ## Media tracker (how it works, for the next session and the weekly routine)
@@ -52,7 +52,7 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 
 ## How the current UI works (for the next Claude session)
 
-- **Home dashboard:** a single grid with named areas (`.v2-dashboard`), columns `1.72fr 1fr .72fr .24fr 1.02fr`, rows `1fr 1.25fr .5fr`. Every cell is min-size 0 and clips its own content, so cards cannot overlap. The time and weather cards use container queries (`container-type: size`, `cqh` units) to size their content from the card itself; the weather card hides humidity/wind below 175 px tall.
+- **Home (desktop/tablet, ≥721×620):** drawn on the mockup's own canvas. `.pdos-stage` (inside Home's `.pdos-crt-slide`) is 1440 design px wide and scaled by `--pdos-s = max(.75, min(width/1440, (height-40)/900))` (`scaleHome()` in `ui-v2.js`, re-run on resize). Every size inside uses the mockup's px values; never use vw/vh there. The title is `min((100cqw - 754px) * .195, 15cqh)` against the stage; on wide windows about.txt takes the extra width. `--v2-gutter` is `12px * --pdos-s` for every section. Phones keep the fluid layout.
 - **Title fitting:** `fitText()` in `ui-v2.js` handles any element with `data-fit="1|2"` (line budget) and optional `data-fit-max` (extra lines allowed). It shrinks the font from the CSS size down to 70% within the budget, then for `data-fit-max` down to 55% with more lines. Lines are counted from `range.getClientRects()`, because Anton's tall glyphs make `scrollHeight` checks wrongly report overflow. Call `fitText(el)` after changing any fitted title's text; it also re-runs on resize and when fonts load. The headline and portfolio title keep their own fitters (`fitHeadline`, `fitPortfolioTitle`).
 - **Section paging:** `initSectionPager()` is active at ≥721 × ≥620 px. Each move is a critically damped spring (`OMEGA = 14`, 4 substeps per frame, ~0.6 s settle) driven by requestAnimationFrame, with `scroll-snap-type` switched off on `<html>` while it runs and restored when it lands. A move in flight is retargeted, not queued: the next step counts from `targetIndex`. Jumps of 2+ sections add `html.v2-jump-out` (sections fade to 0 over 150 ms), teleport to the target's neighbour, then fade in while the spring finishes. Wheel: a new gesture is a 200 ms pause, a direction change, or a delta >1.6× the previous one (>20 px, ≥250 ms since the last step), so a swipe during momentum counts but one flick or a fast wheel spin moves once; `deltaMode` lines/pages are normalised. Held keys step once per landing. A touch or scrollbar press mid-move stops the spring. Wheel, keys and in-page `#v2-*` links all go through `goTo()`. With reduced motion it jumps instantly. Phones scroll continuously.
 - **Empty and failure states:** gigs show "No upcoming gigs to show right now" (there is no invented fallback list — Rulebook §2.4); covers stay as grey squares until a real image loads; the listening rows read "Awaiting listening data".
@@ -87,6 +87,16 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 - Lighthouse `valid-source-maps` flags a third-party library map; it doesn't affect the score categories that matter (production: 90 / 100 / 100).
 
 ## Work log (newest first)
+
+### 2026-10-07 — Home matches the Claude Design mockup 1:1; Media and Gigs show six per batch
+
+- Milind: the live Home looked off next to the Claude Design preview (title too big, tiles short, icons small on wide screens) and asked for a 1:1 match; Media and Gigs should show six at a time (better on phones: 2×3).
+- **Home:** new `.pdos-stage` wrapper scaled like the mockup (see "How the current UI works"). Reference height 900, not the mockup's 760: Milind's preview was a 1440×~910 canvas, and 760 squeezes the tiles on 16:9 windows. Short-screen Home tweaks (the max-height 860/700 queries) removed — the canvas is never shorter than 760 design px now. To keep headlines.feed near the mockup's height: steps.sys hides its "Daily steps" label, bodies followed by a footer lose 8px bottom padding, Steam portrait art is 30px wide, weather hides humidity/wind.
+- **Rails:** `RAIL_SIZE = 6` in `createCardRail()`; `.v2-gigs` is six columns on desktop (two on phones); card titles `clamp(1rem, min(1.7vw, 3.8vh), 2rem)`. Copy changed to "Six at a time" / "6 results per batch".
+- Gutters: `--v2-gutter` 12px × scale (was 0.75–2.25rem) to match the mockup's edges.
+- Versions: `ui-v2.css?v=37`, `ui-v2.js?v=30`.
+- Tested (headless Edge, `wrangler dev`, production fixtures): screenshots of the mockup and the live page side by side at 1530×990 and 1920×969, plus 2560×1300, 1366×657, 1024×700, 768×1024; layout check at all 10 standard sizes clean except the phone playlists "A." overflow, which production also shows (pre-existing). Six cards per batch on Media and Gigs at 1530×990 and on phones.
+- Known: portrait tablets (768×1024) render the canvas at the .75 floor, so the title is small and tiles tall; acceptable for now.
 
 ### 2026-10-07 — Media / Gigs filters; Champion Run renamed Victory Road and switched off
 

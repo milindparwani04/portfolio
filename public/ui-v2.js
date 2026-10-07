@@ -77,10 +77,22 @@
     });
   }
 
+  // Home's canvas scale (see .pdos-stage in ui-v2.css): the mockup's 1440-wide design scaled to
+  // the space under the nav (900 design px tall, the proportions of the Claude Design preview), never below .75 so the small print stays readable.
+  const pagedQuery = window.matchMedia('(min-width: 721px) and (min-height: 620px)');
+  function scaleHome() {
+    const home = byId('v2-home');
+    if (!home || !pagedQuery.matches) return;
+    const scale = Math.max(0.75, Math.min(home.clientWidth / 1440, (home.clientHeight - 40) / 900));
+    document.documentElement.style.setProperty('--pdos-s', scale.toFixed(4));
+  }
+  scaleHome();
+
   let resizeFrame = 0;
   window.addEventListener('resize', () => {
     window.cancelAnimationFrame(resizeFrame);
     resizeFrame = window.requestAnimationFrame(() => {
+      scaleHome();
       fitHeadline();
       fitText();
     });
@@ -229,10 +241,11 @@
     return `${day(start)} ${month(start)} – ${day(last)} ${month(last)}${year}`;
   }
 
-  // Five-at-a-time card rail shared by the Gig Finder and the Media tracker: batch counter,
+  // Six-at-a-time card rail shared by the Gig Finder and the Media tracker: batch counter,
   // prev / pause / next, a 10-second countdown that holds on hover or focus, and an honest empty
   // state. `ids` are the element ids of one section; `renderCard(item, number)` returns a card.
   const RAIL_SECONDS = 10;
+  const RAIL_SIZE = 6;
   // filter (optional): { group: id of the chip group, test(item, key), label(key) }. The chips'
   // data-filter keys pick a subset; "all" shows everything. Changing it restarts at batch 1.
   function createCardRail({ url, ids, noun, renderCard, filter }) {
@@ -264,9 +277,9 @@
         renderTick();
         return;
       }
-      const batchCount = Math.max(1, Math.ceil(items.length / 5));
+      const batchCount = Math.max(1, Math.ceil(items.length / RAIL_SIZE));
       batch = (batch + batchCount) % batchCount;
-      list.innerHTML = items.slice(batch * 5, batch * 5 + 5).map((item, index) => renderCard(item, batch * 5 + index + 1)).join('');
+      list.innerHTML = items.slice(batch * RAIL_SIZE, (batch + 1) * RAIL_SIZE).map((item, index) => renderCard(item, batch * RAIL_SIZE + index + 1)).join('');
       fitText(list);
       byId(ids.batch).textContent = `Batch ${String(batch + 1).padStart(2, '0')} of ${String(batchCount).padStart(2, '0')}`;
       tick = 0;
