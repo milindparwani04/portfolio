@@ -132,6 +132,7 @@ Done:
 - Accessibility pass: Paper theme status/dim text darkened to meet AA; Lighthouse accessibility 100.
 Tested (how, result):
 - Headless Edge at ten sizes for all seven sections: no overflow, no page errors. Every window, the Champion Run logic and the working tools exercised by script. Details in the Claude handoff.
+- Production Lighthouse (mobile, three runs after the follow-up performance pushes): performance 90–91, accessibility 100, best practices 100. The first push had scored 75: idle icon animations and a script-resized title (the LCP element) were the cause; both fixed the same day, and the page now loads only Pixelify Sans.
 Known issues / not done:
 - Not built from the mockup: Media/Gigs filter chips and the playlists now-playing strip (no such behaviour existed). The four planned projects open a window that says they're planned.
 Next session starts with:

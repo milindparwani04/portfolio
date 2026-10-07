@@ -62,7 +62,7 @@ Full spec and interactive reference: `design_handoff_parwani_dos/` (`README.md`,
 | R-DOS-7 | Toolbox sliding panel | Live 2026-10-07 — every working tool runs in the panel with its existing logic (the panel borrows the legacy tool modal); unbuilt tools say "Still being built" |
 | R-DOS-8 | Media / Playlists / Gigs restyle | Live 2026-10-07 — windows with pink / green / yellow bars, same carousels. The mockup's All/Films/Games and Dubai/Abu Dhabi filter chips and the playlists now-playing strip were not built (no such behaviour on the current site) |
 | R-DOS-9 | Pixel icon sprites (Poké Ball, safe, terminal, bulb, skyline, globe, EQ, book, whiteboard, toolbox, projector, Spotify mark, guitar fire) | Live 2026-10-07 — `public/pdos-icons.js`, ported from the mockup; animate on hover and keyboard focus; still with reduced motion |
-| R-DOS-10 | Accessibility and Lighthouse pass for all three themes | Live 2026-10-07 — WCAG AA text contrast checked per theme (Paper got darker status/dim text tokens), dialogs and tabs have ARIA, focus trap in windows; Lighthouse in the Claude handoff |
+| R-DOS-10 | Accessibility and Lighthouse pass for all three themes | Live 2026-10-07 — WCAG AA text contrast checked per theme (Paper got darker status/dim text tokens), dialogs and tabs have ARIA, focus trap in windows. Production Lighthouse (mobile): performance 90–91, accessibility 100, best practices 100 |
 
 ## Projects
 
