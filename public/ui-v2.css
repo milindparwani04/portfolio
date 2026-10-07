@@ -423,7 +423,13 @@ body.locked { overflow: auto !important; height: auto !important; }
 .pdos-window--playlists { --bar: var(--ok); }
 .pdos-window--gigs { --bar: oklch(0.86 0.15 95); }
 .pdos-window-body { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; gap: 12px; padding: clamp(10px, 1.8vh, 16px); background: var(--v2-panel); }
-.pdos-sec-head { flex: 0 0 auto; }
+.pdos-sec-head { flex: 0 0 auto; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 12px 20px; }
+/* Filter chips (Media: All / Films / Games, Gigs: Both / Dubai / Abu Dhabi). */
+.pdos-filter { display: flex; gap: 4px; }
+.pdos-filter button { padding: 8px 12px; border: 0; background: var(--v2-panel-raised); color: var(--v2-fg); font: inherit; font-size: .75rem; letter-spacing: .04em; text-transform: uppercase; cursor: pointer; }
+.pdos-filter button:hover, .pdos-filter button:focus-visible { background: var(--bar); color: var(--on); }
+.pdos-filter button:focus-visible { outline: 2px solid var(--v2-fg); outline-offset: 2px; }
+.pdos-filter button[aria-pressed="true"] { background: var(--v2-fg); color: var(--v2-bg); }
 .pdos-sec-title { margin: 0; font-family: var(--display); font-weight: 700; font-size: clamp(2.6rem, min(6.4vw, 10vh), 6.5rem); line-height: .86; text-transform: uppercase; }
 .pdos-sec-kicker { margin: 6px 0 0; font-size: .75rem; letter-spacing: .12em; text-transform: uppercase; }
 /* Cards inside a window body sit one step lighter than the body. */
@@ -462,6 +468,10 @@ body.locked { overflow: auto !important; height: auto !important; }
 .pdos-project--crack:hover, .pdos-project--crack:focus-visible { background: #f4f3ef; color: #070707; }
 .pdos-champ-card { grid-column: 1 / -1; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: clamp(16px, 2.2vw, 32px); padding: 10px 22px; outline: 1px dashed var(--v2-soft-line); outline-offset: -1px; }
 .pdos-champ-card:hover, .pdos-champ-card:focus-visible { background: #f7c947; color: #070707; outline-color: transparent; }
+/* Victory Road is coming soon: no hover fill and nothing to click (its icon still animates). */
+.pdos-champ-card.is-soon, .pdos-extra.is-soon { cursor: default; }
+.pdos-champ-card.is-soon:hover { background: var(--v2-panel); color: var(--v2-fg); outline-color: var(--v2-soft-line); }
+.pdos-extra.is-soon:hover { border-color: var(--v2-soft-line); color: var(--v2-fg); }
 .pdos-champ-lockup { align-self: stretch; display: flex; align-items: center; gap: 20px; min-height: 0; }
 .pdos-champ-ball { width: clamp(56px, 6vw, 90px); align-self: stretch; }
 .pdos-champ-word { margin: 0; font-family: var(--display); font-weight: 700; font-size: clamp(1.9rem, min(4.2vw, 6.6vh), 3.9rem); line-height: .88; text-transform: uppercase; white-space: nowrap; }
@@ -787,6 +797,8 @@ html { scrollbar-gutter: stable; }
   .pdos-tile { padding: 8px 10px; }
   .pdos-tile-foot { padding-top: 4px; }
   .pdos-boot-log { display: none; }
+  .pdos-window--playlists .v2-playlist-copy { padding-bottom: 8px; }
+  .pdos-window--playlists .v2-playlist { padding: 8px 12px; }
 }
 
 @media (max-width: 720px) {

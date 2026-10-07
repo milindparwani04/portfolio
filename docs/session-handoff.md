@@ -119,6 +119,17 @@ Settled removals (do not re-propose without flagging): YouTube to MP3/MP4/WAV co
 
 ## Session log (newest first)
 
+### 2026-10-07 — Media / Gigs filters; Victory Road coming soon
+Agent: Claude · Model: Opus 5.5
+Done:
+- Media has All / Films / Games chips and Gigs has Both / Dubai / Abu Dhabi chips (as in the mockup); the rotation restarts on the chosen subset.
+- Champion Run is renamed **Victory Road** and marked "Coming soon" on the Projects card and the Home extra; it can't be opened. Its setup window is kept for the next session.
+- The playlists now-playing strip from the mockup will not be built (Milind's call).
+Tested (how, result):
+- Headless Edge with production data: each chip shows only matching cards; Victory Road opens nothing; layout clean at ten sizes; no page errors.
+Next session starts with:
+- Victory Road (Milind plans to work on it on 2026-10-08).
+
 ### 2026-10-07 — Parwani-DOS Phases 4–9 (all in one push) + Home title fills its space
 Agent: Claude · Model: Opus 5.5
 Phase: 4–9 of 9 (Milind asked for them in one go without per-phase approval)

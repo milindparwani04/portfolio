@@ -233,10 +233,14 @@
   // prev / pause / next, a 10-second countdown that holds on hover or focus, and an honest empty
   // state. `ids` are the element ids of one section; `renderCard(item, number)` returns a card.
   const RAIL_SECONDS = 10;
-  function createCardRail({ url, ids, noun, renderCard }) {
+  // filter (optional): { group: id of the chip group, test(item, key), label(key) }. The chips'
+  // data-filter keys pick a subset; "all" shows everything. Changing it restarts at batch 1.
+  function createCardRail({ url, ids, noun, renderCard, filter }) {
     const list = byId(ids.list);
     if (!list) return;
+    let all = [];
     let items = [];
+    let filterKey = 'all';
     let loading = true;
     let batch = 0;
     let paused = false;
@@ -252,7 +256,8 @@
 
     function render() {
       if (!items.length) {
-        const message = loading ? `Loading ${noun}&hellip;` : `No ${noun} to show right now. Check back soon.`;
+        const what = filter && filterKey !== 'all' ? filter.label(filterKey) : noun;
+        const message = loading ? `Loading ${noun}&hellip;` : `No ${what} to show right now. Check back soon.`;
         list.innerHTML = `<div class="v2-panel v2-gig-empty">${message}</div>`;
         byId(ids.batch).textContent = 'Batch 00 of 00';
         tick = 0;
@@ -275,14 +280,28 @@
         if (!response.ok) throw new Error(`${url} failed`);
         const payload = await response.json();
         if (!Array.isArray(payload) || !payload.length) throw new Error('Empty');
-        items = payload;
+        all = payload;
+        applyFilter();
         batch = 0;
       } catch (_) {
+        all = [];
         items = [];
       }
       loading = false;
       render();
     }
+
+    function applyFilter() {
+      items = filter && filterKey !== 'all' ? all.filter((item) => filter.test(item, filterKey)) : all;
+    }
+    const chips = filter ? [...(byId(filter.group)?.querySelectorAll('[data-filter]') || [])] : [];
+    chips.forEach((chip) => chip.addEventListener('click', () => {
+      filterKey = chip.dataset.filter;
+      chips.forEach((c) => c.setAttribute('aria-pressed', String(c === chip)));
+      applyFilter();
+      batch = 0;
+      render();
+    }));
 
     byId(ids.prev)?.addEventListener('click', () => { batch -= 1; render(); });
     byId(ids.next)?.addEventListener('click', () => { batch += 1; render(); });
@@ -313,6 +332,11 @@
   createCardRail({
     url: '/api/gigs',
     noun: 'upcoming gigs',
+    filter: {
+      group: 'pdosGigFilter',
+      test: (gig, key) => (/abu dhabi/i.test(gig.venue || '') ? 'abu-dhabi' : 'dubai') === key,
+      label: (key) => (key === 'abu-dhabi' ? 'Abu Dhabi gigs' : 'Dubai gigs')
+    },
     ids: { list: 'v2GigList', batch: 'v2GigBatch', tick: 'v2GigTick', progress: 'v2GigProgress', prev: 'v2GigPrev', next: 'v2GigNext', pause: 'v2GigPause' },
     renderCard(gig, number) {
       // Artist photo and ticket page from the API; a plain grey block when there is no photo.
@@ -340,6 +364,11 @@
   createCardRail({
     url: '/api/media',
     noun: 'releases',
+    filter: {
+      group: 'pdosMediaFilter',
+      test: (item, key) => item.kind === key,
+      label: (key) => (key === 'game' ? 'game releases' : 'films')
+    },
     ids: { list: 'v2MediaList', batch: 'v2MediaBatch', tick: 'v2MediaTick', progress: 'v2MediaProgress', prev: 'v2MediaPrev', next: 'v2MediaNext', pause: 'v2MediaPause' },
     renderCard(item, number) {
       const image = /^(https:\/\/|\/assets\/media\/)/.test(item.image || '') ? item.image : '';

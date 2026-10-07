@@ -12,13 +12,13 @@
 
 ## Current assignment
 
-Status: **Parwani-DOS redesign complete — all 9 phases shipped 2026-10-07** (full spec in `design_handoff_parwani_dos/README.md`; see the Work log entries below for what each phase covers and how it was tested). Phases 4–9 went out in one push at Milind's request ("all in one go, no approval per stage"). Next: Milind's feedback on the live site; the Champion Run battle is a later spec. Previous wrap-up (2026-10-04): Game card (08: PlayStation or Steam) replaced Site Updated, both sources connected; Home Steps card live with real data, restyled 2026-10-02 to Codex's selected oversized-count design; a Location card was built (`fb2fabb`) and reverted the same day at Milind's request, a settled removal. Open items from before the redesign: article pages for the Journal, an optional TMDB key for sharper media posters. Two weekly routines still run on Mondays (Gig Finder 06:00, Media 06:30 Dubai) — the redesign doesn't touch the Worker, so they're unaffected.
+Status: **Parwani-DOS redesign complete — all 9 phases shipped 2026-10-07** (full spec in `design_handoff_parwani_dos/README.md`; see the Work log entries below for what each phase covers and how it was tested). Phases 4–9 went out in one push at Milind's request ("all in one go, no approval per stage"). Next: Victory Road (renamed from Champion Run, currently "coming soon") — Milind plans to work on it on 2026-10-08. Previous wrap-up (2026-10-04): Game card (08: PlayStation or Steam) replaced Site Updated, both sources connected; Home Steps card live with real data, restyled 2026-10-02 to Codex's selected oversized-count design; a Location card was built (`fb2fabb`) and reverted the same day at Milind's request, a settled removal. Open items from before the redesign: article pages for the Journal, an optional TMDB key for sharper media posters. Two weekly routines still run on Mondays (Gig Finder 06:00, Media 06:30 Dubai) — the redesign doesn't touch the Worker, so they're unaffected.
 
 Areas Claude has most recently owned (coordinate before Codex changes these):
 
 | Area | Files | Notes |
 |---|---|---|
-| Visible portfolio UI | `public/index.html` (the `.portfolio-v2` block only), `public/ui-v2.css`, `public/ui-v2.js`, `public/pdos-icons.js` | Parwani-DOS redesign (see `design_handoff_parwani_dos/`), every section migrated. Cache-bust versions: `ui-v2.css?v=31`, `ui-v2.js?v=27`, `pdos-icons.js?v=5` — bump on every change. The legacy tool modals further down `index.html` are still live: the Toolbox panel borrows them. |
+| Visible portfolio UI | `public/index.html` (the `.portfolio-v2` block only), `public/ui-v2.css`, `public/ui-v2.js`, `public/pdos-icons.js` | Parwani-DOS redesign (see `design_handoff_parwani_dos/`), every section migrated. Cache-bust versions: `ui-v2.css?v=32`, `ui-v2.js?v=28`, `pdos-icons.js?v=5` — bump on every change. The legacy tool modals further down `index.html` are still live: the Toolbox panel borrows them. |
 | Worker routes and data | `worker/index.js`, `worker/gig-picks.json`, `migrations/` | Spotify listening data, heart rate, steps, gigs, Game card (PlayStation + Steam). Gig Finder rebuilt 2026-10-02. Untouched by the Parwani-DOS redesign so far (Phase 1 is frontend-only). |
 
 ## Media tracker (how it works, for the next session and the weekly routine)
@@ -74,8 +74,8 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 - Media: Reel posters are 300×450. A free TMDB API key, stored with `wrangler secret bulk` as `TMDB_API_KEY`, turns on 780 px posters with no code change; Milind has to create the TMDB account. VOX and ROXY extras depend on the weekly routine, which may also be blocked from those sites, so they are best-effort.
 
 - Journal: no article text is written yet. When one is, it goes inline in that entry's `.pdos-journal-article` panel (replacing the "in progress" note) and the status changes; there are no separate article pages any more.
-- Champion Run: the battle itself is a later spec; the window only does setup (saved in `localStorage` key `pdosChampionRun`). Pool cards show names only — no sprites (no official artwork).
-- Mockup extras not built: Media's All/Films/Games and Gigs' Both/Dubai/Abu Dhabi filter chips, and the playlists "now playing" strip (the current site has no such behaviour; Home already shows now-playing). Ask Milind if he wants them.
+- **Victory Road (next session, Milind's plan for 2026-10-08):** renamed from Champion Run and switched off ("coming soon"). The setup window exists (pool, team, modifiers, tiers; `localStorage` key `pdosChampionRun`) but nothing opens it; the battle itself is still to be specced. Pool cards show names only — no official artwork.
+- The playlists "now playing" strip from the mockup was dropped at Milind's request (2026-10-07) — don't re-propose it.
 - Planned projects (Today Somewhere, Where Next, Speed Round, Terminal Adventure) open a window that says they're planned; Sounds Like and Crack run inside theirs.
 - Reminders: `worker/reminders.json` holds Milind's general daily phone reminders (added 2026-10-05); `sendDailyReminders` in the cron pushes each active one to the `REMINDERS_TOPIC` secret (`shawshankreminder`) once per Dubai day from 12:00. Add entries there when he asks for a reminder; prune expired ones occasionally.
 - PlayStation: the PSN refresh token lasts 10 days, so Milind re-submits `/api/psn/authorize` with a fresh NPSSO about every 10 days; since 2026-10-04 the cron pushes an ntfy reminder from 2 days before expiry (`checkPsnExpiry`). Open question: whether the refresh token's lifetime actually resets on each refresh. If Milind gets a reminder and the card still works days after the recorded expiry, the token slides and the reminder can be dropped. If that becomes a chore, the alternative he turned down was storing the NPSSO in KV (~60-day life, but it is effectively his Sony login).
@@ -87,6 +87,15 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 - Lighthouse `valid-source-maps` flags a third-party library map; it doesn't affect the score categories that matter (production: 90 / 100 / 100).
 
 ## Work log (newest first)
+
+### 2026-10-07 — Media / Gigs filters; Champion Run renamed Victory Road and switched off
+
+- Milind wanted the mockup's filter chips, not the playlists now-playing strip, and Champion Run renamed **Victory Road**, marked coming soon and not openable ("we'll work on that tomorrow").
+- **Filters:** `createCardRail()` takes an optional `filter: { group, test(item, key), label(key) }`. Chips are `.pdos-filter` buttons with `data-filter` and `aria-pressed` in the section head (`#pdosMediaFilter`, `#pdosGigFilter`). The rail keeps the full list in `all` and the filtered one in `items`; a chip click restarts at batch 1, and an empty result says "No films / game releases / Dubai gigs / Abu Dhabi gigs to show right now". Media filters on `item.kind` (`film` | `game`; re-releases are films). Gigs have no city field, but every venue line ends ", Dubai" or ", Abu Dhabi" (the Worker appends the city), so the page tests the venue for "Abu Dhabi" — no Worker change.
+- **Victory Road:** the Projects card is now a `div.pdos-champ-card.is-soon` ("Victory / Road" wordmark, "Coming soon" box, no hover fill, default cursor) and the Home extra a `div.pdos-extra.is-soon` ("victory_road.cart — coming soon"). Neither has `data-open-project`, so nothing opens. The setup window (`#pdosChampOverlay`, `initChampionRun()`) stays in the page, renamed, for the next session; internal ids/keys still say "champ" (`pdosChampionRun` in `localStorage`).
+- Short screens (≤700px tall): playlist cards trimmed (padding 8px 12px, copy padding-bottom 8px) — 3px overflow at 1100×620 after the section heads became flex rows.
+- Versions: `ui-v2.css?v=32`, `ui-v2.js?v=28`.
+- Tested (headless Edge, `wrangler dev`, production fixtures): Media All = 15 batches, Games = 5 (all "[ Game ]"), Films = 10 (Film + Re-release); Gigs Both = 13, Abu Dhabi = 4 (every venue Abu Dhabi), Dubai = 10 (none Abu Dhabi, also after Next). Clicking the Victory Road card and extra opens nothing and doesn't lock the page; no "Champion" text left on the page. Layout check at 2560×1300, 1920×969, 1440×789, 1366×657, 1280×720, 1100×620, 1024×700, 768×1024, 390×844, 360×740: clean. No page errors.
 
 ### 2026-10-07 — Parwani-DOS redesign, Phases 4–9 in one push (+ Home title fix)
 
