@@ -303,14 +303,12 @@
     spotify: [iconSpotifySym, 4], guitar: [iconGuitar3, 3], safe: [iconSafe, 5], ball: [makeBall, 6],
     eq: [iconEq, 6], skyline: [iconSkyline, 4], globe: [iconGlobe, 5], bulb: [iconBulb, 5], terminal: [iconTerminal, 5]
   };
-  const units = {};
-  function unitSize(name) {
-    if (!units[name]) {
-      const root = ICONS[name][0](1, false);
-      units[name] = [parseFloat(root.style.width) || 1, parseFloat(root.style.height) || 1];
-    }
-    return units[name];
-  }
+  // Each sprite's size in grid cells (its frame at P = 1), so fitting never has to build a copy.
+  const UNITS = {
+    book: [24, 12], board: [28, 13], toolbox: [16, 14], projector: [31, 14], spotify: [16, 16], guitar: [24, 25],
+    safe: [16, 14], ball: [14, 19.6], eq: [17, 8], skyline: [24, 14], globe: [16, 18], bulb: [12, 16], terminal: [16, 14]
+  };
+  const unitSize = (name) => UNITS[name];
 
   // Copy the target tree's inline styles onto the live tree. Same shape -> in-place (transitions
   // play); a different shape -> swap in a copy.
