@@ -11,6 +11,40 @@
   --v2-blue: #71c8ff;
 }
 
+/* Parwani-DOS redesign (docs/agent-rulebook.md §3, 2026-10-07): Pixelify Sans + a PixC override
+   for its C/c (Pixelify's own C reads as an O), and three colour themes. Themes are scoped to
+   .portfolio-v2 and alias the existing --v2-* tokens to the new --bg/--fg/--p1.../--ok/--warn
+   set, so every component already wired to --v2-bg, --v2-panel etc. recolours with no changes
+   of its own. "Mono" reproduces the old locked greyscale palette exactly. */
+@font-face { font-family: 'PixC'; src: url('/assets/fonts/PixC-400.otf') format('opentype'); font-weight: 400 599; unicode-range: U+0043, U+0063; }
+@font-face { font-family: 'PixC'; src: url('/assets/fonts/PixC-700.otf') format('opentype'); font-weight: 600 900; unicode-range: U+0043, U+0063; }
+
+.portfolio-v2 {
+  --display: 'PixC', 'Pixelify Sans', sans-serif;
+  --mono: 'PixC', 'Pixelify Sans', sans-serif;
+  --v2-bg: var(--bg);
+  --v2-fg: var(--fg);
+  --v2-dim: var(--dim);
+  --v2-line: var(--line);
+  --v2-soft-line: var(--line);
+  --v2-panel: var(--p1);
+  --v2-panel-raised: var(--p2);
+  --v2-green: var(--ok);
+  --v2-yellow: var(--warn);
+}
+.portfolio-v2, .portfolio-v2[data-theme="night"] {
+  --bg: #0d1020; --fg: #f3ead8; --p0: #10142a; --p1: #151a33; --p2: #1d2346; --p3: #262d57;
+  --dim: #9a9db8; --line: rgba(243, 234, 216, .2); --ok: #7ef0b0; --warn: #ffc65c; --on: #0d1020;
+}
+.portfolio-v2[data-theme="mono"] {
+  --bg: #070707; --fg: #f4f3ef; --p0: #0d0d0d; --p1: #151515; --p2: #202020; --p3: #262626;
+  --dim: #aaa9a3; --line: rgba(244, 243, 239, .2); --ok: #1ed760; --warn: #f7c947; --on: #070707;
+}
+.portfolio-v2[data-theme="paper"] {
+  --bg: #ecebe4; --fg: #141414; --p0: #e3e1d9; --p1: #dcdad1; --p2: #d0cec4; --p3: #c6c4b9;
+  --dim: #5c5a53; --line: rgba(20, 20, 20, .18); --ok: #2fbf63; --warn: #e0a526; --on: #141414;
+}
+
 #boot { display: none !important; }
 body.locked { overflow: auto !important; height: auto !important; }
 
@@ -30,45 +64,68 @@ body.locked { overflow: auto !important; height: auto !important; }
   padding: 1.2rem clamp(.75rem, 2.1vw, 2.25rem) 1rem;
 }
 
+/* Parwani-DOS top bar: brand + theme switcher left, typed command line centre, section
+   counter + clock right. Three-column grid so the centre command line stays truly centred. */
 .v2-nav {
   position: sticky;
   top: 0;
   z-index: 50;
-  min-height: 46px;
-  display: flex;
+  min-height: 40px;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  justify-content: space-between;
-  gap: 1.5rem;
+  gap: 1rem;
   border-bottom: 1px solid var(--v2-soft-line);
   background: var(--v2-bg);
-  padding: 0;
+  padding: 0 .9rem;
+  font-size: .78rem;
+  letter-spacing: .04em;
+  text-transform: uppercase;
 }
 
-.v2-terminal {
-  white-space: nowrap;
-  font-size: clamp(.72rem, 1vw, .9rem);
-  letter-spacing: .02em;
+.pdos-left { display: flex; align-items: center; gap: .5rem; min-width: 0; }
+.pdos-brand { flex: 0 0 auto; padding: .3rem .4rem; font-weight: 700; white-space: nowrap; }
+.pdos-brand:hover, .pdos-brand:focus-visible { background: var(--v2-fg); color: var(--on); text-decoration: none; }
+
+.pdos-theme { position: relative; flex: 0 0 auto; }
+.pdos-theme-btn {
+  display: flex; align-items: center; gap: .5rem; padding: .3rem .55rem;
+  border: 1px solid var(--v2-soft-line); background: none; color: var(--v2-fg);
+  font: inherit; letter-spacing: inherit; text-transform: inherit; cursor: pointer; white-space: nowrap;
 }
+.pdos-theme-btn:hover, .pdos-theme-btn:focus-visible, .pdos-theme-btn[aria-expanded="true"] { background: var(--v2-fg); color: var(--on); }
+.pdos-swatch { display: flex; flex: 0 0 auto; }
+.pdos-swatch span { display: block; width: .45em; height: .85em; }
+.pdos-swatch span:first-child { outline: 1px solid var(--v2-soft-line); outline-offset: -1px; }
+.pdos-theme-menu {
+  position: absolute; left: 0; top: calc(100% + 6px); z-index: 60; width: 220px;
+  display: flex; flex-direction: column; padding: 4px;
+  background: var(--v2-panel); border: 1px solid var(--v2-fg); box-shadow: 8px 8px 0 rgba(0, 0, 0, .45);
+}
+.pdos-theme-opt {
+  display: flex; align-items: center; gap: .65rem; padding: .55rem .6rem; width: 100%;
+  border: 0; background: none; color: var(--v2-fg); font: inherit; letter-spacing: inherit;
+  text-transform: inherit; text-align: left; cursor: pointer;
+}
+.pdos-theme-opt:hover, .pdos-theme-opt:focus-visible { background: var(--v2-panel-raised); }
+.pdos-theme-opt[aria-selected="true"] { background: var(--v2-panel-raised); }
+.pdos-theme-opt-label { flex: 1 1 auto; }
+.pdos-theme-opt-mark { flex: 0 0 auto; }
+
+.pdos-cmd { min-width: 0; white-space: nowrap; text-transform: none; letter-spacing: .02em; }
+
+.pdos-right { display: flex; justify-content: flex-end; gap: 1rem; min-width: 0; color: var(--v2-dim); white-space: nowrap; overflow: hidden; }
+.pdos-right span:first-child { color: var(--v2-fg); }
 
 .v2-cursor {
   display: inline-block;
-  width: .68em;
+  width: .6em;
   height: 1em;
-  margin-left: .3em;
-  vertical-align: -.12em;
+  margin-left: .15em;
+  vertical-align: -.15em;
   background: var(--v2-fg);
   animation: blink 1s steps(1) infinite;
 }
-
-.v2-links { display: flex; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
-.v2-links a {
-  font-size: clamp(.68rem, .95vw, .92rem);
-  text-transform: uppercase;
-  letter-spacing: .04em;
-  color: var(--v2-fg);
-}
-.v2-links a + a::before { content: '/'; color: var(--v2-dim); margin: 0 clamp(.45rem, 1.25vw, 1.2rem); }
-.v2-links a:hover { text-decoration: underline; text-underline-offset: .35em; }
 
 .v2-section { width: 100%; margin: 0 auto; padding: .7rem 0 1.1rem; scroll-margin-top: 52px; }
 .v2-section + .v2-section { border-top: 1px solid var(--v2-line); }
@@ -333,16 +390,23 @@ body.locked { overflow: auto !important; height: auto !important; }
 .v2-ref-row { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin-bottom: .3rem; }
 .v2-scroll-prev { color: var(--v2-dim); font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
 .v2-scroll-prev:hover, .v2-scroll-prev:focus-visible { color: var(--v2-fg); }
-.v2-links a[aria-current="true"] { text-decoration: underline; text-underline-offset: .35em; }
+/* CRT power-on transition (Parwani-DOS): outside paging mode these wrappers are inert
+   (display:contents — zero effect on phones/continuous scroll). Inside paging mode they
+   become the three animated layers from the design handoff. initShell() in ui-v2.js toggles
+   .is-active via IntersectionObserver; the reverse (losing .is-active) plays the same
+   transition backwards, so it replays on every visit. */
+.pdos-crt-clip, .pdos-crt-slide { display: contents; }
+.pdos-crt-line { display: none; }
 
 /* Section paging: on desktop/tablet every section is exactly one viewport under the fixed
-   nav, and scrolling moves one whole section at a time (see initSectionPager in ui-v2.js).
-   Phones and very short windows fall back to normal document scrolling. */
+   nav, and scrolling moves one whole section at a time (native CSS scroll-snap; see
+   initShell in ui-v2.js for the IntersectionObserver-driven CRT transition, keyboard 1-7
+   and theme switcher). Phones and very short windows fall back to normal document scrolling. */
 @media (min-width: 721px) and (min-height: 620px) {
   :root {
     --v2-gutter: clamp(.75rem, 2.1vw, 2.25rem);
     --v2-nav-top: 0px;
-    --v2-nav-h: 52px;
+    --v2-nav-h: 40px;
     --v2-stage-top: calc(var(--v2-nav-top) + var(--v2-nav-h) + clamp(.6rem, 1.6vh, 1.1rem));
   }
   html { scroll-snap-type: y mandatory; }
@@ -351,20 +415,52 @@ body.locked { overflow: auto !important; height: auto !important; }
   .v2-section {
     height: 100vh;
     height: 100dvh;
-    display: flex;
-    flex-direction: column;
-    padding: var(--v2-stage-top) 0 clamp(1rem, 3vh, 2.2rem);
+    position: relative;
     overflow: hidden;
     scroll-snap-align: start;
     scroll-snap-stop: always;
     scroll-margin-top: 0;
   }
   .v2-section + .v2-section { border-top: 0; }
-  /* Multi-section jumps fade the sections out and back in rather than blurring past them. */
-  .v2-section { transition: opacity .15s ease; }
-  html.v2-jump-out .v2-section { opacity: 0; }
-  .v2-section > .v2-scroll-next { margin-top: auto; padding-top: clamp(.6rem, 2vh, 1.4rem); }
-  .v2-section > .v2-footer { margin-top: auto; padding-top: clamp(.6rem, 2vh, 1.4rem); }
+
+  .pdos-crt-clip {
+    display: block;
+    position: absolute;
+    inset: 0;
+    clip-path: inset(49.7% 0 49.7% 0);
+    transition: clip-path .6s steps(10);
+  }
+  .pdos-crt-slide {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: var(--v2-stage-top) 0 clamp(1rem, 3vh, 2.2rem);
+    transform: translateY(40px);
+    opacity: 0;
+    transition: transform .55s cubic-bezier(.2, .8, .2, 1) .18s, opacity .3s steps(3) .12s;
+  }
+  .pdos-crt-line {
+    display: block;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 4px;
+    margin-top: -2px;
+    background: var(--fg);
+    box-shadow: 0 0 22px var(--fg);
+    transform: scaleX(.12);
+    opacity: 1;
+    transition: transform .32s steps(4), opacity .2s steps(2) .38s;
+    pointer-events: none;
+    z-index: 5;
+  }
+  .v2-section.is-active .pdos-crt-clip { clip-path: inset(0 0 0 0); }
+  .v2-section.is-active .pdos-crt-slide { transform: translateY(0); opacity: 1; }
+  .v2-section.is-active .pdos-crt-line { transform: scaleX(1); opacity: 0; }
+
+  .pdos-crt-slide > .v2-scroll-next { margin-top: auto; padding-top: clamp(.6rem, 2vh, 1.4rem); }
+  .pdos-crt-slide > .v2-footer { margin-top: auto; padding-top: clamp(.6rem, 2vh, 1.4rem); }
 
   /* Fit every section to the stage: the header keeps its size, the stage takes whatever
      height is left, and cards/type scale with viewport height as well as width. */
@@ -399,9 +495,12 @@ body.locked { overflow: auto !important; height: auto !important; }
 
 @media (max-width: 720px) {
   .portfolio-v2 { padding-inline: .7rem; }
-  .v2-nav { position: relative; align-items: flex-start; flex-direction: column; padding: .8rem .6rem; gap: .7rem; }
-  .v2-links { justify-content: flex-start; row-gap: .55rem; }
-  .v2-links a + a::before { margin-inline: .45rem; }
+  /* The typed command line is decorative (aria-hidden) and the first thing to go when the
+     bar can't fit brand + theme switcher + section counter + clock on one line. */
+  .v2-nav { position: relative; display: flex; flex-wrap: nowrap; justify-content: space-between; gap: .5rem; padding: .5rem .6rem; font-size: .66rem; }
+  .pdos-cmd { display: none; }
+  .pdos-theme-btn span:last-child { display: none; }
+  .pdos-right { gap: .6rem; }
   .v2-display { font-size: clamp(3.25rem, 17vw, 6rem); white-space: normal; line-height: .92; }
   /* Phones scroll normally: the dashboard becomes a two-column stack of fixed-height cards. */
   .v2-dashboard {
@@ -444,4 +543,8 @@ body.locked { overflow: auto !important; height: auto !important; }
 
 @media (prefers-reduced-motion: reduce) {
   .v2-cursor { animation: none; }
+  .pdos-crt-clip { clip-path: none !important; transition: none !important; }
+  .pdos-crt-slide { transform: none !important; opacity: 0; transition: opacity .2s linear !important; }
+  .v2-section.is-active .pdos-crt-slide { opacity: 1; }
+  .pdos-crt-line { display: none !important; }
 }

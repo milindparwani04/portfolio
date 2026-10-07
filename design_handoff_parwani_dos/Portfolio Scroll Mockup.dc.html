@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
+<style>@font-face{font-family:'PixC';src:url('fonts/PixC-400.otf') format('opentype');font-weight:400 599;unicode-range:U+0043,U+0063}@font-face{font-family:'PixC';src:url('fonts/PixC-700.otf') format('opentype');font-weight:600 900;unicode-range:U+0043,U+0063}html,body{margin:0;height:100%;overflow:hidden;background:#0d1020}a{color:inherit;text-decoration:none}a:hover{text-decoration:underline;text-underline-offset:.3em}@keyframes pxscroll{from{transform:translateY(0)}to{transform:translateY(-50%)}}@keyframes pxblink{50%{opacity:0}}@keyframes pxspin{from{transform:translateX(0)}to{transform:translateX(-50%)}}@keyframes pxeq{0%{transform:scaleY(.25)}50%{transform:scaleY(1)}100%{transform:scaleY(.45)}}@keyframes pxrot{to{transform:rotate(360deg)}}@keyframes pxflame{0%{opacity:.95;transform:translateY(0)}50%{opacity:.35;transform:translateY(-100%)}100%{opacity:.95;transform:translateY(0)}}@keyframes pxglow{0%,100%{filter:drop-shadow(0 0 3px #1ed760) drop-shadow(0 0 0 #1ed760)}50%{filter:drop-shadow(0 0 10px #1ed760) drop-shadow(0 0 22px rgba(30,215,96,.6))}}@keyframes pxflick{0%,100%{opacity:1}37%{opacity:.82}41%{opacity:1}73%{opacity:.9}}@keyframes pxfr{0%,33%{visibility:visible}33.1%,100%{visibility:hidden}}@keyframes pxfirepulse{from{opacity:.6;transform:scale(.96)}to{opacity:1;transform:scale(1.06)}}@keyframes pxshake{0%{transform:translate(0,0)}50%{transform:translate(2px,-1px)}100%{transform:translate(-1px,1px)}}@keyframes crbob{0%,100%{transform:translateY(0)}50%{transform:translateY(-16%)}}@keyframes crshadow{0%,100%{transform:scaleX(1);opacity:.55}50%{transform:scaleX(.62);opacity:.25}}</style>
+</helmet>
+<div data-artboard="1" style="position:fixed;inset:0;background:var(--bg,#0d1020);color:var(--fg,#f3ead8);font-family:var(--mono,'PixC','Pixelify Sans'),sans-serif;display:flex;flex-direction:column;overflow:hidden">
+  <div style="height:40px;flex:0 0 auto;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:16px;padding:0 14px;border-bottom:1px solid var(--line,rgba(243,234,216,.2));font-size:14px;letter-spacing:.04em;text-transform:uppercase;position:relative;z-index:30;background:var(--bg,#0d1020)">
+    <div style="display:flex;align-items:center;gap:8px">
+      <span onClick="{{ go.home }}" style="font-weight:700;padding:5px 8px;cursor:pointer" style-hover="background:var(--fg,#f3ead8);color:var(--bg,#0d1020)">■ Parwani-DOS</span>
+      <div style="position:relative">
+        <div onClick="{{ toggleTheme }}" style="display:flex;align-items:center;gap:8px;padding:5px 10px;cursor:pointer;border:1px solid var(--line,rgba(243,234,216,.3))" style-hover="background:var(--fg,#f3ead8);color:var(--bg,#0d1020)"><span style="display:flex"><span style="width:8px;height:14px;background:var(--bg,#0d1020);outline:1px solid var(--line,rgba(243,234,216,.4))"></span><span style="width:8px;height:14px;background:var(--fg,#f3ead8)"></span><span style="width:8px;height:14px;background:var(--ok,#7ef0b0)"></span></span><span style="white-space:nowrap">Theme: {{ themeLabel }} {{ themeCaret }}</span></div>
+        <sc-if value="{{ themeOpen }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;left:0;top:38px;width:240px;background:var(--p1,#151a33);border:1px solid var(--fg,#f3ead8);box-shadow:8px 8px 0 rgba(0,0,0,.45);display:flex;flex-direction:column;padding:4px">
+            <sc-for list="{{ themeOpts }}" as="o" hint-placeholder-count="4">
+              <div onClick="{{ o.onClick }}" style="display:flex;align-items:center;gap:10px;padding:9px 10px;cursor:pointer;background:{{ o.bg }};color:{{ o.fg }}" style-hover="background:var(--p3,#262d57)">
+                <span style="display:flex"><span style="width:12px;height:18px;background:{{ o.sw1 }};outline:1px solid #555"></span><span style="width:12px;height:18px;background:{{ o.sw2 }}"></span><span style="width:12px;height:18px;background:{{ o.sw3 }}"></span></span>
+                <span style="flex:1">{{ o.label }}</span><span>{{ o.mark }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+    <div style="font-size:14px;letter-spacing:.02em;text-transform:none;white-space:nowrap">C:\PARWANI&gt; {{ cmd }}<span style="display:inline-block;width:.6em;height:1em;background:var(--fg,#f3ead8);margin-left:2px;vertical-align:-.15em;animation:pxblink 1s steps(1) infinite"></span></div>
+    <div style="display:flex;justify-content:flex-end;gap:16px;color:var(--dim,#9a9db8);white-space:nowrap;min-width:0;overflow:hidden"><span style="color:var(--fg,#f3ead8)">{{ secNum }} · {{ secName }}</span><span>{{ clock }}</span></div>
+  </div>
+
+  <div style="position:relative;flex:1;min-height:0">
+    <div ref="{{ scrollRef }}" style="position:absolute;inset:0;overflow-y:{{ scrollY }};overflow-x:hidden;scroll-snap-type:y mandatory;scroll-behavior:smooth">
+      <section data-sec="home" style="height:100%;scroll-snap-align:start;scroll-snap-stop:always;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden">
+        <div style="position:absolute;left:0;top:0;width:{{ abW }};height:{{ abH }};transform:{{ scaleTf }};transform-origin:0 0">
+          <div style="width:100%;height:100%;clip-path:{{ fx.home.clip }};transition:clip-path .6s steps(10)">
+            <div style="width:100%;height:100%;transform:{{ fx.home.tf }};opacity:{{ fx.home.op }};transition:transform .55s cubic-bezier(.2,.8,.2,1) .18s, opacity .3s steps(3) .12s">
+<div style="position:relative;width:100%;height:100%;background:var(--bg,#070707);color:var(--fg,#f4f3ef);font-family:var(--mono,'IBM Plex Mono'),monospace;display:flex;flex-direction:column;overflow:hidden">
+        
+        <div style="flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:10px;padding:12px">
+          <div style="display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:10px;min-height:0;min-width:0">
+            <div style="display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:10px;align-items:stretch">
+              <div style="min-width:0;display:flex;align-items:flex-end;overflow:hidden"><div data-fit="title" style="display:inline-block;white-space:nowrap;font-family:var(--display,Anton),sans-serif;font-weight:var(--dw,400);font-size:128px;line-height:1;text-transform:uppercase;letter-spacing:-.02em">My Digital<br>Portfolio.</div></div>
+              <div style="display:flex;flex-direction:column">
+                <div style="height:26px;background:var(--p2,#202020);display:flex;align-items:center;justify-content:space-between;padding:0 8px;font-size:11px;text-transform:uppercase"><span>about.txt</span><span style="color:var(--dim,#aaa9a3)">00</span></div>
+                <div style="flex:1;background:var(--p1,#151515);padding:12px;display:flex;flex-direction:column;justify-content:space-between;gap:10px">
+                  <div style="font-size:15px;line-height:1.5;text-wrap:pretty">No fixed brief. A growing collection of things I am curious enough to build, research or test right now.</div>
+                  <div style="font-size:10px;line-height:1.7;color:var(--dim,#aaa9a3);display:flex;flex-direction:column;border-top:1px solid var(--line,rgba(244,243,239,.2));padding-top:8px">
+                    <div><span style="color:var(--ok,#1ed760)">[ OK ]</span> journal · projects · toolbox mounted</div>
+                    <div><span style="color:var(--ok,#1ed760)">[ OK ]</span> spotify.drv · weather.drv ready</div>
+                    <div><span style="color:var(--warn,#f7c947)">[ !! ]</span> health.sys awaiting data source</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div style="min-height:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));gap:8px">
+              <div onClick="{{ go.journal }}" onMouseEnter="{{ hoverOn.lJournal }}" onMouseLeave="{{ hoverOff.lJournal }}" style="background:var(--p1,#151515);padding:14px;overflow:hidden;min-width:0;display:flex;flex-direction:column;cursor:pointer;transition:background .15s,color .15s" style-hover="background:oklch(0.75 0.16 40);color:var(--on,#070707)"><div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;text-transform:uppercase"><span style="display:flex;align-items:center;gap:8px"><span style="width:14px;height:14px;border-radius:50%;background:currentColor"></span>journal.log</span><span style="border:1px solid currentColor;padding:0 5px">1</span></div><div style="font-family:var(--display,Anton),sans-serif;font-weight:var(--dw,400);font-size:34px;text-transform:uppercase;line-height:1;margin-top:8px">Journal</div><div style="flex:1;min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:4px 0">{{ licons.journal }}</div><div style="margin-top:auto;border-top:1px solid currentColor;padding-top:8px;display:flex;flex-direction:column;gap:3px"><span style="font-size:10px;text-transform:uppercase;opacity:.7">Latest · Researching</span><span style="font-size:13px;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Karoshi: An Enquiry Into Japan's Work Culture</span></div></div>
+              <div onClick="{{ go.projects }}" onMouseEnter="{{ hoverOn.lProjects }}" onMouseLeave="{{ hoverOff.lProjects }}" style="background:var(--p1,#151515);padding:14px;overflow:hidden;min-width:0;display:flex;flex-direction:column;cursor:pointer;transition:background .15s,color .15s" style-hover="background:oklch(0.72 0.16 290);color:var(--on,#070707)"><div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;text-transform:uppercase"><span style="display:flex;align-items:center;gap:8px"><span style="width:14px;height:14px;background:currentColor"></span>projects.vol</span><span style="border:1px solid currentColor;padding:0 5px">2</span></div><div style="font-family:var(--display,Anton),sans-serif;font-weight:var(--dw,400);font-size:34px;text-transform:uppercase;line-height:1;margin-top:8px">Projects</div><div style="flex:1;min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:4px 0">{{ licons.projects }}</div><div style="margin-top:auto;border-top:1px solid currentColor;padding-top:8px;display:flex;flex-direction:column;gap:3px"><span style="font-size:10px;text-transform:uppercase;opacity:.7">Current focus · Phase 02</span><span style="font-size:13px;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Sounds Like — a similarity engine for music discovery</span></div></div>
+              <div onClick="{{ go.toolbox }}" onMouseEnter="{{ hoverOn.lToolbox }}" onMouseLeave="{{ hoverOff.lToolbox }}" style="background:var(--p1,#151515);padding:14px;overflow:hidden;min-width:0;display:flex;flex-direction:column;cursor:pointer;transition:background .15s,color .15s" style-hover="background:oklch(0.74 0.14 245);color:var(--on,#070707)"><div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;text-transform:uppercase"><span style="display:flex;align-items:center;gap:8px"><span style="width:10px;height:10px;margin:2px;transform:rotate(45deg);background:currentColor"></span>toolbox.exe</span><span style="border:1px solid currentColor;padding:0 5px">3</span></div><div style="font-family:var(--display,Anton),sans-serif;font-weight:var(--dw,400);font-size:34px;text-transform:uppercase;line-height:1;margin-top:8px">Toolbox</div><div style="flex:1;min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:4px 0">{{ licons.toolbox }}</div><div style="margin-top:auto;border-top:1px solid currentColor;padding-top:8px;display:flex;flex-direction:column;gap:3px"><span style="font-size:10px;text-transform:uppercase;opacity:.7">6 ready · 3 being built</span><span style="font-size:13px;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Image Converter · Tempo Tap · QR Code · Password…</span></div></div>
+              <div onClick="{{ go.media }}" onMouseEnter="{{ hoverOn.lMedia }}" onMouseLeave="{{ hoverOff.lMedia }}" style="background:var(--p1,#151515);padding:14px;overflow:hidden;min-width:0;display:flex;flex-direction:column;cursor:pointer;transition:background .15s,color .15s" style-hover="background:oklch(0.74 0.16 0);color:var(--on,#070707)"><div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;text-transform:uppercase"><span style="display:flex;align-items:center;gap:8px"><span style="display:flex;gap:2px"><span style="width:4px;height:14px;background:currentColor"></span><span style="width:4px;height:14px;background:currentColor"></span><span style="width:4px;height:14px;background:currentColor"></span></span>media.reel</span><span style="border:1px solid currentColor;padding:0 5px">4</span></div><div style="font-family:var(--display,Anton),sans-serif;font-weight:var(--dw,400);font-size:34px;text-transform:uppercase;line-height:1;margin-top:8px">Media</div><div style="flex:1;min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:4px 0">{{ licons.media }}</div><div style="margin-top:auto;border-top:1px solid currentColor;padding-top:8px;display:flex;flex-direction:column;gap:3px"><span style="font-size:10px;text-transform:uppercase;opacity:.7">Next three months</span><span style="font-size:13px;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Films in Dubai cinemas and new games</span></div></div>
+              <div onClick="{{ go.playlists }}" onMouseEnter="{{ hoverOn.lPlaylists }}" onMouseLeave="{{ hoverOff.lPlaylists }}" style="background:var(--p1,#151515);padding:14px;overflow:hidden;min-width:0;display:flex;flex-direction:column;cursor:pointer;transition:background .15s,color .15s" style-hover="background:var(--ok,#1ed760);color:var(--on,#070707)"><div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;text-transform:uppercase"><span style="display:flex;align-items:center;gap:8px"><span style="width:14px;height:14px;border-radius:50%;border:4px solid currentColor;box-sizing:border-box"></span>playlists.fm</span><span style="border:1px solid currentColor;padding:0 5px">5</span></div><div style="font-family:var(--display,Anton),sans-serif;font-weight:var(--dw,400);font-size:34px;text-transform:uppercase;line-height:1;margin-top:8px">Playlists</div><div style="flex:1;min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:4px 0">{{ licons.playlists }}</div><div style="margin-top:auto;border-top:1px solid currentColor;padding-top:8px;display:flex;flex-direction:column;gap:3px"><span style="font-size:10px;text-transform:uppercase;opacity:.7">Three on repeat</span><span style="font-size:13px;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">pop · Camon · idk</span></div></div>
+              <div onClick="{{ go.gigs }}" onMouseEnter="{{ hoverOn.lGigs }}" onMouseLeave="{{ hoverOff.lGigs }}" style="background:var(--p1,#151515);padding:14px;overflow:hidden;min-width:0;display:flex;flex-direction:column;cursor:pointer;transition:background .15s,color .15s" style-hover="background:#160a06;color:#ffd43b"><div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;text-transform:uppercase"><span style="display:flex;align-items:center;gap:8px"><span style="width:14px;height:14px;border:2px solid currentColor;box-sizing:border-box"></span>gigs.map</span><span style="border:1px solid currentColor;padding:0 5px">6</span></div><div style="font-family:var(--display,Anton),sans-serif;font-weight:var(--dw,400);font-size:34px;text-transform:uppercase;line-height:1;margin-top:8px">Gigs</div><div style="flex:1;min-height:0;display:flex;align-items:center;justify-content:center;overflow:visible;padding:4px 0;position:relative;z-index:1">{{ licons.gigs }}</div><div style="margin-top:auto;border-top:1px solid currentColor;padding-top:8px;display:flex;flex-direction:column;gap:3px"><span style="font-size:10px;text-transform:uppercase;opacity:.7">Five at a time</span><span style="font-size:13px;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Upcoming in Dubai and Abu Dhabi</span></div></div>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;font-size:12px;text-transform:uppercase;letter-spacing:.04em">
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 14px;border:1px solid var(--line,rgba(244,243,239,.2));cursor:pointer" onClick="{{ goChamp }}" onMouseEnter="{{ hoverOn.landing }}" onMouseLeave="{{ hoverOff.landing }}" style-hover="border-color:var(--warn,#f7c947);color:var(--warn,#f7c947)"><span style="display:flex;align-items:center;gap:12px">{{ balls.landing }}<span><span style="color:var(--dim,#aaa9a3)">Extras /</span> champion_run.cart — insert cartridge</span></span><span>▸</span></div>
+              <div onClick="{{ goCrack }}" onMouseEnter="{{ hoverOn.crackL }}" onMouseLeave="{{ hoverOff.crackL }}" style="display:flex;justify-content:space-between;align-items:center;padding:8px 14px;border:1px solid var(--line,rgba(244,243,239,.2));cursor:pointer" style-hover="border-color:var(--ok,#1ed760);color:var(--ok,#1ed760)"><span style="display:flex;align-items:center;gap:12px">{{ safeL }}<span><span style="color:var(--dim,#aaa9a3)">Extras /</span> crack.exe — play</span></span><span>▸</span></div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-rows:auto auto auto minmax(0,1fr) auto auto;gap:8px;min-height:0">
+            <div style="display:flex;flex-direction:column"><div style="height:26px;background:var(--p2,#202020);display:flex;align-items:center;justify-content:space-between;padding:0 8px;font-size:11px;text-transform:uppercase"><span>weather.drv</span><span style="color:var(--dim,#aaa9a3)">03</span></div><div style="background:var(--p1,#151515);padding:12px;display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:11px;text-transform:uppercase;color:var(--dim,#aaa9a3)">Dubai</div><div style="font-family:var(--display,Anton),sans-serif;font-weight:var(--dw,400);font-size:36px;line-height:1">--°C</div><div style="font-size:10px;text-transform:uppercase;color:var(--dim,#aaa9a3)">High --° / Low --°</div></div><span style="width:36px;height:36px;border-radius:50%;background:var(--warn,#f7c947)"></span></div></div>
+            <div style="display:flex;flex-direction:column"><div style="height:26px;background:var(--p2,#202020);display:flex;align-items:center;justify-content:space-between;padding:0 8px;font-size:11px;text-transform:uppercase"><span style="color:var(--ok,#1ed760)">spotify.drv</span><span style="color:var(--dim,#aaa9a3)">04</span></div><div style="background:var(--p1,#151515);padding:12px;display:flex;gap:12px;align-items:center"><div style="width:44px;height:44px;flex:0 0 auto;background:repeating-linear-gradient(45deg,rgba(244,243,239,.07) 0 5px,transparent 5px 10px)"></div><div><div style="font-family:var(--display,Anton),sans-serif;font-weight:var(--dw,400);font-size:22px;text-transform:uppercase;line-height:1">Nothing Playing</div><div style="font-size:11px;color:var(--dim,#aaa9a3);margin-top:4px">Listening data will appear here</div></div></div></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+              <div style="display:flex;flex-direction:column"><div style="height:26px;background:var(--p2,#202020);display:flex;align-items:center;padding:0 8px;font-size:11px;text-transform:uppercase">heart.sys</div><div style="background:var(--p1,#151515);padding:12px"><div style="font-family:var(--display,Anton),sans-serif;font-weight:var(--dw,400);font-size:32px;line-height:1">-- <span style="font-size:13px">BPM</span></div></div></div>
+              <div style="display:flex;flex-direction:column"><div style="height:26px;background:var(--p2,#202020);display:flex;align-items:center;padding:0 8px;font-size:11px;text-transform:uppercase">steps.sys</div><div style="background:var(--p1,#151515);padding:12px;display:flex;flex-direction:column;gap:8px"><div style="font-family:var(--display,Anton),sans-serif;font-weight:var(--dw,400);font-size:32px;line-height:1">-- <span style="font-size:13px">/10K</span></div><div style="height:3px;background:var(--line,rgba(244,243,239,.2))"></div></div></div>
+            </div>
+            <div style="display:flex;flex-direction:column;min-height:0"><div style="height:26px;background:var(--p2,#202020);display:flex;align-items:center;justify-content:space-between;padding:0 8px;font-size:11px;text-transform:uppercase"><span>headlines.feed</span><span style="color:var(--dim,#aaa9a3)">BBC · World · 01</span></div><div data-fitbox="1" style="flex:1;min-height:0;overflow:hidden;background:var(--p1,#151515);padding:14px;display:flex;flex-direction:column;gap:10px;justify-content:center"><div data-fitbox-h="1" style="font-family:var(--display,Anton),sans-serif;font-weight:var(--dw,400);font-size:44px;text-transform:uppercase;line-height:1.02;text-wrap:balance">Global markets steady as new data arrives</div><div data-fitbox-s="1" style="font-size:15px;line-height:1.45;text-wrap:pretty">Investors assess the latest economic data as markets turn their attention to the months ahead.</div></div></div>
+            <div style="display:flex;flex-direction:column"><div style="height:26px;background:var(--p2,#202020);display:flex;align-items:center;justify-content:space-between;padding:0 8px;font-size:11px;text-transform:uppercase"><span>game.sys</span><span style="color:var(--dim,#aaa9a3)">08</span></div><div style="background:var(--p1,#151515);padding:12px;display:flex;gap:10px;align-items:center"><div style="width:40px;height:40px;flex:0 0 auto;background:repeating-linear-gradient(45deg,rgba(244,243,239,.07) 0 5px,transparent 5px 10px)"></div><div><div style="font-family:var(--display,Anton),sans-serif;font-weight:var(--dw,400);font-size:18px;text-transform:uppercase;line-height:1">Nothing played</div><div style="font-size:10px;color:var(--dim,#aaa9a3);text-transform:uppercase;margin-top:3px">Awaiting game data</div></div></div></div>
+            <div style="display:flex;flex-direction:column"><div style="height:26px;background:var(--p2,#202020);display:flex;align-items:center;justify-content:space-between;padding:0 8px;font-size:11px;text-transform:uppercase"><span>dissertation.pdf</span><span style="color:var(--warn,#f7c947)">read-only</span></div><div style="background:var(--p1,#151515);padding:12px;display:flex;justify-content:space-between;align-items:flex-end;gap:10px"><div style="font-family:var(--display,Anton),sans-serif;font-weight:var(--dw,400);font-size:20px;text-transform:uppercase;line-height:1.05">Conflict &amp; Risk Preferences</div><a href="https://milindparwani.com/dissertation.pdf" style="font-size:11px;text-transform:uppercase;white-space:nowrap;text-decoration:underline">Read →</a></div></div>
+          </div>
+        </div>
+        <div style="height:30px;flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;padding:0 16px;border-top:1px solid var(--line,rgba(244,243,239,.2));font-size:11px;text-transform:uppercase;letter-spacing:.05em">
+          <span>C:\PARWANI&gt; <span style="display:inline-block;width:.6em;height:1em;background:var(--fg,#f4f3ef);vertical-align:-.15em"></span></span>
+          <span style="color:var(--dim,#aaa9a3)">Scroll, or press 1–7 to jump · Esc closes a window</span>
+        </div>
+        <div style="position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(255,255,255,.025) 0 1px,transparent 1px 3px)"></div>
+      </div>
+            </div>
+          </div>
+          <div style="position:absolute;left:0;right:0;top:50%;height:4px;margin-top:-2px;background:var(--fg,#f3ead8);box-shadow:0 0 22px var(--fg,#f3ead8);pointer-events:none;opacity:{{ fx.home.lineO }};transform:{{ fx.home.lineTf }};transition:opacity .2s steps(2) .38s, transform .32s steps(4)"></div>
+        </div>
+      </section>
+      <section data-sec="journal" style="height:100%;scroll-snap-align:start;scroll-snap-stop:always;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden">
+        <div style="position:absolute;left:0;top:0;width:{{ abW }};height:{{ abH }};transform:{{ scaleTf }};transform-origin:0 0">
+          <div style="width:100%;height:100%;clip-path:{{ fx.journal.clip }};transition:clip-path .6s steps(10)">
+            <div style="width:100%;height:100%;transform:{{ fx.journal.tf }};opacity:{{ fx.journal.op }};transition:transform .55s cubic-bezier(.2,.8,.2,1) .18s, opacity .3s steps(3) .12s">
+<div style="position:relative;width:100%;height:100%;background:var(--bg,#070707);color:var(--fg,#f4f3ef);font-family:var(--mono,'IBM Plex Mono'),monospace;display:flex;flex-direction:column;overflow:hidden">
+        
+        <div style="flex:1;min-height:0;display:flex;flex-direction:column;margin:12px;outline:1px solid var(--line,rgba(244,243,239,.2))">
+          <div style="height:30px;flex:0 0 auto;background:oklch(0.75 0.16 40);color:var(--on,#070707);display:flex;align-items:center;justify-content:space-between;padding:0 10px;font-size:12px;text-transform:uppercase;letter-spacing:.04em;font-weight:500"><span>journal.log — ref. 01</span><span style="display:flex;gap:14px;align-items:center"><span onClick="{{ go.home }}" style="cursor:pointer">↑ Home</span><span onClick="{{ go.projects }}" style="cursor:pointer">Projects ↓</span></span></div>
+          <div style="flex:1;min-height:0;display:grid;grid-template-columns:440px minmax(0,1fr);background:var(--p1,#151515)">
+            <div style="display:flex;flex-direction:column;border-right:1px solid var(--line,rgba(244,243,239,.2));min-height:0">
+              <div style="padding:16px 18px 12px;display:flex;flex-direction:column;gap:6px">
+                <div style="font-family:var(--display,Anton),sans-serif;font-weight:var(--dw,400);font-size:96px;line-height:.86;text-transform:uppercase">Journal</div>
+                <div style="font-size:12px;letter-spacing:.1em;text-transform:uppercase">Writing on economics, work and the way we live.</div>
+              </div>
+              <div style="padding:8px 18px;font-size:11px;color:var(--dim,#aaa9a3);text-transform:uppercase;letter-spacing:.05em;border-top:1px solid var(--line,rgba(244,243,239,.2))">All entries · 03</div>
+              <div style="flex:1;min-height:0;overflow:auto">
+                <sc-for list="{{ entriesA }}" as="e" hint-placeholder-count="3">
+                  <div onClick="{{ e.onClick }}" style="padding:12px 18px;border-top:1px solid var(--line,rgba(244,243,239,.2));display:grid;grid-template-columns:64px minmax(0,1fr);gap:12px;cursor:pointer;background:{{ e.bg }};box-shadow:{{ e.shadow }}" style-hover="background:var(--p2,#202020)">
+                    <div style="width:64px;height:64px;background-color:var(--p2,#202020);background-size:cover;background-position:center;background-image:{{ e.bgImg }}"></div>
+                    <div style="display:flex;flex-direction:column;gap:4px;min-width:0">
+                      <div style="display:flex;justify-content:space-between;gap:8px;font-size:10px;text-transform:uppercase"><span>{{ e.kind }}</span><span style="color:var(--dim,#aaa9a3)">{{ e.tag }}</span></div>
+                      <div style="font-family:var(--display,Anton),sans-serif;font-weight:var(--dw,400);font-size:22px;text-transform:uppercase;line-height:1">{{ e.title }}</div>
+                      <div style="font-size:10px;text-transform:uppercase;color:{{ e.statusColor }}">● {{ e.status }}</div>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="padding:10px 18px;font-size:10px;color:var(--dim,#aaa9a3);text-transform:uppercase;line-height:1.6;border-top:1px solid var(--line,rgba(244,243,239,.2))">New writing + reviews appear here as they're published</div>
+            </div>
+            <div style="display:flex;flex-direction:column;min-height:0">
+              <div style="position:relative;height:280px;flex:0 0 auto;background-color:var(--p2,#202020);background-size:cover;background-position:center;background-image:{{ selA.bgImg }}">
+                <div style="position:absolute;inset:0 0 auto;height:70px;background:linear-gradient(rgba(0,0,0,.6),transparent)"></div>
+                <span style="position:absolute;left:14px;top:12px;font-size:11px;color:#f4f3ef;text-transform:uppercase;letter-spacing:.05em;text-shadow:0 1px 4px rgba(0,0,0,.9)">{{ selA.caption }}</span>
+                <sc-if value="{{ selA.hasScore }}" hint-placeholder-val="{{ true }}">
+                  <div style="position:absolute;right:18px;top:14px;width:136px;height:136px;box-sizing:border-box;padding-top:36px;display:flex;align-items:baseline;justify-content:center;background:#5b21ff;color:#fff;clip-path:polygon(50% 0%, 56% 4.4%, 62.9% 1.7%, 67.6% 7.5%, 75% 6.7%, 78% 13.5%, 85.4% 14.6%, 86.5% 22%, 93.3% 25%, 92.5% 32.4%, 98.3% 37.1%, 95.6% 44%, 100% 50%, 95.6% 56%, 98.3% 62.9%, 92.5% 67.6%, 93.3% 75%, 86.5% 78%, 85.4% 85.4%, 78% 86.5%, 75% 93.3%, 67.6% 92.5%, 62.9% 98.3%, 56% 95.6%, 50% 100%, 44% 95.6%, 37.1% 98.3%, 32.4% 92.5%, 25% 93.3%, 22% 86.5%, 14.6% 85.4%, 13.5% 78%, 6.7% 75%, 7.5% 67.6%, 1.7% 62.9%, 4.4% 56%, 0% 50%, 4.4% 44%, 1.7% 37.1%, 7.5% 32.4%, 6.7% 25%, 13.5% 22%, 14.6% 14.6%, 22% 13.5%, 25% 6.7%, 32.4% 7.5%, 37.1% 1.7%, 44% 4.4%)"><span style="font-family:var(--display,'PixC','Pixelify Sans'),sans-serif;font-size:60px;line-height:1">{{ selA.score }}</span><span style="font-size:14px;margin-left:3px">/10</span></div>
+                </sc-if>
+                <sc-if value="{{ selA.noScore }}" hint-placeholder-val="{{ false }}">
+                  <span style="position:absolute;right:14px;top:12px;padding:6px 10px;background:#070707;color:{{ selA.statusColor }};font-size:11px;text-transform:uppercase;letter-spacing:.05em">● {{ selA.status }}</span>
+                </sc-if>
+                <a href="{{ selA.creditUrl }}" style="position:absolute;right:8px;bottom:6px;font-size:10px;color:rgba(244,243,239,.85);text-shadow:0 1px 3px rgba(0,0,0,.95)">{{ selA.credit }}</a>
+              </div>
+              <div style="flex:0 0 auto;padding:14px 22px 12px;border-bottom:1px solid var(--line,rgba(244,243,239,.2));display:flex;flex-direction:column;gap:8px">
+                <div style="font-family:var(--display,Anton),sans-serif;font-weight:var(--dw,400);font-size:48px;line-height:.95;text-transform:uppercase">{{ selA.title }}</div>
+                <div style="display:flex;gap:16px;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--dim,#aaa9a3)"><span>{{ selA.kind }}</span><span>{{ selA.tag }}</span><span style="color:{{ selA.statusColor }}">● {{ selA.status }}</span></div>
+              </div>
+              <div ref="{{ bodyRef }}" style="flex:1;min-height:0;overflow:auto;padding:18px 22px 40px">
+                <p style="margin:0 0 16px;font-size:16px;line-height:1.6;max-width:68ch;text-wrap:pretty">{{ selA.desc }}</p>
+                <div style="font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--dim,#aaa9a3);margin-bottom:14px">Placeholder article text ↓</div>
+                <sc-for list="{{ bodyA }}" as="b" hint-placeholder-count="4">
+                  <sc-if value="{{ b.isH }}" hint-placeholder-val="{{ false }}"><div style="font-family:var(--display,Anton),sans-serif;font-weight:var(--dw,400);font-size:26px;text-transform:uppercase;margin:22px 0 10px">{{ b.text }}</div></sc-if>
+                  <sc-if value="{{ b.isP }}" hint-placeholder-val="{{ true }}"><p style="margin:0 0 14px;font-size:14px;line-height:1.75;max-width:68ch;text-wrap:pretty">{{ b.text }}</p></sc-if>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(255,255,255,.025) 0 1px,transparent 1px 3px)"></div>
+      </div>
+            </div>
+          </div>
+          <div style="position:absolute;left:0;right:0;top:50%;height:4px;margin-top:-2px;background:var(--fg,#f3ead8);box-shadow:0 0 22px var(--fg,#f3ead8);pointer-events:none;opacity:{{ fx.journal.lineO }};transform:{{ fx.journal.lineTf }};transition:opacity .2s steps(2) .38s, transform .32s steps(4)"></div>
+        </div>
+      </section>
+      <section data-sec="projects" style="height:100%;scroll-snap-align:start;scroll-snap-stop:always;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden">
+        <div style="position:absolute;left:0;top:0;width:{{ abW }};height:{{ abH }};transform:{{ scaleTf }};transform-origin:0 0">
+          <div style="width:100%;height:100%;clip-path:{{ fx.projects.clip }};transition:clip-path .6s steps(10)">
+            <div style="width:100%;height:100%;transform:{{ fx.projects.tf }};opacity:{{ fx.projects.op }};transition:transform .55s cubic-bezier(.2,.8,.2,1) .18s, opacity .3s steps(3) .12s">
+<div style="position:relative;width:100%;height:100%;background:var(--bg,#070707);color:var(--fg,#f4f3ef);font-family:var(--mono,'IBM Plex Mono'),monospace;display:flex;flex-direction:column;overflow:hidden">
+        
+        <div style="position:relative;flex:1;min-height:0;display:flex;flex-direction:column;margin:12px;outline:1px solid var(--line,rgba(244,243,239,.2))">
+          <div style="height:30px;flex:0 0 auto;background:oklch(0.72 0.16 290);color:var(--on,#070707);display:flex;align-items:center;justify-content:space-between;padding:0 10px;font-size:12px;text-transform:uppercase;letter-spacing:.04em;font-weight:500"><span>projects.vol — working experiments across music, finance, travel and games</span><span>7 volumes · 4 games</span></div>
+          <div style="flex:1;min-height:0;background:var(--p0,#0d0d0d);padding:12px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:minmax(0,1fr) minmax(0,1fr) 168px;gap:8px">
+            <div onClick="{{ open.music }}" onMouseEnter="{{ hoverOn.music }}" onMouseLeave="{{ hoverOff.music }}" style="background:var(--p1,#151515);padding:14px;display:flex;flex-direction:column;cursor:pointer;min-height:0;overflow:hidden;transition:background .15s,color .15s" style-hover="background:#1ed760;color:#070707"><div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;text-transform:uppercase"><span>01</span><span>[ Music ]</span></div><div style="flex:1;min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden">{{ icons.music }}</div><div style="font-family:var(--display,Anton),sans-serif;font-weight:var(--dw,400);font-size:30px;text-transform:uppercase;line-height:.95">Sounds Like + Prompt Playlist</div><p style="margin:6px 0 10px;font-size:12px;line-height:1.45">A similarity engine for music discovery. Turn text into personalised playlists.</p><div style="display:flex;justify-content:space-between;border-top:1px solid currentColor;padding-top:8px;font-size:11px;text-transform:uppercase"><span>Phase 02 / Similarity engine</span><span>Explore ▸</span></div></div>
+            <div onClick="{{ open.today }}" onMouseEnter="{{ hoverOn.today }}" onMouseLeave="{{ hoverOff.today }}" style="background:var(--p1,#151515);padding:14px;display:flex;flex-direction:column;cursor:pointer;min-height:0;overflow:hidden;transition:background .15s,color .15s" style-hover="background:oklch(0.3 0.07 265);color:#f4f3ef"><div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;text-transform:uppercase"><span>02</span><span>[ Experiment ]</span></div><div style="flex:1;min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden">{{ icons.today }}</div><div style="font-family:var(--display,Anton),sans-serif;font-weight:var(--dw,400);font-size:30px;text-transform:uppercase;line-height:.95">Today Somewhere</div><p style="margin:6px 0 10px;font-size:12px;line-height:1.45">A collection of places, moments and photographs.</p><div style="display:flex;justify-content:space-between;border-top:1px solid currentColor;padding-top:8px;font-size:11px;text-transform:uppercase"><span>Planned</span><span>In development</span></div></div>
+            <div onClick="{{ open.where }}" onMouseEnter="{{ hoverOn.where }}" onMouseLeave="{{ hoverOff.where }}" style="background:var(--p1,#151515);padding:14px;display:flex;flex-direction:column;cursor:pointer;min-height:0;overflow:hidden;transition:background .15s,color .15s" style-hover="background:oklch(0.88 0.07 85);color:#070707"><div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;text-transform:uppercase"><span>03</span><span>[ Tool ]</span></div><div style="flex:1;min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden">{{ icons.where }}</div><div style="font-family:var(--display,Anton),sans-serif;font-weight:var(--dw,400);font-size:30px;text-transform:uppercase;line-height:.95">Where Next</div><p style="margin:6px 0 10px;font-size:12px;line-height:1.45">A simple tool for exploring new destinations.</p><div style="display:flex;justify-content:space-between;border-top:1px solid currentColor;padding-top:8px;font-size:11px;text-transform:uppercase"><span>Planned</span><span>In development</span></div></div>
+            <div onClick="{{ open.speed }}" onMouseEnter="{{ hoverOn.speed }}" onMouseLeave="{{ hoverOff.speed }}" style="background:var(--p1,#151515);padding:14px;display:flex;flex-direction:column;cursor:pointer;min-height:0;overflow:hidden;transition:background .15s,color .15s" style-hover="background:oklch(0.74 0.16 0);color:#070707"><div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;text-transform:uppercase"><span>04</span><span style="border:1px solid currentColor;padding:1px 6px">▶ Game</span></div><div style="flex:1;min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden">{{ icons.speed }}</div><div style="font-family:var(--display,Anton),sans-serif;font-weight:var(--dw,400);font-size:30px;text-transform:uppercase;line-height:.95">Speed Round</div><p style="margin:6px 0 10px;font-size:12px;line-height:1.45">A fast-paced trivia game for curious minds.</p><div style="display:flex;justify-content:space-between;border-top:1px solid currentColor;padding-top:8px;font-size:11px;text-transform:uppercase"><span>Planned</span><span>In development</span></div></div>
+            <div onClick="{{ open.terminal }}" onMouseEnter="{{ hoverOn.terminal }}" onMouseLeave="{{ hoverOff.terminal }}" style="background:var(--p1,#151515);padding:14px;display:flex;flex-direction:column;cursor:pointer;min-height:0;overflow:hidden;transition:background .15s,color .15s" style-hover="background:oklch(0.75 0.16 40);color:#070707"><div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;text-transform:uppercase"><span>05</span><span style="border:1px solid currentColor;padding:1px 6px">▶ Game</span></div><div style="flex:1;min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden">{{ icons.terminal }}</div><div style="font-family:var(--display,Anton),sans-serif;font-weight:var(--dw,400);font-size:30px;text-transform:uppercase;line-height:.95">Untitled Terminal Adventure</div><p style="margin:6px 0 10px;font-size:12px;line-height:1.45">A text-based experiment in choice and consequence.</p><div style="display:flex;justify-content:space-between;border-top:1px solid currentColor;padding-top:8px;font-size:11px;text-transform:uppercase"><span>Planned</span><span>In development</span></div></div>
+            <div onClick="{{ open.crack }}" onMouseEnter="{{ hoverOn.crack }}" onMouseLeave="{{ hoverOff.crack }}" style="background:var(--p1,#151515);padding:14px;display:flex;flex-direction:column;cursor:pointer;min-height:0;overflow:hidden;transition:background .15s,color .15s" style-hover="background:#f4f3ef;color:#070707"><div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;text-transform:uppercase"><span>06</span><span style="border:1px solid currentColor;padding:1px 6px">▶ Game</span></div><div style="flex:1;min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden">{{ icons.crack }}</div><div style="font-family:var(--display,Anton),sans-serif;font-weight:var(--dw,400);font-size:30px;text-transform:uppercase;line-height:.95">Crack</div><p style="margin:6px 0 10px;font-size:12px;line-height:1.45">Visual experiments with fracture, distortion and decay.</p><div style="display:flex;justify-content:space-between;border-top:1px solid currentColor;padding-top:8px;font-size:11px;text-transform:uppercase"><span>Playable</span><span>Play ▸</span></div></div>
+            <div onClick="{{ open.champion }}" onMouseEnter="{{ hoverOn.champ }}" onMouseLeave="{{ hoverOff.champ }}" style="grid-column:1 / -1;background:var(--p1,#151515);padding:14px 22px;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:32px;align-items:center;cursor:pointer;outline:1px dashed var(--line,rgba(244,243,239,.35));outline-offset:-1px;transition:background .15s,color .15s" style-hover="background:#f7c947;color:#070707;outline-color:transparent">
+              <div style="display:flex;align-items:center;gap:20px">{{ balls.champ }}<span style="font-family:'PixC','Pixelify Sans',sans-serif;font-weight:700;font-size:62px;line-height:.88;text-transform:uppercase">Champion<br>Run</span></div>
+              <div style="display:flex;flex-direction:column;gap:10px;min-width:0">
+                <div style="display:flex;gap:10px;align-items:center;font-size:11px;text-transform:uppercase"><span>07 · cartridge</span><span style="border:1px solid currentColor;padding:1px 6px">▶ Game</span></div>
+                <p style="margin:0;font-size:14px;line-height:1.5;max-width:62ch">Pick a team from one generation or all nine and face the hardest trainer. Stack modifiers like random moves and no potions for bigger rewards.</p>
+                <div style="display:flex;flex-wrap:wrap;gap:6px;font-size:10px;text-transform:uppercase;letter-spacing:.04em"><span style="border:1px solid currentColor;padding:3px 7px">Random team ×1.4</span><span style="border:1px solid currentColor;padding:3px 7px">Random moves ×1.5</span><span style="border:1px solid currentColor;padding:3px 7px">No potions ×1.3</span><span style="border:1px solid currentColor;padding:3px 7px">Level cap ×1.2</span><span style="border:1px solid currentColor;padding:3px 7px">No switching ×1.25</span></div>
+              </div>
+              <div style="display:flex;flex-direction:column;align-items:flex-end;gap:10px"><span style="font-size:11px;text-transform:uppercase">In progress</span><span style="border:1px solid currentColor;padding:12px 16px;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.05em">Insert cartridge ▸</span></div>
+            </div>
+          </div>
+          <sc-if value="{{ showGeneric }}" hint-placeholder-val="{{ false }}">
+            <div onClick="{{ closeP }}" style="position:absolute;inset:30px 0 0;background:rgba(0,0,0,.6)"></div>
+            <div style="position:absolute;left:50%;top:52%;transform:translate(-50%,-50%);width:780px;display:flex;flex-direction:column;box-shadow:0 0 0 1px var(--line,rgba(244,243,239,.72)),14px 14px 0 rgba(0,0,0,.55)">
+              <div style="height:30px;background:{{ proj.color }};color:#070707;display:flex;align-items:center;justify-content:space-between;padding:0 10px;font-size:12px;text-transform:uppercase;letter-spacing:.04em;font-weight:500"><span>{{ proj.file }} — project {{ proj.n }}</span><span onClick="{{ closeP }}" style="cursor:pointer;padding:0 4px">✕</span></div>
+              <div style="background:var(--p1,#151515);padding:20px;display:flex;flex-direction:column;gap:12px">
+                <div style="display:flex;justify-content:space-between;font-size:11px;text-transform:uppercase"><span>{{ proj.n }}</span><span>[ {{ proj.tag }} ]</span></div>
+                <div style="font-family:var(--display,Anton),sans-serif;font-weight:var(--dw,400);font-size:64px;line-height:.92;text-transform:uppercase">{{ proj.title }}</div>
+                <p style="margin:0;font-size:14px;line-height:1.5">{{ proj.desc }}</p>
+                <div style="height:280px;background:repeating-linear-gradient(45deg,rgba(128,128,128,.12) 0 6px,transparent 6px 12px);display:flex;align-items:flex-end;padding:10px;font-size:11px;color:var(--dim,#aaa9a3);text-transform:uppercase">The project runs here, inside this window</div>
+                <div style="display:flex;justify-content:space-between;border-top:1px solid var(--line,rgba(244,243,239,.2));padding-top:10px;font-size:11px;text-transform:uppercase;letter-spacing:.05em"><span style="color:var(--dim,#aaa9a3)">{{ proj.status }}</span><span>Esc to close</span></div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ showCR }}" hint-placeholder-val="{{ true }}">
+            <div onClick="{{ closeP }}" style="position:absolute;inset:30px 0 0;background:rgba(0,0,0,.6)"></div>
+            <div style="position:absolute;left:60px;right:60px;top:52px;bottom:22px;display:flex;flex-direction:column;box-shadow:0 0 0 1px var(--line,rgba(244,243,239,.72)),14px 14px 0 rgba(0,0,0,.55)">
+              <div style="height:30px;flex:0 0 auto;background:#f7c947;color:#070707;display:flex;align-items:center;justify-content:space-between;padding:0 10px;font-size:12px;text-transform:uppercase;letter-spacing:.04em;font-weight:500"><span>champion_run.cart — project 08 / game</span><span onClick="{{ closeP }}" style="cursor:pointer;padding:0 4px">✕</span></div>
+              <div style="flex:1;min-height:0;background:var(--p1,#151515);padding:14px 16px 16px;display:flex;flex-direction:column;gap:12px">
+                <div style="display:flex;justify-content:space-between;align-items:center;gap:20px">
+                  <div onMouseEnter="{{ hoverOn.win }}" onMouseLeave="{{ hoverOff.win }}" style="display:flex;align-items:center;gap:14px;cursor:default">{{ balls.win }}<span style="font-family:'PixC','Pixelify Sans',sans-serif;font-weight:700;font-size:46px;line-height:.9;text-transform:uppercase">Champion<br>Run</span></div>
+                  <div style="display:flex;flex-direction:column;align-items:flex-end"><span style="font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--dim,#aaa9a3)">Reward multiplier · {{ cr.tier }}</span><span style="font-family:var(--display,Anton),sans-serif;font-weight:var(--dw,400);font-size:56px;line-height:1;color:{{ cr.multColor }}">×{{ cr.mult }}</span></div>
+                </div>
+                <div style="flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:10px">
+                  <div style="background:var(--p2,#202020);padding:12px;display:flex;flex-direction:column;gap:10px;min-height:0">
+                    <div style="display:flex;justify-content:space-between;font-size:11px;text-transform:uppercase;letter-spacing:.05em"><span>01 / Pokémon pool</span><span style="color:var(--dim,#aaa9a3)">{{ cr.poolNote }}</span></div>
+                    <div style="display:flex;gap:4px;font-size:12px;text-transform:uppercase;letter-spacing:.04em">
+                      <span onClick="{{ cr.setSingle }}" style="padding:7px 12px;cursor:pointer;background:{{ cr.singleBg }};color:{{ cr.singleFg }}">One generation</span>
+                      <span onClick="{{ cr.setCross }}" style="padding:7px 12px;cursor:pointer;background:{{ cr.crossBg }};color:{{ cr.crossFg }}">Cross-generation</span>
+                    </div>
+                    <div style="display:flex;flex-wrap:wrap;gap:4px;font-size:12px">
+                      <sc-for list="{{ cr.genChips }}" as="g" hint-placeholder-count="9"><span onClick="{{ g.onClick }}" style="padding:5px 10px;cursor:pointer;background:{{ g.bg }};color:{{ g.fg }}">{{ g.label }}</span></sc-for>
+                    </div>
+                    <div style="flex:1;min-height:0;overflow:auto;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));grid-auto-rows:min-content;gap:6px;opacity:{{ cr.poolOpacity }}">
+                      <sc-for list="{{ cr.pool }}" as="p" hint-placeholder-count="8">
+                        <div onClick="{{ p.onClick }}" style="background:{{ p.bg }};outline:{{ p.outline }};padding:5px;display:flex;flex-direction:column;gap:5px;cursor:pointer" style-hover="background:var(--p3,#262626)">
+                          <div style="aspect-ratio:1;background:repeating-linear-gradient(45deg,rgba(128,128,128,.14) 0 5px,transparent 5px 10px);display:flex;align-items:flex-end;padding:3px;font-size:8px;color:var(--dim,#aaa9a3);text-transform:uppercase">sprite</div>
+                          <div style="display:flex;justify-content:space-between;gap:4px;font-size:9px;text-transform:uppercase"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ p.name }}</span><span style="color:var(--dim,#aaa9a3)">{{ p.genLabel }}</span></div>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:10px;min-height:0">
+                    <div style="background:var(--p2,#202020);padding:12px;display:flex;flex-direction:column;gap:8px">
+                      <div style="display:flex;justify-content:space-between;font-size:11px;text-transform:uppercase;letter-spacing:.05em"><span>02 / Team {{ cr.teamCount }}/6</span><sc-if value="{{ cr.isRandom }}" hint-placeholder-val="{{ false }}"><span onClick="{{ cr.reroll }}" style="cursor:pointer;color:var(--ok,#1ed760)">Reroll ↻</span></sc-if></div>
+                      <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px">
+                        <sc-for list="{{ cr.slots }}" as="s" hint-placeholder-count="6"><div onClick="{{ s.onClick }}" style="height:42px;padding:5px;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;background:{{ s.bg }};border:1px dashed {{ s.border }};font-size:9px;text-transform:uppercase"><span style="color:var(--dim,#aaa9a3)">{{ s.index }}</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ s.name }}</span></div></sc-for>
+                      </div>
+                    </div>
+                    <div style="flex:1;min-height:0;overflow:auto;background:var(--p2,#202020);padding:12px;display:flex;flex-direction:column">
+                      <span style="font-size:11px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">03 / Modifiers</span>
+                      <sc-for list="{{ cr.mods }}" as="m" hint-placeholder-count="5">
+                        <div onClick="{{ m.onClick }}" style="display:grid;grid-template-columns:14px minmax(0,1fr) auto;gap:8px;align-items:start;border-top:1px solid var(--line,rgba(244,243,239,.2));padding:7px 0;cursor:pointer">
+                          <span style="width:11px;height:11px;margin-top:2px;border:1px solid {{ m.color }};background:{{ m.fill }}"></span>
+                          <div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:{{ m.color }}">{{ m.label }}</span><span style="font-size:10px;color:var(--dim,#aaa9a3);line-height:1.35">{{ m.note }}</span></div>
+                          <span style="font-size:11px;color:{{ m.color }}">×{{ m.m }}</span>
+                        </div>
+                      </sc-for>
+                    </div>
+                    <div style="background:var(--fg,#f4f3ef);color:var(--bg,#070707);padding:13px 16px;font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;display:flex;justify-content:space-between" style-hover="background:#f7c947;color:#070707"><span>{{ cr.cta }}</span><span>↵</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+        </div>
+        <div style="position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(255,255,255,.025) 0 1px,transparent 1px 3px)"></div>
+      </div>
+            </div>
+          </div>
+          <div style="position:absolute;left:0;right:0;top:50%;height:4px;margin-top:-2px;background:var(--fg,#f3ead8);box-shadow:0 0 22px var(--fg,#f3ead8);pointer-events:none;opacity:{{ fx.projects.lineO }};transform:{{ fx.projects.lineTf }};transition:opacity .2s steps(2) .38s, transform .32s steps(4)"></div>
+        </div>
+      </section>
+      <section data-sec="toolbox" style="height:100%;scroll-snap-align:start;scroll-snap-stop:always;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden">
+        <div style="position:absolute;left:0;top:0;width:{{ abW }};height:{{ abH }};transform:{{ scaleTf }};transform-origin:0 0">
+          <div style="width:100%;height:100%;clip-path:{{ fx.toolbox.clip }};transition:clip-path .6s steps(10)">
+            <div style="width:100%;height:100%;transform:{{ fx.toolbox.tf }};opacity:{{ fx.toolbox.op }};transition:transform .55s cubic-bezier(.2,.8,.2,1) .18s, opacity .3s steps(3) .12s">
+<div style="position:relative;width:100%;height:100%;background:var(--bg,#070707);color:var(--fg,#f4f3ef);font-family:var(--mono,'IBM Plex Mono'),monospace;display:flex;flex-direction:column;overflow:hidden">
+        
+        <div style="flex:1;min-height:0;display:flex;flex-direction:column;margin:12px;outline:1px solid var(--line,rgba(244,243,239,.2))">
+          <div style="height:30px;flex:0 0 auto;background:oklch(0.74 0.14 245);color:var(--on,#070707);display:flex;align-items:center;justify-content:space-between;padding:0 10px;font-size:12px;text-transform:uppercase;letter-spacing:.04em;font-weight:500"><span>toolbox.exe — ref. 03 · no accounts. no clutter.</span><span>{{ toolStatus }}</span></div>
+          <div style="flex:1;min-height:0;display:flex;background:var(--p1,#151515);overflow:hidden">
+            <div style="flex:1;min-width:0;padding:16px;display:flex;flex-direction:column;gap:14px">
+              <div style="font-family:var(--display,Anton),sans-serif;font-weight:var(--dw,400);font-size:76px;line-height:1.02;text-transform:uppercase;white-space:nowrap;overflow:hidden;flex:0 0 auto">Drop something in,<br>get the result out.</div>
+              <div style="flex:1;min-height:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(3,minmax(0,1fr));gap:8px">
+                <sc-for list="{{ tools }}" as="t" hint-placeholder-count="9">
+                  <div onClick="{{ t.onClick }}" style="background:{{ t.bg }};color:{{ t.fg }};padding:14px 16px;display:flex;flex-direction:column;cursor:pointer;opacity:{{ t.opacity }};min-width:0;overflow:hidden;transition:background .15s,color .15s" style-hover="background:{{ t.hover }};color:#070707">
+                    <div style="display:flex;justify-content:space-between;font-size:11px;text-transform:uppercase"><span>{{ t.n }}</span><span>[ {{ t.cat }} ]</span></div>
+                    <div style="margin-top:auto;font-family:var(--display,Anton),sans-serif;font-weight:var(--dw,400);font-size:30px;text-transform:uppercase;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ t.name }}</div>
+                    <div style="font-size:12px;line-height:1.4;margin-top:6px;opacity:.75;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">{{ t.desc }}</div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+            <div style="flex:0 0 auto;width:{{ panelW }};overflow:hidden;transition:width .55s cubic-bezier(.7,0,.2,1)">
+              <div style="width:520px;height:100%;box-sizing:border-box;border-left:1px solid var(--line,rgba(244,243,239,.2));display:flex;flex-direction:column;transform:translateX({{ panelX }});opacity:{{ panelO }};transition:transform .55s cubic-bezier(.7,0,.2,1),opacity .3s ease .12s">
+                <div style="height:30px;flex:0 0 auto;background:var(--fg,#f4f3ef);color:var(--bg,#070707);display:flex;align-items:center;justify-content:space-between;padding:0 10px;font-size:12px;text-transform:uppercase;letter-spacing:.04em;font-weight:500"><span>{{ tool.exe }} — ref. 03.{{ tool.n }}</span><span onClick="{{ closeTool }}" style="cursor:pointer;padding:0 4px">✕</span></div>
+                <div style="flex:1;min-height:0;padding:20px;display:flex;flex-direction:column;gap:16px;background:var(--p0,#0f0f0f)">
+                  <div style="font-family:var(--display,Anton),sans-serif;font-weight:var(--dw,400);font-size:48px;line-height:.95;text-transform:uppercase">{{ tool.name }}</div>
+                  <p style="margin:0;font-size:13px;line-height:1.5">{{ tool.long }}</p>
+                  <sc-if value="{{ isTempo }}" hint-placeholder-val="{{ true }}">
+                  <div style="flex:1;display:flex;flex-direction:column;gap:14px">
+                    <div style="font-family:var(--display,Anton),sans-serif;font-weight:var(--dw,400);font-size:132px;line-height:.9">{{ bpm }} <span style="font-size:32px">BPM</span></div>
+                    <div onClick="{{ tap }}" style="flex:1;min-height:160px;background:var(--p2,#202020);display:flex;align-items:center;justify-content:center;font-family:var(--display,Anton),sans-serif;font-weight:var(--dw,400);font-size:52px;text-transform:uppercase;cursor:pointer;user-select:none" style-hover="background:oklch(0.74 0.14 245);color:var(--on,#070707)" style-active="background:var(--fg,#f4f3ef);color:var(--bg,#070707)">Tap</div>
+                    <div style="display:flex;justify-content:space-between;font-size:11px;text-transform:uppercase;letter-spacing:.05em;border-top:1px solid var(--line,rgba(244,243,239,.2));padding-top:10px"><span style="color:var(--dim,#aaa9a3)">{{ tapCount }} taps · {{ msLabel }}</span><span onClick="{{ resetTaps }}" style="text-decoration:underline;cursor:pointer">Reset</span></div>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ isPassword }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;flex-direction:column;gap:12px">
+                    <div style="background:var(--p2,#202020);padding:16px;font-size:20px;letter-spacing:.04em;word-break:break-all;line-height:1.4">{{ password }}</div>
+                    <div style="display:flex;gap:4px;font-size:12px;align-items:center"><span style="color:var(--dim,#aaa9a3);text-transform:uppercase;font-size:11px;margin-right:8px">Length</span>
+                      <sc-for list="{{ lengths }}" as="l" hint-placeholder-count="3"><span onClick="{{ l.onClick }}" style="padding:6px 12px;cursor:pointer;background:{{ l.bg }};color:{{ l.fg }}">{{ l.n }}</span></sc-for>
+                    </div>
+                    <div onClick="{{ regen }}" style="background:var(--fg,#f4f3ef);color:var(--bg,#070707);padding:12px 16px;font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;display:flex;justify-content:space-between" style-hover="background:oklch(0.72 0.16 290)"><span>Generate new password</span><span>↻</span></div>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ isDrop }}" hint-placeholder-val="{{ false }}">
+                  <div style="flex:1;min-height:200px;border:1px dashed var(--line,rgba(244,243,239,.4));display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;font-size:12px;text-transform:uppercase;letter-spacing:.05em;text-align:center;padding:16px" style-hover="border-color:var(--fg,#f4f3ef);background:var(--p1,#151515)"><span style="font-size:22px">↓</span><span>Drag &amp; drop here, or click to browse</span><span style="color:var(--dim,#aaa9a3)">{{ tool.accepts }}</span></div>
+                </sc-if>
+                <sc-if value="{{ isInput }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;flex-direction:column;gap:10px;flex:1">
+                    <div style="background:var(--p2,#202020);padding:14px;font-size:13px;color:var(--dim,#aaa9a3);border-bottom:1px solid var(--fg,#f4f3ef)">{{ tool.placeholder }}</div>
+                    <div style="flex:1;min-height:160px;background:repeating-linear-gradient(45deg,rgba(244,243,239,.05) 0 6px,transparent 6px 12px);display:flex;align-items:flex-end;padding:10px;font-size:11px;color:var(--dim,#aaa9a3);text-transform:uppercase">{{ tool.output }}</div>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ isSoon }}" hint-placeholder-val="{{ false }}">
+                  <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:8px;border:1px solid var(--line,rgba(244,243,239,.2));padding:20px"><span style="font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--warn,#f7c947)">● Still being built</span><span style="font-size:13px;line-height:1.5;color:var(--dim,#aaa9a3)">This tool isn't available yet. It'll open here when it ships.</span></div>
+                </sc-if>
+                <div style="margin-top:auto;font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--dim,#aaa9a3)">Nothing leaves your browser.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(255,255,255,.025) 0 1px,transparent 1px 3px)"></div>
+      </div>
+            </div>
+          </div>
+          <div style="position:absolute;left:0;right:0;top:50%;height:4px;margin-top:-2px;background:var(--fg,#f3ead8);box-shadow:0 0 22px var(--fg,#f3ead8);pointer-events:none;opacity:{{ fx.toolbox.lineO }};transform:{{ fx.toolbox.lineTf }};transition:opacity .2s steps(2) .38s, transform .32s steps(4)"></div>
+        </div>
+      </section>
+      <section data-sec="media" style="height:100%;scroll-snap-align:start;scroll-snap-stop:always;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden">
+        <div style="position:absolute;left:0;top:0;width:{{ abW }};height:{{ abH }};transform:{{ scaleTf }};transform-origin:0 0">
+          <div style="width:100%;height:100%;clip-path:{{ fx.media.clip }};transition:clip-path .6s steps(10)">
+            <div style="width:100%;height:100%;transform:{{ fx.media.tf }};opacity:{{ fx.media.op }};transition:transform .55s cubic-bezier(.2,.8,.2,1) .18s, opacity .3s steps(3) .12s">
+<div style="position:relative;width:100%;height:100%;background:var(--bg,#070707);color:var(--fg,#f4f3ef);font-family:var(--mono,'IBM Plex Mono'),monospace;display:flex;flex-direction:column;overflow:hidden">
+        
+        <div style="flex:1;min-height:0;display:flex;flex-direction:column;margin:12px;outline:1px solid var(--line,rgba(244,243,239,.2))">
+          <div style="height:30px;flex:0 0 auto;background:oklch(0.74 0.16 0);color:var(--on,#070707);display:flex;align-items:center;justify-content:space-between;padding:0 10px;font-size:12px;text-transform:uppercase;letter-spacing:.04em;font-weight:500"><span>media.reel — ref. 04</span><span style="display:flex;gap:5px"><span style="width:11px;height:11px;border:1px solid #070707"></span><span style="width:11px;height:11px;background:#070707"></span></span></div>
+          <div style="flex:1;min-height:0;background:var(--p1,#151515);padding:16px;display:flex;flex-direction:column;gap:12px">
+            <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:20px">
+              <div><div style="font-family:var(--display,Anton),sans-serif;font-weight:var(--dw,400);font-size:104px;line-height:.86;text-transform:uppercase">Media</div><div style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;margin-top:6px">Films in Dubai cinemas and new games. Next three months.</div></div>
+              <div style="display:flex;gap:4px;font-size:12px;text-transform:uppercase;letter-spacing:.04em"><span style="padding:8px 12px;background:var(--fg,#f4f3ef);color:var(--bg,#070707)">All</span><span style="padding:8px 12px;background:var(--p2,#202020);cursor:pointer" style-hover="background:oklch(0.74 0.16 0);color:var(--on,#070707)">Films</span><span style="padding:8px 12px;background:var(--p2,#202020);cursor:pointer" style-hover="background:oklch(0.74 0.16 0);color:var(--on,#070707)">Games</span></div>
+            </div>
+            <div style="display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:16px;background:var(--p2,#202020);padding:8px 12px;font-size:11px;text-transform:uppercase;letter-spacing:.05em">
+              <span>Batch 01 of 02 / Auto 10 sec</span>
+              <div style="display:flex;background:var(--p1,#151515)"><span style="width:38px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer" style-hover="background:var(--fg,#f4f3ef);color:var(--bg,#070707)">‹</span><span style="width:38px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer" style-hover="background:var(--fg,#f4f3ef);color:var(--bg,#070707)">‖</span><span style="width:38px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer" style-hover="background:var(--fg,#f4f3ef);color:var(--bg,#070707)">›</span></div>
+              <div style="display:flex;align-items:center;justify-content:flex-end;gap:12px"><span>01 / 10</span><span style="width:90px;height:1px;background:var(--line,rgba(244,243,239,.2))"><span style="display:block;width:40%;height:100%;background:var(--fg,#f4f3ef)"></span></span></div>
+            </div>
+            <div style="flex:1;min-height:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px">
+              <div style="background:var(--p2,#202020);padding:10px;display:flex;flex-direction:column;gap:8px;cursor:pointer;outline:1px solid transparent;outline-offset:3px" style-hover="outline-color:oklch(0.74 0.16 0)"><div style="flex:1;min-height:0;background:repeating-linear-gradient(45deg,rgba(244,243,239,.06) 0 6px,transparent 6px 12px);display:flex;align-items:flex-end;padding:8px;font-size:10px;color:var(--dim,#aaa9a3);text-transform:uppercase">Poster</div><div style="display:flex;justify-content:space-between;font-size:10px;text-transform:uppercase"><span>01</span><span style="color:oklch(0.8 0.12 0)">[ Film ]</span></div><div style="font-family:var(--display,Anton),sans-serif;font-weight:var(--dw,400);font-size:24px;text-transform:uppercase;line-height:1">Film title</div><div style="font-size:11px;text-transform:uppercase;color:var(--dim,#aaa9a3);line-height:1.4">Release date<br>Reel / VOX</div><div style="border-top:1px solid var(--line,rgba(244,243,239,.2));padding-top:8px;font-size:11px;text-transform:uppercase;text-align:center">Showtimes ↗</div></div>
+              <div style="background:var(--p2,#202020);padding:10px;display:flex;flex-direction:column;gap:8px;cursor:pointer;outline:1px solid transparent;outline-offset:3px" style-hover="outline-color:oklch(0.74 0.16 0)"><div style="flex:1;min-height:0;background:repeating-linear-gradient(45deg,rgba(244,243,239,.06) 0 6px,transparent 6px 12px);display:flex;align-items:flex-end;padding:8px;font-size:10px;color:var(--dim,#aaa9a3);text-transform:uppercase">Cover art</div><div style="display:flex;justify-content:space-between;font-size:10px;text-transform:uppercase"><span>02</span><span style="color:oklch(0.8 0.12 245)">[ Game ]</span></div><div style="font-family:var(--display,Anton),sans-serif;font-weight:var(--dw,400);font-size:24px;text-transform:uppercase;line-height:1">Game title</div><div style="font-size:11px;text-transform:uppercase;color:var(--dim,#aaa9a3);line-height:1.4">Release date<br>Platforms</div><div style="border-top:1px solid var(--line,rgba(244,243,239,.2));padding-top:8px;font-size:11px;text-transform:uppercase;text-align:center">Store page ↗</div></div>
+              <div style="background:var(--p2,#202020);padding:10px;display:flex;flex-direction:column;gap:8px;cursor:pointer;outline:1px solid transparent;outline-offset:3px" style-hover="outline-color:oklch(0.74 0.16 0)"><div style="flex:1;min-height:0;background:repeating-linear-gradient(45deg,rgba(244,243,239,.06) 0 6px,transparent 6px 12px);display:flex;align-items:flex-end;padding:8px;font-size:10px;color:var(--dim,#aaa9a3);text-transform:uppercase">Poster</div><div style="display:flex;justify-content:space-between;font-size:10px;text-transform:uppercase"><span>03</span><span style="color:oklch(0.8 0.12 0)">[ Film · Re-release ]</span></div><div style="font-family:var(--display,Anton),sans-serif;font-weight:var(--dw,400);font-size:24px;text-transform:uppercase;line-height:1">Film title</div><div style="font-size:11px;text-transform:uppercase;color:var(--dim,#aaa9a3);line-height:1.4">Release date<br>ROXY / Cinema Akil</div><div style="border-top:1px solid var(--line,rgba(244,243,239,.2));padding-top:8px;font-size:11px;text-transform:uppercase;text-align:center">Showtimes ↗</div></div>
+              <div style="background:var(--p2,#202020);padding:10px;display:flex;flex-direction:column;gap:8px;cursor:pointer;outline:1px solid transparent;outline-offset:3px" style-hover="outline-color:oklch(0.74 0.16 0)"><div style="flex:1;min-height:0;background:repeating-linear-gradient(45deg,rgba(244,243,239,.06) 0 6px,transparent 6px 12px);display:flex;align-items:flex-end;padding:8px;font-size:10px;color:var(--dim,#aaa9a3);text-transform:uppercase">Poster</div><div style="display:flex;justify-content:space-between;font-size:10px;text-transform:uppercase"><span>04</span><span style="color:oklch(0.8 0.12 0)">[ Film ]</span></div><div style="font-family:var(--display,Anton),sans-serif;font-weight:var(--dw,400);font-size:24px;text-transform:uppercase;line-height:1">Film title</div><div style="font-size:11px;text-transform:uppercase;color:var(--dim,#aaa9a3);line-height:1.4">Release date<br>VOX</div><div style="border-top:1px solid var(--line,rgba(244,243,239,.2));padding-top:8px;font-size:11px;text-transform:uppercase;text-align:center">Showtimes ↗</div></div>
+              <div style="background:var(--p2,#202020);padding:10px;display:flex;flex-direction:column;gap:8px;cursor:pointer;outline:1px solid transparent;outline-offset:3px" style-hover="outline-color:oklch(0.74 0.16 0)"><div style="flex:1;min-height:0;background:repeating-linear-gradient(45deg,rgba(244,243,239,.06) 0 6px,transparent 6px 12px);display:flex;align-items:flex-end;padding:8px;font-size:10px;color:var(--dim,#aaa9a3);text-transform:uppercase">Cover art</div><div style="display:flex;justify-content:space-between;font-size:10px;text-transform:uppercase"><span>05</span><span style="color:oklch(0.8 0.12 245)">[ Game ]</span></div><div style="font-family:var(--display,Anton),sans-serif;font-weight:var(--dw,400);font-size:24px;text-transform:uppercase;line-height:1">Game title</div><div style="font-size:11px;text-transform:uppercase;color:var(--dim,#aaa9a3);line-height:1.4">Release date<br>Platforms</div><div style="border-top:1px solid var(--line,rgba(244,243,239,.2));padding-top:8px;font-size:11px;text-transform:uppercase;text-align:center">Store page ↗</div></div>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;background:var(--p2,#202020);padding:10px 14px;font-size:11px;letter-spacing:.05em;text-transform:uppercase;gap:8px 24px"><span>Films: English, Japanese, Korean</span><span style="color:var(--dim,#aaa9a3)">/</span><span>Reel / VOX / ROXY / Cinema Akil</span><span style="color:var(--dim,#aaa9a3)">/</span><span>Games: release dates</span></div>
+          </div>
+        </div>
+        <div style="position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(255,255,255,.025) 0 1px,transparent 1px 3px)"></div>
+      </div>
+            </div>
+          </div>
+          <div style="position:absolute;left:0;right:0;top:50%;height:4px;margin-top:-2px;background:var(--fg,#f3ead8);box-shadow:0 0 22px var(--fg,#f3ead8);pointer-events:none;opacity:{{ fx.media.lineO }};transform:{{ fx.media.lineTf }};transition:opacity .2s steps(2) .38s, transform .32s steps(4)"></div>
+        </div>
+      </section>
+      <section data-sec="playlists" style="height:100%;scroll-snap-align:start;scroll-snap-stop:always;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden">
+        <div style="position:absolute;left:0;top:0;width:{{ abW }};height:{{ abH }};transform:{{ scaleTf }};transform-origin:0 0">
+          <div style="width:100%;height:100%;clip-path:{{ fx.playlists.clip }};transition:clip-path .6s steps(10)">
+            <div style="width:100%;height:100%;transform:{{ fx.playlists.tf }};opacity:{{ fx.playlists.op }};transition:transform .55s cubic-bezier(.2,.8,.2,1) .18s, opacity .3s steps(3) .12s">
+<div style="position:relative;width:100%;height:100%;background:var(--bg,#070707);color:var(--fg,#f4f3ef);font-family:var(--mono,'IBM Plex Mono'),monospace;display:flex;flex-direction:column;overflow:hidden">
+        
+        <div style="flex:1;min-height:0;display:flex;flex-direction:column;margin:12px;outline:1px solid var(--line,rgba(244,243,239,.2))">
+          <div style="height:30px;flex:0 0 auto;background:var(--ok,#1ed760);color:var(--on,#070707);display:flex;align-items:center;justify-content:space-between;padding:0 10px;font-size:12px;text-transform:uppercase;letter-spacing:.04em;font-weight:500"><span>playlists.fm — ref. 05</span><span style="display:flex;gap:5px"><span style="width:11px;height:11px;border:1px solid #070707"></span><span style="width:11px;height:11px;background:#070707"></span></span></div>
+          <div style="flex:1;min-height:0;background:var(--p1,#151515);padding:16px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.35fr);gap:12px">
+            <div style="display:flex;flex-direction:column;gap:8px;min-height:0">
+              <div style="font-family:var(--display,Anton),sans-serif;font-weight:var(--dw,400);font-size:104px;line-height:.86;text-transform:uppercase">Playlists</div>
+              <div style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:6px">Three on repeat, plus this month’s listening history.</div>
+              <div style="flex:1;min-height:0;display:grid;grid-template-rows:repeat(3,minmax(0,1fr));gap:8px">
+                <div style="background:var(--p2,#202020);padding:12px;display:grid;grid-template-columns:auto minmax(0,1fr);gap:14px;cursor:pointer;transition:background .15s,color .15s" style-hover="background:var(--ok,#1ed760);color:var(--on,#070707)"><div style="height:100%;aspect-ratio:1;background:repeating-linear-gradient(45deg,rgba(128,128,128,.18) 0 5px,transparent 5px 10px);display:flex;align-items:flex-end;padding:6px;font-size:9px;text-transform:uppercase;opacity:.8">Cover</div><div style="display:flex;flex-direction:column;padding-bottom:18px"><div style="display:flex;justify-content:space-between;font-size:10px;text-transform:uppercase"><span>01</span><span>[ Playlist ]</span></div><div style="margin-top:auto;font-family:var(--display,Anton),sans-serif;font-weight:var(--dw,400);font-size:40px;text-transform:uppercase;line-height:1">pop</div><div style="font-size:12px;opacity:.75">Playlist on Spotify.</div><div style="border-top:1px solid currentColor;margin-top:10px;padding-top:8px;font-size:11px;text-transform:uppercase">Open on Spotify ↗</div></div></div>
+                <div style="background:var(--p2,#202020);padding:12px;display:grid;grid-template-columns:auto minmax(0,1fr);gap:14px;cursor:pointer;transition:background .15s,color .15s" style-hover="background:var(--ok,#1ed760);color:var(--on,#070707)"><div style="height:100%;aspect-ratio:1;background:repeating-linear-gradient(45deg,rgba(128,128,128,.18) 0 5px,transparent 5px 10px);display:flex;align-items:flex-end;padding:6px;font-size:9px;text-transform:uppercase;opacity:.8">Cover</div><div style="display:flex;flex-direction:column;padding-bottom:18px"><div style="display:flex;justify-content:space-between;font-size:10px;text-transform:uppercase"><span>02</span><span>[ Playlist ]</span></div><div style="margin-top:auto;font-family:var(--display,Anton),sans-serif;font-weight:var(--dw,400);font-size:40px;text-transform:uppercase;line-height:1">Camon</div><div style="font-size:12px;opacity:.75">Playlist on Spotify.</div><div style="border-top:1px solid currentColor;margin-top:10px;padding-top:8px;font-size:11px;text-transform:uppercase">Open on Spotify ↗</div></div></div>
+                <div style="background:var(--p2,#202020);padding:12px;display:grid;grid-template-columns:auto minmax(0,1fr);gap:14px;cursor:pointer;transition:background .15s,color .15s" style-hover="background:var(--ok,#1ed760);color:var(--on,#070707)"><div style="height:100%;aspect-ratio:1;background:repeating-linear-gradient(45deg,rgba(128,128,128,.18) 0 5px,transparent 5px 10px);display:flex;align-items:flex-end;padding:6px;font-size:9px;text-transform:uppercase;opacity:.8">Cover</div><div style="display:flex;flex-direction:column;padding-bottom:18px"><div style="display:flex;justify-content:space-between;font-size:10px;text-transform:uppercase"><span>03</span><span>[ Playlist ]</span></div><div style="margin-top:auto;font-family:var(--display,Anton),sans-serif;font-weight:var(--dw,400);font-size:40px;text-transform:uppercase;line-height:1">idk</div><div style="font-size:12px;opacity:.75">Playlist on Spotify.</div><div style="border-top:1px solid currentColor;margin-top:10px;padding-top:8px;font-size:11px;text-transform:uppercase">Open on Spotify ↗</div></div></div>
+              </div>
+            </div>
+            <div style="background:var(--p2,#202020);padding:16px;display:flex;flex-direction:column;min-height:0">
+              <div style="display:flex;justify-content:space-between;font-size:11px;text-transform:uppercase"><span>04 — Listening history</span><span style="color:var(--dim,#aaa9a3)">[ This month / Tracks ]</span></div>
+              <div style="display:flex;justify-content:space-between;align-items:flex-end;margin:18px 0 12px"><div style="font-family:var(--display,Anton),sans-serif;font-weight:var(--dw,400);font-size:56px;line-height:1;text-transform:uppercase">Top this month</div><div style="display:flex;gap:4px;font-size:11px;text-transform:uppercase;letter-spacing:.05em"><span style="padding:6px 10px;background:var(--fg,#f4f3ef);color:var(--bg,#070707)">Tracks</span><span style="padding:6px 10px;background:var(--p1,#151515);cursor:pointer" style-hover="background:var(--ok,#1ed760);color:var(--on,#070707)">Artists</span></div></div>
+              <div style="flex:1;min-height:0;display:grid;grid-template-rows:repeat(5,minmax(0,1fr))">
+                <div style="display:grid;grid-template-columns:28px minmax(0,1.2fr) minmax(0,1fr) minmax(0,1.4fr) 40px;gap:16px;align-items:center;border-top:1px solid var(--line,rgba(244,243,239,.2));font-size:12px;text-transform:uppercase;letter-spacing:.04em" style-hover="background:var(--p3,#262626)"><span style="color:var(--dim,#aaa9a3)">01</span><span>Heaven Up There</span><span style="color:var(--dim,#aaa9a3)">Palace</span><span style="height:5px;background:var(--line,rgba(244,243,239,.14))"><span style="display:block;width:100%;height:100%;background:var(--ok,#1ed760)"></span></span><span style="text-align:right">--</span></div>
+                <div style="display:grid;grid-template-columns:28px minmax(0,1.2fr) minmax(0,1fr) minmax(0,1.4fr) 40px;gap:16px;align-items:center;border-top:1px solid var(--line,rgba(244,243,239,.2));font-size:12px;text-transform:uppercase;letter-spacing:.04em" style-hover="background:var(--p3,#262626)"><span style="color:var(--dim,#aaa9a3)">02</span><span>Wicked Game</span><span style="color:var(--dim,#aaa9a3)">Chris Isaak</span><span style="height:5px;background:var(--line,rgba(244,243,239,.14))"><span style="display:block;width:78%;height:100%;background:var(--fg,#f4f3ef)"></span></span><span style="text-align:right">--</span></div>
+                <div style="display:grid;grid-template-columns:28px minmax(0,1.2fr) minmax(0,1fr) minmax(0,1.4fr) 40px;gap:16px;align-items:center;border-top:1px solid var(--line,rgba(244,243,239,.2));font-size:12px;text-transform:uppercase;letter-spacing:.04em" style-hover="background:var(--p3,#262626)"><span style="color:var(--dim,#aaa9a3)">03</span><span>Love Will Tear Us Apart</span><span style="color:var(--dim,#aaa9a3)">Joy Division</span><span style="height:5px;background:var(--line,rgba(244,243,239,.14))"><span style="display:block;width:61%;height:100%;background:var(--fg,#f4f3ef)"></span></span><span style="text-align:right">--</span></div>
+                <div style="display:grid;grid-template-columns:28px minmax(0,1.2fr) minmax(0,1fr) minmax(0,1.4fr) 40px;gap:16px;align-items:center;border-top:1px solid var(--line,rgba(244,243,239,.2));font-size:12px;text-transform:uppercase;letter-spacing:.04em" style-hover="background:var(--p3,#262626)"><span style="color:var(--dim,#aaa9a3)">04</span><span>Free Fallin'</span><span style="color:var(--dim,#aaa9a3)">Tom Petty</span><span style="height:5px;background:var(--line,rgba(244,243,239,.14))"><span style="display:block;width:47%;height:100%;background:var(--fg,#f4f3ef)"></span></span><span style="text-align:right">--</span></div>
+                <div style="display:grid;grid-template-columns:28px minmax(0,1.2fr) minmax(0,1fr) minmax(0,1.4fr) 40px;gap:16px;align-items:center;border-top:1px solid var(--line,rgba(244,243,239,.2));border-bottom:1px solid var(--line,rgba(244,243,239,.2));font-size:12px;text-transform:uppercase;letter-spacing:.04em" style-hover="background:var(--p3,#262626)"><span style="color:var(--dim,#aaa9a3)">05</span><span>Maniac</span><span style="color:var(--dim,#aaa9a3)">Michael Sembello</span><span style="height:5px;background:var(--line,rgba(244,243,239,.14))"><span style="display:block;width:30%;height:100%;background:var(--fg,#f4f3ef)"></span></span><span style="text-align:right">--</span></div>
+              </div>
+              <div style="margin-top:12px;display:flex;align-items:center;gap:12px;background:var(--p1,#151515);padding:10px 12px;font-size:11px;text-transform:uppercase;letter-spacing:.05em"><span style="color:var(--ok,#1ed760)">▶ Now playing</span><span style="color:var(--dim,#aaa9a3)">Nothing playing</span><span style="flex:1;height:1px;background:var(--line,rgba(244,243,239,.2))"></span><span>0:00 / 0:00</span></div>
+            </div>
+          </div>
+        </div>
+        <div style="position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(255,255,255,.025) 0 1px,transparent 1px 3px)"></div>
+      </div>
+            </div>
+          </div>
+          <div style="position:absolute;left:0;right:0;top:50%;height:4px;margin-top:-2px;background:var(--fg,#f3ead8);box-shadow:0 0 22px var(--fg,#f3ead8);pointer-events:none;opacity:{{ fx.playlists.lineO }};transform:{{ fx.playlists.lineTf }};transition:opacity .2s steps(2) .38s, transform .32s steps(4)"></div>
+        </div>
+      </section>
+      <section data-sec="gigs" style="height:100%;scroll-snap-align:start;scroll-snap-stop:always;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden">
+        <div style="position:absolute;left:0;top:0;width:{{ abW }};height:{{ abH }};transform:{{ scaleTf }};transform-origin:0 0">
+          <div style="width:100%;height:100%;clip-path:{{ fx.gigs.clip }};transition:clip-path .6s steps(10)">
+            <div style="width:100%;height:100%;transform:{{ fx.gigs.tf }};opacity:{{ fx.gigs.op }};transition:transform .55s cubic-bezier(.2,.8,.2,1) .18s, opacity .3s steps(3) .12s">
+<div style="position:relative;width:100%;height:100%;background:var(--bg,#070707);color:var(--fg,#f4f3ef);font-family:var(--mono,'IBM Plex Mono'),monospace;display:flex;flex-direction:column;overflow:hidden">
+        
+        <div style="flex:1;min-height:0;display:flex;flex-direction:column;margin:12px;outline:1px solid var(--line,rgba(244,243,239,.2))">
+          <div style="height:30px;flex:0 0 auto;background:oklch(0.86 0.15 95);color:var(--on,#070707);display:flex;align-items:center;justify-content:space-between;padding:0 10px;font-size:12px;text-transform:uppercase;letter-spacing:.04em;font-weight:500"><span>gigs.map — ref. 06 / gig finder</span><span style="display:flex;gap:5px"><span style="width:11px;height:11px;border:1px solid #070707"></span><span style="width:11px;height:11px;background:#070707"></span></span></div>
+          <div style="flex:1;min-height:0;background:var(--p1,#151515);padding:16px;display:flex;flex-direction:column;gap:12px">
+            <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:20px">
+              <div><div style="font-family:var(--display,Anton),sans-serif;font-weight:var(--dw,400);font-size:104px;line-height:.86;text-transform:uppercase">Upcoming</div><div style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;margin-top:6px">Dubai and Abu Dhabi. Five at a time.</div></div>
+              <div style="display:flex;gap:4px;font-size:12px;text-transform:uppercase;letter-spacing:.04em"><span style="padding:8px 12px;background:var(--fg,#f4f3ef);color:var(--bg,#070707)">Both</span><span style="padding:8px 12px;background:var(--p2,#202020);cursor:pointer" style-hover="background:oklch(0.86 0.15 95);color:var(--on,#070707)">Dubai</span><span style="padding:8px 12px;background:var(--p2,#202020);cursor:pointer" style-hover="background:oklch(0.86 0.15 95);color:var(--on,#070707)">Abu Dhabi</span></div>
+            </div>
+            <div style="display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:16px;background:var(--p2,#202020);padding:8px 12px;font-size:11px;text-transform:uppercase;letter-spacing:.05em">
+              <span>Batch 01 of 02 / Auto 10 sec</span>
+              <div style="display:flex;background:var(--p1,#151515)"><span style="width:38px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer" style-hover="background:var(--fg,#f4f3ef);color:var(--bg,#070707)">‹</span><span style="width:38px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer" style-hover="background:var(--fg,#f4f3ef);color:var(--bg,#070707)">‖</span><span style="width:38px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer" style-hover="background:var(--fg,#f4f3ef);color:var(--bg,#070707)">›</span></div>
+              <div style="display:flex;align-items:center;justify-content:flex-end;gap:12px"><span>01 / 10</span><span style="width:90px;height:1px;background:var(--line,rgba(244,243,239,.2))"><span style="display:block;width:65%;height:100%;background:var(--fg,#f4f3ef)"></span></span></div>
+            </div>
+            <div style="flex:1;min-height:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px">
+              <div style="background:var(--p2,#202020);padding:10px;display:flex;flex-direction:column;gap:8px;cursor:pointer;outline:1px solid transparent;outline-offset:3px" style-hover="outline-color:oklch(0.86 0.15 95)"><div style="flex:1;min-height:0;background:repeating-linear-gradient(45deg,rgba(244,243,239,.06) 0 6px,transparent 6px 12px);display:flex;align-items:flex-end;padding:8px;font-size:10px;color:var(--dim,#aaa9a3);text-transform:uppercase">Artist photo</div><div style="display:flex;justify-content:space-between;font-size:10px;text-transform:uppercase"><span>01</span><span style="color:oklch(0.86 0.15 95)">Dubai</span></div><div style="font-family:var(--display,Anton),sans-serif;font-weight:var(--dw,400);font-size:26px;text-transform:uppercase;line-height:1">Artist name</div><div style="font-size:11px;text-transform:uppercase;color:var(--dim,#aaa9a3);line-height:1.4">Date · Doors<br>Venue</div><div style="border-top:1px solid var(--line,rgba(244,243,239,.2));padding-top:8px;font-size:11px;text-transform:uppercase;text-align:center">Tickets ↗</div></div>
+              <div style="background:var(--p2,#202020);padding:10px;display:flex;flex-direction:column;gap:8px;cursor:pointer;outline:1px solid transparent;outline-offset:3px" style-hover="outline-color:oklch(0.86 0.15 95)"><div style="flex:1;min-height:0;background:repeating-linear-gradient(45deg,rgba(244,243,239,.06) 0 6px,transparent 6px 12px);display:flex;align-items:flex-end;padding:8px;font-size:10px;color:var(--dim,#aaa9a3);text-transform:uppercase">Artist photo</div><div style="display:flex;justify-content:space-between;font-size:10px;text-transform:uppercase"><span>02</span><span style="color:oklch(0.82 0.1 205)">Abu Dhabi</span></div><div style="font-family:var(--display,Anton),sans-serif;font-weight:var(--dw,400);font-size:26px;text-transform:uppercase;line-height:1">Artist name</div><div style="font-size:11px;text-transform:uppercase;color:var(--dim,#aaa9a3);line-height:1.4">Date · Doors<br>Venue</div><div style="border-top:1px solid var(--line,rgba(244,243,239,.2));padding-top:8px;font-size:11px;text-transform:uppercase;text-align:center">Tickets ↗</div></div>
+              <div style="background:var(--p2,#202020);padding:10px;display:flex;flex-direction:column;gap:8px;cursor:pointer;outline:1px solid transparent;outline-offset:3px" style-hover="outline-color:oklch(0.86 0.15 95)"><div style="flex:1;min-height:0;background:repeating-linear-gradient(45deg,rgba(244,243,239,.06) 0 6px,transparent 6px 12px);display:flex;align-items:flex-end;padding:8px;font-size:10px;color:var(--dim,#aaa9a3);text-transform:uppercase">Artist photo</div><div style="display:flex;justify-content:space-between;font-size:10px;text-transform:uppercase"><span>03</span><span style="color:oklch(0.86 0.15 95)">Dubai</span></div><div style="font-family:var(--display,Anton),sans-serif;font-weight:var(--dw,400);font-size:26px;text-transform:uppercase;line-height:1">Artist name</div><div style="font-size:11px;text-transform:uppercase;color:var(--dim,#aaa9a3);line-height:1.4">Date · Doors<br>Venue</div><div style="border-top:1px solid var(--line,rgba(244,243,239,.2));padding-top:8px;font-size:11px;text-transform:uppercase;text-align:center">Tickets ↗</div></div>
+              <div style="background:var(--p2,#202020);padding:10px;display:flex;flex-direction:column;gap:8px;cursor:pointer;outline:1px solid transparent;outline-offset:3px" style-hover="outline-color:oklch(0.86 0.15 95)"><div style="flex:1;min-height:0;background:repeating-linear-gradient(45deg,rgba(244,243,239,.06) 0 6px,transparent 6px 12px);display:flex;align-items:flex-end;padding:8px;font-size:10px;color:var(--dim,#aaa9a3);text-transform:uppercase">Artist photo</div><div style="display:flex;justify-content:space-between;font-size:10px;text-transform:uppercase"><span>04</span><span style="color:oklch(0.86 0.15 95)">Dubai</span></div><div style="font-family:var(--display,Anton),sans-serif;font-weight:var(--dw,400);font-size:26px;text-transform:uppercase;line-height:1">Artist name</div><div style="font-size:11px;text-transform:uppercase;color:var(--dim,#aaa9a3);line-height:1.4">Date · Doors<br>Venue</div><div style="border-top:1px solid var(--line,rgba(244,243,239,.2));padding-top:8px;font-size:11px;text-transform:uppercase;text-align:center">Tickets ↗</div></div>
+              <div style="background:var(--p2,#202020);padding:10px;display:flex;flex-direction:column;gap:8px;cursor:pointer;outline:1px solid transparent;outline-offset:3px" style-hover="outline-color:oklch(0.86 0.15 95)"><div style="flex:1;min-height:0;background:repeating-linear-gradient(45deg,rgba(244,243,239,.06) 0 6px,transparent 6px 12px);display:flex;align-items:flex-end;padding:8px;font-size:10px;color:var(--dim,#aaa9a3);text-transform:uppercase">Artist photo</div><div style="display:flex;justify-content:space-between;font-size:10px;text-transform:uppercase"><span>05</span><span style="color:oklch(0.82 0.1 205)">Abu Dhabi</span></div><div style="font-family:var(--display,Anton),sans-serif;font-weight:var(--dw,400);font-size:26px;text-transform:uppercase;line-height:1">Artist name</div><div style="font-size:11px;text-transform:uppercase;color:var(--dim,#aaa9a3);line-height:1.4">Date · Doors<br>Venue</div><div style="border-top:1px solid var(--line,rgba(244,243,239,.2));padding-top:8px;font-size:11px;text-transform:uppercase;text-align:center">Tickets ↗</div></div>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;background:var(--p2,#202020);padding:10px 14px;font-size:11px;letter-spacing:.05em;text-transform:uppercase;gap:8px 24px"><span>5 results per batch</span><span style="color:var(--dim,#aaa9a3)">/</span><span>Auto-advances</span><span style="color:var(--dim,#aaa9a3)">/</span><span>Hover or focus pauses</span></div>
+          </div>
+        </div>
+        <div style="position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(255,255,255,.025) 0 1px,transparent 1px 3px)"></div>
+      </div>
+            </div>
+          </div>
+          <div style="position:absolute;left:0;right:0;top:50%;height:4px;margin-top:-2px;background:var(--fg,#f3ead8);box-shadow:0 0 22px var(--fg,#f3ead8);pointer-events:none;opacity:{{ fx.gigs.lineO }};transform:{{ fx.gigs.lineTf }};transition:opacity .2s steps(2) .38s, transform .32s steps(4)"></div>
+        </div>
+      </section>
+    </div>
+
+    
+
+    
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;scheme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;mono&quot;,&quot;paper&quot;,&quot;night&quot;],&quot;default&quot;:&quot;night&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+
+const COLORS = {
+  mono: { label: 'Mono', vars: { bg: '#070707', fg: '#f4f3ef', p0: '#0d0d0d', p1: '#151515', p2: '#202020', p3: '#262626', dim: '#aaa9a3', line: 'rgba(244,243,239,.2)', ok: '#1ed760', warn: '#f7c947', on: '#070707' } },
+  paper: { label: 'Paper', vars: { bg: '#ecebe4', fg: '#141414', p0: '#e3e1d9', p1: '#dcdad1', p2: '#d0cec4', p3: '#c6c4b9', dim: '#5c5a53', line: 'rgba(20,20,20,.18)', ok: '#2fbf63', warn: '#e0a526', on: '#141414' } },
+  night: { label: 'Night', vars: { bg: '#0d1020', fg: '#f3ead8', p0: '#10142a', p1: '#151a33', p2: '#1d2346', p3: '#262d57', dim: '#9a9db8', line: 'rgba(243,234,216,.2)', ok: '#7ef0b0', warn: '#ffc65c', on: '#0d1020' } }
+};
+const FONTS = {
+  anton: { label: 'Anton', sub: 'IBM Plex Mono', display: "'Anton'", dw: '400', mono: "'IBM Plex Mono'" },
+  pixel: { label: 'Pixelify Sans', sub: 'Pixelify Sans', display: "'PixC','Pixelify Sans'", dw: '700', mono: "'PixC','Pixelify Sans'" },
+  archivo: { label: 'Archivo Black', sub: 'JetBrains Mono', display: "'Archivo Black'", dw: '400', mono: "'JetBrains Mono'" },
+  shoulders: { label: 'Big Shoulders', sub: 'DM Mono', display: "'Big Shoulders Display'", dw: '800', mono: "'DM Mono'" },
+  serif: { label: 'Instrument Serif', sub: 'Martian Mono', display: "'Instrument Serif'", dw: '400', mono: "'Martian Mono'" },
+  rubik: { label: 'Rubik Mono One', sub: 'Space Mono', display: "'Rubik Mono One'", dw: '400', mono: "'Space Mono'" },
+  bebas: { label: 'Bebas Neue', sub: 'Courier Prime', display: "'Bebas Neue'", dw: '400', mono: "'Courier Prime'" },
+  syne: { label: 'Syne', sub: 'Geist Mono', display: "'Syne'", dw: '800', mono: "'Geist Mono'" }
+};
+const V = { fg: 'var(--fg,#f4f3ef)', bg: 'var(--bg,#070707)', p1: 'var(--p1,#151515)', p2: 'var(--p2,#202020)', p3: 'var(--p3,#262626)', dim: 'var(--dim,#aaa9a3)', line: 'var(--line,rgba(244,243,239,.25))', ok: 'var(--ok,#1ed760)', warn: 'var(--warn,#f7c947)' };
+const LOREM = [
+  'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere erat a ante venenatis dapibus posuere velit aliquet. Cras mattis consectetur purus sit amet fermentum. Donec ullamcorper nulla non metus auctor fringilla.',
+  'Vestibulum id ligula porta felis euismod semper. Maecenas faucibus mollis interdum. Nullam quis risus eget urna mollis ornare vel eu leo. Aenean lacinia bibendum nulla sed consectetur, praesent commodo cursus magna.',
+  'Etiam porta sem malesuada magna mollis euismod. Curabitur blandit tempus porttitor. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Sed posuere consectetur est at lobortis, donec sed odio dui.',
+  'Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit.'
+];
+const BODY = [['p', 0], ['h', '01 / Context'], ['p', 1], ['p', 2], ['h', '02 / The argument'], ['p', 3], ['p', 0], ['p', 1], ['h', '03 / Where it lands'], ['p', 2], ['p', 3]].map(([t, v]) => ({ isH: t === 'h', isP: t === 'p', text: t === 'h' ? v : LOREM[v] }));
+const ENTRIES = [
+  { kind: '01 — Latest entry', tag: 'Culture / Society', title: "Karoshi: An Enquiry Into Japan's Work Culture", desc: 'Exploring the cultural, economic and psychological forces behind karoshi, and what it reveals about modern work, value and human limits.', status: 'Researching', statusColor: V.warn, img: 'https://milindparwani.com/assets/journal/karoshi-marunouchi.jpg', caption: 'Tokyo / Work culture', credit: 'Photo: KimonBerlin / CC BY-SA 2.0', creditUrl: 'https://commons.wikimedia.org/wiki/File:Marunouchi_skyscrapers_(2074578901).jpg' },
+  { kind: '02 — Planned article', tag: 'Attention / Economy', title: 'The Attention Economy', desc: 'Every industry is competing for the same finite resource: our attention. The new currency that converts focus into revenue.', status: 'Planned', statusColor: V.dim, img: 'https://milindparwani.com/assets/journal/attention-shibuya.jpg', caption: 'Screens / Crowds', credit: 'Photo: Moyan Brenn / CC BY 2.0', creditUrl: 'https://commons.wikimedia.org/wiki/File:Japan_(15608018214).jpg' },
+  { kind: '03 — Review · 1994', tag: 'Review / Film', title: 'The Shawshank Redemption', desc: 'A quiet, profound story about hope, friendship and the human spirit, reminding us that freedom lives on, even in the darkest places.', status: 'Writing', statusColor: V.ok, img: 'https://milindparwani.com/assets/journal/shawshank-reformatory.jpg', caption: 'Prison / Redemption', credit: 'Photo: Marianodemiguel / CC BY-SA 4.0', creditUrl: 'https://commons.wikimedia.org/wiki/File:Ohio_State_Reformatory-4.jpg', score: 10 }
+];
+const TOOLS = [
+  { n: '01', cat: 'Media', name: 'Image Converter', desc: 'Convert between JPG, PNG, WEBP and more. Fast, simple, in your browser.', long: 'Drop images below, pick an output format, download the result.', kind: 'drop', accepts: 'Accepts WEBP, PNG, JPG, GIF, BMP', hover: 'oklch(0.74 0.16 0)' },
+  { n: '02', cat: 'Music', name: 'Tempo Tap', desc: 'Tap a tempo to get BPM, milliseconds and note values instantly.', long: 'Tap along to a beat — click, spacebar, or tap — and read the BPM live.', kind: 'tempo', hover: 'oklch(0.74 0.14 245)' },
+  { n: '03', cat: 'Reference', name: 'Key / BPM Lookup', desc: 'Find key, BPM and related scales for any track or chord progression.', long: 'Search a track by name, get its BPM and key in Camelot notation for mixing.', kind: 'input', placeholder: 'Search a track…', output: 'Search for a track above', hover: '#1ed760' },
+  { n: '04', cat: 'Utility', name: 'QR Code Generator', desc: 'Create QR codes for links, text, contacts and more.', long: 'Paste a link (or any text), get a scannable QR code.', kind: 'input', placeholder: 'Paste a link or text…', output: 'Paste something above to generate a code', hover: '#f4f3ef' },
+  { n: '05', cat: 'Audio', name: 'Sample Finder', desc: 'Still being built', long: 'Search vocal or melody samples by mood and BPM — free to use.', kind: 'soon', hover: '#8a8880' },
+  { n: '06', cat: 'Documents', name: 'PDF Editor', desc: 'Still being built', long: 'Reorder, rotate, and edit a PDF page by page.', kind: 'soon', hover: '#8a8880' },
+  { n: '07', cat: 'Audio', name: 'Audio Trimmer', desc: 'Trim, cut and export audio files directly in your browser.', long: 'Drop an audio file, pick the range, download the clip.', kind: 'drop', accepts: 'Accepts MP3, WAV, OGG, M4A', hover: 'oklch(0.75 0.16 40)' },
+  { n: '08', cat: 'Security', name: 'Password Generator', desc: 'Create strong, random passwords with custom options.', long: 'Generate a strong password instantly.', kind: 'password', hover: 'oklch(0.72 0.16 290)' },
+  { n: '09', cat: 'Creative', name: 'Signature Creator', desc: 'Still being built', long: 'Type your name, get a signature. Regenerate for a new style, download as a real vector file.', kind: 'soon', hover: '#8a8880' }
+];
+const PROJ = {
+  music: { n: '01', tag: 'Music', title: 'Sounds Like + Prompt Playlist', desc: 'A similarity engine for music discovery. Turn text into personalised playlists.', status: 'Phase 02 / Similarity engine', color: '#1ed760', file: 'sounds_like.vol' },
+  today: { n: '02', tag: 'Experiment', title: 'Today Somewhere', desc: 'A collection of places, moments and photographs.', status: 'Planned · In development', color: 'oklch(0.78 0.1 265)', file: 'today_somewhere.vol' },
+  where: { n: '03', tag: 'Tool', title: 'Where Next', desc: 'A simple tool for exploring new destinations.', status: 'Planned · In development', color: 'oklch(0.88 0.07 85)', file: 'where_next.vol' },
+  speed: { n: '04', tag: 'Game', title: 'Speed Round', desc: 'A fast-paced trivia game for curious minds.', status: 'Planned · In development', color: 'oklch(0.74 0.16 0)', file: 'speed_round.exe' },
+  terminal: { n: '05', tag: 'Game', title: 'Untitled Terminal Adventure', desc: 'A text-based experiment in choice and consequence.', status: 'Planned · In development', color: 'oklch(0.75 0.16 40)', file: 'terminal_adventure.exe' },
+  crack: { n: '06', tag: 'Game', title: 'Crack', desc: 'Visual experiments with fracture, distortion and decay.', status: 'Playable', color: '#f4f3ef', file: 'crack.exe' }
+};
+const DEX = {
+  1: ['Bulbasaur','Charmander','Squirtle','Pikachu','Gengar','Dragonite','Snorlax','Lapras'],
+  2: ['Chikorita','Cyndaquil','Totodile','Ampharos','Scizor','Tyranitar','Umbreon','Heracross'],
+  3: ['Treecko','Torchic','Mudkip','Gardevoir','Aggron','Salamence','Metagross','Milotic'],
+  4: ['Turtwig','Chimchar','Piplup','Lucario','Garchomp','Togekiss','Weavile','Roserade'],
+  5: ['Snivy','Tepig','Oshawott','Excadrill','Hydreigon','Volcarona','Chandelure','Zoroark'],
+  6: ['Chespin','Fennekin','Froakie','Greninja','Aegislash','Sylveon','Talonflame','Goodra'],
+  7: ['Rowlet','Litten','Popplio','Mimikyu','Toxapex','Kommo-o','Decidueye','Lycanroc'],
+  8: ['Grookey','Scorbunny','Sobble','Dragapult','Corviknight','Toxtricity','Grimmsnarl','Cinderace'],
+  9: ['Sprigatito','Fuecoco','Quaxly','Kingambit','Gholdengo','Tinkaton','Baxcalibur','Annihilape']
+};
+const ROMAN = ['','I','II','III','IV','V','VI','VII','VIII','IX'];
+const MODS = [
+  { k: 'random', label: 'Random team — all generations', note: 'Six Pokémon drawn from Gen I–IX. Pool locked.', m: 1.4 },
+  { k: 'moves', label: 'Random moves', note: 'Every moveset is rerolled.', m: 1.5 },
+  { k: 'potions', label: 'No potions', note: 'No healing items in battle.', m: 1.3 },
+  { k: 'cap', label: 'Level cap 50', note: 'Your team is capped. The champion is not.', m: 1.2 },
+  { k: 'noswitch', label: 'No switching', note: 'A Pokémon stays in until it faints.', m: 1.25 }
+];
+const TIERS = [['Master', 4], ['Gold', 2.5], ['Silver', 1.75], ['Bronze', 1]];
+const genOf = n => +Object.keys(DEX).find(g => DEX[g].includes(n));
+const ALL = Object.values(DEX).flat();
+const CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%&*?';
+const makePw = n => Array.from({ length: n }, () => CHARS[Math.floor(Math.random() * CHARS.length)]).join('');
+const SECS = [['home', 'Home'], ['journal', 'Journal'], ['projects', 'Projects'], ['toolbox', 'Toolbox'], ['media', 'Media'], ['playlists', 'Playlists'], ['gigs', 'Gigs']];
+const HOVER_KEYS = ['lJournal', 'lProjects', 'lToolbox', 'lMedia', 'lPlaylists', 'lGigs', 'crackL', 'music', 'today', 'where', 'speed', 'terminal', 'crack', 'champ', 'win', 'landing', 'logoA', 'logoB', 'logoC'];
+
+/* ---------- pixel helpers ---------- */
+const E = React.createElement;
+const cellsOf = (rows, col, P, trans) => {
+  const out = [];
+  rows.forEach((row, r) => row.split('').forEach((c, ci) => {
+    if (c !== '.' && col[c]) out.push(E('div', { key: r + '_' + ci, style: { position: 'absolute', left: ci * P, top: r * P, width: P, height: P, background: col[c], transition: trans || 'none' } }));
+  }));
+  return out;
+};
+const frame = (w, h, style, ...kids) => E('div', { style: { position: 'relative', width: w, height: h, flex: '0 0 auto', ...style } }, ...kids);
+
+const BALL = ['.....KKKK.....','...KKRRRRKK...','..KRRRRRRSSK..','.KRRRRRRRRSSK.','.KDRRRRRRRRRK.','KDDRRKKKKRRRRK','KKKKKKWWKKKKKK','KWWWWKWWKWWWWK','KWWWWKKKKWWWWK','.KWWWWWWWWWWK.','.KWWWWWWWWWGK.','..KWWWWWWGGK..','...KKWWWWKK...','.....KKKK.....'];
+const BALL_COL = { K: '#1c1c1c', R: '#e3350d', D: '#a8240a', S: '#ffd2c4', W: '#f4f3ef', G: '#bdbab0' };
+function makeBall(P, open) {
+  const px = P * 14;
+  const top = E('div', { style: { position: 'absolute', left: 0, top: 0, width: px, height: 7 * P, transformOrigin: `${2 * P}px ${7 * P}px`, transform: open ? `translate(${-P}px,${-3 * P}px) rotate(-30deg)` : 'none', transition: 'transform .24s steps(3)' } }, cellsOf(BALL.slice(0, 7), BALL_COL, P));
+  const bottom = E('div', { style: { position: 'absolute', left: 0, top: 7 * P, width: px, height: 7 * P } }, cellsOf(BALL.slice(7), BALL_COL, P));
+  const glow = E('div', { style: { position: 'absolute', left: 3 * P, width: 8 * P, top: 6 * P, height: 2 * P, background: '#fff3a0', boxShadow: `0 0 ${3 * P}px ${P}px rgba(255,236,140,.85)`, opacity: open ? 1 : 0, transition: 'opacity .24s steps(3)' } });
+  const rim = 'var(--fg,#f4f3ef)';
+  const bob = E('div', { style: { position: 'absolute', left: 0, top: Math.round(px * 0.18), width: px, height: px, animation: 'crbob 1.6s ease-in-out infinite', filter: `drop-shadow(${P}px 0 0 ${rim}) drop-shadow(-${P}px 0 0 ${rim}) drop-shadow(0 ${P}px 0 ${rim}) drop-shadow(0 -${P}px 0 ${rim})` } }, bottom, glow, top);
+  const shadow = E('div', { style: { position: 'absolute', left: '18%', width: '64%', bottom: 0, height: Math.max(2, P), background: 'rgba(0,0,0,.45)', animation: 'crshadow 1.6s ease-in-out infinite' } });
+  return frame(px, Math.round(px * 1.4), {}, bob, shadow);
+}
+
+const SAFE = ['KKKKKKKKKKKKKKKK','KFFFFFFFFFFFFFFK','KFIIIIIIIIIIIIFK','KFIIIIIIIIIIIIFK','KFIIIIIIIIIIIIFK','KFIIIIIIIIIIIIFK','KFIIIIIIIIIIIIFK','KFIIIIIIIIIIIIFK','KFIIIYYYIIIIIIFK','KFIIYYYYYIIYYIFK','KFIYYYYYYYYYYIFK','KFFFFFFFFFFFFFFK','KKKKKKKKKKKKKKKK','.KK..........KK.'];
+const SAFE_DOOR = ['EEEEEEEEEEEE','EDDDDDDDDDDE','EDDDKKKKDDDE','EDDKLLLLKDHE','EDDKLKKLKDHE','EDDKLLLLKDHE','EDDDKKKKDDDE','EDDDDDDDDDDE','EEEEEEEEEEEE'];
+function iconSafe(P, open) {
+  const base = cellsOf(SAFE, { K: '#1c1c1c', F: '#6b7078', I: '#0e0e10', Y: '#f2c14e' }, P);
+  const door = E('div', { style: { position: 'absolute', left: 2 * P, top: 2 * P, width: 12 * P, height: 9 * P, transformOrigin: 'left center', transform: open ? 'perspective(260px) rotateY(-80deg)' : 'none', transition: 'transform .36s steps(4)' } }, cellsOf(SAFE_DOOR, { E: '#4a4f57', D: '#9aa0a8', K: '#1c1c1c', L: '#d9dde2', H: '#f2c14e' }, P));
+  const sparkle = E('div', { style: { position: 'absolute', left: 5 * P, top: 7 * P, width: P, height: P, background: '#fff', boxShadow: `${3 * P}px ${-2 * P}px 0 #fff, ${6 * P}px ${P}px 0 #fff`, opacity: open ? 1 : 0, transition: 'opacity .2s steps(2) .3s' } });
+  return frame(16 * P, 14 * P, {}, ...base, sparkle, door);
+}
+
+const MON = ['.KKKKKKKKKKKKKK.','KGGGGGGGGGGGGGGK','KGSSSSSSSSSSSSGK','KGSSSSSSSSSSSSGK','KGSSSSSSSSSSSSGK','KGSSSSSSSSSSSSGK','KGSSSSSSSSSSSSGK','KGSSSSSSSSSSSSGK','KGSSSSSSSSSSSSGK','KGSSSSSSSSSSSSGK','KGGGGGGGGGGGGGGK','.KKKKKKKKKKKKKK.','......KKKK......','....KKKKKKKK....'];
+const CODE = [[0, 7], [2, 5], [2, 8], [0, 4], [1, 9], [3, 6], [3, 4], [1, 7], [0, 10], [2, 3], [2, 6], [0, 5], [1, 8], [4, 5], [1, 4], [0, 9]];
+function iconTerminal(P, on) {
+  const base = cellsOf(MON, { K: '#1c1c1c', G: '#8a8f98', S: '#0b140d' }, P);
+  const green = '#6dff8e';
+  const prompt = E('div', { style: { position: 'absolute', inset: 0, opacity: on ? 0 : 1 } },
+    E('div', { style: { position: 'absolute', left: P, top: P, width: P, height: P, background: green, boxShadow: `${P}px ${P}px 0 ${green}, 0 ${2 * P}px 0 ${green}` } }),
+    E('div', { style: { position: 'absolute', left: 4 * P, top: 2 * P, width: 2 * P, height: 2 * P, background: green, animation: 'pxblink 1s steps(1) infinite' } }));
+  const lines = [...CODE, ...CODE].map(([ind, w], i) => E('div', { key: i, style: { marginLeft: ind * P, width: Math.min(w, 12 - ind) * P, height: P, marginBottom: P, background: i % 5 === 3 ? '#f7c947' : green } }));
+  const code = E('div', { style: { position: 'absolute', left: 0, top: 0, width: 12 * P, animation: 'pxscroll 2.4s steps(16) infinite', animationPlayState: on ? 'running' : 'paused', opacity: on ? 1 : 0 } }, ...lines);
+  const screen = E('div', { style: { position: 'absolute', left: 2 * P, top: 2 * P, width: 12 * P, height: 8 * P, overflow: 'hidden' } }, prompt, code);
+  return frame(16 * P, 14 * P, {}, ...base, screen);
+}
+
+const BULB = ['....KKKK....','..KKGGGGKK..','.KGGGGGGGGK.','KGGGGGGGGGGK','KGGGFGGFGGGK','KGGGGFFGGGGK','KGGGGFFGGGGK','.KGGGFFGGGK.','..KGGFFGGK..','...KGFFGK...','...KMMMMK...','...KNNNNK...','...KMMMMK...','...KNNNNK...','....KKKK....','.....KK.....'];
+function iconBulb(P, on) {
+  const col = on ? { K: '#1c1c1c', G: '#ffe066', F: '#fffbe0', M: '#a3a3a3', N: '#6e6e6e' } : { K: '#1c1c1c', G: '#4a4a44', F: '#6a675e', M: '#a3a3a3', N: '#6e6e6e' };
+  const glow = E('div', { style: { position: 'absolute', left: -6 * P, top: -5 * P, width: 24 * P, height: 20 * P, background: 'radial-gradient(circle at 50% 38%, rgba(255,224,102,.75), rgba(255,224,102,0) 55%)', opacity: on ? 1 : 0, transition: 'opacity .2s steps(2)' } });
+  const ray = (x, y) => E('div', { key: x + '_' + y, style: { position: 'absolute', left: x * P, top: y * P, width: P, height: P, background: '#ffe066', opacity: on ? 1 : 0, transition: 'opacity .2s steps(2)' } });
+  return frame(12 * P, 16 * P, {}, glow, ...cellsOf(BULB, col, P, 'background .18s steps(2)'), ray(-2, 4), ray(13, 4), ray(-1, 0), ray(12, 0), ray(5.5, -2.5));
+}
+
+const BUILD = [[0, 4, 8], [4, 5, 12], [9, 3, 6], [12, 5, 14], [17, 3, 9], [20, 4, 11]];
+function iconSkyline(P, on) {
+  const W = 24, H = 14, kids = [];
+  let wi = 0;
+  BUILD.forEach(([x, w, h], bi) => {
+    kids.push(E('div', { key: 'b' + bi, style: { position: 'absolute', left: x * P, top: (H - h) * P, width: w * P, height: h * P, background: bi % 2 ? '#2a2a33' : '#33333d' } }));
+    for (let r = H - h + 1; r < H - 1; r += 2) for (let c = x + 1; c < x + w - 1; c += 2) {
+      const lit = on && ((wi * 7 + bi * 3) % 4 !== 0);
+      kids.push(E('div', { key: 'w' + wi, style: { position: 'absolute', left: c * P, top: r * P, width: P, height: P, background: lit ? '#ffd34d' : '#16161b', transition: `background 0s linear ${on ? (wi % 13) * 45 : 0}ms` } }));
+      wi++;
+    }
+  });
+  const moon = E('div', { style: { position: 'absolute', left: P, top: P, width: 2 * P, height: 2 * P, background: '#f4f3ef', opacity: on ? 1 : 0.3, transition: 'opacity .2s steps(2)' } });
+  const stars = [[5, 1], [8, 3], [10, 0], [18, 2], [22, 1]].map(([x, y]) => E('div', { key: 's' + x, style: { position: 'absolute', left: x * P, top: y * P, width: P, height: P, background: '#f4f3ef', opacity: on ? 0.9 : 0.15 } }));
+  return frame(W * P, H * P, {}, moon, ...stars, ...kids);
+}
+
+const MAP = ['OOOLLLOOOOOOOOLLLLOOOOOO','OOLLLLLOOOOOOLLLLLLOOOOO','OLLLLLLLOOOOOLLLLLLLOOOO','OLLLLLLOOOOOOOLLLLLLOOLO','OOLLLLOOOOOOOOOLLLLOOLLO','OOOLLOOOOLLOOOOOLLOOOLLO','OOOOLLOOOLLLOOOOOOOOOOOO','OOOOLLLOOOLLLOOOOOOLLOOO','OOOOOLLOOOLLOOOOOOLLLLOO','OOOOOLOOOOOLOOOOOOOLLOOO','OOOOOOOOOOOOOOOOOOOOOOOO','OOOOOOOOOOOOOOOOOOOOOOOO'];
+function globeMask() {
+  const ext = [];
+  for (let r = 0; r < 12; r++) { let l = 12, rr = -1; for (let c = 0; c < 12; c++) if ((c - 5.5) ** 2 + (r - 5.5) ** 2 <= 34) { l = Math.min(l, c); rr = Math.max(rr, c); } ext.push([l, rr + 1]); }
+  const pts = [];
+  ext.forEach(([l, r], i) => { pts.push([r, i], [r, i + 1]); });
+  for (let i = 11; i >= 0; i--) { const [l] = ext[i]; pts.push([l, i + 1], [l, i]); }
+  return 'polygon(' + pts.map(([x, y]) => `${(x / 12 * 100).toFixed(2)}% ${(y / 12 * 100).toFixed(2)}%`).join(',') + ')';
+}
+const GLOBE_MASK = globeMask();
+function iconGlobe(P, spin) {
+  const land = [];
+  for (let r = 0; r < 12; r++) for (let c = 0; c < 48; c++) if ((MAP[r] || '')[c % 24] === 'L') land.push(E('div', { key: r + '_' + c, style: { position: 'absolute', left: c * P, top: r * P, width: P, height: P, background: '#4caf50' } }));
+  const strip = E('div', { style: { position: 'absolute', left: 0, top: 0, width: 48 * P, height: 12 * P, animation: 'pxspin 2.6s steps(24) infinite', animationPlayState: spin ? 'running' : 'paused' } }, ...land);
+  const shade = [];
+  for (let r = 0; r < 12; r++) for (let c = 8; c < 12; c++) if ((c - 5.5) ** 2 + (r - 5.5) ** 2 <= 34) shade.push(E('div', { key: 'sh' + r + c, style: { position: 'absolute', left: c * P, top: r * P, width: P, height: P, background: 'rgba(0,0,0,.28)' } }));
+  const globe = E('div', { style: { position: 'absolute', left: 2 * P, top: P, width: 12 * P, height: 12 * P, background: '#2f6fd6', clipPath: GLOBE_MASK, overflow: 'hidden' } }, strip, ...shade);
+  const stand = [];
+  for (let r = 0; r < 18; r++) for (let c = 0; c < 16; c++) {
+    const d = Math.sqrt((c - 7.5) ** 2 + (r - 6.5) ** 2);
+    let col = null;
+    if (d >= 6.6 && d < 7.6 && c >= 7 && r <= 14) col = '#c9a227';
+    if ((r === 14 || r === 15) && (c === 7 || c === 8)) col = '#8b5a2b';
+    if (r === 16 && c >= 4 && c <= 11) col = '#8b5a2b';
+    if (r === 17 && c >= 3 && c <= 12) col = '#5e3a1a';
+    if (col) stand.push(E('div', { key: 'st' + r + '_' + c, style: { position: 'absolute', left: c * P, top: r * P, width: P, height: P, background: col } }));
+  }
+  return frame(16 * P, 18 * P, {}, globe, ...stand);
+}
+
+function iconEq(P, on) {
+  const idle = [2, 3, 2, 4, 3, 5, 3, 2, 3];
+  const bars = idle.map((h, i) => E('div', { key: i, style: { width: P, height: 8 * P, transformOrigin: 'bottom', background: `repeating-linear-gradient(to top, currentColor 0 ${P - 1}px, transparent ${P - 1}px ${P}px)`, transform: on ? undefined : `scaleY(${h / 8})`, animation: on ? `pxeq ${0.6 + (i % 3) * 0.18}s steps(4) ${i * 0.07}s infinite alternate` : 'none' } }));
+  return frame(9 * P + 8 * P, 8 * P, { display: 'flex', alignItems: 'flex-end', gap: P }, ...bars);
+}
+
+
+const BOOK_C = ['KKKKKKKKKKKKK.','KDRRRRRRRRRRWK','KDRRRRRRRRRRWK','KDRRYYYYYYRRWK','KDRRYYYYYYRRWK','KDRRRRRRRRRRWK','KDRRRRRRRRRRWK','KDRRRRRRRRRRWK','KDRRRRRRRRRRWK','KDRRRRRRRRRRWK','KDRRRRRRRRRRWK','.KKKKKKKKKKKKK'];
+const BOOK_O = ['.KKKKKKKKKK..KKKKKKKKKK.','KWWWWWWWWWWKKWWWWWWWWWWK','KWLLLLLLLWWKKWLLLLLLLLWK','KWWWWWWWWWWKKWWWWWWWWWWK','KWLLLLLLWWWKKWLLLLLLWWWK','KWWWWWWWWWWKKWWWWWWWWWWK','KWLLLLLLLLWKKWLLLLLWWWWK','KWWWWWWWWWWKKWWWWWWWWWWK','KWLLLLLWWWWKKWLLLLLLLLWK','KWWWWWWWWWWKKWWWWWWWWWWK','RKKKKKKKKKKRRKKKKKKKKKKR','.RRRRRRRRRRRRRRRRRRRRRR.'];
+function iconBook(P, on) {
+  const closed = E('div', { style: { position: 'absolute', left: 5 * P, top: 0, width: 14 * P, height: 12 * P, opacity: on ? 0 : 1, transition: 'opacity .15s steps(2)' } }, cellsOf(BOOK_C, { K: '#1c1c1c', D: '#7a2a1d', R: '#b8432f', Y: '#f2c14e', W: '#f4f3ef' }, P));
+  const cells = [];
+  BOOK_O.forEach((row, r) => row.split('').forEach((c, ci) => {
+    if (c === '.') return;
+    const col = { K: '#1c1c1c', W: '#f4f3ef', R: '#b8432f' }[c];
+    if (c === 'L') {
+      const page = ci < 12 ? 0 : 1, order = page * 60 + r * 8 + ci;
+      cells.push(E('div', { key: r + '_' + ci, style: { position: 'absolute', left: ci * P, top: r * P, width: P, height: P, background: on ? '#3a3a3a' : '#f4f3ef', transition: on ? `background 0s linear ${order * 14}ms` : 'none' } }));
+    } else cells.push(E('div', { key: r + '_' + ci, style: { position: 'absolute', left: ci * P, top: r * P, width: P, height: P, background: col } }));
+  }));
+  const open = E('div', { style: { position: 'absolute', left: 0, top: 0, width: 24 * P, height: 12 * P, opacity: on ? 1 : 0, transition: 'opacity .15s steps(2)' } }, ...cells);
+  return frame(24 * P, 12 * P, {}, closed, open);
+}
+
+function iconBoard(P, on) {
+  const W = 28, H = 13, base = [];
+  for (let r = 0; r < H; r++) for (let c = 0; c < W; c++) {
+    let col = null;
+    if (r <= 10 && (r === 0 || r === 10 || c === 0 || c === W - 1)) col = '#8a8f98';
+    else if (r >= 1 && r <= 9 && c >= 1 && c <= W - 2) col = '#f4f3ef';
+    else if (r === 11 && c >= 3 && c <= W - 4) col = '#6b7078';
+    else if (r === 12 && (c === 4 || c === W - 5)) col = '#6b7078';
+    if (col) base.push(E('div', { key: 'b' + r + '_' + c, style: { position: 'absolute', left: c * P, top: r * P, width: P, height: P, background: col } }));
+  }
+  const ink = [];
+  const put = (c, r, col) => ink.push(E('div', { key: 'i' + r + '_' + c + ink.length, style: { position: 'absolute', left: c * P, top: r * P, width: P, height: P, background: col || '#141414' } }));
+  for (let r = 0; r < 9; r++) for (let c = 0; c < 9; c++) {
+    const d = Math.hypot(c - 4, r - 4); const a = Math.atan2(r - 4, c - 4);
+    if (d > 2.6 && d <= 3.6) put(c, r);
+    else if (d <= 2.6 && a > -1.7 && a < 0.1) put(c, r, '#e3350d');
+  }
+  for (let r = 1; r <= 8; r++) put(10, r);
+  for (let c = 10; c <= 16; c++) put(c, 8);
+  [[12, 3], [14, 5], [16, 7]].forEach(([c, h]) => { for (let r = 8 - h; r < 8; r++) put(c, r); });
+  ['K.K.KKK', '.K....K', 'K.K..K.', '....KKK', '.......', 'KKK.K.K', '..K..K.', '.K..K.K', 'KKK....'].forEach((row, r) => row.split('').forEach((ch, c) => { if (ch === 'K') put(18 + c, r); }));
+  const layer = E('div', { style: { position: 'absolute', left: P, top: P, width: 26 * P, height: 9 * P, clipPath: on ? 'inset(0 0% 0 0)' : 'inset(0 100% 0 0)', transition: on ? 'clip-path .9s steps(13)' : 'clip-path .1s steps(1)' } }, ...ink);
+  return frame(W * P, H * P, {}, ...base, layer);
+}
+
+const TB_LID = ['.....KKKKKK.....','.....K....K.....','KKKKKKKKKKKKKKKK','KRRRRRRRRRRRRRRK','KDDDDDDDDDDDDDDK'];
+const TB_BODY = ['KRRRRRRYYRRRRRRK','KRRRRRRRRRRRRRRK','KRRRRRRRRRRRRRRK','KRRRRRRRRRRRRRRK','KRRRRRRRRRRRRRRK','KDDDDDDDDDDDDDDK','KKKKKKKKKKKKKKKK'];
+const TB_TOOLS = ['..MM.......YY...', '..M.M......YY...', '...MM......YY...', '....M......SS...', '....M......SS...', '....M......SS...'];
+function iconToolbox(P, on) {
+  const col = { K: '#1c1c1c', R: '#d63a2a', D: '#9a2418', Y: '#f2c14e', M: '#c9ccd1', S: '#9aa0a8' };
+  const tools = E('div', { style: { position: 'absolute', left: 0, top: 2 * P, width: 16 * P, height: 6 * P, opacity: on ? 1 : 0, transform: on ? `translateY(${-2 * P}px)` : 'none', transition: 'transform .3s steps(3) .08s, opacity .1s steps(1)' } }, cellsOf(TB_TOOLS, col, P));
+  const body = E('div', { style: { position: 'absolute', left: 0, top: 7 * P, width: 16 * P, height: 7 * P } }, cellsOf(TB_BODY, col, P));
+  const lid = E('div', { style: { position: 'absolute', left: 0, top: 2 * P, width: 16 * P, height: 5 * P, transformOrigin: `${16 * P}px ${5 * P}px`, transform: on ? `translate(${3 * P}px,${-2 * P}px) rotate(38deg)` : 'none', transition: 'transform .28s steps(3)' } }, cellsOf(TB_LID, col, P));
+  return frame(16 * P, 14 * P, {}, tools, body, lid);
+}
+
+function iconReel(P, on) {
+  const reel = [];
+  for (let r = 0; r < 14; r++) for (let c = 0; c < 14; c++) {
+    const d = Math.hypot(c - 6.5, r - 6.5);
+    if (d > 6.7) continue;
+    const hole = [[6.5, 3], [6.5, 10], [3, 6.5], [10, 6.5]].some(([x, y]) => Math.abs(c - x) <= 1 && Math.abs(r - y) <= 1 && Math.hypot(c - x, r - y) < 1.3);
+    if (hole) continue;
+    const col = d > 5.8 ? '#1c1c1c' : (d < 1.3 ? '#1c1c1c' : '#9aa0a8');
+    reel.push(E('div', { key: r + '_' + c, style: { position: 'absolute', left: c * P, top: r * P, width: P, height: P, background: col } }));
+  }
+  const wheel = E('div', { style: { position: 'absolute', left: 0, top: 0, width: 14 * P, height: 14 * P, animation: 'pxrot 1.4s steps(8) infinite', animationPlayState: on ? 'running' : 'paused' } }, ...reel);
+  const FR = [['#7cc6ff', '#3f8f4a'], ['#f2a65a', '#6b3f2a'], ['#ffd34d', '#2f6fd6'], ['#e3350d', '#1c1c1c'], ['#c7a0ff', '#2a2a33'], ['#f4f3ef', '#8a8f98']];
+  const strip = [];
+  for (let c = 0; c < 60; c++) {
+    strip.push(E('div', { key: 't' + c, style: { position: 'absolute', left: c * P, top: 0, width: P, height: 8 * P, background: '#1c1c1c' } }));
+    if (c % 2 === 0) { strip.push(E('div', { key: 'h' + c, style: { position: 'absolute', left: c * P, top: 0, width: P, height: P, background: '#d9d6cc' } })); strip.push(E('div', { key: 'g' + c, style: { position: 'absolute', left: c * P, top: 7 * P, width: P, height: P, background: '#d9d6cc' } })); }
+    const fi = Math.floor(c / 5) % 6, inFrame = c % 5 !== 4;
+    if (inFrame) for (let r = 2; r <= 5; r++) strip.push(E('div', { key: 'f' + c + '_' + r, style: { position: 'absolute', left: c * P, top: r * P, width: P, height: P, background: r <= 3 ? FR[fi][0] : FR[fi][1] } }));
+  }
+  const run = E('div', { style: { position: 'absolute', left: 0, top: 0, width: 60 * P, height: 8 * P, animation: 'pxspin 1.8s steps(30) infinite', animationPlayState: on ? 'running' : 'paused' } }, ...strip);
+  const win = E('div', { style: { position: 'absolute', left: 12 * P, top: 3 * P, width: 15 * P, height: 8 * P, overflow: 'hidden' } }, run);
+  return frame(27 * P, 14 * P, {}, win, wheel);
+}
+
+function iconSpotify(P, on) {
+  const cells = [];
+  const bars = { 3: [3, 10], 6: [3, 9], 9: [4, 8] }, ends = { 4: [2, 11], 7: [2, 10], 10: [3, 9] };
+  for (let r = 0; r < 14; r++) for (let c = 0; c < 14; c++) {
+    const d = Math.hypot(c - 6.5, r - 6.5);
+    if (d > 6.9) continue;
+    let col = d > 6.0 ? '#0e0e0e' : (on ? '#1ed760' : '#1d6b3a');
+    if (bars[r] && c >= bars[r][0] && c <= bars[r][1]) col = '#0e0e0e';
+    if (ends[r] && ends[r].includes(c)) col = '#0e0e0e';
+    cells.push(E('div', { key: r + '_' + c, style: { position: 'absolute', left: c * P, top: r * P, width: P, height: P, background: col, transition: 'background .2s steps(2)' } }));
+  }
+  return frame(14 * P, 14 * P, { animation: on ? 'pxglow 1.2s steps(4) infinite' : 'none', filter: on ? undefined : 'none' }, ...cells);
+}
+
+const GUITAR = ['.............KK.','............KHHK','...........KHHK.','..........KNK...','.........KNK....','........KNK.....','.......KNK......','..KK..KNK.......','.KRRKKNK........','KRRRRWK.........','KRRRWRRK........','.KRRRRRRK.......','KRRRRRRK........','KRRRRRK.........','.KRRRK..........','..KKK...........'];
+function iconGuitar(P, on) {
+  const OFF = 2, W = 16 + OFF * 2, H = 16 + OFF * 2;
+  const solid = new Set();
+  GUITAR.forEach((row, r) => row.split('').forEach((c, ci) => { if (c !== '.') solid.add((r + OFF) + ',' + (ci + OFF)); }));
+  const flames = [];
+  const FC = ['#ff3b1f', '#ff7a1a', '#ffc21a', '#ff5a1a'];
+  let n = 0;
+  for (let r = 0; r < H; r++) for (let c = 0; c < W; c++) {
+    if (solid.has(r + ',' + c)) continue;
+    let near = 9;
+    for (let dr = -2; dr <= 2; dr++) for (let dc = -2; dc <= 2; dc++) if (solid.has((r + dr) + ',' + (c + dc))) near = Math.min(near, Math.max(Math.abs(dr), Math.abs(dc)));
+    if (near > 2) continue;
+    if (near === 2 && (r * 7 + c * 3) % 3 === 0) continue;
+    n++;
+    flames.push(E('div', { key: 'f' + r + '_' + c, style: { position: 'absolute', left: c * P, top: r * P, width: P, height: P, background: near === 1 ? FC[(r + c) % 2 + 1] : FC[(r * 3 + c) % 4 === 0 ? 2 : 0], animation: `pxflame ${0.5 + (n % 4) * 0.12}s steps(2) ${(n % 7) * 0.06}s infinite` } }));
+  }
+  const aura = E('div', { style: { position: 'absolute', inset: 0, opacity: on ? 1 : 0, transition: 'opacity .15s steps(2)' } }, ...flames);
+  const body = E('div', { style: { position: 'absolute', left: OFF * P, top: OFF * P, width: 16 * P, height: 16 * P } }, cellsOf(GUITAR, { K: '#1c1c1c', H: '#3a3a3a', N: '#8b5a2b', R: '#e3350d', W: '#f4f3ef' }, P));
+  return frame(W * P, H * P, {}, aura, body);
+}
+
+
+function iconProjector(P, on) {
+  const W = 31, H = 14, cells = [];
+  const put = (c, r, col, k) => cells.push(E('div', { key: k || ('p' + r + '_' + c), style: { position: 'absolute', left: c * P, top: r * P, width: P, height: P, background: col, transition: 'background .15s steps(2)' } }));
+  const reel = (cx, key) => {
+    const kids = [];
+    for (let r = 0; r < 6; r++) for (let c = 0; c < 6; c++) {
+      const d = Math.hypot(c - 2.5, r - 2.5);
+      if (d > 2.9) continue;
+      const hole = (r === 1 && c === 2) || (r === 4 && c === 3) || (r === 2 && c === 4) || (r === 3 && c === 1);
+      if (hole) continue;
+      kids.push(E('div', { key: r + '_' + c, style: { position: 'absolute', left: c * P, top: r * P, width: P, height: P, background: d > 2.1 ? '#1c1c1c' : (d < 0.8 ? '#1c1c1c' : '#9aa0a8') } }));
+    }
+    return E('div', { key, style: { position: 'absolute', left: cx * P, top: 0, width: 6 * P, height: 6 * P, animation: 'pxrot 1.2s steps(8) infinite', animationPlayState: on ? 'running' : 'paused' } }, ...kids);
+  };
+  for (let r = 6; r <= 12; r++) for (let c = 1; c <= 13; c++) {
+    const edge = r === 6 || r === 12 || c === 1 || c === 13;
+    put(c, r, edge ? '#1c1c1c' : (r === 7 ? '#5d636d' : '#3a3f47'));
+  }
+  [[4, 9], [6, 9], [8, 9], [4, 10], [6, 10], [8, 10]].forEach(([c, r]) => put(c, r, '#22262c', 'v' + c + r));
+  put(11, 9, on ? '#e3350d' : '#5a1d16', 'led');
+  for (let r = 8; r <= 10; r++) { put(14, r, '#1c1c1c', 'lb' + r); put(15, r, '#6b7078', 'lc' + r); }
+  for (let r = 7; r <= 11; r++) put(16, r, '#1c1c1c', 'ld' + r);
+  for (let r = 8; r <= 10; r++) put(17, r, on ? '#fff7c2' : '#2a3a4a', 'lg' + r);
+  [[3, 13], [4, 13], [10, 13], [11, 13]].forEach(([c, r]) => put(c, r, '#1c1c1c', 'leg' + c));
+  put(5, 5, '#1c1c1c', 'arm1'); put(6, 4, '#1c1c1c', 'arm2'); put(9, 4, '#1c1c1c', 'arm3'); put(10, 5, '#1c1c1c', 'arm4');
+  const beam = [];
+  for (let c = 18; c < W; c++) {
+    const spread = Math.floor((c - 18) / 2.2);
+    for (let r = 8 - spread; r <= 10 + spread; r++) {
+      if (r < 0 || r >= H) continue;
+      const edge = r === 8 - spread || r === 10 + spread;
+      beam.push(E('div', { key: 'b' + c + '_' + r, style: { position: 'absolute', left: c * P, top: r * P, width: P, height: P, background: edge ? 'rgba(255,240,170,.35)' : 'rgba(255,240,170,.62)' } }));
+    }
+  }
+  const beamLayer = E('div', { style: { position: 'absolute', inset: 0, opacity: on ? 1 : 0, transition: 'opacity .18s steps(3)', animation: on ? 'pxflick 1.6s steps(1) infinite' : 'none' } }, ...beam);
+  return frame(W * P, H * P, {}, beamLayer, ...cells, reel(2, 'r1'), reel(8, 'r2'));
+}
+
+function iconSpotifySym(P, on) {
+  const cells = [], N = 16, cx = 7.5;
+  const arcs = [[4, 4, 11], [7, 5, 10], [10, 6, 9]];
+  for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
+    const d = Math.hypot(c - cx, r - cx);
+    if (d > 7.7) continue;
+    let col = d > 6.9 ? '#0e0e0e' : (on ? '#1ed760' : '#1d6b3a');
+    arcs.forEach(([ar, a0, a1]) => {
+      if (r === ar && c >= a0 && c <= a1) col = '#0e0e0e';
+      if (r === ar + 1 && (c === a0 - 1 || c === a1 + 1)) col = '#0e0e0e';
+    });
+    cells.push(E('div', { key: r + '_' + c, style: { position: 'absolute', left: c * P, top: r * P, width: P, height: P, background: col, transition: 'background .2s steps(2)' } }));
+  }
+  return frame(N * P, N * P, { animation: on ? 'pxglow 1.2s steps(4) infinite' : 'none' }, ...cells);
+}
+
+const GUITAR2 = ['....KKKK....','...KHHHHK...','..TKHHHHKT..','...KHHHHK...','..TKHHHHKT..','...KKHHKK...','....KNNK....','....KffK....','....KNNK....','....KNNK....','....KffK....','....KNNK....','....KNNK....','..KKKffKKK..','.KRRKNNKRRK.','KRRRKNNKRRRK','KRRRRWWRRRRK','.KRRRRRRRRK.','..KRRRRRRK..','.KRRRWWRRRK.','KRRRRRRRRRRK','KRRRRBBRRRRK','KRRRRRRRRRRK','.KRRRRRRRRK.','..KKKKKKKK..'];
+function iconGuitar2(P, on) {
+  const OX = 3, OY = 3, W = 12 + OX * 2, H = 25 + OY + 1;
+  const solid = new Set();
+  GUITAR2.forEach((row, r) => row.split('').forEach((c, ci) => { if (c !== '.') solid.add((r + OY) + ',' + (ci + OX)); }));
+  const flames = []; let n = 0;
+  for (let r = 0; r < H; r++) for (let c = 0; c < W; c++) {
+    if (solid.has(r + ',' + c)) continue;
+    let near = 9;
+    for (let dr = -3; dr <= 3; dr++) for (let dc = -3; dc <= 3; dc++) if (solid.has((r + dr) + ',' + (c + dc))) near = Math.min(near, Math.max(Math.abs(dr), Math.abs(dc)));
+    const below = solid.has((r + 2) + ',' + c) || solid.has((r + 3) + ',' + c);
+    const reach = below ? 3 : 2;
+    if (near > reach) continue;
+    if (near === reach && (r * 5 + c * 3) % 3 === 0) continue;
+    n++;
+    const col = near === 1 ? '#ffe14d' : (near === 2 ? '#ff8a1a' : '#ff3b1f');
+    flames.push(E('div', { key: 'f' + r + '_' + c, style: { position: 'absolute', left: c * P, top: r * P, width: P, height: P, background: col, animation: `pxflame ${0.42 + (n % 5) * 0.09}s steps(2) ${(n % 9) * 0.05}s infinite` } }));
+  }
+  [[2, 1], [14, 2], [8, 0], [16, 6], [1, 9]].forEach(([c, r], i) => flames.push(E('div', { key: 'sp' + i, style: { position: 'absolute', left: c * P, top: r * P, width: P, height: P, background: '#ffe14d', animation: `pxflame ${0.7 + i * 0.1}s steps(2) ${i * 0.13}s infinite` } })));
+  const aura = E('div', { style: { position: 'absolute', inset: 0, opacity: on ? 1 : 0, transition: 'opacity .15s steps(2)' } }, ...flames);
+  const body = E('div', { style: { position: 'absolute', left: OX * P, top: OY * P, width: 12 * P, height: 25 * P } }, cellsOf(GUITAR2, { K: '#1c1c1c', H: '#2a2a2a', T: '#c9ccd1', N: '#8b5a2b', f: '#c9ccd1', R: '#e3350d', W: '#f4f3ef', B: '#1c1c1c' }, P));
+  return frame(W * P, H * P, {}, aura, body);
+}
+
+
+function iconGuitar3(P, on) {
+  const OY = 2, W = 24, H = 25;
+  const g = new Map();
+  const set = (x, y, c) => { if (x >= 0 && x < W && y + OY >= 0 && y + OY < H) g.set(x + ',' + (y + OY), c); };
+  for (let x = 0; x <= 13; x++) for (let y = 8; y <= 22; y++) {
+    const inA = ((x - 5) ** 2) / (5.2 ** 2) + ((y - 16) ** 2) / (4.6 ** 2) <= 1;
+    const inB = (x - 8.6) ** 2 + (y - 12.4) ** 2 <= 9;
+    const notch = (x - 10.2) ** 2 + (y - 15.6) ** 2 <= 2.4;
+    if ((inA || inB) && !notch) set(x, y, 'R');
+  }
+  for (let x = 0; x <= 13; x++) for (let y = 8; y <= 22; y++) if (g.get(x + ',' + (y + OY)) === 'R' && (x - 6.6) ** 2 + (y - 15.2) ** 2 <= 5.2) set(x, y, 'W');
+  [[6, 14], [7, 15], [4, 16], [5, 17]].forEach(([x, y]) => set(x, y, 'P'));
+  [[2, 18], [3, 19]].forEach(([x, y]) => set(x, y, 'B'));
+  [[1, 15], [2, 16]].forEach(([x, y]) => set(x, y, 'O'));
+  for (let t = 0; t <= 10; t++) { const x = 9 + t, y = 12 - t; set(x, y, 'N'); set(x + 1, y, t % 3 === 1 ? 'f' : 'N'); }
+  [[20, 1], [21, 1], [22, 1], [21, 0], [22, 0], [23, 0], [22, -1], [23, -1]].forEach(([x, y]) => set(x, y, 'H'));
+  [[20, 0], [21, -1], [23, 1], [22, -2]].forEach(([x, y]) => set(x, y, 'T'));
+  const solid = new Set(g.keys());
+  const outline = new Set();
+  solid.forEach(k => { const [x, y] = k.split(',').map(Number); [[1, 0], [-1, 0], [0, 1], [0, -1]].forEach(([dx, dy]) => { const kk = (x + dx) + ',' + (y + dy); if (!solid.has(kk)) outline.add(kk); }); });
+  const sil = new Set([...solid, ...outline]);
+  const COL = { R: '#e3350d', W: '#f4f3ef', P: '#1c1c1c', B: '#1c1c1c', O: '#c9ccd1', N: '#8b5a2b', f: '#d9dde2', H: '#2a2a2a', T: '#c9ccd1' };
+  const body = [];
+  outline.forEach(k => { const [x, y] = k.split(',').map(Number); body.push(E('div', { key: 'o' + k, style: { position: 'absolute', left: x * P, top: y * P, width: P, height: P, background: '#1c1c1c' } })); });
+  g.forEach((c, k) => { const [x, y] = k.split(',').map(Number); body.push(E('div', { key: 's' + k, style: { position: 'absolute', left: x * P, top: y * P, width: P, height: P, background: COL[c] } })); });
+  const hash = (a, b, c) => { let h = (a * 374761393 + b * 668265263 + c * 2147483647) | 0; h = (h ^ (h >>> 13)) * 1274126177; return ((h ^ (h >>> 16)) >>> 0); };
+  const tops = {};
+  sil.forEach(k => { const [x, y] = k.split(',').map(Number); if (tops[x] === undefined || y < tops[x]) tops[x] = y; });
+  const near = (x, y) => { let d = 9; for (let dy = -3; dy <= 3; dy++) for (let dx = -3; dx <= 3; dx++) if (sil.has((x + dx) + ',' + (y + dy))) d = Math.min(d, Math.max(Math.abs(dx), Math.abs(dy))); return d; };
+  const layers = [0, 1, 2].map(i => {
+    const cells = new Map();
+    const add = (x, y, col) => { const k = x + ',' + y; if (!sil.has(k) && !cells.has(k)) cells.set(k, col); };
+    for (let y = -10; y < H + 3; y++) for (let x = -4; x < W + 4; x++) {
+      if (sil.has(x + ',' + y)) continue;
+      const d = near(x, y);
+      if (d === 1) add(x, y, '#ffe14d');
+      else if (d === 2 && hash(x, y, i) % 5) add(x, y, '#ff8a1a');
+      else if (d === 3 && hash(x, y, i + 7) % 3 === 0) add(x, y, '#ff3b1f');
+    }
+    Object.entries(tops).forEach(([xs, top]) => {
+      const x = +xs, h = 3 + hash(x, i, 3) % 7;
+      for (let s = 1; s <= h; s++) {
+        const y = top - s; if (s > 2 && hash(x, y, i) % 4 === 0) continue;
+        const col = s <= 1 ? '#fff6c2' : s <= 3 ? '#ffd43b' : s <= 5 ? '#ff8a1a' : '#ff3b1f';
+        add(x, y, col);
+        if (s <= h - 2 && hash(x, y, i + 2) % 3 === 0) add(x + (hash(x, y, i) % 2 ? 1 : -1), y, s <= 3 ? '#ffd43b' : '#ff8a1a');
+      }
+      if (hash(x, i, 9) % 4 === 0) add(x, top - h - 2 - hash(x, i, 5) % 3, '#fff6c2');
+    });
+    const kids = [];
+    cells.forEach((col, k) => { const [x, y] = k.split(',').map(Number); kids.push(E('div', { key: k, style: { position: 'absolute', left: x * P, top: y * P, width: P, height: P, background: col } })); });
+    return E('div', { key: 'L' + i, style: { position: 'absolute', left: 0, top: 0, width: W * P, height: H * P, animation: `pxfr .33s steps(1) ${-i * 0.11}s infinite` } }, ...kids);
+  });
+  const glow = E('div', { style: { position: 'absolute', left: -8 * P, top: -10 * P, width: (W + 16) * P, height: (H + 16) * P, background: 'radial-gradient(ellipse at 50% 55%, rgba(255,150,30,.65), rgba(255,60,20,.25) 40%, rgba(255,60,20,0) 65%)', animation: 'pxfirepulse .5s steps(3) infinite alternate' } });
+  const aura = E('div', { style: { position: 'absolute', inset: 0, opacity: on ? 1 : 0, transition: 'opacity .12s steps(2)', pointerEvents: 'none' } }, glow, ...layers);
+  const guitar = E('div', { style: { position: 'absolute', inset: 0, animation: on ? 'pxshake .16s steps(2) infinite' : 'none' } }, ...body);
+  return frame(W * P, H * P, {}, aura, guitar);
+}
+
+class Component extends DCLogic {
+  bodyRef = React.createRef();
+  state = {
+    scheme: null, font: null, h: {}, jA: 2, tool: null, lastTool: 1, taps: [], pwLen: 16, pw: makePw(16), openP: null, active: null, cmd: '', themeOpen: false, scale: 0.6, clock: '--:--',
+    cr: { mode: 'cross', gen: 4, gens: [1, 4, 9], team: ['Garchomp', 'Lucario', 'Gengar'], mods: { random: false, moves: true, potions: true, cap: false, noswitch: false } }
+  };
+  ck() { return this.state.scheme || this.props.scheme || 'night'; }
+  fk() { return 'pixel'; }
+  fit() {
+    document.querySelectorAll('[data-fitbox]').forEach(box => {
+      const h = box.querySelector('[data-fitbox-h]'), sm = box.querySelector('[data-fitbox-s]'); if (!h) return;
+      for (let fs = 72; fs >= 14; fs -= 1) { h.style.fontSize = fs + 'px'; if (sm) sm.style.fontSize = Math.max(12, Math.min(20, Math.round(fs * 0.36))) + 'px'; if (box.scrollHeight <= box.clientHeight + 1) break; }
+    });
+    document.querySelectorAll('[data-fit]').forEach(el => {
+      const box = el.parentElement; if (!box) return;
+      el.style.fontSize = '100px';
+      const w = el.offsetWidth; if (!w) return;
+      el.style.fontSize = Math.min(220, Math.floor(100 * box.clientWidth / w * 0.99)) + 'px';
+    });
+  }
+  applyTheme() {
+    const c = COLORS[this.ck()].vars, f = FONTS[this.fk()];
+    const vars = { ...c, display: f.display, dw: f.dw, mono: f.mono };
+    document.querySelectorAll('[data-artboard]').forEach(el => Object.entries(vars).forEach(([k, v]) => el.style.setProperty('--' + k, v)));
+    requestAnimationFrame(() => this.fit());
+    setTimeout(() => this.fit(), 400);
+    setTimeout(() => this.fit(), 1200);
+    if (document.fonts) document.fonts.ready.then(() => this.fit());
+  }
+  scrollRef = React.createRef();
+  locked() { return this.state.tool !== null || !!this.state.openP; }
+  go(k) { if (this.locked()) return; const c = this.scrollRef.current; const el = c && c.querySelector('[data-sec="' + k + '"]'); if (el) c.scrollTo({ top: el.offsetTop, behavior: 'smooth' }); }
+  typeCmd(k) {
+    clearInterval(this._ti);
+    const target = k === 'home' ? 'cd \\' : 'cd ' + k; let i = 0;
+    this.setState({ cmd: '' });
+    this._ti = setInterval(() => { i++; this.setState({ cmd: target.slice(0, i) }); if (i >= target.length) clearInterval(this._ti); }, 45);
+  }
+  activate(k) { if (k && k !== this.state.active) { this.setState({ active: k, themeOpen: false }); this.typeCmd(k); } }
+  resize() { const c = this.scrollRef.current; const vw = c ? c.clientWidth : window.innerWidth, vh = c ? c.clientHeight : window.innerHeight - 40; const s = Math.max(0.3, Math.min(vw / 1440, vh / 760)); this.setState({ scale: s, abW: (vw / s) + 'px', abH: (vh / s) + 'px' }); }
+  tick() { const d = new Date(); this.setState({ clock: String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0') }); }
+  componentDidMount() {
+    this.applyTheme(); setTimeout(() => this.applyTheme(), 300);
+    this._rs = () => this.resize(); window.addEventListener('resize', this._rs); this.resize();
+    this.tick(); this._clk = setInterval(() => this.tick(), 15000);
+    this._kd = (e) => {
+      if (e.target && /INPUT|TEXTAREA/.test(e.target.tagName)) return;
+      const n = parseInt(e.key, 10); if (n >= 1 && n <= 7) this.go(SECS[n - 1][0]);
+      if (e.key === 'Escape') this.setState({ openP: null, tool: null, themeOpen: false });
+    };
+    window.addEventListener('keydown', this._kd);
+    const attach = () => {
+      const c = this.scrollRef.current; if (!c) return setTimeout(attach, 100);
+      this._io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting && e.intersectionRatio >= 0.55) this.activate(e.target.getAttribute('data-sec')); }), { root: c, threshold: [0.55] });
+      c.querySelectorAll('[data-sec]').forEach(s => this._io.observe(s));
+    };
+    setTimeout(attach, 250); setTimeout(() => this.resize(), 300);
+    setTimeout(() => this.activate('home'), 350);
+  }
+  componentWillUnmount() { window.removeEventListener('resize', this._rs); window.removeEventListener('keydown', this._kd); clearInterval(this._clk); clearInterval(this._ti); this._io && this._io.disconnect(); }
+  siteVals() {
+    const s = this.state, ck = this.ck();
+    const fx = {}, go = {};
+    SECS.forEach(([k]) => {
+      const on = s.active === k;
+      fx[k] = on ? { clip: 'inset(0% 0% 0% 0%)', tf: 'translateY(0px)', op: 1, lineO: 0, lineTf: 'scaleX(1)' } : { clip: 'inset(49.7% 0% 49.7% 0%)', tf: 'translateY(40px)', op: 0, lineO: 1, lineTf: 'scaleX(0.12)' };
+      go[k] = () => this.go(k);
+    });
+    const idx = Math.max(0, SECS.findIndex(x => x[0] === s.active));
+    return {
+      fx, go, scrollRef: this.scrollRef, scaleTf: 'scale(' + s.scale + ')', abW: s.abW || '1440px', abH: s.abH || '868px',
+      goChamp: () => { if (this.locked()) return; this.go('projects'); setTimeout(() => this.setState({ openP: 'champion' }), 700); },
+      goCrack: (e) => { e && e.stopPropagation && e.stopPropagation(); if (this.locked()) return; this.go('projects'); setTimeout(() => this.setState({ openP: 'crack' }), 700); },
+      cmd: s.cmd, clock: s.clock, secNum: String(idx + 1).padStart(2, '0') + ' / 07', secName: SECS[idx][1],
+      showHint: s.active === 'home' || !s.active,
+      rail: SECS.map(([k, label], i) => ({ n: String(i + 1).padStart(2, '0'), label, onClick: () => this.go(k), labelO: s.active === k ? 1 : 0, w: s.active === k ? '30px' : '10px', bg: s.active === k ? V.fg : 'transparent' })),
+      themeLabel: COLORS[ck].label, themeCaret: s.themeOpen ? '−' : '+', themeOpen: s.themeOpen, toggleTheme: () => this.setState(st => ({ themeOpen: !st.themeOpen })),
+      themeOpts: Object.entries(COLORS).map(([k, th]) => ({ label: th.label, sw1: th.vars.bg, sw2: th.vars.fg, sw3: th.vars.ok, mark: k === ck ? '■' : '', bg: k === ck ? V.p2 : 'transparent', fg: V.fg, onClick: () => this.setState({ scheme: k, themeOpen: false }) }))
+    };
+  }
+  setH(k, v) { this.setState(s => ({ h: { ...s.h, [k]: v } })); }
+  tap() {
+    const now = performance.now();
+    this.setState(s => ({ taps: (s.taps.length && now - s.taps[s.taps.length - 1] > 2500) ? [now] : [...s.taps, now].slice(-8) }));
+  }
+  setCr(fn) { this.setState(s => ({ cr: { ...s.cr, ...fn(s.cr) } })); }
+  fitTeam(team, gens, random) { return random ? team : team.filter(n => gens.includes(genOf(n))); }
+  rollTeam() { return [...ALL].sort(() => Math.random() - .5).slice(0, 6); }
+  crVals() {
+    const c = this.state.cr, random = c.mods.random;
+    const active = c.mode === 'single' ? [c.gen] : c.gens;
+    const mult = MODS.reduce((a, m) => a * (c.mods[m.k] ? m.m : 1), 1);
+    const on = a => ({ bg: a ? V.fg : V.p1, fg: a ? V.bg : V.fg });
+    const pool = active.flatMap(g => DEX[g].map(name => {
+      const inTeam = c.team.includes(name);
+      return { name, genLabel: ROMAN[g], bg: inTeam ? V.p3 : V.p1, outline: inTeam ? '1px solid ' + V.ok : 'none', onClick: () => this.setCr(cc => cc.mods.random ? {} : (cc.team.includes(name) ? { team: cc.team.filter(x => x !== name) } : (cc.team.length < 6 ? { team: [...cc.team, name] } : {}))) };
+    }));
+    return {
+      setSingle: () => this.setCr(cc => ({ mode: 'single', team: this.fitTeam(cc.team, [cc.gen], cc.mods.random) })),
+      setCross: () => this.setCr(cc => ({ mode: 'cross', team: this.fitTeam(cc.team, cc.gens, cc.mods.random) })),
+      singleBg: on(c.mode === 'single').bg, singleFg: on(c.mode === 'single').fg, crossBg: on(c.mode === 'cross').bg, crossFg: on(c.mode === 'cross').fg,
+      genChips: [1, 2, 3, 4, 5, 6, 7, 8, 9].map(g => ({ label: 'Gen ' + ROMAN[g], ...on(active.includes(g)), onClick: () => this.setCr(cc => {
+        if (cc.mode === 'single') return { gen: g, team: this.fitTeam(cc.team, [g], cc.mods.random) };
+        let gens = cc.gens.includes(g) ? cc.gens.filter(x => x !== g) : [...cc.gens, g].sort((a, b) => a - b);
+        if (!gens.length) gens = [g];
+        return { gens, team: this.fitTeam(cc.team, gens, cc.mods.random) };
+      }) })),
+      pool, poolOpacity: random ? 0.35 : 1,
+      poolNote: random ? 'Locked — random team is on' : (c.mode === 'single' ? `Gen ${ROMAN[c.gen]} only` : `${active.length} gens mixed`),
+      slots: Array.from({ length: 6 }, (_, i) => { const n = c.team[i]; return { index: String(i + 1).padStart(2, '0'), name: n ? `${n} · ${ROMAN[genOf(n)]}` : 'Empty', bg: n ? V.p1 : 'transparent', border: n ? 'transparent' : V.line, onClick: () => n && !random && this.setCr(cc => ({ team: cc.team.filter(x => x !== n) })) }; }),
+      teamCount: c.team.length, isRandom: random, reroll: () => this.setCr(() => ({ team: this.rollTeam() })),
+      mods: MODS.map(m => ({ ...m, color: c.mods[m.k] ? V.ok : V.dim, fill: c.mods[m.k] ? V.ok : 'transparent', onClick: () => this.setCr(cc => { const mods = { ...cc.mods, [m.k]: !cc.mods[m.k] }; return m.k === 'random' ? { mods, team: mods.random ? this.rollTeam() : [] } : { mods }; }) })),
+      mult: mult.toFixed(2), multColor: mult >= 2.5 ? V.warn : (mult > 1 ? V.ok : V.fg),
+      tier: TIERS.find(t => mult >= t[1])[0] + ' tier',
+      cta: c.team.length ? `Enter battle · ${c.team.length} Pokémon` : 'Pick at least one Pokémon'
+    };
+  }
+  renderVals() {
+    const s = this.state, h = s.h, ck = this.ck(), fk = this.fk();
+    const key = ck + '|' + fk;
+    if (key !== this._applied) { this._applied = key; setTimeout(() => this.applyTheme(), 0); }
+    const toTop = () => { const el = this.bodyRef.current; if (el) el.scrollTop = 0; };
+    const entriesA = ENTRIES.map((e, i) => ({ ...e, bgImg: `url("${e.img}")`, bg: i === s.jA ? V.p2 : 'transparent', shadow: i === s.jA ? 'inset 3px 0 0 oklch(0.75 0.16 40)' : 'none', onClick: () => { toTop(); this.setState({ jA: i }); setTimeout(toTop, 0); } }));
+    const e = ENTRIES[s.jA];
+    const open = s.tool !== null;
+    const ti = open ? s.tool : s.lastTool;
+    const t = TOOLS[ti];
+    let bpm = '—', ms = '— ms';
+    if (s.taps.length > 1) { const iv = (s.taps[s.taps.length - 1] - s.taps[0]) / (s.taps.length - 1); bpm = Math.round(60000 / iv); ms = Math.round(iv) + ' ms / beat'; }
+    const hoverOn = {}, hoverOff = {};
+    HOVER_KEYS.forEach(k => { hoverOn[k] = () => this.setH(k, true); hoverOff[k] = () => this.setH(k, false); });
+    const openP = {};
+    [...Object.keys(PROJ), 'champion'].forEach(k => { openP[k] = () => this.setState({ openP: k }); });
+    return {
+      ...this.siteVals(),
+      colorChips: Object.entries(COLORS).map(([k, th]) => ({ label: th.label, sw1: th.vars.bg, sw2: th.vars.fg, sw3: th.vars.ok, bg: k === ck ? '#f4f3ef' : '#1a1a1a', fg: k === ck ? '#070707' : '#f4f3ef', onClick: () => this.setState({ scheme: k }) })),
+      fontChips: Object.entries(FONTS).map(([k, f]) => ({ label: f.label, sub: '+ ' + f.sub, dfam: f.display + ',sans-serif', mfam: f.mono + ',monospace', dw: f.dw, bg: k === fk ? '#f4f3ef' : '#1a1a1a', fg: k === fk ? '#070707' : '#f4f3ef', onClick: () => this.setState({ font: k }) })),
+      entriesA, selA: { ...e, bgImg: `url("${e.img}")`, hasScore: !!e.score, noScore: !e.score }, bodyA: BODY, bodyRef: this.bodyRef,
+      hoverOn, hoverOff, open: openP, closeP: () => this.setState({ openP: null }),
+      showGeneric: !!(s.openP && s.openP !== 'champion'), showCR: s.openP === 'champion', proj: PROJ[s.openP] || PROJ.music,
+      cr: this.crVals(),
+      licons: { journal: iconBook(5, !!h.lJournal), projects: iconBoard(4, !!h.lProjects), toolbox: iconToolbox(4, !!h.lToolbox), media: iconProjector(4, !!h.lMedia), playlists: iconSpotifySym(4, !!h.lPlaylists), gigs: iconGuitar3(3, !!h.lGigs) },
+      safeL: iconSafe(2, !!h.crackL), scrollY: (s.tool !== null || s.openP) ? 'hidden' : 'auto',
+      icons: { music: iconEq(6, !!h.music), today: iconSkyline(4, !!h.today), where: iconGlobe(5, !!h.where), speed: iconBulb(5, !!h.speed), terminal: iconTerminal(5, !!h.terminal), crack: iconSafe(5, !!h.crack) },
+      balls: { champ: makeBall(6, !!h.champ), win: makeBall(4, !!h.win), landing: makeBall(2, !!h.landing), logoA: makeBall(9, !!h.logoA), logoB: makeBall(7, !!h.logoB), logoC: makeBall(4, !!h.logoC), logoC2: makeBall(2, !!h.logoC) },
+      hoverHintA: h.logoA ? 'Open' : 'Hover to open', hoverHintB: h.logoB ? 'Open' : 'Hover to open', hoverHintC: h.logoC ? 'Open' : 'Hover to open',
+      tools: TOOLS.map((x, i) => ({ ...x, bg: open && i === s.tool ? V.fg : V.p2, fg: open && i === s.tool ? V.bg : V.fg, opacity: x.kind === 'soon' && !(open && i === s.tool) ? 0.5 : 1, onClick: () => this.setState({ tool: i, lastTool: i }) })),
+      tool: { ...t, exe: t.name.toLowerCase().replace(/[^a-z]+/g, '_').replace(/_$/, '') + '.exe' },
+      toolStatus: open ? `${t.name} open` : '9 tools · click one to open',
+      panelW: open ? '520px' : '0px', panelX: open ? '0px' : '80px', panelO: open ? 1 : 0, closeTool: () => this.setState({ tool: null }),
+      isTempo: t.kind === 'tempo', isPassword: t.kind === 'password', isDrop: t.kind === 'drop', isInput: t.kind === 'input', isSoon: t.kind === 'soon',
+      bpm, msLabel: ms, tapCount: s.taps.length, tap: () => this.tap(), resetTaps: () => this.setState({ taps: [] }),
+      password: s.pw, regen: () => this.setState(st => ({ pw: makePw(st.pwLen) })),
+      lengths: [12, 16, 24].map(n => ({ n, bg: n === s.pwLen ? V.fg : V.p2, fg: n === s.pwLen ? V.bg : V.fg, onClick: () => this.setState({ pwLen: n, pw: makePw(n) }) }))
+    };
+  }
+}
+
+
+</script>
+</body>
+</html>

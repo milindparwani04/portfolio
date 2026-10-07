@@ -32,7 +32,7 @@ An item only moves to `Live` after the Definition of Done in the [Rulebook](agen
 | SH-03 | Headlines | Fixed-size card via `/api/news`; title text fits within its area, rotates every 10 seconds; preview copy and description follow each other | Built |
 | SH-04 | Status bar | Removed in favour of the clean sticky navigation | Dropped |
 | SH-05 | Sections | Journal, Projects, Toolbox, Playlists and Gigs retain Anton titles + Ref. stamps, with next-section cues at the bottom and previous-section cues top-right | Built |
-| SH-09 | Section paging | Desktop/tablet (≥721 px wide, ≥620 px tall): every section is exactly one viewport under a fixed nav; one wheel gesture / PageUp/PageDown/arrow/Space moves one section; scroll-snap for touch and scrollbar; active nav link and URL hash follow the section; reduced motion jumps instantly. Smaller viewports scroll normally | Built |
+| SH-09 | Section paging | Desktop/tablet (≥721 px wide, ≥620 px tall): every section is exactly one viewport under the fixed top bar; native CSS scroll-snap (wheel/touch/scrollbar/anchor links); URL hash follows the section; reduced motion jumps instantly. Smaller viewports scroll normally | Built — reworked onto native scroll-snap + the Parwani-DOS CRT transition 2026-10-07 (R-DOS-2), replacing the old spring-based pager |
 | SH-06 | Last updated | Deploy date from `/api/last-updated`, with local-preview fallback | Replaced 2026-10-04 by SH-10 on the dashboard (route kept for the hidden legacy shell) |
 | SH-10 | Game card | Card 08 `[ Game ]`: whichever of PlayStation and Steam is running a game, else whichever was played most recently, with art (square PSN, 2:3 Steam cover), `Playing now` / `Last played / age` and platform, via `/api/game`. PSN reconnects about every 10 days at `/api/psn/authorize`; Steam needs `STEAM_API_KEY` + `STEAM_ID` and public game details | PlayStation live 2026-10-04 (verified in production); Steam live 2026-10-04 (key and ID stored; key, profile visibility and 121-game library checked against the Steam API; production requests log no Steam errors) |
 | SH-07 | Personal metrics | Heart-rate and Spotify cards keep their approved layouts as explicit empty states until sources are connected. Spotify card shows the current track (else last played) from `/api/now-playing` | Spotify card Live 2026-09-30 (polls every 30 s while visible; verified in production); heart-rate card Live 2026-09-30 — `/api/heart-rate` from Google Health API, verified in production (81 BPM, reading ~30 s old); both update on screen without a reload (fixed 2026-09-30). Freshness limited by the phone's background sync. Steps card (replaces Time / Location) built 2026-10-02: `/api/steps` daily total vs 10,000 goal with the same "latest reading" age; live with real data 2026-10-02, verified in production (2,587 steps); restyled the same day to Codex's oversized-count design (no age footer) |
@@ -46,6 +46,23 @@ An item only moves to `Live` after the Definition of Done in the [Rulebook](agen
 | MP-01 | Local music player | Removed from the visible experience; Spotify empty state and playlists replace local MP3 playback | Dropped |
 | MP-02 | Parametric EQ | Removed with the local music player | Dropped |
 | MP-03 | Gigs | Dubai and Abu Dhabi only (Milind, 2026-10-02): comedians in either city; musicals at Dubai Opera and Coca-Cola Arena; English-language concerts at Coca-Cola Arena, Ushuaïa and the big Abu Dhabi venues (incl. F1 after-race concerts); DJs at Dubai clubs, next 90 days only; film/TV composer concerts (Zimmer, Djawadi, Göransson, Williams…, Candlelight tributes count); the F1 weekend. Sources: Ticketmaster UAE (automatic) + `worker/gig-picks.json` (curated, refreshed weekly by a Claude routine). Cards show a category tag, date ranges for multi-night runs, a high-quality photo on every card (≥ 600 px short side; Ticketmaster 1136×639, Deezer 1000×1000, official artwork; `imageOverrides` for logos and cropped posters; Wikimedia photos credited on the card via `imageCredits`), ticket link | Live 2026-10-02 — production `/api/gigs` returns 65 events (25 comedy, 29 DJ, 6 concert, 4 film score, 1 big event); page checked at 1920×969, 1280×720 and 390×844 with no errors. Supersedes the 2026-09-30 top-artists version |
+
+## Parwani-DOS redesign
+
+Full spec and interactive reference: `design_handoff_parwani_dos/` (`README.md`, `PROMPT.md`, `DOC_UPDATES.md`). Rulebook §3 updated 2026-10-07 to approve it. One push per phase; Milind reviews the live result before the next phase starts.
+
+| ID | Item | Status |
+|---|---|---|
+| R-DOS-1 | Theme tokens (Mono / Paper / Night) + top bar + theme switcher (persisted) | Live 2026-10-07 |
+| R-DOS-2 | Scroll-snap shell, CRT transition, 1–7 / Esc keys, reduced-motion fallback | Live 2026-10-07 |
+| R-DOS-3 | Home tiles, extras, headline auto-fit | Planned |
+| R-DOS-4 | Journal list/detail with scroll-to-top on switch | Planned |
+| R-DOS-5 | Projects grid + overlay windows + scroll lock | Planned |
+| R-DOS-6 | Champion Run setup window (pool modes, gens, team of 6, modifiers, reward tiers) | Planned |
+| R-DOS-7 | Toolbox sliding panel | Planned |
+| R-DOS-8 | Media / Playlists / Gigs restyle | Planned |
+| R-DOS-9 | Pixel icon sprites (Poké Ball, safe, terminal, bulb, skyline, globe, EQ, book, whiteboard, toolbox, projector, Spotify mark, guitar fire) | Planned |
+| R-DOS-10 | Accessibility and Lighthouse pass for all three themes | Planned |
 
 ## Projects
 

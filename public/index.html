@@ -18,7 +18,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo+Black&family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo+Black&family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600&family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg:#0A0A0A;
@@ -972,7 +972,7 @@
     .tools{ grid-template-columns:1fr; }
   }
 </style>
-<link rel="stylesheet" href="/ui-v2.css?v=25">
+<link rel="stylesheet" href="/ui-v2.css?v=26">
 </head>
 <body class="locked">
 
@@ -986,13 +986,34 @@
 <div id="site">
   <div class="portfolio-v2" role="main">
     <header class="v2-nav">
-      <a class="v2-terminal" href="#v2-home">C:\PARWANI&gt;<span class="v2-cursor" aria-hidden="true"></span></a>
-      <nav class="v2-links" aria-label="Primary navigation">
-        <a href="#v2-journal">Journal</a><a href="#v2-projects">Projects</a><a href="#v2-tools">Toolbox</a><a href="#v2-media">Media</a><a href="#v2-playlists">Playlists</a><a href="#v2-gigs">Gigs</a>
-      </nav>
+      <div class="pdos-left">
+        <a class="pdos-brand" href="#v2-home">&#9632; Parwani-DOS</a>
+        <div class="pdos-theme">
+          <button type="button" class="pdos-theme-btn" id="pdosThemeBtn" aria-haspopup="listbox" aria-expanded="false" aria-label="Switch theme">
+            <span class="pdos-swatch" aria-hidden="true"><span style="background:var(--bg)"></span><span style="background:var(--fg)"></span><span style="background:var(--ok)"></span></span>
+            <span>Theme: <span id="pdosThemeLabel">Night</span> <span id="pdosThemeCaret">+</span></span>
+          </button>
+          <div class="pdos-theme-menu" id="pdosThemeMenu" role="listbox" aria-label="Theme" hidden>
+            <button type="button" class="pdos-theme-opt" data-theme="mono" role="option" aria-selected="false">
+              <span class="pdos-swatch" aria-hidden="true"><span style="background:#070707"></span><span style="background:#f4f3ef"></span><span style="background:#1ed760"></span></span>
+              <span class="pdos-theme-opt-label">Mono</span><span class="pdos-theme-opt-mark" aria-hidden="true"></span>
+            </button>
+            <button type="button" class="pdos-theme-opt" data-theme="paper" role="option" aria-selected="false">
+              <span class="pdos-swatch" aria-hidden="true"><span style="background:#ecebe4"></span><span style="background:#141414"></span><span style="background:#2fbf63"></span></span>
+              <span class="pdos-theme-opt-label">Paper</span><span class="pdos-theme-opt-mark" aria-hidden="true"></span>
+            </button>
+            <button type="button" class="pdos-theme-opt" data-theme="night" role="option" aria-selected="true">
+              <span class="pdos-swatch" aria-hidden="true"><span style="background:#0d1020"></span><span style="background:#f3ead8"></span><span style="background:#7ef0b0"></span></span>
+              <span class="pdos-theme-opt-label">Night</span><span class="pdos-theme-opt-mark" aria-hidden="true">&#9632;</span>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="pdos-cmd" aria-hidden="true">C:\PARWANI&gt; <span id="pdosCmd"></span><span class="v2-cursor"></span></div>
+      <div class="pdos-right" aria-hidden="true"><span id="pdosSecLabel">01 / 07 &middot; Home</span><span id="pdosClock">--:--</span></div>
     </header>
 
-    <section class="v2-section" id="v2-home">
+    <section class="v2-section is-active" id="v2-home" data-sec="home"><div class="pdos-crt-clip"><div class="pdos-crt-slide">
       <h1 class="v2-display">My Digital Portfolio.</h1>
       <div class="v2-dashboard">
         <article class="v2-panel v2-news">
@@ -1055,9 +1076,9 @@
         </article>
       </div>
       <a class="v2-scroll-next" href="#v2-journal"><span></span>Scroll&nbsp; / &nbsp;Journal next&nbsp; &#8595;<span></span></a>
-    </section>
+    </div></div><div class="pdos-crt-line" aria-hidden="true"></div></section>
 
-    <section class="v2-section" id="v2-journal">
+    <section class="v2-section" id="v2-journal" data-sec="journal"><div class="pdos-crt-clip"><div class="pdos-crt-slide">
       <div class="v2-section-head"><div class="v2-ref-row"><span class="v2-ref">Ref. 01 / Journal</span><a class="v2-scroll-prev" href="#v2-home">&#8593;&nbsp; Home</a></div><h2 class="v2-section-title">Journal</h2><p class="v2-section-kicker">Writing on economics, work and the way we live.</p></div>
       <div class="v2-stage v2-journal-stage">
         <!-- Journal entries: writing and reviews. An unfinished entry shows only its status. When an
@@ -1101,9 +1122,9 @@
         <div class="v2-strip"><span>03 entries</span><span>New writing + reviews appear here as they're published</span><span>Economics / Work / Culture / Film</span></div>
       </div>
       <a class="v2-scroll-next" href="#v2-projects"><span></span>Scroll&nbsp; / &nbsp;Projects next&nbsp; &#8595;<span></span></a>
-    </section>
+    </div></div><div class="pdos-crt-line" aria-hidden="true"></div></section>
 
-    <section class="v2-section" id="v2-projects">
+    <section class="v2-section" id="v2-projects" data-sec="projects"><div class="pdos-crt-clip"><div class="pdos-crt-slide">
       <div class="v2-section-head"><div class="v2-ref-row"><span class="v2-ref">Ref. 02 / Projects</span><a class="v2-scroll-prev" href="#v2-journal">&#8593;&nbsp; Journal</a></div><h2 class="v2-section-title">Projects</h2><p class="v2-section-kicker">Working experiments across music, finance, travel and games.</p></div>
       <div class="v2-stage v2-project-grid">
         <article class="v2-panel v2-project"><div class="v2-index-row"><span>01</span><span class="v2-tag">[ Current Focus ]</span></div><div class="v2-project-copy"><h3>Sounds Like</h3><p>A similarity engine for music discovery.</p></div><div class="v2-card-foot"><span>Phase 02 / Similarity engine</span><a href="/sounds-like.html">Explore &#8594;</a></div></article>
@@ -1115,9 +1136,9 @@
         <article class="v2-panel v2-project v2-project-wide"><div class="v2-index-row"><span>07</span><span class="v2-tag">[ Creative Tech ]</span></div><div class="v2-project-copy"><h3>Crack</h3><p>Visual experiments with fracture, distortion and decay.</p></div><div class="v2-card-foot"><span>Playable</span><a href="/crack.html">Play &#8594;</a></div></article>
       </div>
       <a class="v2-scroll-next" href="#v2-tools"><span></span>Scroll&nbsp; / &nbsp;Toolbox next&nbsp; &#8595;<span></span></a>
-    </section>
+    </div></div><div class="pdos-crt-line" aria-hidden="true"></div></section>
 
-    <section class="v2-section" id="v2-tools">
+    <section class="v2-section" id="v2-tools" data-sec="toolbox"><div class="pdos-crt-clip"><div class="pdos-crt-slide">
       <div class="v2-section-head"><div class="v2-ref-row"><span class="v2-ref">Ref. 03 / Toolbox</span><a class="v2-scroll-prev" href="#v2-projects">&#8593;&nbsp; Projects</a></div><h2 class="v2-section-title">Toolbox</h2><p class="v2-section-kicker">No accounts. No clutter. Drop something in, get the result out.</p></div>
       <div class="v2-stage v2-tool-grid">
         <article class="v2-panel v2-tool">
@@ -1167,9 +1188,9 @@
         </article>
       </div>
       <a class="v2-scroll-next" href="#v2-media"><span></span>Scroll&nbsp; / &nbsp;Media next&nbsp; &#8595;<span></span></a>
-    </section>
+    </div></div><div class="pdos-crt-line" aria-hidden="true"></div></section>
 
-    <section class="v2-section" id="v2-media">
+    <section class="v2-section" id="v2-media" data-sec="media"><div class="pdos-crt-clip"><div class="pdos-crt-slide">
       <div class="v2-section-head"><div class="v2-ref-row"><span class="v2-ref">Ref. 04 / Media</span><a class="v2-scroll-prev" href="#v2-tools">&#8593;&nbsp; Toolbox</a></div><h2 class="v2-section-title">Media</h2><p class="v2-section-kicker">Films in Dubai cinemas and new games. Next three months.</p></div>
       <div class="v2-stage v2-gig-stage">
         <div class="v2-gig-controls">
@@ -1181,9 +1202,9 @@
         <div class="v2-strip"><span>Films: English, Japanese, Korean</span><span>Reel / VOX / ROXY / Cinema Akil</span><span>Games: release dates</span></div>
       </div>
       <a class="v2-scroll-next" href="#v2-playlists"><span></span>Scroll&nbsp; / &nbsp;Playlists next&nbsp; &#8595;<span></span></a>
-    </section>
+    </div></div><div class="pdos-crt-line" aria-hidden="true"></div></section>
 
-    <section class="v2-section" id="v2-playlists">
+    <section class="v2-section" id="v2-playlists" data-sec="playlists"><div class="pdos-crt-clip"><div class="pdos-crt-slide">
       <div class="v2-section-head"><div class="v2-ref-row"><span class="v2-ref">Ref. 05 / Playlists</span><a class="v2-scroll-prev" href="#v2-media">&#8593;&nbsp; Media</a></div><h2 class="v2-section-title">Playlists</h2><p class="v2-section-kicker">Three on repeat, plus this month&rsquo;s listening history.</p></div>
       <div class="v2-stage v2-playlist-stage">
         <div class="v2-playlists">
@@ -1223,9 +1244,9 @@
         </article>
       </div>
       <a class="v2-scroll-next" href="#v2-gigs"><span></span>Scroll&nbsp; / &nbsp;Gig finder next&nbsp; &#8595;<span></span></a>
-    </section>
+    </div></div><div class="pdos-crt-line" aria-hidden="true"></div></section>
 
-    <section class="v2-section" id="v2-gigs">
+    <section class="v2-section" id="v2-gigs" data-sec="gigs"><div class="pdos-crt-clip"><div class="pdos-crt-slide">
       <div class="v2-section-head"><div class="v2-ref-row"><span class="v2-ref">Ref. 06 / Gig Finder</span><a class="v2-scroll-prev" href="#v2-playlists">&#8593;&nbsp; Playlists</a></div><h2 class="v2-section-title">Upcoming</h2><p class="v2-section-kicker">Dubai and Abu Dhabi. Five at a time.</p></div>
       <div class="v2-stage v2-gig-stage">
         <div class="v2-gig-controls">
@@ -1243,7 +1264,7 @@
         <span class="v2-footer-rule" aria-hidden="true"></span>
         <span class="v2-footer-links"><a href="https://www.linkedin.com/in/milind-parwani-55a5b0266/" target="_blank" rel="noopener noreferrer">LinkedIn</a><span aria-hidden="true">/</span><a href="https://open.spotify.com/user/9zbpfc2ssjpy9tjiqo7xm3at0" target="_blank" rel="noopener noreferrer">Spotify</a></span>
       </footer>
-    </section>
+    </div></div><div class="pdos-crt-line" aria-hidden="true"></div></section>
   </div>
   <div class="site-header" id="siteHeader">
     <div class="topbar">
@@ -5050,7 +5071,7 @@
 
 </script>
 
-<script src="/ui-v2.js?v=23"></script>
+<script src="/ui-v2.js?v=24"></script>
 
 </body>
 </html>

@@ -640,187 +640,137 @@
     loadGame();
   });
 
-  // One wheel gesture or key press moves exactly one section. CSS scroll-snap handles touch
-  // swipes and scrollbar drags; this handles wheel/trackpad (so momentum can't skip sections)
-  // and keyboard. Only active when the paging media query matches (desktop/tablet).
-  function initSectionPager() {
-    const sections = Array.from(document.querySelectorAll('.v2-section'));
-    if (!sections.length) return;
-    const paging = window.matchMedia('(min-width: 721px) and (min-height: 620px)');
+  // Parwani-DOS shell: native CSS scroll-snap (see the paging media query in ui-v2.css)
+  // handles wheel/touch/scrollbar movement and in-page anchor links on its own, via the
+  // site-wide `html{scroll-behavior:smooth}`. This just drives the chrome that sits on top:
+  // an IntersectionObserver toggles .is-active per section (CSS does the CRT power-on/off),
+  // keeps the top bar's typed command line, section counter and clock current, handles the
+  // 1-7 jump keys and Esc, and runs the Mono/Paper/Night theme switcher. Phones fall outside
+  // the paging media query, so the CRT wrappers stay inert there (see .pdos-crt-* in the CSS)
+  // and this still safely updates the (hidden) top bar state as the user scrolls past.
+  function initShell() {
+    const root = document.querySelector('.portfolio-v2');
+    const sections = Array.from(document.querySelectorAll('.v2-section[data-sec]'));
+    if (!root || !sections.length) return;
+    const SECS = [
+      ['home', 'Home'], ['journal', 'Journal'], ['projects', 'Projects'], ['toolbox', 'Toolbox'],
+      ['media', 'Media'], ['playlists', 'Playlists'], ['gigs', 'Gigs']
+    ];
+    const THEMES = { mono: 'Mono', paper: 'Paper', night: 'Night' };
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const navLinks = Array.from(document.querySelectorAll('.v2-links a'));
-    const root = document.documentElement;
+    const cmdEl = byId('pdosCmd');
+    const secLabelEl = byId('pdosSecLabel');
+    const clockEl = byId('pdosClock');
+    const themeBtn = byId('pdosThemeBtn');
+    const themeMenu = byId('pdosThemeMenu');
+    const themeLabelEl = byId('pdosThemeLabel');
+    const themeCaretEl = byId('pdosThemeCaret');
 
-    function currentIndex() {
-      let best = 0;
-      let bestDistance = Infinity;
-      sections.forEach((section, index) => {
-        const distance = Math.abs(section.getBoundingClientRect().top);
-        if (distance < bestDistance) { bestDistance = distance; best = index; }
-      });
-      return best;
+    let activeKey = null;
+    let typeTimer = null;
+
+    function typeCmd(key) {
+      if (typeTimer) window.clearInterval(typeTimer);
+      if (!cmdEl) return;
+      const target = key === 'home' ? 'cd \\' : `cd ${key}`;
+      if (reduceMotion.matches) { cmdEl.textContent = target; return; }
+      let i = 0;
+      cmdEl.textContent = '';
+      typeTimer = window.setInterval(() => {
+        i += 1;
+        cmdEl.textContent = target.slice(0, i);
+        if (i >= target.length) window.clearInterval(typeTimer);
+      }, 45);
     }
 
-    // Moves are driven by a critically damped spring rather than a fixed-length easing curve:
-    // it responds on the first frame, settles softly (~0.6 s) and, when a new gesture arrives
-    // mid-move, retargets from the current position and velocity instead of waiting or jumping.
-    // Scroll-snap is switched off while the spring runs so the browser doesn't fight it.
-    const OMEGA = 14;
-    let animating = false;
-    let jumping = false;
-    let targetIndex = 0;
-    let targetY = 0;
-    let position = 0;
-    let velocity = 0;
-    let lastFrame = 0;
-    let animationFrame = 0;
-
-    const sectionTop = (section) => Math.round(section.getBoundingClientRect().top + window.scrollY);
-    const clampIndex = (index) => Math.max(0, Math.min(sections.length - 1, index));
-    // While a move is in flight, the next step counts from where it is heading, not where it is.
-    const baseIndex = () => (animating || jumping ? targetIndex : currentIndex());
-
-    function step(now) {
-      const dt = Math.min(.034, (now - lastFrame) / 1000);
-      lastFrame = now;
-      for (let i = 0; i < 4; i += 1) {
-        const h = dt / 4;
-        velocity += (OMEGA * OMEGA * (targetY - position) - 2 * OMEGA * velocity) * h;
-        position += velocity * h;
-      }
-      if (Math.abs(targetY - position) < .5 && Math.abs(velocity) < 30) {
-        window.scrollTo({ top: targetY, behavior: 'instant' });
-        stop();
-        return;
-      }
-      window.scrollTo({ top: position, behavior: 'instant' });
-      animationFrame = window.requestAnimationFrame(step);
-    }
-
-    function stop() {
-      window.cancelAnimationFrame(animationFrame);
-      animating = false;
-      if (!jumping) root.style.scrollSnapType = '';
-    }
-
-    function springTo(index) {
-      targetIndex = index;
-      targetY = sectionTop(sections[index]);
-      if (reduceMotion.matches) {
-        stop();
-        window.scrollTo({ top: targetY, behavior: 'instant' });
-        return;
-      }
-      if (animating) return;
-      position = window.scrollY;
-      velocity = 0;
-      animating = true;
-      root.style.scrollSnapType = 'none';
-      lastFrame = performance.now();
-      animationFrame = window.requestAnimationFrame(step);
-    }
-
-    // Jumps of more than one section (nav links, Home/End) would otherwise blur through every
-    // section in between, so the sections fade out, the page moves to the target's neighbour,
-    // and the sections fade back in while the spring carries it the last section.
-    const FADE_MS = 150;
-    function goTo(index) {
-      index = clampIndex(index);
-      if (jumping) { targetIndex = index; return; }
-      const from = baseIndex();
-      if (index === from && !animating) return;
-      const distance = Math.abs(index - currentIndex());
-      if (distance <= 1 || reduceMotion.matches) { springTo(index); return; }
-      jumping = true;
-      targetIndex = index;
-      root.style.scrollSnapType = 'none';
-      root.classList.add('v2-jump-out');
-      window.setTimeout(() => {
-        const land = targetIndex;
-        const dir = Math.sign(land - currentIndex()) || 1;
-        stop();
-        window.scrollTo({ top: sectionTop(sections[clampIndex(land - dir)]), behavior: 'instant' });
-        jumping = false;
-        root.classList.remove('v2-jump-out');
-        springTo(land);
-      }, FADE_MS);
-    }
-
-    // A touch or scrollbar drag during a move hands control back to the user.
-    const interrupt = () => { if (animating && !jumping) stop(); };
-    window.addEventListener('touchstart', interrupt, { passive: true });
-    window.addEventListener('mousedown', (event) => { if (event.clientX >= root.clientWidth) interrupt(); });
-
-    // In-page links (nav, scroll cues, back to top) use the same motion.
-    document.addEventListener('click', (event) => {
-      const link = event.target instanceof Element && event.target.closest('a[href^="#v2-"]');
-      if (!paging.matches || !link || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey) return;
-      const index = sections.findIndex((section) => `#${section.id}` === link.getAttribute('href'));
+    function activate(section) {
+      const key = section.getAttribute('data-sec');
+      if (key === activeKey) return;
+      const index = SECS.findIndex(([k]) => k === key);
       if (index < 0) return;
-      event.preventDefault();
-      goTo(index);
-    });
-
-    function blockedTarget(target) {
-      return document.querySelector('.tool-modal.open') ||
-        (target instanceof Element && target.closest('input, textarea, select, [contenteditable="true"]'));
+      activeKey = key;
+      if (secLabelEl) secLabelEl.textContent = `${String(index + 1).padStart(2, '0')} / 07 · ${SECS[index][1]}`;
+      typeCmd(key);
+      // Keep the URL in sync so a direct link or the browser back/forward button still lands
+      // on the right section (SH-09), now that there's no nav link to carry aria-current.
+      const id = section.id;
+      const hash = id === 'v2-home' ? '' : `#${id}`;
+      if (location.hash !== hash) history.replaceState(null, '', hash ? hash : location.pathname + location.search);
     }
 
-    // One gesture moves one section. A gesture starts after a 200 ms pause, on a change of
-    // direction, or when the wheel delta jumps well above the decaying trackpad momentum (a new
-    // swipe while the last one is still coasting) — so quick repeated swipes each count, like a
-    // feed, while one long flick or a fast wheel spin still moves only once.
-    let lastWheelAt = 0;
-    let lastWheelSize = 0;
-    let lastWheelDir = 0;
-    let lastStepAt = 0;
-    window.addEventListener('wheel', (event) => {
-      if (!paging.matches || event.ctrlKey || blockedTarget(event.target)) return;
-      if (Math.abs(event.deltaY) < Math.abs(event.deltaX)) return;
-      event.preventDefault();
-      const scale = event.deltaMode === 1 ? 33 : event.deltaMode === 2 ? window.innerHeight : 1;
-      const size = Math.abs(event.deltaY * scale);
-      if (size < 1) return;
-      const dir = Math.sign(event.deltaY);
-      const now = performance.now();
-      const fresh = now - lastWheelAt > 200 || dir !== lastWheelDir ||
-        (size > lastWheelSize * 1.6 && size > 20 && now - lastStepAt > 250);
-      lastWheelAt = now;
-      lastWheelSize = size;
-      lastWheelDir = dir;
-      if (!fresh || size < 4) return;
-      lastStepAt = now;
-      goTo(baseIndex() + dir);
-    }, { passive: false });
+    function tickClock() {
+      if (!clockEl) return;
+      const now = new Date();
+      clockEl.textContent = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+    }
 
-    document.addEventListener('keydown', (event) => {
-      if (!paging.matches || event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey) return;
-      if (blockedTarget(event.target) || (event.target instanceof Element && event.target.closest('button, a') && event.key === ' ')) return;
-      const keys = { ArrowDown: 1, PageDown: 1, ArrowUp: -1, PageUp: -1 };
-      let move = keys[event.key];
-      if (event.key === ' ') move = event.shiftKey ? -1 : 1;
-      if (event.key === 'Home') { event.preventDefault(); goTo(0); return; }
-      if (event.key === 'End') { event.preventDefault(); goTo(sections.length - 1); return; }
-      if (!move) return;
-      event.preventDefault();
-      // A held key steps once per landing rather than racing through every section.
-      if (event.repeat && (animating || jumping)) return;
-      goTo(baseIndex() + move);
+    // Mono reproduces the site's previously-locked greyscale palette exactly; Night is the
+    // default for a new visitor. Persisted so a returning visitor keeps their choice.
+    function applyTheme(theme) {
+      if (!THEMES[theme]) theme = 'night';
+      root.setAttribute('data-theme', theme);
+      try { window.localStorage.setItem('pdosTheme', theme); } catch (_) { /* private mode */ }
+      if (themeLabelEl) themeLabelEl.textContent = THEMES[theme];
+      document.querySelectorAll('.pdos-theme-opt').forEach((opt) => {
+        const match = opt.getAttribute('data-theme') === theme;
+        opt.setAttribute('aria-selected', String(match));
+        const mark = opt.querySelector('.pdos-theme-opt-mark');
+        if (mark) mark.textContent = match ? '■' : '';
+      });
+    }
+
+    function openThemeMenu(open) {
+      if (!themeMenu || !themeBtn) return;
+      themeMenu.hidden = !open;
+      themeBtn.setAttribute('aria-expanded', String(open));
+      if (themeCaretEl) themeCaretEl.textContent = open ? '−' : '+';
+    }
+
+    let savedTheme = 'night';
+    try { savedTheme = window.localStorage.getItem('pdosTheme') || 'night'; } catch (_) { /* private mode */ }
+    applyTheme(savedTheme);
+
+    if (themeBtn) {
+      themeBtn.addEventListener('click', (event) => {
+        event.stopPropagation();
+        openThemeMenu(Boolean(themeMenu && themeMenu.hidden));
+      });
+    }
+    document.querySelectorAll('.pdos-theme-opt').forEach((opt) => {
+      opt.addEventListener('click', () => {
+        applyTheme(opt.getAttribute('data-theme'));
+        openThemeMenu(false);
+      });
+    });
+    document.addEventListener('click', (event) => {
+      if (themeMenu && !themeMenu.hidden && !(event.target instanceof Element && event.target.closest('.pdos-theme'))) openThemeMenu(false);
     });
 
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
-        if (!entry.isIntersecting) return;
-        const id = entry.target.id;
-        navLinks.forEach((link) => {
-          if (link.getAttribute('href') === `#${id}`) link.setAttribute('aria-current', 'true');
-          else link.removeAttribute('aria-current');
-        });
-        if (paging.matches && location.hash !== `#${id}`) history.replaceState(null, '', id === 'v2-home' ? location.pathname + location.search : `#${id}`);
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.55) {
+          entry.target.classList.add('is-active');
+          activate(entry.target);
+        } else {
+          entry.target.classList.remove('is-active');
+        }
       });
-    }, { threshold: 0.55 });
+    }, { threshold: [0.55] });
     sections.forEach((section) => observer.observe(section));
+
+    tickClock();
+    window.setInterval(tickClock, 15000);
+
+    document.addEventListener('keydown', (event) => {
+      if (event.target instanceof Element && /INPUT|TEXTAREA|SELECT/.test(event.target.tagName)) return;
+      if (event.target instanceof Element && event.target.closest('[contenteditable="true"]')) return;
+      if (event.key === 'Escape') { openThemeMenu(false); return; }
+      const n = parseInt(event.key, 10);
+      if (!(n >= 1 && n <= 7)) return;
+      const target = sections[n - 1];
+      if (target) target.scrollIntoView({ behavior: reduceMotion.matches ? 'auto' : 'smooth', block: 'start' });
+    });
   }
 
-  initSectionPager();
+  initShell();
 }());

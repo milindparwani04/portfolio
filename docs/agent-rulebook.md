@@ -20,7 +20,7 @@ End: update the Handoff session log, move statuses in the Requirements Tracker, 
 
 - **Every push updates the handoff docs.** Before any push (to `main` or any branch), update the living documents in the same commit: add or extend the Session Log entry in [`session-handoff.md`](session-handoff.md) (and Current Build State / Priorities if they changed), move statuses in [`requirements-tracker.md`](requirements-tracker.md), and update [`security-handoff.md`](security-handoff.md) whenever the Worker, secrets, OAuth apps or external services changed. A push without matching doc updates is not allowed — the other device may pull at any moment. (Added 2026-09-30 at Milind's request.)
 - **Surgical edits only.** Use `str_replace` on the exact lines that change. Never regenerate a whole file.
-- **Design is locked.** Grayscale only, IBM Plex Mono / Sans, Anton, REF. labels, equal full-page dividers. Do not change confirmed design elements unless Milind raises them.
+- **Design is locked: Parwani-DOS.** Pixelify Sans (+ PixC C/c override). Themes Mono / Paper / Night. Greyscale surfaces; colour only on hover fills, window title bars, status colours and pixel icons. Windows over pages, never new pages. Do not change confirmed design elements unless Milind raises them.
 - **Respect settled decisions.** Do not re-propose dropped items (YouTube converters, Seamless Set, standalone Liveliness Index) without flagging the earlier reason.
 - **Artifact is the live iteration surface; local file is the backup; the deployed Worker is production.**
 - **Communication:** answer directly, no preamble, filler or trailing summaries. Plain prose or tight lists.
