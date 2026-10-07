@@ -903,6 +903,8 @@
     function hideOverlay({ restoreFocus = true } = {}) {
       if (!openOverlay) return;
       openOverlay.hidden = true;
+      // A Victory Road battle lives only while its window is open.
+      openOverlay.querySelector('.pdos-cr')?.dispatchEvent(new CustomEvent('vr:dispose'));
       // Stop anything running inside the window (Crack, Sounds Like) by unloading its frame.
       openOverlay.querySelectorAll('iframe').forEach((frame) => frame.remove());
       openOverlay = null;
@@ -984,7 +986,7 @@
   // Victory Road (project 07). Its code and Pokédex load only the first time the window opens
   // (/vr/*.js, /vr/vr.css, /vr/dex.json). The entry points stay "coming soon" until the battle ships;
   // adding ?vr to the URL switches them on for testing.
-  const VR_VERSION = '1';
+  const VR_VERSION = '3';
   let vrLoading = null;
   function loadVictoryRoad() {
     if (!vrLoading) {
@@ -999,7 +1001,7 @@
         s.onerror = reject;
         document.body.appendChild(s);
       });
-      vrLoading = script('/vr/vr-core.js').then(() => script('/vr/vr-setup.js')).catch((error) => { vrLoading = null; throw error; });
+      vrLoading = script('/vr/vr-core.js').then(() => script('/vr/vr-setup.js')).then(() => script('/vr/vr-battle.js')).catch((error) => { vrLoading = null; throw error; });
     }
     return vrLoading;
   }

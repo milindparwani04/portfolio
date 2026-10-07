@@ -1,0 +1,12 @@
+{
+  "name": "victory-road-build",
+  "private": true,
+  "description": "Build tools for Victory Road (public/vr). Not deployed. Install with: npm ci --prefix scripts/vr",
+  "type": "module",
+  "devDependencies": {
+    "esbuild": "0.25.10"
+  },
+  "dependencies": {
+    "ts-chacha20": "1.2.0"
+  }
+}

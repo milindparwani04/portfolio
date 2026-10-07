@@ -80,7 +80,7 @@ Long-term goal: a portfolio that feels like an enterprise-quality product — fa
 Priorities, in order:
 
 1. Close the open security findings (see [Security Handoff](security-handoff.md) §4) before shipping new public endpoints. Most urgent operational item: confirm Workers Builds' non-production branch command is `npx wrangler versions upload` — until then every branch push deploys to production.
-2. **Next implementation:** Victory Road Phase 2 (battle engine vertical slice). Build record: [`victory-road-build.md`](victory-road-build.md). Entry points stay "Coming soon" until Phase 6; `?vr` opens it for testing.
+2. **Next implementation:** Victory Road Phase 3 (champion fidelity), then 4–6. Build record: [`victory-road-build.md`](victory-road-build.md). Entry points stay "Coming soon" until Phase 6; `?vr` opens it for testing.
 3. Finish API-integrated projects: Sounds Like, then Where Next (with Liveliness Index).
 4. Activate remaining Toolbox placeholders, client-side tools first (no new backend risk).
 5. Parked: real-time multiplayer "swipe to decide where to go out" — needs WebSockets/Durable Objects or Supabase, a places API and match logic. Do not start until 1–4 are done.
@@ -118,6 +118,12 @@ External accounts connected (owner-only): Spotify (re-authorize at `/api/spotify
 Settled removals (do not re-propose without flagging): YouTube to MP3/MP4/WAV converters (ToS and backend complexity), Seamless Set project, standalone Liveliness Index (merged into Where Next), public location card (built and dropped 2026-10-04: Milind judged showing his whereabouts not responsible).
 
 ## Session log (newest first)
+
+### 2026-10-07 — Victory Road Phase 2: playable battle (still hidden)
+Agent: Claude · Model: Opus 5.5
+Done:
+- A full doubles battle against Takuma Yamazaki's official Worlds team now runs in the browser: Pokémon Showdown's simulator (MIT) in a Web Worker, loaded only when a battle starts (352 KB gzipped), an AI that sees only public information, a 2-Potion bag, and No Switching / Chaotic Replacement / No Potions / Level Cap 45 / All Shiny wired. Battle screen with team preview, narrated text box, menus, sounds, win/lose.
+- Still behind "Coming soon"; `?vr` opens it. Details: [`victory-road-build.md`](victory-road-build.md).
 
 ### 2026-10-07 — Victory Road Phase 0 + Phase 1 (setup), still hidden
 Agent: Claude · Model: Opus 5.5

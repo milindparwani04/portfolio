@@ -141,5 +141,19 @@
     return setup;
   }
 
-  return { TEAM_SIZE, ROMAN, MODS, TIERS, multiplier, tier, rng, newSeed, shuffle, rollTeam, eligible, moveSlot, addToTeam, modNotes, serialize, restore };
+  // A battle set from a /vr/sets.json row: [ability, item, nature, moves, "hp,atk,def,spa,spd,spe"].
+  function toSet(entry, row, opts) {
+    const [ability, item, nature, moves, points] = row;
+    const [hp, atk, def, spa, spd, spe] = points.split(',').map(Number);
+    const set = { species: entry.name, name: entry.name.split('-')[0], ability, item, nature, moves: moves.slice(), evs: { hp, atk, def, spa, spd, spe } };
+    if (opts && opts.shiny) set.shiny = true;
+    return set;
+  }
+
+  // Engine rules from the chosen modifiers (cosmetic ones don't reach the engine).
+  function engineRules(mods) {
+    return { noSwitch: !!mods.noswitch, chaos: !!mods.chaos, noPotions: !!mods.nopotions, levelCap: !!mods.cap };
+  }
+
+  return { TEAM_SIZE, ROMAN, MODS, toSet, engineRules, TIERS, multiplier, tier, rng, newSeed, shuffle, rollTeam, eligible, moveSlot, addToTeam, modNotes, serialize, restore };
 }));
