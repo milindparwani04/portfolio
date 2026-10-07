@@ -80,7 +80,7 @@ Long-term goal: a portfolio that feels like an enterprise-quality product — fa
 Priorities, in order:
 
 1. Close the open security findings (see [Security Handoff](security-handoff.md) §4) before shipping new public endpoints. Most urgent operational item: confirm Workers Builds' non-production branch command is `npx wrangler versions upload` — until then every branch push deploys to production.
-2. **Next implementation:** Victory Road Phase 3 (champion fidelity), then 4–6. Build record: [`victory-road-build.md`](victory-road-build.md). Entry points stay "Coming soon" until Phase 6; `?vr` opens it for testing.
+2. **Victory Road shipped 2026-10-07.** Build record: [`victory-road-build.md`](victory-road-build.md). Possible follow-ups: deeper AI, Potion on benched Pokémon.
 3. Finish API-integrated projects: Sounds Like, then Where Next (with Liveliness Index).
 4. Activate remaining Toolbox placeholders, client-side tools first (no new backend risk).
 5. Parked: real-time multiplayer "swipe to decide where to go out" — needs WebSockets/Durable Objects or Supabase, a places API and match logic. Do not start until 1–4 are done.
@@ -118,6 +118,12 @@ External accounts connected (owner-only): Spotify (re-authorize at `/api/spotify
 Settled removals (do not re-propose without flagging): YouTube to MP3/MP4/WAV converters (ToS and backend complexity), Seamless Set project, standalone Liveliness Index (merged into Where Next), public location card (built and dropped 2026-10-04: Milind judged showing his whereabouts not responsible).
 
 ## Session log (newest first)
+
+### 2026-10-07 — Victory Road is live (Phases 3–6)
+Agent: Claude · Model: Opus 5.5
+Done:
+- Phase 3: champion data verified against the official team sheet and the Champions stat formula; AI Mega preference, threat-aware Protect, difficulty. Phase 4: Random Held Items, Random Moves, Trainer Taunts; every modifier pair tested. Phase 5: original chiptune theme with music/volume controls, keyboard-only play, axe-clean. Phase 6: failure states, watchdog, release.
+- The Projects card and Home extra now open Victory Road. Nothing loads until the window opens; the engine (352 KB gz) only when a battle starts. Details, rollback and limitations: [`victory-road-build.md`](victory-road-build.md).
 
 ### 2026-10-07 — Victory Road Phase 2: playable battle (still hidden)
 Agent: Claude · Model: Opus 5.5

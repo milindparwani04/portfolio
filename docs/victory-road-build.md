@@ -12,7 +12,7 @@ Living record of the Victory Road build (spec: [`victory-road-master-prompt.md`]
 | Hardest modifier | **Level Cap 45**: the player's team is Lv 45, the champion stays Lv 50 (at Worlds everyone is Lv 50). Labelled as a Victory Road rule |
 | No Potions | Kept. The normal game gets a small bag (2 Potions) usable in place of a move; No Potions removes it |
 | Engine / audio | Pokémon Showdown simulator (MIT, `sim/` only); original audio synthesised in the browser |
-| Pushing | Push each finished phase; the Projects card and Home extra stay "Coming soon" until the whole game passes acceptance. `?vr` in the URL switches them on for testing |
+| Pushing | Each phase pushed hidden; switched on in Phase 6 after the full flow passed (2026-10-07). The `?vr` test switch was removed then |
 
 ## Phase 0 findings (2026-10-07)
 
@@ -45,7 +45,7 @@ Living record of the Victory Road build (spec: [`victory-road-master-prompt.md`]
 | 3 Champion fidelity | Done 2026-10-07 — see below |
 | 4 Catalog integration + modifier behaviour | Done 2026-10-07 — see below |
 | 5 Presentation, audio, accessibility polish | Done 2026-10-07 — see below |
-| 6 Hardening and release | Next |
+| 6 Hardening and release | Done 2026-10-07 — **live** |
 
 ## Phase 1 — setup experience (2026-10-07)
 
@@ -89,3 +89,14 @@ Living record of the Victory Road build (spec: [`victory-road-master-prompt.md`]
 - **Music:** an original 8-bar chiptune boss loop (E minor, 150 bpm: square lead, triangle bass, noise hats, sine kick), synthesised and scheduled 250 ms ahead on a 100 ms timer. Starts with the champion's intro (after the Enter Battle click, so autoplay rules are met), stops for the win/lose jingle, on Exit and when the window closes; the AudioContext suspends while the tab is hidden and resumes when it's visible again. Battle bar: **Sound on/off** (everything), **Music on/off**, **Volume** slider (master gain); all three remembered per browser. `AUDIO_MANIFEST.theme` in `vr-battle.js` takes a licensed file's URL to replace the synth theme without touching gameplay code.
 - **Keyboard:** the pool is a single Tab stop (roving tabindex; arrows, Home, End), and Down or Enter in search jumps to the first result — before this, Tab had to pass 1,127 cards. Battle menus: arrows move within the grid, Enter/Space choose, **Escape goes Back** (never Forfeit, and it no longer closes the window mid-menu; the battle's key listener runs in the capture phase). Text box: a blinking ▼ shows when Enter/Space/click will advance.
 - **Checks:** keyboard-only run (`%TEMP%/pdos/vr3.js`): open the window, build six via search, Tab to Enter Battle, team preview, play to a result with keys only, Escape returns from the move list with the window still open. axe-core 4 (WCAG 2 A/AA, 2.1 AA) on the setup window, team preview and battle command menu: 0 violations. Browser battles at 1440×900 (Taunts/Items/Moves/Shiny) and 360×740 (Random Team) pass; no overflow, no page errors.
+
+## Phase 6 — hardening and release (2026-10-07)
+
+- **Released:** the Projects card is a `<button data-open-project="champion">` ("Insert cartridge ▸", copy and modifier chips updated to the shipped multipliers) and the Home extra an `<a>` like Crack's ("victory_road.cart — insert cartridge"). The `?vr` switch and the unused "coming soon", `.pdos-cr-list` and `.pdos-cr-team` CSS are gone. `ui-v2.css?v=40`, `ui-v2.js?v=39`, `VR_VERSION` 8.
+- **Hardening added:** a 15 s engine watchdog (an engine that never answers now ends in "The battle engine didn't respond…" with Back to setup, instead of a silent wait); engine errors and data-load failures end the same way.
+- **Acceptance run** (all with the entry points live): 28 unit/engine tests; setup flow at 1440×900, 1366×657, 1280×720, 390×844, 360×740; full battles through the UI (plain, Level Cap + No Potions, Random Team on a phone, Taunts + Items + Moves + Shiny, reduced motion); keyboard-only setup + battle; axe-core WCAG 2.1 AA: 0 violations on setup, team preview and battle menus; failure and lifecycle (`%TEMP%/pdos/vr4.js`): silent engine → watchdog message + Back to setup; sets.json blocked → "Couldn't start the battle"; missing sprite → fallback pattern with the name still shown; closing the window mid-battle ends it and reopening shows the setup; reload mid-battle resets to the setup with the team kept. Site layout check at the ten standard sizes: clean apart from the pre-existing phone Playlists "A." overflow (also on production before this work).
+- **Found and fixed in Phase 6:** the Home extra's longer "insert cartridge" label widened the whole phone Home column (the phone `.pdos-extras` track was `1fr`, now `minmax(0, 1fr)`).
+- **Weight:** nothing new on first load. Opening the window: vr-core/setup/battle JS + CSS (~60 KB) + `dex.json` (18 KB gz) + about 100 lazy sprites (~1 KB each). Enter Battle: `sets.json` (22 KB gz), `vr-engine.js` (352 KB gz), `movepools.json` only with Random Moves (43 KB gz). Repo: 5.0 MB of sprites (4,976 files; Cloudflare's per-Worker asset limit is 20,000 files).
+- **Security / licence review:** no new Worker routes, secrets, cookies or third-party requests; the engine worker is same-origin, makes no network calls and has no `eval`/`new Function`; all Pokémon names, taunts and log text reach the page through `textContent` (`innerHTML` only for fixed SVG/markup constants); `localStorage` (`pdosVictoryRoad`, `pdosVrMuted`, `pdosVrMusic`, `pdosVrVolume`) is validated on read and never holds a hidden random team. Licences and rights in `public/vr/NOTICE.md`: Showdown sim and data MIT (client not used), ts-chacha20 MIT, PokeAPI sprites (images © The Pokémon Company, fan use approved by Milind), champion team facts, original audio and art. Fan-project disclaimers on the setup and battle screens.
+- **Rollback:** `git revert` the release commit to put back "Coming soon" (the setup and battle files can stay; nothing loads them until the window opens). For a faulty engine only, revert `public/vr/vr-engine.js` to the previous commit and bump `ENGINE_URL`'s `?v=`.
+- **Known limitations:** the AI is a heuristic (doesn't predict Protect or switch voluntarily); Potion counts as a status action (Taunt/Assault Vest block it) and targets only the user or its partner; non-Reg-M-B species battle under Champions mechanics without being tournament-legal; Gen 9 Tera isn't part of Reg M-B and isn't offered.

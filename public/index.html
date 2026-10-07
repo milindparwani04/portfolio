@@ -976,7 +976,7 @@
     .tools{ grid-template-columns:1fr; }
   }
 </style>
-<link rel="stylesheet" href="/ui-v2.css?v=38">
+<link rel="stylesheet" href="/ui-v2.css?v=40">
 </head>
 <body class="locked">
 
@@ -1076,7 +1076,7 @@
           </div>
 
           <div class="pdos-extras">
-            <div class="pdos-extra pdos-extra--champion is-soon" data-icon-host><span class="pdos-extra-icon" aria-hidden="true"><span class="pdos-icon" data-icon="ball" data-icon-p="2"></span></span><span><span class="pdos-extra-label">Extras /</span> victory_road.cart &mdash; coming soon</span></div>
+            <a class="pdos-extra pdos-extra--champion" href="#v2-projects" data-open-project="champion" data-icon-host><span class="pdos-extra-icon" aria-hidden="true"><span class="pdos-icon" data-icon="ball" data-icon-p="2"></span></span><span><span class="pdos-extra-label">Extras /</span> victory_road.cart &mdash; insert cartridge</span><span aria-hidden="true">&#9656;</span></a>
             <a class="pdos-extra pdos-extra--crack" href="#v2-projects" data-open-project="crack" data-icon-host><span class="pdos-extra-icon" aria-hidden="true"><span class="pdos-icon" data-icon="safe" data-icon-p="2"></span></span><span><span class="pdos-extra-label">Extras /</span> crack.exe &mdash; play</span><span aria-hidden="true">&#9656;</span></a>
           </div>
         </div>
@@ -1289,15 +1289,15 @@
             <span class="pdos-project-desc">Visual experiments with fracture, distortion and decay.</span>
             <span class="pdos-project-foot"><span>Playable</span><span>Play &#9656;</span></span>
           </button>
-          <div class="pdos-project pdos-champ-card is-soon" data-icon-host>
+          <button class="pdos-project pdos-champ-card" type="button" data-open-project="champion" data-icon-host>
             <span class="pdos-champ-lockup"><span class="pdos-icon pdos-champ-ball" data-icon="ball" data-icon-max="6"></span><span class="pdos-champ-word">Victory<br>Road</span></span>
             <span class="pdos-champ-copy">
               <span class="pdos-champ-meta"><span>07 &middot; cartridge</span><span class="pdos-chip">&#9654; Game</span></span>
-              <span class="pdos-champ-desc">Pick a team from one generation or all nine and face the hardest trainer. Stack modifiers like random moves and no potions for bigger rewards.</span>
-              <span class="pdos-champ-chips"><span>Random team &times;1.4</span><span>Random moves &times;1.5</span><span>No potions &times;1.3</span><span>Level cap &times;1.2</span><span>No switching &times;1.25</span></span>
+              <span class="pdos-champ-desc">Pick six from all 1,025 Pok&eacute;mon, then take on 2026 world champion Takuma Yamazaki&rsquo;s real team in a doubles battle. Stack modifiers for bigger rewards.</span>
+              <span class="pdos-champ-chips"><span>Random team &times;1.35</span><span>Random moves &times;1.5</span><span>No potions &times;1.25</span><span>Level cap 45 &times;1.75</span><span>No switching &times;1.2</span></span>
             </span>
-            <span class="pdos-champ-cta"><span class="pdos-champ-insert">Coming soon</span></span>
-          </div>
+            <span class="pdos-champ-cta"><span class="pdos-champ-insert">Insert cartridge &#9656;</span></span>
+          </button>
         </div>
       </div>
 
@@ -5258,7 +5258,7 @@
 
 </script>
 
-<script src="/ui-v2.js?v=37"></script>
+<script src="/ui-v2.js?v=39"></script>
 <script src="/pdos-icons.js?v=5" defer></script>
 
 </body>

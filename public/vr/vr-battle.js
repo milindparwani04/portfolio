@@ -777,10 +777,15 @@
         showMenu('Couldn’t start the battle', [menuButton('Back to setup', () => exit())]);
         return;
       }
-      worker.onerror = () => { if (!ended) say('The battle engine stopped unexpectedly.').then(() => showMenu('Battle stopped', [menuButton('Back to setup', () => exit())])); };
+      const stopped = (text) => { if (ended || disposed) return; ended = true; window.clearTimeout(watchdog); if (worker) { worker.terminate(); worker = null; } say(text).then(() => showMenu('Battle stopped', [menuButton('Back to setup', () => exit())])); };
+      // Watchdog: if the engine never answers (blocked or failed download), say so instead of waiting forever.
+      const watchdog = window.setTimeout(() => stopped('The battle engine didn’t respond. Check your connection and try again.'), 15000);
+      timers.add(watchdog);
+      worker.onerror = () => stopped('The battle engine stopped unexpectedly.');
       worker.onmessage = (event) => {
         const msg = event.data || {};
         if (disposed) return;
+        window.clearTimeout(watchdog);
         if (msg.t === 'log') {
           const lines = msg.lines;
           lines.forEach((l) => { if (l.startsWith('|poke|p2|')) previewFoes.push(l.split('|')[3].split(',')[0]); });

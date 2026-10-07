@@ -66,6 +66,10 @@ Covers the `portfolio` Worker on milindparwani.com, its static assets, the `GIG_
 - [ ] `workers.dev` subdomain route disabled so the Worker is only reachable on the real domain.
 - [ ] Worker observability / logs enabled to spot abuse.
 
+### Victory Road (2026-10-07, Claude)
+
+Static assets only: no new Worker routes, secrets or third-party requests. The battle engine (`public/vr/vr-engine.js`, Pokémon Showdown sim, MIT) runs in a same-origin Web Worker with no network access or `eval`. Page text from game data goes through `textContent`. `localStorage` keys `pdosVictoryRoad`, `pdosVrMuted`, `pdosVrMusic`, `pdosVrVolume` are validated on read. Third-party rights are listed in `public/vr/NOTICE.md`. No finding opened.
+
 ## 4. Open findings
 
 | ID | Severity | Finding | Fix |

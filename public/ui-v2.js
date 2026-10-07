@@ -984,9 +984,8 @@
   }
 
   // Victory Road (project 07). Its code and Pokédex load only the first time the window opens
-  // (/vr/*.js, /vr/vr.css, /vr/dex.json). The entry points stay "coming soon" until the battle ships;
-  // adding ?vr to the URL switches them on for testing.
-  const VR_VERSION = '7';
+  // (/vr/*.js, /vr/vr.css, /vr/dex.json); the battle engine only when a battle starts.
+  const VR_VERSION = '8';
   let vrLoading = null;
   function loadVictoryRoad() {
     if (!vrLoading) {
@@ -1006,16 +1005,6 @@
     return vrLoading;
   }
   function initChampionRun(overlay) {
-    if (new URLSearchParams(window.location.search).has('vr')) {
-      document.querySelectorAll('.pdos-champ-card.is-soon, .pdos-extra--champion.is-soon').forEach((el) => {
-        el.classList.remove('is-soon');
-        el.setAttribute('data-open-project', 'champion');
-        el.setAttribute('role', 'button');
-        el.setAttribute('tabindex', '0');
-        el.addEventListener('keydown', (event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); el.click(); } });
-        el.querySelector('.pdos-champ-insert')?.replaceChildren('Insert cartridge ▸');
-      });
-    }
     return () => {
       const root = overlay.querySelector('.pdos-cr');
       loadVictoryRoad().then(() => window.VictoryRoad.mount(root)).catch(() => {

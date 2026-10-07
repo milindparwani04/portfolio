@@ -468,10 +468,6 @@ body.locked { overflow: auto !important; height: auto !important; }
 .pdos-project--crack:hover, .pdos-project--crack:focus-visible { background: #f4f3ef; color: #070707; }
 .pdos-champ-card { grid-column: 1 / -1; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: clamp(16px, 2.2vw, 32px); padding: 10px 22px; outline: 1px dashed var(--v2-soft-line); outline-offset: -1px; }
 .pdos-champ-card:hover, .pdos-champ-card:focus-visible { background: #f7c947; color: #070707; outline-color: transparent; }
-/* Victory Road is coming soon: no hover fill and nothing to click (its icon still animates). */
-.pdos-champ-card.is-soon, .pdos-extra.is-soon { cursor: default; }
-.pdos-champ-card.is-soon:hover { background: var(--v2-panel); color: var(--v2-fg); outline-color: var(--v2-soft-line); }
-.pdos-extra.is-soon:hover { border-color: var(--v2-soft-line); color: var(--v2-fg); }
 .pdos-champ-lockup { align-self: stretch; display: flex; align-items: center; gap: 20px; min-height: 0; }
 /* The sprite frame (ball + bob room + shadow) sits on the card's centre line, so the bob never
    reaches the card edge. */
@@ -528,21 +524,8 @@ html { scrollbar-gutter: stable; }
 .pdos-cr-toggle button { padding: 7px 12px; background: var(--v2-panel); }
 .pdos-cr-gens button { padding: 5px 10px; background: var(--v2-panel); }
 .pdos-cr-toggle button[aria-pressed="true"], .pdos-cr-gens button[aria-pressed="true"] { background: var(--v2-fg); color: var(--v2-bg); }
-.pdos-cr-list { flex: 1 1 auto; min-height: 120px; overflow: auto; overscroll-behavior: contain; display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); grid-auto-rows: min-content; gap: 6px; }
-.pdos-cr-list.is-locked { opacity: .35; }
-.pdos-cr-list button { display: flex; justify-content: space-between; gap: 6px; padding: 8px; background: var(--v2-panel); font-size: .69rem; text-transform: uppercase; text-align: left; }
-.pdos-cr-list button span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.pdos-cr-list button span:last-child { color: var(--v2-dim); }
-.pdos-cr-list button:hover { background: var(--p3); }
-.pdos-cr-list button[aria-pressed="true"] { background: var(--p3); outline: 1px solid var(--v2-green); outline-offset: -1px; }
-.pdos-cr-list button:disabled { cursor: default; }
 .pdos-cr-side { min-height: 0; display: flex; flex-direction: column; gap: 10px; }
 .pdos-cr-reroll { padding: 0; background: none; color: var(--v2-green) !important; text-transform: uppercase; }
-.pdos-cr-team { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; }
-.pdos-cr-team button { height: 42px; padding: 5px; display: flex; flex-direction: column; justify-content: space-between; background: transparent; border: 1px dashed var(--v2-soft-line); font-size: .58rem; text-transform: uppercase; text-align: left; }
-.pdos-cr-team button.is-filled { background: var(--v2-panel); border-color: transparent; }
-.pdos-cr-team button span:first-child { color: var(--v2-dim); }
-.pdos-cr-team button span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
 .pdos-cr-mods { flex: 1 1 auto; overflow: auto; gap: 0; }
 .pdos-cr-mods .pdos-cr-label { margin-bottom: 6px; }
 .pdos-cr-mod { width: 100%; display: grid; grid-template-columns: 14px minmax(0, 1fr) auto; gap: 8px; align-items: start; padding: 7px 0 !important; border-top: 1px solid var(--v2-soft-line) !important; background: none; color: var(--v2-dim) !important; text-align: left; }
@@ -880,7 +863,7 @@ html { scrollbar-gutter: stable; }
   .pdos-about-body { min-height: 120px; }
   .pdos-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(3, minmax(150px, auto)); }
   .pdos-tile-title { font-size: 1.5rem; }
-  .pdos-extras { grid-template-columns: 1fr; }
+  .pdos-extras { grid-template-columns: minmax(0, 1fr); }
   .pdos-weather-body, .pdos-spotify-body, .pdos-game-body { min-height: 72px; }
   .pdos-mini-grid { grid-template-rows: minmax(110px, auto); }
   /* fitHeadline() (ui-v2.js) binary-searches a font size against this box's clientHeight, so it
@@ -906,7 +889,7 @@ html { scrollbar-gutter: stable; }
   .pdos-project-icon { flex: 0 0 96px; margin: 8px 0; }
   .pdos-project-desc, .pdos-champ-desc, .pdos-tool-desc { font-size: .75rem; }
   .pdos-project-head, .pdos-project-foot, .pdos-champ-meta, .pdos-champ-cta, .pdos-champ-chips, .pdos-tool-head, .pdos-dialog-meta, .pdos-dialog-foot,
-  .pdos-cr-label, .pdos-cr-list button, .pdos-cr-team button, .pdos-cr-mod-text span, .pdos-cr-status, .pdos-sec-kicker, .pdos-tool-panel-foot { font-size: .75rem !important; }
+  .pdos-cr-label, .pdos-cr-mod-text span, .pdos-cr-status, .pdos-sec-kicker, .pdos-tool-panel-foot { font-size: .75rem !important; }
   .pdos-champ-card { grid-template-columns: 1fr; grid-auto-rows: auto; gap: 14px; padding: 16px; }
   .pdos-champ-lockup { height: 120px; }
   .pdos-champ-cta { align-items: flex-start; }
@@ -916,7 +899,6 @@ html { scrollbar-gutter: stable; }
   .pdos-cr-side, .pdos-cr-box { flex-shrink: 0; }
   .pdos-cr-mods { overflow: visible; }
   .pdos-cr-mult { align-items: flex-start; }
-  .pdos-cr-list { max-height: 260px; }
   .pdos-cr-top { flex-wrap: wrap; }
   .pdos-toolbox-title { font-size: clamp(1.5rem, 8vw, 2.2rem); white-space: normal; }
   .pdos-tools { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: none; grid-auto-rows: minmax(120px, auto); }

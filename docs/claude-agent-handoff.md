@@ -12,7 +12,7 @@
 
 ## Current assignment
 
-Status: **Parwani-DOS redesign complete — all 9 phases shipped 2026-10-07** (full spec in `design_handoff_parwani_dos/README.md`; see the Work log entries below for what each phase covers and how it was tested). Phases 4–9 went out in one push at Milind's request ("all in one go, no approval per stage"). Next: Victory Road (renamed from Champion Run, currently "coming soon") — Milind plans to work on it on 2026-10-08. Previous wrap-up (2026-10-04): Game card (08: PlayStation or Steam) replaced Site Updated, both sources connected; Home Steps card live with real data, restyled 2026-10-02 to Codex's selected oversized-count design; a Location card was built (`fb2fabb`) and reverted the same day at Milind's request, a settled removal. Open items from before the redesign: article pages for the Journal, an optional TMDB key for sharper media posters. Two weekly routines still run on Mondays (Gig Finder 06:00, Media 06:30 Dubai) — the redesign doesn't touch the Worker, so they're unaffected.
+Status: **Victory Road shipped 2026-10-07** (Phases 0–6; build record [`victory-road-build.md`](victory-road-build.md)). Earlier the same day: Parwani-DOS redesign complete (all 9 phases), Home drawn on the mockup's scaled canvas, Media/Gigs six per batch. Open items: article pages for the Journal, an optional TMDB key for sharper media posters, Victory Road AI depth (see its known limitations). Two weekly routines still run on Mondays (Gig Finder 06:00, Media 06:30 Dubai).
 
 Areas Claude has most recently owned (coordinate before Codex changes these):
 
@@ -74,7 +74,7 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 - Media: Reel posters are 300×450. A free TMDB API key, stored with `wrangler secret bulk` as `TMDB_API_KEY`, turns on 780 px posters with no code change; Milind has to create the TMDB account. VOX and ROXY extras depend on the weekly routine, which may also be blocked from those sites, so they are best-effort.
 
 - Journal: no article text is written yet. When one is, it goes inline in that entry's `.pdos-journal-article` panel (replacing the "in progress" note) and the status changes; there are no separate article pages any more.
-- **Victory Road (next session, Milind's plan for 2026-10-08):** renamed from Champion Run and switched off ("coming soon"). The setup window exists (pool, team, modifiers, tiers; `localStorage` key `pdosChampionRun`) but nothing opens it; the battle itself is still to be specced. Pool cards show names only — no official artwork.
+- **Victory Road:** live since 2026-10-07; follow-ups (smarter AI, Potion targeting the bench) are listed under "Known limitations" in [`victory-road-build.md`](victory-road-build.md).
 - The playlists "now playing" strip from the mockup was dropped at Milind's request (2026-10-07) — don't re-propose it.
 - Planned projects (Today Somewhere, Where Next, Speed Round, Terminal Adventure) open a window that says they're planned; Sounds Like and Crack run inside theirs.
 - Reminders: `worker/reminders.json` holds Milind's general daily phone reminders (added 2026-10-05); `sendDailyReminders` in the cron pushes each active one to the `REMINDERS_TOPIC` secret (`shawshankreminder`) once per Dubai day from 12:00. Add entries there when he asks for a reminder; prune expired ones occasionally.
@@ -87,6 +87,10 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 - Lighthouse `valid-source-maps` flags a third-party library map; it doesn't affect the score categories that matter (production: 90 / 100 / 100).
 
 ## Work log (newest first)
+
+### 2026-10-07 — Victory Road Phase 6: released
+
+- Entry points switched on, `?vr` removed, dead CSS removed, engine watchdog, phone `.pdos-extras` fix; acceptance, failure-state and accessibility runs all pass. Detail, rollback and limitations in [`victory-road-build.md`](victory-road-build.md). Browser test scripts: `%TEMP%/pdos/vr1.js` (setup), `vr2.js` (battle; options `random`, `cap`, `fun`, `reduce`), `vr3.js` (keyboard only), `vr4.js` (failures/lifecycle), `axe-vr.js`.
 
 ### 2026-10-07 — Victory Road Phase 5 (music, keyboard, accessibility)
 
