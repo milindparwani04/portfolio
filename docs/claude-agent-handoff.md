@@ -83,6 +83,13 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 
 ## Work log (newest first)
 
+### 2026-10-07 — Fix: theme menu never actually closed
+
+- Milind caught this live (exactly the kind of bug the "not visually verified" note in Phase 1 flagged as a risk): opening the theme dropdown and picking a theme, or clicking the button again, never closed it.
+- Cause: `.pdos-theme-menu` sets `display: flex` unconditionally. That rule and the browser's built-in `[hidden]{display:none}` have identical specificity (one class, one attribute selector), so the author rule — loaded after the UA stylesheet — always won regardless of the `hidden` property JS was correctly toggling. The menu was visually stuck open from the first click onward.
+- Fix: added `.pdos-theme-menu[hidden] { display: none; }` (specificity 0,2,0, beats both), matching the existing `.v2-top-toggle[hidden]` pattern already in the file. `ui-v2.css?v=27`.
+- Tested: confirms by inspection against the same cascade rule already used elsewhere in the file for this exact pattern. This is a pure CSS-cascade bug my DOM-mock test harness from Phase 1 could not have caught (it asserts the `hidden` property/attribute value, not computed `display`) — flagging that gap for future phases: cascade/specificity issues need either a real browser or a second pass reading every new rule against what else targets the same selector.
+
 ### 2026-10-07 — Parwani-DOS redesign, Phase 1: themes, top bar, CRT transition
 
 - Milind supplied the full design handoff (`design_handoff_parwani_dos/`: `README.md` spec, `PROMPT.md`, `DOC_UPDATES.md`, an interactive `.dc.html` reference + `support.js`, and the `fonts/PixC-*.otf` override), copied into the repo root as instructed. Its `PROMPT.md` says to treat the rulebook §3 "design is locked" change as pre-approved, so I made that edit myself rather than waiting — the new wording is in `docs/agent-rulebook.md`.

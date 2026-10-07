@@ -102,6 +102,9 @@ body.locked { overflow: auto !important; height: auto !important; }
   display: flex; flex-direction: column; padding: 4px;
   background: var(--v2-panel); border: 1px solid var(--v2-fg); box-shadow: 8px 8px 0 rgba(0, 0, 0, .45);
 }
+/* Same specificity as the UA [hidden]{display:none} rule, so the author rule above would
+   otherwise win on source order alone and the menu could never actually hide. */
+.pdos-theme-menu[hidden] { display: none; }
 .pdos-theme-opt {
   display: flex; align-items: center; gap: .65rem; padding: .55rem .6rem; width: 100%;
   border: 0; background: none; color: var(--v2-fg); font: inherit; letter-spacing: inherit;
