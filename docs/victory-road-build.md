@@ -44,8 +44,8 @@ Living record of the Victory Road build (spec: [`victory-road-master-prompt.md`]
 | 2 Battle engine vertical slice | Done 2026-10-07 — see below |
 | 3 Champion fidelity | Done 2026-10-07 — see below |
 | 4 Catalog integration + modifier behaviour | Done 2026-10-07 — see below |
-| 5 Presentation, audio, accessibility polish | Next |
-| 6 Hardening and release | — |
+| 5 Presentation, audio, accessibility polish | Done 2026-10-07 — see below |
+| 6 Hardening and release | Next |
 
 ## Phase 1 — setup experience (2026-10-07)
 
@@ -83,3 +83,9 @@ Living record of the Victory Road build (spec: [`victory-road-master-prompt.md`]
 - **Trainer Taunts:** after each player action (move, Potion or voluntary switch) the champion's speech bubble shows a line chosen by what the action did — knocked out his Pokémon > super effective > hit his Protect > missed > resisted > left his Pokémon under 25% > Potion > switch > generic — never the same line twice in a row for a context. 30 original lines; playful, never cruel; fictional dialogue for the in-game opponent (the disclaimer says so). The bubble sits inside the arena (never over the menus), has a dismiss button, auto-hides after 3.2 s, is announced in a polite live region, and doesn't animate with reduced motion.
 - **Combinations:** none are impossible. No Switching + Chaotic Replacement: you never choose who comes in (shown as a note in setup). Random Team + Random Moves: a full surprise. Random Held Items respects Item Clause by construction.
 - **Tests:** 28 pass. Phase 4 adds: random items (six distinct, real, seeded); random moves over 400 seeded species (distinct, learnable, ≥ 2 attacks when possible); all 36 modifier pairs and all nine together, each played to a result with no engine errors; ×6.72 Master for all nine. Browser: a full battle with Taunts + Random Items + Random Moves + All Shiny shows shiny back sprites, narrates a taunt, no errors.
+
+## Phase 5 — presentation, audio, accessibility (2026-10-07)
+
+- **Music:** an original 8-bar chiptune boss loop (E minor, 150 bpm: square lead, triangle bass, noise hats, sine kick), synthesised and scheduled 250 ms ahead on a 100 ms timer. Starts with the champion's intro (after the Enter Battle click, so autoplay rules are met), stops for the win/lose jingle, on Exit and when the window closes; the AudioContext suspends while the tab is hidden and resumes when it's visible again. Battle bar: **Sound on/off** (everything), **Music on/off**, **Volume** slider (master gain); all three remembered per browser. `AUDIO_MANIFEST.theme` in `vr-battle.js` takes a licensed file's URL to replace the synth theme without touching gameplay code.
+- **Keyboard:** the pool is a single Tab stop (roving tabindex; arrows, Home, End), and Down or Enter in search jumps to the first result — before this, Tab had to pass 1,127 cards. Battle menus: arrows move within the grid, Enter/Space choose, **Escape goes Back** (never Forfeit, and it no longer closes the window mid-menu; the battle's key listener runs in the capture phase). Text box: a blinking ▼ shows when Enter/Space/click will advance.
+- **Checks:** keyboard-only run (`%TEMP%/pdos/vr3.js`): open the window, build six via search, Tab to Enter Battle, team preview, play to a result with keys only, Escape returns from the move list with the window still open. axe-core 4 (WCAG 2 A/AA, 2.1 AA) on the setup window, team preview and battle command menu: 0 violations. Browser battles at 1440×900 (Taunts/Items/Moves/Shiny) and 360×740 (Random Team) pass; no overflow, no page errors.

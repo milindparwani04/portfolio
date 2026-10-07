@@ -233,3 +233,16 @@
 @keyframes vr-pop { from { transform: translateX(-50%) scale(.6); opacity: 0; } }
 @media (max-width: 720px) { .vr-taunt { max-width: 80%; font-size: .72rem; } }
 @media (prefers-reduced-motion: reduce) { .vr-taunt { animation: none; } }
+
+/* Phase 5: audio controls and the text box's advance arrow. */
+.vr-volume { display: flex; align-items: center; gap: 6px; padding: 0 8px; background: var(--v2-panel-raised); font-size: .69rem; text-transform: uppercase; }
+.vr-volume input { width: 90px; accent-color: var(--v2-yellow); }
+.vr-textbox { position: relative; }
+.vr-next { position: absolute; right: 18px; bottom: 10px; color: #f7c947; font-size: .7rem; opacity: 0; }
+.vr-textbox.is-waiting .vr-next { opacity: 1; animation: vr-blink 1s steps(1) infinite; }
+.vr-battle-tools { flex-wrap: wrap; justify-content: flex-end; }
+@media (max-width: 720px) {
+  .vr-battle-bar { flex-wrap: wrap; }
+  .vr-volume input { width: 70px; }
+}
+@media (prefers-reduced-motion: reduce) { .vr-textbox.is-waiting .vr-next { animation: none; } }

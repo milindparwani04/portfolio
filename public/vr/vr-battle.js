@@ -37,10 +37,20 @@
       if (ctx.state === 'suspended') ctx.resume();
       return ctx;
     };
-    const tone = (freq, dur, { type = 'square', vol = 0.06, slide = 0, delay = 0 } = {}) => {
+    let master = null;
+    let volume = 0.7;
+    try { const v = Number(window.localStorage.getItem('pdosVrVolume')); if (v >= 0 && v <= 1 && window.localStorage.getItem('pdosVrVolume') !== null) volume = v; } catch (_) { /* private mode */ }
+    const out = () => {
+      const a = ensure();
+      if (!a) return null;
+      if (!master) { master = a.createGain(); master.gain.value = volume; master.connect(a.destination); }
+      return master;
+    };
+    const tone = (freq, dur, { type = 'square', vol = 0.06, slide = 0, delay = 0, at = null } = {}) => {
       const a = ensure();
       if (!a) return;
-      const t = a.currentTime + delay;
+      const dest = out();
+      const t = (at ?? a.currentTime) + delay;
       const o = a.createOscillator();
       const g = a.createGain();
       o.type = type;
@@ -48,13 +58,14 @@
       if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(30, freq + slide), t + dur);
       g.gain.setValueAtTime(vol, t);
       g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-      o.connect(g).connect(a.destination);
+      o.connect(g).connect(dest);
       o.start(t);
       o.stop(t + dur + 0.02);
     };
-    const noise = (dur, vol = 0.08) => {
+    const noise = (dur, vol = 0.08, at = null) => {
       const a = ensure();
       if (!a) return;
+      const dest = out();
       const buf = a.createBuffer(1, Math.floor(a.sampleRate * dur), a.sampleRate);
       const data = buf.getChannelData(0);
       for (let i = 0; i < data.length; i += 1) data[i] = (Math.random() * 2 - 1) * (1 - i / data.length);
@@ -62,8 +73,8 @@
       const g = a.createGain();
       g.gain.value = vol;
       s.buffer = buf;
-      s.connect(g).connect(a.destination);
-      s.start();
+      s.connect(g).connect(dest);
+      s.start(at ?? a.currentTime);
     };
     const fx = {
       select: () => tone(880, 0.05, { vol: 0.04 }),
@@ -79,16 +90,85 @@
       win: () => [523, 523, 523, 659, 784, 659, 784, 1047].forEach((f, i) => tone(f, 0.16, { delay: i * 0.13 })),
       lose: () => [392, 349, 311, 262].forEach((f, i) => tone(f, 0.28, { type: 'triangle', delay: i * 0.24 }))
     };
-    document.addEventListener('visibilitychange', () => { if (ctx && document.hidden) ctx.suspend(); });
+    const N = (name) => { const m = /^([A-G]#?)(\d)$/.exec(name); if (!m) return 0; const i = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'].indexOf(m[1]); return 440 * 2 ** ((i + 12 * (Number(m[2]) + 1) - 69) / 12); };
+    const LEAD = ('E5 E5 B4 E5 G5 F#5 E5 D5 E5 E5 B4 E5 A5 G5 F#5 G5 C5 C5 G4 C5 E5 D5 C5 B4 D5 D5 A4 D5 F#5 E5 D5 F#5 '
+      + 'E5 G5 B5 G5 E5 G5 B5 C6 B5 A5 G5 F#5 E5 F#5 G5 A5 C6 B5 A5 G5 A5 G5 F#5 E5 D#5 E5 F#5 B4 D#5 F#5 B5 -').split(' ');
+    const BASS = 'E2 E3 E2 E3 E2 E3 E2 E3 C2 C3 C2 C3 D2 D3 D2 D3 E2 E3 E2 E3 E2 E3 E2 E3 A1 A2 A1 A2 B1 B2 B1 B2'.split(' ');
+    const EIGHTH = 60 / 150 / 2;
+    let musicOn = true;
+    try { musicOn = window.localStorage.getItem('pdosVrMusic') !== '0'; } catch (_) { /* private mode */ }
+    let musicTimer = 0;
+    let step = 0;
+    let nextAt = 0;
+    let playing = false;
+    // Swappable audio: set AUDIO_MANIFEST.theme to a licensed file's URL to replace the synth theme.
+    const AUDIO_MANIFEST = { theme: null };
+    let themeEl = null;
+    function schedule() {
+      const a = ensure();
+      if (!a || !playing) return;
+      while (nextAt < a.currentTime + 0.25) {
+        const lead = LEAD[step % LEAD.length];
+        if (lead !== '-') tone(N(lead), EIGHTH * 0.9, { vol: 0.035, at: nextAt });
+        if (step % 2 === 0) tone(N(BASS[(step / 2) % BASS.length]), EIGHTH * 1.8, { type: 'triangle', vol: 0.09, at: nextAt });
+        if (step % 2 === 1) noise(0.03, 0.025, nextAt);
+        if (step % 4 === 0) tone(110, 0.12, { type: 'sine', slide: -70, vol: 0.12, at: nextAt });
+        nextAt += EIGHTH;
+        step += 1;
+      }
+    }
+    const music = {
+      start() {
+        if (playing || muted || !musicOn) return;
+        if (AUDIO_MANIFEST.theme) {
+          themeEl = themeEl || Object.assign(new Audio(AUDIO_MANIFEST.theme), { loop: true });
+          themeEl.volume = volume;
+          themeEl.play().catch(() => {});
+          playing = true;
+          return;
+        }
+        const a = ensure();
+        if (!a) return;
+        playing = true;
+        step = 0;
+        nextAt = a.currentTime + 0.1;
+        schedule();
+        musicTimer = window.setInterval(schedule, 100);
+      },
+      stop() {
+        playing = false;
+        window.clearInterval(musicTimer);
+        if (themeEl) themeEl.pause();
+      }
+    };
+    document.addEventListener('visibilitychange', () => {
+      if (!ctx) return;
+      if (document.hidden) ctx.suspend();
+      else if (playing) ctx.resume();
+    });
     return {
       play: (name) => { try { fx[name] && fx[name](); } catch (_) { /* audio is optional */ } },
       get muted() { return muted; },
       setMuted(on) {
         muted = on;
         try { window.localStorage.setItem('pdosVrMuted', on ? '1' : '0'); } catch (_) { /* private mode */ }
-        if (on && ctx) ctx.suspend();
+        if (on) { music.stop(); if (ctx) ctx.suspend(); }
       },
-      close() { if (ctx) { ctx.close(); ctx = null; } }
+      get musicOn() { return musicOn; },
+      setMusic(on, wanted) {
+        musicOn = on;
+        try { window.localStorage.setItem('pdosVrMusic', on ? '1' : '0'); } catch (_) { /* private mode */ }
+        if (!on) music.stop(); else if (wanted) music.start();
+      },
+      get volume() { return volume; },
+      setVolume(v) {
+        volume = v;
+        try { window.localStorage.setItem('pdosVrVolume', String(v)); } catch (_) { /* private mode */ }
+        if (master) master.gain.value = v;
+        if (themeEl) themeEl.volume = v;
+      },
+      music,
+      close() { music.stop(); if (ctx) { ctx.close(); ctx = null; master = null; } }
     };
   })();
 
@@ -140,6 +220,7 @@
     const rules = C.engineRules(mods);
     let worker = null;
     let ended = false;
+    let musicWanted = false;
     let disposed = false;
     const timers = new Set();
 
@@ -149,10 +230,12 @@
     const bar = h('div', { class: 'vr-battle-bar' },
       h('span', { class: 'vr-battle-mult', text: `×${mult.toFixed(2)} · ${C.tier(mult)} tier` }),
       h('span', { class: 'vr-battle-tools' },
-        h('button', { type: 'button', class: 'vr-tool', 'aria-pressed': String(Sound.muted), text: Sound.muted ? 'Sound off' : 'Sound on', onclick: (e) => { Sound.setMuted(!Sound.muted); e.currentTarget.textContent = Sound.muted ? 'Sound off' : 'Sound on'; e.currentTarget.setAttribute('aria-pressed', String(Sound.muted)); } }),
+        h('button', { type: 'button', class: 'vr-tool', 'aria-pressed': String(Sound.muted), text: Sound.muted ? 'Sound off' : 'Sound on', onclick: (e) => { Sound.setMuted(!Sound.muted); e.currentTarget.textContent = Sound.muted ? 'Sound off' : 'Sound on'; e.currentTarget.setAttribute('aria-pressed', String(Sound.muted)); if (!Sound.muted && musicWanted) Sound.music.start(); } }),
+        h('button', { type: 'button', class: 'vr-tool', 'aria-pressed': String(!Sound.musicOn), text: Sound.musicOn ? 'Music on' : 'Music off', onclick: (e) => { Sound.setMusic(!Sound.musicOn, musicWanted); e.currentTarget.textContent = Sound.musicOn ? 'Music on' : 'Music off'; e.currentTarget.setAttribute('aria-pressed', String(!Sound.musicOn)); } }),
+        h('label', { class: 'vr-volume' }, h('span', { text: 'Volume' }), h('input', { type: 'range', min: '0', max: '100', value: String(Math.round(Sound.volume * 100)), 'aria-label': 'Volume', oninput: (e) => Sound.setVolume(Number(e.currentTarget.value) / 100) })),
         h('button', { type: 'button', class: 'vr-tool', text: 'Exit battle', onclick: () => exit() })));
     const stage = h('div', { class: 'vr-stage' });
-    const textbox = h('div', { class: 'vr-textbox' }, h('p', { class: 'vr-text' }));
+    const textbox = h('div', { class: 'vr-textbox' }, h('p', { class: 'vr-text' }), h('span', { class: 'vr-next', 'aria-hidden': 'true', text: '▼' }));
     const menu = h('div', { class: 'vr-menu' });
     screen.append(bar, h('div', { class: 'vr-frame' }, stage, textbox), menu, live,
       h('p', { class: 'vr-disclaimer', text: 'Unofficial fan project, not affiliated with or endorsed by Nintendo, Game Freak, Creatures, The Pokémon Company or Takuma Yamazaki. The champion’s team is his official 2026 Worlds team sheet; stat spreads are a community reconstruction, the AI is a heuristic, not his play, and taunts are fictional lines for the in-game opponent.' }));
@@ -165,9 +248,24 @@
     screen.addEventListener('click', (e) => { if (!e.target.closest('button')) advance(); });
     const onKey = (e) => {
       if (disposed) return;
+      const grid = e.target.closest && e.target.closest('.vr-menu-grid');
+      if (grid && ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
+        const items = [...grid.querySelectorAll('button:not(:disabled)')];
+        const cols = window.getComputedStyle(grid).gridTemplateColumns.split(' ').length || 2;
+        const i = items.indexOf(e.target);
+        const d = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -cols, ArrowDown: cols }[e.key];
+        const next = items[Math.max(0, Math.min(items.length - 1, i + d))];
+        if (next) { e.preventDefault(); next.focus(); }
+        return;
+      }
+      if (e.key === 'Escape' && screen.contains(document.activeElement)) {
+        const back = menu.querySelector('button[data-back="back"]');
+        if (back) { e.preventDefault(); e.stopPropagation(); back.click(); }
+        return;
+      }
       if ((e.key === 'Enter' || e.key === ' ') && !e.target.closest('button, input')) { e.preventDefault(); advance(); }
     };
-    document.addEventListener('keydown', onKey);
+    document.addEventListener('keydown', onKey, true);
     async function say(text, hold = 650) {
       if (disposed || !text) return;
       live.textContent = text;
@@ -187,6 +285,7 @@
         };
         step();
       });
+      textbox.classList.add('is-waiting');
       await new Promise((resolve) => {
         if (disposed) return resolve();
         const t = window.setTimeout(resolve, done ? 120 : hold);
@@ -194,6 +293,7 @@
         skip = () => { window.clearTimeout(t); resolve(); };
       });
       skip = null;
+      textbox.classList.remove('is-waiting');
     }
 
     // ----- arena -----
@@ -521,14 +621,14 @@
             menuButton('Fight', () => fight()),
             menuButton(`Bag${potions ? ` (${potions})` : ''}`, () => bag(), { disabled: !potions }),
             menuButton('Pokémon', () => party(), { disabled: !canSwitch }),
-            back ? menuButton('Back', back, { 'data-back': '1' }) : menuButton('Forfeit', () => forfeit(), { 'data-back': '1' })
+            back ? menuButton('Back', back, { 'data-back': 'back' }) : menuButton('Forfeit', () => forfeit(), { 'data-back': 'forfeit' })
           ];
           showMenu(`What will ${name} do?`, buttons);
         };
         const pickTarget = (label, list, done) => {
           if (!list) return done('');
           if (list.length === 1) return done(` ${list[0].loc}`);
-          showMenu(`${label}: choose a target`, [...list.map((x) => menuButton(slots[x.pos].name.textContent + (x.pos.startsWith('p1') ? (x.loc === -(slot + 1) ? ' (self)' : ' (partner)') : ''), () => done(` ${x.loc}`))), menuButton('Back', () => top(), { 'data-back': '1' })]);
+          showMenu(`${label}: choose a target`, [...list.map((x) => menuButton(slots[x.pos].name.textContent + (x.pos.startsWith('p1') ? (x.loc === -(slot + 1) ? ' (self)' : ' (partner)') : ''), () => done(` ${x.loc}`))), menuButton('Back', () => top(), { 'data-back': 'back' })]);
         };
         const fight = () => {
           let mega = false;
@@ -545,7 +645,7 @@
               }, { disabled: m.disabled || m.pp === 0, class: 'vr-cmd vr-move', 'data-type': info.type });
             });
             if (act.canMegaEvo && !megaTaken) buttons.push(menuButton(mega ? 'Mega Evolution: ON' : 'Mega Evolve', () => { mega = !mega; render(); }, { class: 'vr-cmd vr-cmd--mega', 'aria-pressed': String(mega) }));
-            buttons.push(menuButton('Back', () => top(), { 'data-back': '1' }));
+            buttons.push(menuButton('Back', () => top(), { 'data-back': 'back' }));
             showMenu(`${name}: choose a move`, buttons);
           };
           render();
@@ -554,7 +654,7 @@
           const slotN = act.moves.findIndex((m) => m.id === 'potion') + 1;
           showMenu(`Bag: ${req.vr.potions} Potion${req.vr.potions === 1 ? '' : 's'} (restores half of max HP)`, [
             menuButton('Use Potion', () => pickTarget('Potion', targetsFor({ target: 'adjacentAllyOrSelf' }, slot, req), (tgt) => { choices[slot] = `move ${slotN}${tgt}`; next(slot + 1); }), { disabled: !slotN }),
-            menuButton('Back', () => top(), { 'data-back': '1' })
+            menuButton('Back', () => top(), { 'data-back': 'back' })
           ]);
         };
         const party = () => {
@@ -563,7 +663,7 @@
             const hp = readHp(p.condition);
             return menuButton(`${p.ident.replace(/^p1: /, '')} · ${hp.status === 'fnt' ? 'fainted' : `${hp.cur}/${hp.max}`}`, () => { choices[slot] = `switch ${n}`; next(slot + 1); }, { disabled: hp.status === 'fnt' || taken.includes(n) });
           });
-          buttons.push(menuButton('Back', () => top(), { 'data-back': '1' }));
+          buttons.push(menuButton('Back', () => top(), { 'data-back': 'back' }));
           showMenu(`Switch ${name} for…`, buttons);
         };
         top();
@@ -585,7 +685,7 @@
     }
 
     function forfeit() {
-      showMenu('Forfeit the battle?', [menuButton('Yes, forfeit', () => finish('p2', true)), menuButton('Keep battling', () => command(lastRequest), { 'data-back': '1' })]);
+      showMenu('Forfeit the battle?', [menuButton('Yes, forfeit', () => finish('p2', true)), menuButton('Keep battling', () => command(lastRequest), { 'data-back': 'back' })]);
     }
 
     // ----- engine plumbing -----
@@ -614,21 +714,25 @@
       if (disposed) return;
       clearMenu();
       const won = winner === 'p1';
+      musicWanted = false;
+      Sound.music.stop();
       Sound.play(won ? 'win' : 'lose');
       screen.classList.add(won ? 'is-won' : 'is-lost');
       await say(won ? `You defeated ${CHAMP.name}!` : forfeited ? 'You forfeited the battle.' : `You lost to ${CHAMP.name}…`, 900);
       showMenu(won ? `Victory! Reward ×${mult.toFixed(2)} · ${C.tier(mult)} tier` : 'Defeat. Your setup is saved: try again?', [
         menuButton('Battle again', () => { dispose(); start(detail, root); }, { class: 'vr-cmd vr-cmd--go' }),
-        menuButton('Back to setup', () => exit(), { 'data-back': '1' })
+        menuButton('Back to setup', () => exit(), { 'data-back': 'exit' })
       ]);
       if (worker) { worker.terminate(); worker = null; }
     }
 
     function dispose() {
       disposed = true;
+      musicWanted = false;
+      Sound.music.stop();
       skip = null;
       timers.forEach((t) => window.clearTimeout(t));
-      document.removeEventListener('keydown', onKey);
+      document.removeEventListener('keydown', onKey, true);
       root.removeEventListener('vr:dispose', dispose);
       if (worker) { worker.terminate(); worker = null; }
       screen.remove();
@@ -662,6 +766,8 @@
       const team = C.buildTeam(detail.team, mods, seed, { byId: dex.byId, sets: sets.sets, movepools: pools, attacks: new Set(pools ? pools.attacks : []) });
       trainer.hidden = false;
       trainerLabel.hidden = false;
+      musicWanted = true;
+      Sound.music.start();
       await say(`${CHAMP.name} would like to battle!`, 900);
       if (disposed) return;
       try {

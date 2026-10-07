@@ -173,6 +173,8 @@
       });
       nodes.pool.classList.toggle('is-locked', st.mods.random);
       nodes.poolCount.textContent = st.mods.random ? 'Pool locked: random team is on.' : `${shown} Pokémon shown`;
+      const current = poolButtons.find((p) => p.button.getAttribute('tabindex') === '0' && !p.button.hidden);
+      setRoving(current ? current.button : null);
       nodes.poolNote.textContent = st.mode === 'single' ? `Gen ${C.ROMAN[st.gen]} only` : `${gens.length} of 9 gens`;
       nodes.modeBtns.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.crMode === st.mode)));
       nodes.gens.replaceChildren(...[1, 2, 3, 4, 5, 6, 7, 8, 9].map((g) => h('button', {
@@ -380,6 +382,33 @@
       update();
     }));
     nodes.search.addEventListener('input', () => { query = nodes.search.value; renderPool(); });
+
+    // The pool is one Tab stop (roving tabindex): arrows move between cards, Home/End jump, so
+    // keyboard users aren't made to Tab through 1,127 buttons. Down or Enter in search jumps in.
+    const visibleCards = () => poolButtons.filter((p) => !p.button.hidden).map((p) => p.button);
+    function setRoving(target) {
+      poolButtons.forEach(({ button }) => button.setAttribute('tabindex', '-1'));
+      const card = target || visibleCards()[0];
+      if (card) card.setAttribute('tabindex', '0');
+      return card;
+    }
+    nodes.pool.addEventListener('focusin', (e) => { if (e.target.classList.contains('vr-mon')) setRoving(e.target); });
+    nodes.pool.addEventListener('keydown', (e) => {
+      const cards = visibleCards();
+      const i = cards.indexOf(e.target);
+      if (i < 0) return;
+      const cols = Math.max(1, window.getComputedStyle(nodes.pool).gridTemplateColumns.split(' ').length);
+      const to = { ArrowLeft: i - 1, ArrowRight: i + 1, ArrowUp: i - cols, ArrowDown: i + cols, Home: 0, End: cards.length - 1 }[e.key];
+      if (to === undefined) return;
+      e.preventDefault();
+      const next = cards[Math.max(0, Math.min(cards.length - 1, to))];
+      setRoving(next).focus();
+    });
+    nodes.search.addEventListener('keydown', (e) => {
+      if (e.key !== 'ArrowDown' && e.key !== 'Enter') return;
+      const first = setRoving();
+      if (first) { e.preventDefault(); first.focus(); }
+    });
     nodes.reroll.addEventListener('click', () => { rerollHidden(); announce('New hidden team rolled.'); renderTeam(); });
     nodes.cta.addEventListener('click', () => {
       if (team().length !== C.TEAM_SIZE) return;

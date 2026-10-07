@@ -986,7 +986,7 @@
   // Victory Road (project 07). Its code and Pokédex load only the first time the window opens
   // (/vr/*.js, /vr/vr.css, /vr/dex.json). The entry points stay "coming soon" until the battle ships;
   // adding ?vr to the URL switches them on for testing.
-  const VR_VERSION = '5';
+  const VR_VERSION = '7';
   let vrLoading = null;
   function loadVictoryRoad() {
     if (!vrLoading) {
