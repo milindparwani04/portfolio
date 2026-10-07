@@ -231,11 +231,13 @@ body.locked { overflow: auto !important; height: auto !important; }
 
 /* Right column widgets — ids/classes below this point are the same ones the fetch functions in
    ui-v2.js already target; only their container markup changed. */
-.pdos-weather { container-type: size; }
-/* Short weather widget (720p-class screens): drop the humidity/wind line rather than squeeze the temperature. */
-@container (max-height: 120px) { #v2WeatherExtras { display: none; } }
+/* Widgets in the right column sit in auto-height grid rows, so none of them may use
+   container-type: size (size containment gives the box zero intrinsic height and it collapses). */
 .pdos-weather-body { flex-direction: row; align-items: center; justify-content: space-between; gap: .6rem; }
-.pdos-weather .v2-value { font-size: clamp(1.6rem, min(3.6vw, 6.8vh, 26cqh), 2.6rem); }
+.pdos-weather .v2-value { font-size: clamp(1.6rem, min(3vw, 5vh), 2.4rem); }
+.pdos-weather .v2-metric-foot { display: flex; flex-wrap: wrap; column-gap: .9em; }
+/* Short screens: drop the humidity/wind line so the headlines window keeps its room. */
+@media (max-height: 860px) { #v2WeatherExtras { display: none; } }
 .v2-value { margin: .05rem 0; font-family: var(--display); font-size: clamp(2.1rem, min(4.4vw, 8.6vh), 5.25rem); line-height: 1.08; white-space: nowrap; }
 .v2-value small { font-size: .42em; }
 .v2-placeholder { color: var(--v2-dim); }
@@ -244,7 +246,7 @@ body.locked { overflow: auto !important; height: auto !important; }
 .v2-sun { width: clamp(24px, min(2.6vw, 5vh), 40px); height: clamp(24px, min(2.6vw, 5vh), 40px); color: var(--v2-yellow); flex: 0 0 auto; }
 
 .pdos-spotify-body { flex-direction: row; align-items: center; gap: .7rem; }
-.v2-spotify-art { flex: 0 0 auto; width: clamp(36px, 10cqw, 52px); }
+.v2-spotify-art { flex: 0 0 auto; width: 48px; }
 .v2-spotify-cover { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; background: var(--v2-panel-raised); }
 .pdos-spotify-text { min-width: 0; }
 #v2NowTitle { margin: 0; max-width: 100%; font-family: var(--display); font-weight: 400; font-size: clamp(.95rem, min(1.6vw, 3vh), 1.5rem); line-height: 1.05; text-transform: uppercase; }
@@ -254,27 +256,31 @@ body.locked { overflow: auto !important; height: auto !important; }
 
 .pdos-mini-grid { min-height: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 .pdos-heart .v2-value, .pdos-heart .v2-metric-foot { margin-top: auto; }
+/* Heart and steps share a ~160px column: their numbers size from the body's own width (cqw),
+   so "180 BPM" and "10,000/10,000" always fit inside the window. */
+.pdos-mini-grid .pdos-widget-body { container-type: inline-size; }
+.pdos-mini-grid .v2-value { font-size: clamp(1.3rem, 34cqw, 3rem); }
 
-/* Steps widget (Codex's oversized-count variant, unchanged since 2026-10-02): small label, the
-   count as large as the box allows with "/10,000" on its baseline, a progress line and the goal
-   line. Sizes come from the box itself (container units), so "10,000/10,000" never clips. */
-.v2-steps { container-type: size; }
-.v2-steps-label { margin-top: auto; color: var(--v2-dim); font-size: clamp(.54rem, min(5cqh, 4cqw), .8rem); letter-spacing: .08em; text-transform: uppercase; }
-.v2-steps-value { margin: clamp(.1rem, 2cqh, .5rem) 0 clamp(.5rem, 6.5cqh, 1.2rem); font-family: var(--display); font-size: clamp(2rem, min(48cqh, 26cqw), 11rem); line-height: .9; white-space: nowrap; }
+/* Steps widget (Codex's oversized-count variant): small label, the count as large as the body's
+   width allows with "/10,000" on its baseline, a progress line and the goal line. 19cqw keeps the
+   widest case, "10,000/10,000" (about 4.9em), inside the body. */
+.v2-steps-label { margin-top: auto; color: var(--v2-dim); font-size: .62rem; letter-spacing: .08em; text-transform: uppercase; }
+.v2-steps-value { margin: .3rem 0 .5rem; font-family: var(--display); font-size: clamp(1rem, 19cqw, 3rem); line-height: .9; white-space: nowrap; }
 .v2-steps-value small { margin-left: .12em; font-size: .4em; }
 .v2-steps-bar { flex: 0 0 auto; height: 3px; background: var(--v2-soft-line); }
 .v2-steps-bar span { display: block; width: 0; height: 100%; background: var(--v2-fg); transition: width .6s ease; }
-.v2-steps-goal { margin: clamp(.3rem, 3.5cqh, .8rem) 0 auto; color: var(--v2-dim); font-size: clamp(.54rem, min(5cqh, 4cqw), .8rem); letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.v2-steps-goal { margin: .4rem 0 auto; color: var(--v2-dim); font-size: .62rem; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .v2-steps--done .v2-steps-value, .v2-steps--done .v2-steps-goal { color: var(--v2-green); }
 .v2-steps--done .v2-steps-bar span { background: var(--v2-green); }
 
 .pdos-headlines { min-height: 0; }
 .pdos-headlines-body { justify-content: center; gap: .5rem; }
-.pdos-headlines-body h2 { margin: 0; min-height: 0; overflow: hidden; font-family: var(--display); font-weight: 400; font-size: clamp(1.4rem, min(3.2vw, 5.6vh), 2.6rem); line-height: .98; text-transform: uppercase; overflow-wrap: anywhere; }
-.v2-news-desc { flex: 0 0 auto; max-height: 4.2em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; margin: 0; color: var(--v2-fg); font-size: clamp(.6rem, 1.3vh, .76rem); line-height: 1.5; }
+/* fitHeadline() sizes both lines against this body, so neither may shrink or clamp on its own. */
+.pdos-headlines-body h2 { flex: 0 0 auto; margin: 0; font-family: var(--display); font-weight: 400; font-size: clamp(1.4rem, min(3.2vw, 5.6vh), 2.6rem); line-height: 1.02; text-transform: uppercase; overflow-wrap: break-word; text-wrap: balance; }
+.v2-news-desc { flex: 0 0 auto; margin: 0; color: var(--v2-fg); font-size: clamp(.6rem, 1.3vh, .76rem); line-height: 1.45; text-wrap: pretty; }
 
 .pdos-game-body { flex-direction: row; align-items: center; gap: .6rem; }
-.v2-game-art { flex: 0 0 auto; width: clamp(34px, 10cqw, 48px); aspect-ratio: 1; object-fit: cover; display: block; background: var(--v2-panel-raised); }
+.v2-game-art { flex: 0 0 auto; width: 40px; aspect-ratio: 1; object-fit: cover; display: block; background: var(--v2-panel-raised); }
 .v2-game-art--portrait { aspect-ratio: 2 / 3; }
 .v2-game-text { min-width: 0; }
 .v2-game-text h3 { margin: 0; font-family: var(--display); font-weight: 400; font-size: clamp(.85rem, min(1.4vw, 2.6vh), 1.2rem); line-height: 1.05; text-transform: uppercase; }
@@ -311,33 +317,72 @@ body.locked { overflow: auto !important; height: auto !important; }
 .v2-card-foot a:hover, .v2-card-foot a:focus-visible, .v2-card-foot button:not(:disabled):hover, .v2-card-foot button:not(:disabled):focus-visible { text-decoration: underline; text-underline-offset: .3em; }
 .v2-card-foot button:disabled { cursor: default; }
 
-/* Journal (Codex mockup, 2026-10-02): three cards — writing and reviews — each with its photo on
-   top, title and copy below, and the status pinned to the bottom. The photo is the part that
-   gives way on short screens. */
-/* The cards share one set of rows (subgrid), so photos, titles and status lines line up across
-   all three even when one title wraps and another doesn't. */
-.v2-journal-grid { flex: 1 1 auto; min-height: 520px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: auto minmax(90px, 1fr) auto auto; column-gap: 10px; row-gap: 0; }
-.v2-journal-card { min-width: 0; min-height: 0; overflow: hidden; padding: clamp(.6rem, 1.5vh, .9rem) clamp(.7rem, 1vw, .95rem); display: grid; grid-row: span 4; grid-template-rows: subgrid; row-gap: 0; }
-.v2-journal-media { position: relative; min-height: 0; margin: clamp(.45rem, 1.4vh, .8rem) 0 0; overflow: hidden; background: var(--v2-panel-raised); }
+/* Window chrome (Parwani-DOS): a 30px title bar filled with the section's colour (--bar), text in
+   --on, over a body with a 1px --line outline. Journal is the first section to use it; Projects,
+   Toolbox and Media/Playlists/Gigs reuse it in later phases with their own --bar. */
+.pdos-window { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; outline: 1px solid var(--v2-soft-line); }
+.pdos-window--journal { --bar: oklch(0.75 0.16 40); }
+.pdos-window-bar { flex: 0 0 auto; height: 30px; display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 0 10px; background: var(--bar, var(--v2-panel-raised)); color: var(--on); font-size: .75rem; font-weight: 500; letter-spacing: .04em; text-transform: uppercase; white-space: nowrap; }
+.pdos-window-bar > span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.pdos-window-nav { display: flex; gap: 14px; }
+.pdos-window-nav a { color: inherit; }
+.pdos-window-nav a:hover, .pdos-window-nav a:focus-visible { text-decoration: underline; text-underline-offset: .25em; }
+
+/* Status colours shared by the journal list, meta rows and photo chips. */
+.pdos-status--warn { color: var(--v2-yellow); }
+.pdos-status--ok { color: var(--v2-green); }
+.pdos-status--dim { color: var(--v2-dim); }
+
+/* Journal (Phase 3): list of every entry on the left, the selected entry on the right. The list
+   and the article body scroll inside the window; the page itself never does here. */
+.pdos-journal { flex: 1 1 auto; min-height: 0; display: grid; grid-template-columns: clamp(290px, 31vw, 440px) minmax(0, 1fr); background: var(--v2-panel); }
+.pdos-journal-side { min-width: 0; min-height: 0; display: flex; flex-direction: column; border-right: 1px solid var(--v2-soft-line); }
+.pdos-journal-head { flex: 0 0 auto; display: flex; flex-direction: column; gap: 6px; padding: clamp(.6rem, 1.8vh, 1rem) 18px clamp(.5rem, 1.4vh, .75rem); }
+.pdos-journal-title { margin: 0; font-family: var(--display); font-weight: 700; font-size: clamp(3rem, min(6.2vw, 11vh), 5.85rem); line-height: .86; text-transform: uppercase; white-space: nowrap; }
+.pdos-journal-kicker { margin: 0; font-size: .75rem; letter-spacing: .1em; text-transform: uppercase; }
+.pdos-journal-count, .pdos-journal-foot { flex: 0 0 auto; padding: 8px 18px; border-top: 1px solid var(--v2-soft-line); color: var(--v2-dim); font-size: .69rem; letter-spacing: .05em; text-transform: uppercase; }
+.pdos-journal-foot { padding: 10px 18px; font-size: .62rem; line-height: 1.6; }
+.pdos-journal-list { flex: 1 1 auto; min-height: 0; overflow: auto; overscroll-behavior: contain; }
+.pdos-journal-row {
+  width: 100%; display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 12px; align-items: start;
+  padding: 12px 18px; border: 0; border-top: 1px solid var(--v2-soft-line); background: transparent; color: var(--v2-fg);
+  font: inherit; text-align: left; cursor: pointer;
+}
+.pdos-journal-row:first-child { border-top: 0; }
+.pdos-journal-row:hover { background: var(--v2-panel-raised); }
+.pdos-journal-row:focus-visible { outline: 2px solid var(--bar); outline-offset: -2px; }
+.pdos-journal-row[aria-selected="true"] { background: var(--v2-panel-raised); box-shadow: inset 3px 0 0 var(--bar); }
+.pdos-journal-thumb { width: 64px; height: 64px; object-fit: cover; display: block; background: var(--v2-panel-raised); }
+.pdos-journal-row-text { min-width: 0; display: flex; flex-direction: column; gap: 4px; font-size: .62rem; text-transform: uppercase; }
+.pdos-journal-row-meta { display: flex; justify-content: space-between; gap: 8px; }
+.pdos-journal-row-meta > span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pdos-journal-row-meta > span:last-child { color: var(--v2-dim); }
+.pdos-journal-row-title { font-family: var(--display); font-weight: 700; font-size: 1.375rem; line-height: 1; }
+
+.pdos-journal-entry { min-width: 0; min-height: 0; display: flex; flex-direction: column; }
+.pdos-journal-entry[hidden] { display: none; }
+.pdos-journal-photo { flex: 0 0 auto; height: clamp(150px, 31vh, 280px); margin: 0; }
+.pdos-journal-chip { position: absolute; z-index: 1; right: 14px; top: 12px; padding: 6px 10px; background: #070707; font-size: .69rem; letter-spacing: .05em; text-transform: uppercase; }
+/* The chip is always black (it sits on a photo), so "Planned" cannot use the theme's --dim. */
+.pdos-journal-chip.pdos-status--dim { color: #aaa9a3; }
+.pdos-journal-score { --v2-score-size: clamp(84px, 15vh, 136px); position: absolute; z-index: 1; right: 18px; top: 14px; }
+.pdos-journal-entry-head { flex: 0 0 auto; display: flex; flex-direction: column; gap: 8px; padding: 14px 22px 12px; border-bottom: 1px solid var(--v2-soft-line); }
+.pdos-journal-entry-head h3 { margin: 0; font-family: var(--display); font-weight: 700; font-size: clamp(1.8rem, min(3.4vw, 6vh), 3rem); line-height: .95; text-transform: uppercase; }
+.pdos-journal-meta { display: flex; flex-wrap: wrap; gap: 4px 16px; color: var(--v2-dim); font-size: .69rem; letter-spacing: .05em; text-transform: uppercase; }
+.pdos-journal-article { flex: 1 1 auto; min-height: 0; overflow: auto; overscroll-behavior: contain; padding: 18px 22px 40px; }
+.pdos-journal-article:focus-visible { outline: 2px solid var(--bar); outline-offset: -2px; }
+.pdos-journal-lead { margin: 0 0 16px; max-width: 68ch; font-size: 1rem; line-height: 1.6; text-wrap: pretty; }
+.pdos-journal-note { margin: 0; color: var(--v2-dim); font-size: .69rem; letter-spacing: .06em; text-transform: uppercase; line-height: 1.6; }
+
+/* Photo with a caption top-left over a dark gradient and its credit bottom-right (journal photos). */
+.v2-journal-media { position: relative; min-height: 0; overflow: hidden; background: var(--v2-panel-raised); }
 .v2-journal-media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
 .v2-journal-media::after { content: ''; position: absolute; inset: 0 0 auto; height: 4.5em; background: linear-gradient(rgba(0, 0, 0, .6), transparent); pointer-events: none; }
-.v2-journal-media figcaption { position: absolute; z-index: 1; left: clamp(.6rem, 1vw, .9rem); top: clamp(.5rem, 1.4vh, .8rem); color: var(--v2-fg); font-size: clamp(.56rem, 1.2vh, .7rem); letter-spacing: .05em; text-transform: uppercase; text-shadow: 0 1px 4px rgba(0, 0, 0, .9); }
+.v2-journal-media figcaption { position: absolute; z-index: 1; left: clamp(.6rem, 1vw, .9rem); top: clamp(.5rem, 1.4vh, .8rem); color: #f4f3ef; font-size: clamp(.56rem, 1.2vh, .7rem); letter-spacing: .05em; text-transform: uppercase; text-shadow: 0 1px 4px rgba(0, 0, 0, .9); }
 /* Photo credit (Wikimedia Commons licences require attribution): bottom-right, quiet, links to the source page. */
 .v2-journal-credit, .v2-gig-credit { position: absolute; z-index: 1; right: .45rem; bottom: .35rem; max-width: calc(100% - .9rem); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; color: rgba(244, 243, 239, .8); font-size: .62rem; letter-spacing: .03em; text-decoration: none; text-shadow: 0 1px 3px rgba(0, 0, 0, .95); }
-.v2-journal-credit:hover, .v2-journal-credit:focus-visible, .v2-gig-credit:hover, .v2-gig-credit:focus-visible { color: var(--v2-fg); text-decoration: underline; }
-.v2-journal-card h3 { margin: clamp(.55rem, 1.8vh, 1.1rem) 0 clamp(.3rem, 1vh, .6rem); font-family: var(--display); font-weight: 400; font-size: clamp(1.5rem, min(2.8vw, 6vh), 3.6rem); text-transform: uppercase; line-height: .95; }
-.v2-journal-copy { min-height: 0; overflow: hidden; }
-.v2-journal-card p { margin: 0; color: var(--v2-fg); font-size: clamp(.62rem, 1.45vh, .84rem); line-height: 1.55; display: -webkit-box; -webkit-line-clamp: 7; -webkit-box-orient: vertical; overflow: hidden; }
-.v2-journal-foot { align-self: end; display: flex; flex-wrap: wrap; justify-content: space-between; column-gap: 1rem; margin-top: clamp(.5rem, 1.6vh, 1rem); padding-top: clamp(.45rem, 1.4vh, .85rem); border-top: 1px solid var(--v2-soft-line); color: var(--v2-dim); font-size: clamp(.56rem, 1.25vh, .72rem); letter-spacing: .05em; text-transform: uppercase; }
-.v2-journal-state { color: var(--v2-yellow); }
-/* Finished entries only: a plain underlined link on its own line under the status. */
-.v2-journal-more { flex: 0 0 100%; margin-top: clamp(.4rem, 1.2vh, .7rem); color: var(--v2-fg); font-size: clamp(.66rem, 1.5vh, .9rem); letter-spacing: .06em; text-transform: uppercase; text-decoration: underline; text-underline-offset: .35em; }
-.v2-journal-more:hover, .v2-journal-more:focus-visible { color: var(--v2-dim); }
-
-/* Review: title and year beside a jagged round score badge. */
-.v2-review-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: clamp(.5rem, 1vw, 1rem); margin: clamp(.55rem, 1.8vh, 1.1rem) 0 clamp(.3rem, 1vh, .6rem); }
-.v2-review-head h3 { margin: 0; }
-.v2-review-meta { display: block; margin-top: .35rem; color: var(--v2-dim); font-size: clamp(.56rem, 1.25vh, .72rem); letter-spacing: .05em; }
+.v2-journal-credit:hover, .v2-journal-credit:focus-visible, .v2-gig-credit:hover, .v2-gig-credit:focus-visible { color: #f4f3ef; text-decoration: underline; }
+/* Review score: a jagged round badge (journal photos). */
 .v2-score {
   --v2-score-size: clamp(64px, min(7vw, 13vh), 124px);
   width: var(--v2-score-size); height: var(--v2-score-size); flex: 0 0 auto;
@@ -530,7 +575,6 @@ body.locked { overflow: auto !important; height: auto !important; }
   .v2-stage { flex: 1 1 auto; min-height: 0; }
   .v2-index-row { font-size: clamp(.6rem, 1.35vh, .8rem); }
 
-  .v2-journal-grid { min-height: 0; }
   .v2-strip { font-size: clamp(.62rem, 1.4vh, .78rem); padding: clamp(.45rem, 1.3vh, .8rem) 1rem; }
 
   .v2-project-grid { grid-template-rows: minmax(0, 1fr) minmax(0, 1fr) minmax(0, .55fr); }
@@ -548,6 +592,17 @@ body.locked { overflow: auto !important; height: auto !important; }
    drop purely decorative lines so every card still fits its section. */
 @media (min-width: 721px) and (min-height: 620px) and (max-height: 760px) {
   .v2-metric h3 { margin-top: .3rem; }
+}
+/* Short screens: tighten Home's right-column windows so headlines.feed (which takes the
+   leftover height) still has room for a readable headline. */
+@media (min-width: 721px) and (min-height: 620px) and (max-height: 860px) {
+  .pdos-home-right { gap: 6px; }
+  .pdos-widget-head { height: 22px; }
+  .pdos-home-right .pdos-widget-body { padding: .4rem .6rem; }
+  .pdos-home-right .pdos-widget-foot { padding-bottom: .35rem; }
+  .pdos-weather .pdos-widget-label { display: none; }
+  .v2-spotify-art { width: 40px; }
+  .v2-game-art { width: 30px; }
 }
 
 @media (max-width: 720px) {
@@ -569,6 +624,7 @@ body.locked { overflow: auto !important; height: auto !important; }
   .pdos-about-body { min-height: 120px; }
   .pdos-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(3, minmax(150px, auto)); }
   .pdos-tile-title { font-size: 1.5rem; }
+  .pdos-extras { grid-template-columns: 1fr; }
   .pdos-weather-body, .pdos-spotify-body, .pdos-game-body { min-height: 72px; }
   .pdos-mini-grid { grid-template-rows: minmax(110px, auto); }
   /* fitHeadline() (ui-v2.js) binary-searches a font size against this box's clientHeight, so it
@@ -583,11 +639,6 @@ body.locked { overflow: auto !important; height: auto !important; }
   .pdos-status-bar { flex-wrap: wrap; }
   .v2-project-grid, .v2-tool-grid, .v2-playlists { grid-template-columns: 1fr; }
   .v2-gigs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .v2-journal-grid { grid-template-columns: 1fr; grid-template-rows: none; row-gap: 10px; min-height: 0; }
-  .v2-journal-card { display: flex; flex-direction: column; grid-row: auto; }
-  .v2-journal-foot { align-self: stretch; }
-  .v2-journal-media { flex: 0 0 auto; height: 220px; }
-  .v2-journal-card h3 { font-size: clamp(2.2rem, 9vw, 3.3rem); }
   .v2-score { --v2-score-size: 92px; }
   .v2-project-wide { grid-column: 1; display: flex; }
   .v2-project-wide .v2-project-copy { display: block; }
@@ -595,6 +646,17 @@ body.locked { overflow: auto !important; height: auto !important; }
   .v2-project-wide p { margin-bottom: .6rem; }
   .v2-project-wide .v2-card-foot { align-self: stretch; margin-top: auto; }
   .v2-strip { flex-direction: column; }
+  /* Journal on phones: the list stacks above the selected entry and nothing scrolls inside the
+     window; picking a row scrolls the entry into view instead (initJournal). */
+  .pdos-journal { grid-template-columns: 1fr; }
+  .pdos-journal-side { border-right: 0; border-bottom: 1px solid var(--v2-soft-line); }
+  .pdos-journal-title { font-size: clamp(3rem, 18vw, 5rem); }
+  .pdos-journal-list, .pdos-journal-article { overflow: visible; }
+  .pdos-journal-entry { scroll-margin-top: 1rem; }
+  .pdos-journal-photo { height: 220px; }
+  .pdos-journal-entry-head { padding: 14px 16px 12px; }
+  .pdos-journal-article { padding: 16px 16px 24px; }
+  .pdos-journal-score { --v2-score-size: 92px; }
   .v2-strip span + span::before { display: none; }
   .v2-track-row { grid-template-columns: minmax(0, 1fr) 4.5rem 2rem; gap: .7rem; }
   .v2-track-row > span:nth-child(2) { display: none; }
@@ -606,8 +668,8 @@ body.locked { overflow: auto !important; height: auto !important; }
   .v2-footer-rule { display: none; }
   /* Phones: no small print below 12px. */
   .v2-index-row, .v2-ref, .v2-scroll-prev, .v2-scroll-next, .v2-card-foot, .v2-metric-foot, .v2-spotify-state, .v2-spotify-status,
-  .v2-steps-label, .v2-steps-goal, .v2-about-date, .v2-bottom-card p, .v2-news-desc, .v2-journal-card p, .v2-journal-foot, .v2-review-meta,
-  .v2-journal-media figcaption, .v2-journal-more, .v2-journal-credit, .v2-gig-credit, .v2-project p, .v2-tool-copy p, .v2-playlist-copy p, .v2-track-row, .v2-top-toggle button,
+  .v2-steps-label, .v2-steps-goal, .v2-about-date, .v2-bottom-card p, .v2-news-desc, .pdos-journal-row-text, .pdos-journal-meta, .pdos-journal-note,
+  .v2-journal-media figcaption, .pdos-journal-count, .pdos-journal-foot, .pdos-journal-kicker, .pdos-journal-chip, .pdos-window-bar, .v2-journal-credit, .v2-gig-credit, .v2-project p, .v2-tool-copy p, .v2-playlist-copy p, .v2-track-row, .v2-top-toggle button,
   .v2-gig p, .v2-gig-link, .v2-gig-controls, .v2-strip, .v2-footer,
   .pdos-widget-head, .pdos-widget-tag, .pdos-widget-foot, .pdos-tile-head, .pdos-tile-key, .pdos-tile-foot, .pdos-tile-foot > span:first-child,
   .pdos-extra, .pdos-status-bar, .pdos-boot-log, .v2-game-text p { font-size: .75rem; }

@@ -9,23 +9,42 @@
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
 
+  // Headlines window (Parwani-DOS spec): the largest headline size from 72px down to 14px at which
+  // the whole panel (headline + summary) stops overflowing; the summary is 0.36x the headline,
+  // clamped to 12-20px.
   function fitHeadline() {
     const title = byId('v2HeadlineTitle');
-    if (!title || !title.clientHeight || !title.clientWidth) return;
-    let low = 18;
-    let high = Math.max(76, Math.min(120, window.innerHeight * .1));
-    let best = low;
-    for (let i = 0; i < 9; i += 1) {
-      const size = (low + high) / 2;
+    const desc = byId('v2HeadlineDesc');
+    const box = title?.parentElement;
+    if (!title || !box || !box.clientHeight || !box.clientWidth) return;
+    const apply = (size) => {
       title.style.fontSize = `${size}px`;
-      if (title.scrollHeight <= title.clientHeight + 1 && title.scrollWidth <= title.clientWidth + 1) {
-        best = size;
-        low = size;
-      } else {
-        high = size;
+      if (desc) desc.style.fontSize = `${Math.min(20, Math.max(12, size * .36))}px`;
+    };
+    const fits = () => box.scrollHeight <= box.clientHeight + 1 && title.scrollWidth <= title.clientWidth + 1;
+    const search = () => {
+      let low = 14;
+      let high = 72;
+      let best = low;
+      for (let i = 0; i < 9; i += 1) {
+        const size = (low + high) / 2;
+        apply(size);
+        if (fits()) {
+          best = size;
+          low = size;
+        } else {
+          high = size;
+        }
       }
+      apply(best);
+    };
+    if (desc) desc.hidden = false;
+    search();
+    // Still overflowing at the minimum: the summary goes before the headline does.
+    if (desc && !fits()) {
+      desc.hidden = true;
+      search();
     }
-    title.style.fontSize = `${best}px`;
   }
 
   function fitPortfolioTitle() {
@@ -96,6 +115,16 @@
     fitHeadline();
     fitText();
   });
+  // headlines.feed takes the right column's leftover height, which changes whenever another
+  // widget fills with data, so refit whenever its box changes size (fitting never resizes it).
+  const headlineBox = byId('v2HeadlineTitle')?.parentElement;
+  if (headlineBox && 'ResizeObserver' in window) {
+    let headlineFrame = 0;
+    new ResizeObserver(() => {
+      window.cancelAnimationFrame(headlineFrame);
+      headlineFrame = window.requestAnimationFrame(fitHeadline);
+    }).observe(headlineBox);
+  }
 
   // Dubai date at the foot of the About card; a minute tick is enough to roll over at midnight.
   const dubaiDate = new Intl.DateTimeFormat('en-GB', {
@@ -137,7 +166,7 @@
     if (title) title.textContent = headlines[headlineIndex].title;
     byId('v2HeadlineDesc').textContent = headlines[headlineIndex].description;
     if (count) count.textContent = `${String(headlineIndex + 1).padStart(2, '0')} / ${String(headlines.length).padStart(2, '0')}`;
-    window.requestAnimationFrame(fitHeadline);
+    fitHeadline();
     restartHeadlineProgress();
   }
 
@@ -772,5 +801,42 @@
     });
   }
 
+  // Journal (Phase 3): each list row is a tab for one entry panel. Selecting a row shows its
+  // panel and resets that panel's article to the top; arrow keys / Home / End move along the list
+  // (roving tabindex). On phones, where the list sits above the entry, the entry scrolls into view.
+  function initJournal() {
+    const tabs = [...document.querySelectorAll('.pdos-journal-row[role="tab"]')];
+    if (!tabs.length) return;
+    const phone = window.matchMedia('(max-width: 720px)');
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+    function select(index, { focus = false, reveal = false } = {}) {
+      tabs.forEach((tab, i) => {
+        const on = i === index;
+        tab.setAttribute('aria-selected', String(on));
+        tab.tabIndex = on ? 0 : -1;
+        const panel = byId(tab.getAttribute('aria-controls'));
+        if (!panel) return;
+        panel.hidden = !on;
+        const article = panel.querySelector('.pdos-journal-article');
+        if (on && article) article.scrollTop = 0;
+        if (on && reveal && phone.matches) panel.scrollIntoView({ behavior: reduceMotion.matches ? 'auto' : 'smooth', block: 'start' });
+      });
+      if (focus) tabs[index].focus();
+    }
+
+    tabs.forEach((tab, i) => {
+      tab.addEventListener('click', () => select(i, { reveal: true }));
+      tab.addEventListener('keydown', (event) => {
+        const last = tabs.length - 1;
+        const next = { ArrowDown: i + 1, ArrowRight: i + 1, ArrowUp: i - 1, ArrowLeft: i - 1, Home: 0, End: last }[event.key];
+        if (next === undefined) return;
+        event.preventDefault();
+        select(Math.max(0, Math.min(last, next)), { focus: true });
+      });
+    });
+  }
+
   initShell();
+  initJournal();
 }());

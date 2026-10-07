@@ -972,7 +972,7 @@
     .tools{ grid-template-columns:1fr; }
   }
 </style>
-<link rel="stylesheet" href="/ui-v2.css?v=28">
+<link rel="stylesheet" href="/ui-v2.css?v=29">
 </head>
 <body class="locked">
 
@@ -1151,49 +1151,89 @@
     </div></div><div class="pdos-crt-line" aria-hidden="true"></div></section>
 
     <section class="v2-section" id="v2-journal" data-sec="journal"><div class="pdos-crt-clip"><div class="pdos-crt-slide">
-      <div class="v2-section-head"><div class="v2-ref-row"><span class="v2-ref">Ref. 01 / Journal</span><a class="v2-scroll-prev" href="#v2-home">&#8593;&nbsp; Home</a></div><h2 class="v2-section-title">Journal</h2><p class="v2-section-kicker">Writing on economics, work and the way we live.</p></div>
-      <div class="v2-stage v2-journal-stage">
-        <!-- Journal entries: writing and reviews. An unfinished entry shows only its status. When an
-             entry is finished, set its status to "Completed" and add
-             <a class="v2-journal-more" href="...">Read more <span aria-hidden="true">&#8250;</span></a>
-             as the last child of its v2-journal-foot — never a disabled or placeholder link. Review score badges take
-             v2-score--red (1–5), --yellow (6–7), --green (8–9) or --purple (10); game reviews also
-             list the platform in the meta line. Every photo carries a v2-journal-credit link (author / licence / source page). -->
-        <div class="v2-journal-grid">
-          <article class="v2-panel v2-journal-card">
-            <div class="v2-index-row"><span>01&nbsp; &mdash; &nbsp;Latest entry</span><span class="v2-tag">[ Culture / Society ]</span></div>
-            <figure class="v2-journal-media"><img src="/assets/journal/karoshi-marunouchi.jpg" alt="Tokyo office towers lit up at night" width="1000" height="720" loading="lazy" decoding="async"><figcaption>Tokyo / Work culture</figcaption><a class="v2-journal-credit" href="https://commons.wikimedia.org/wiki/File:Marunouchi_skyscrapers_(2074578901).jpg" target="_blank" rel="noopener noreferrer">Photo: KimonBerlin / CC BY-SA 2.0</a></figure>
-            <div class="v2-journal-copy">
-              <h3 data-fit="2">Karoshi: An Enquiry Into Japan's Work Culture</h3>
-              <p>Exploring the cultural, economic and psychological forces behind karoshi, and what it reveals about modern work, value and human limits.</p>
+      <!-- Journal (Parwani-DOS Phase 3): one window — the list of every entry on the left, the selected
+           entry on the right. Each list row is a tab for one <article> panel; initJournal() in ui-v2.js
+           switches them and resets the article scroll to the top. To add an entry, add a row and a
+           matching panel (same number). Status colours: pdos-status--warn (Researching), --dim
+           (Planned), --ok (Writing / Completed). Review panels show a v2-score badge on the photo
+           (v2-score--red 1–5, --yellow 6–7, --green 8–9, --purple 10); others show a status chip.
+           When an entry is written, put its text in the panel's .pdos-journal-article, replacing the
+           "in progress" note — never placeholder text. Every photo keeps its v2-journal-credit link. -->
+      <div class="pdos-window pdos-window--journal">
+        <div class="pdos-window-bar"><span>journal.log &mdash; ref. 01</span><span class="pdos-window-nav"><a href="#v2-home">&#8593; Home</a><a href="#v2-projects">Projects &#8595;</a></span></div>
+        <div class="pdos-journal">
+          <div class="pdos-journal-side">
+            <div class="pdos-journal-head">
+              <h2 class="pdos-journal-title">Journal</h2>
+              <p class="pdos-journal-kicker">Writing on economics, work and the way we live.</p>
             </div>
-            <div class="v2-journal-foot"><span>Status</span><span class="v2-journal-state">Researching</span></div>
+            <div class="pdos-journal-count">All entries &middot; 03</div>
+            <div class="pdos-journal-list" role="tablist" aria-orientation="vertical" aria-label="Journal entries">
+              <button class="pdos-journal-row" type="button" role="tab" id="pdosJournalTab1" aria-controls="pdosJournal1" aria-selected="true">
+                <img class="pdos-journal-thumb" src="/assets/journal/karoshi-marunouchi.jpg" alt="" width="64" height="64" loading="lazy" decoding="async">
+                <span class="pdos-journal-row-text">
+                  <span class="pdos-journal-row-meta"><span>01 &mdash; Latest entry</span><span>Culture / Society</span></span>
+                  <span class="pdos-journal-row-title">Karoshi: An Enquiry Into Japan's Work Culture</span>
+                  <span class="pdos-status--warn">&#9679; Researching</span>
+                </span>
+              </button>
+              <button class="pdos-journal-row" type="button" role="tab" id="pdosJournalTab2" aria-controls="pdosJournal2" aria-selected="false" tabindex="-1">
+                <img class="pdos-journal-thumb" src="/assets/journal/attention-shibuya.jpg" alt="" width="64" height="64" loading="lazy" decoding="async">
+                <span class="pdos-journal-row-text">
+                  <span class="pdos-journal-row-meta"><span>02 &mdash; Planned article</span><span>Attention / Economy</span></span>
+                  <span class="pdos-journal-row-title">The Attention Economy</span>
+                  <span class="pdos-status--dim">&#9679; Planned</span>
+                </span>
+              </button>
+              <button class="pdos-journal-row" type="button" role="tab" id="pdosJournalTab3" aria-controls="pdosJournal3" aria-selected="false" tabindex="-1">
+                <img class="pdos-journal-thumb" src="/assets/journal/shawshank-reformatory.jpg" alt="" width="64" height="64" loading="lazy" decoding="async">
+                <span class="pdos-journal-row-text">
+                  <span class="pdos-journal-row-meta"><span>03 &mdash; Review &middot; 1994</span><span>Review / Film</span></span>
+                  <span class="pdos-journal-row-title">The Shawshank Redemption</span>
+                  <span class="pdos-status--ok">&#9679; Writing</span>
+                </span>
+              </button>
+            </div>
+            <div class="pdos-journal-foot">New writing + reviews appear here as they're published</div>
+          </div>
+
+          <article class="pdos-journal-entry" id="pdosJournal1" role="tabpanel" aria-labelledby="pdosJournalTab1">
+            <figure class="pdos-journal-photo v2-journal-media"><img src="/assets/journal/karoshi-marunouchi.jpg" alt="Tokyo office towers lit up at night" width="1000" height="720" decoding="async"><figcaption>Tokyo / Work culture</figcaption><span class="pdos-journal-chip pdos-status--warn">&#9679; Researching</span><a class="v2-journal-credit" href="https://commons.wikimedia.org/wiki/File:Marunouchi_skyscrapers_(2074578901).jpg" target="_blank" rel="noopener noreferrer">Photo: KimonBerlin / CC BY-SA 2.0</a></figure>
+            <header class="pdos-journal-entry-head">
+              <h3>Karoshi: An Enquiry Into Japan's Work Culture</h3>
+              <div class="pdos-journal-meta"><span>01 &mdash; Latest entry</span><span>Culture / Society</span><span class="pdos-status--warn">&#9679; Researching</span></div>
+            </header>
+            <div class="pdos-journal-article" tabindex="0">
+              <p class="pdos-journal-lead">Exploring the cultural, economic and psychological forces behind karoshi, and what it reveals about modern work, value and human limits.</p>
+              <p class="pdos-journal-note">Article in progress &mdash; still being researched. The full text appears here once it's written.</p>
+            </div>
           </article>
-          <article class="v2-panel v2-journal-card">
-            <div class="v2-index-row"><span>02&nbsp; &mdash; &nbsp;Planned article</span><span class="v2-tag">[ Attention / Economy ]</span></div>
-            <figure class="v2-journal-media"><img src="/assets/journal/attention-shibuya.jpg" alt="A crowd crossing beneath advertising screens in Shibuya at night" width="1000" height="602" loading="lazy" decoding="async"><figcaption>Screens / Crowds</figcaption><a class="v2-journal-credit" href="https://commons.wikimedia.org/wiki/File:Japan_(15608018214).jpg" target="_blank" rel="noopener noreferrer">Photo: Moyan Brenn / CC BY 2.0</a></figure>
-            <div class="v2-journal-copy">
-              <h3 data-fit="2">The Attention Economy</h3>
-              <p>Every industry is competing for the same finite resource: our attention. The new currency that converts focus into revenue.</p>
+
+          <article class="pdos-journal-entry" id="pdosJournal2" role="tabpanel" aria-labelledby="pdosJournalTab2" hidden>
+            <figure class="pdos-journal-photo v2-journal-media"><img src="/assets/journal/attention-shibuya.jpg" alt="A crowd crossing beneath advertising screens in Shibuya at night" width="1000" height="602" loading="lazy" decoding="async"><figcaption>Screens / Crowds</figcaption><span class="pdos-journal-chip pdos-status--dim">&#9679; Planned</span><a class="v2-journal-credit" href="https://commons.wikimedia.org/wiki/File:Japan_(15608018214).jpg" target="_blank" rel="noopener noreferrer">Photo: Moyan Brenn / CC BY 2.0</a></figure>
+            <header class="pdos-journal-entry-head">
+              <h3>The Attention Economy</h3>
+              <div class="pdos-journal-meta"><span>02 &mdash; Planned article</span><span>Attention / Economy</span><span class="pdos-status--dim">&#9679; Planned</span></div>
+            </header>
+            <div class="pdos-journal-article" tabindex="0">
+              <p class="pdos-journal-lead">Every industry is competing for the same finite resource: our attention. The new currency that converts focus into revenue.</p>
+              <p class="pdos-journal-note">Planned &mdash; not started yet. The full text appears here once it's written.</p>
             </div>
-            <div class="v2-journal-foot"><span>Status</span><span class="v2-journal-state">Planned</span></div>
           </article>
-          <article class="v2-panel v2-journal-card v2-journal-review">
-            <div class="v2-index-row"><span>03&nbsp; &mdash; &nbsp;Review</span><span class="v2-tag">[ Review / Film ]</span></div>
-            <figure class="v2-journal-media"><img src="/assets/journal/shawshank-reformatory.jpg" alt="A cell block inside the Ohio State Reformatory, where The Shawshank Redemption was filmed" width="1000" height="663" loading="lazy" decoding="async"><figcaption>Prison / Redemption</figcaption><a class="v2-journal-credit" href="https://commons.wikimedia.org/wiki/File:Ohio_State_Reformatory-4.jpg" target="_blank" rel="noopener noreferrer">Photo: Marianodemiguel / CC BY-SA 4.0</a></figure>
-            <div class="v2-journal-copy">
-              <div class="v2-review-head">
-                <div class="v2-review-title"><h3 data-fit="2">The Shawshank Redemption</h3><span class="v2-review-meta">1994</span></div>
-                <span class="v2-score v2-score--purple" role="img" aria-label="Score: 10 out of 10"><b>10</b><small>/10</small></span>
-              </div>
-              <p>A quiet, profound story about hope, friendship and the human spirit, reminding us that freedom lives on, even in the darkest places.</p>
+
+          <article class="pdos-journal-entry" id="pdosJournal3" role="tabpanel" aria-labelledby="pdosJournalTab3" hidden>
+            <figure class="pdos-journal-photo v2-journal-media"><img src="/assets/journal/shawshank-reformatory.jpg" alt="A cell block inside the Ohio State Reformatory, where The Shawshank Redemption was filmed" width="1000" height="663" loading="lazy" decoding="async"><figcaption>Prison / Redemption</figcaption><span class="v2-score v2-score--purple pdos-journal-score" role="img" aria-label="Score: 10 out of 10"><b>10</b><small>/10</small></span><a class="v2-journal-credit" href="https://commons.wikimedia.org/wiki/File:Ohio_State_Reformatory-4.jpg" target="_blank" rel="noopener noreferrer">Photo: Marianodemiguel / CC BY-SA 4.0</a></figure>
+            <header class="pdos-journal-entry-head">
+              <h3>The Shawshank Redemption</h3>
+              <div class="pdos-journal-meta"><span>03 &mdash; Review &middot; 1994</span><span>Review / Film</span><span class="pdos-status--ok">&#9679; Writing</span></div>
+            </header>
+            <div class="pdos-journal-article" tabindex="0">
+              <p class="pdos-journal-lead">A quiet, profound story about hope, friendship and the human spirit, reminding us that freedom lives on, even in the darkest places.</p>
+              <p class="pdos-journal-note">Review in progress &mdash; being written now. The full text appears here once it's finished.</p>
             </div>
-            <div class="v2-journal-foot"><span>Status</span><span class="v2-journal-state">Writing</span></div>
           </article>
         </div>
-        <div class="v2-strip"><span>03 entries</span><span>New writing + reviews appear here as they're published</span><span>Economics / Work / Culture / Film</span></div>
       </div>
-      <a class="v2-scroll-next" href="#v2-projects"><span></span>Scroll&nbsp; / &nbsp;Projects next&nbsp; &#8595;<span></span></a>
     </div></div><div class="pdos-crt-line" aria-hidden="true"></div></section>
 
     <section class="v2-section" id="v2-projects" data-sec="projects"><div class="pdos-crt-clip"><div class="pdos-crt-slide">
@@ -5143,7 +5183,7 @@
 
 </script>
 
-<script src="/ui-v2.js?v=24"></script>
+<script src="/ui-v2.js?v=25"></script>
 
 </body>
 </html>

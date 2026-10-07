@@ -12,13 +12,13 @@
 
 ## Current assignment
 
-Status: **Building the Parwani-DOS redesign, Phase 2 of 9 shipped 2026-10-07** (full spec in `design_handoff_parwani_dos/README.md`; see the Work log entries below for exactly what each phase covers and how it was tested). One push per phase; wait for Milind to look at the live result before starting the next. Phase 3 (Journal: list, detail, scroll-to-top) is next. Previous wrap-up (2026-10-04): Game card (08: PlayStation or Steam) replaced Site Updated, both sources connected; Home Steps card live with real data, restyled 2026-10-02 to Codex's selected oversized-count design; a Location card was built (`fb2fabb`) and reverted the same day at Milind's request, a settled removal. Open items from before the redesign: article pages for the Journal, an optional TMDB key for sharper media posters. Two weekly routines still run on Mondays (Gig Finder 06:00, Media 06:30 Dubai) — the redesign doesn't touch the Worker, so they're unaffected.
+Status: **Building the Parwani-DOS redesign, Phase 3 of 9 shipped 2026-10-07** (full spec in `design_handoff_parwani_dos/README.md`; see the Work log entries below for exactly what each phase covers and how it was tested). One push per phase; wait for Milind to look at the live result before starting the next. Phase 4 (Projects: grid, overlay windows, scroll lock) is next. Previous wrap-up (2026-10-04): Game card (08: PlayStation or Steam) replaced Site Updated, both sources connected; Home Steps card live with real data, restyled 2026-10-02 to Codex's selected oversized-count design; a Location card was built (`fb2fabb`) and reverted the same day at Milind's request, a settled removal. Open items from before the redesign: article pages for the Journal, an optional TMDB key for sharper media posters. Two weekly routines still run on Mondays (Gig Finder 06:00, Media 06:30 Dubai) — the redesign doesn't touch the Worker, so they're unaffected.
 
 Areas Claude has most recently owned (coordinate before Codex changes these):
 
 | Area | Files | Notes |
 |---|---|---|
-| Visible portfolio UI | `public/index.html` (the `.portfolio-v2` block only), `public/ui-v2.css`, `public/ui-v2.js` | Parwani-DOS redesign in progress since 2026-10-07 (see `design_handoff_parwani_dos/`); grey-box/Soft Monolith markup still underneath in sections not yet migrated. Cache-bust versions: `ui-v2.css?v=26`, `ui-v2.js?v=24` — bump on every change. |
+| Visible portfolio UI | `public/index.html` (the `.portfolio-v2` block only), `public/ui-v2.css`, `public/ui-v2.js` | Parwani-DOS redesign in progress since 2026-10-07 (see `design_handoff_parwani_dos/`); grey-box/Soft Monolith markup still underneath in sections not yet migrated. Cache-bust versions: `ui-v2.css?v=29`, `ui-v2.js?v=25` — bump on every change. |
 | Worker routes and data | `worker/index.js`, `worker/gig-picks.json`, `migrations/` | Spotify listening data, heart rate, steps, gigs, Game card (PlayStation + Steam). Gig Finder rebuilt 2026-10-02. Untouched by the Parwani-DOS redesign so far (Phase 1 is frontend-only). |
 
 ## Media tracker (how it works, for the next session and the weekly routine)
@@ -63,6 +63,8 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 - **Local preview:** `npx wrangler dev --port 8787 --ip 127.0.0.1`. The APIs return 503 locally because there are no secrets. For realistic data, copy `public/index.html` to a temporary `public/zz-test.html` with a `fetch` shim in `<head>` that returns saved production `/api/*` JSON (add `?nodata` to make every route return 503). Delete the file before committing. `wrangler dev` serves `zz-test.html` at `/zz-test`, because `.html` URLs redirect.
 - **Automated layout check:** for each section, check that no two `.v2-panel`/`.v2-strip`/`.v2-gig-controls` boxes intersect, no child extends past its box, no section child extends past the section, and no `[data-fit]` title exceeds its line budget. Run it at 2560×1300, 1920×969, 1440×789, 1366×657, 1280×720, 1100×620, 1024×700, 768×1024, 390×844 and 360×740.
 - **Browsers:** Claude in Chrome works with same-origin iframes at exact sizes, but the extension can disconnect if Chrome closes. As a fallback, run `puppeteer-core` with headless Edge (`C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe`), installed in a temp folder, not the repo. Lighthouse also needs `CHROME_PATH` pointed at Edge.
+- **This Windows laptop (2026-10-07):** Node 24 is installed and `npx wrangler dev` works; Python is not (use `node -e` or the Edit tool for scripted edits). Docs and `index.html` are CRLF. Fixture flow used for Phase 3: `curl` each production `/api/*` route into a temp folder, then a small Node script copies `index.html` to `public/zz-test.html` with a fetch shim that serves those files (`?steps=10000&bpm=188` override values, `?nodata` returns 503s). Delete `zz-test.html` before committing.
+- **Claude in Chrome caveats:** the Chrome window often counts as backgrounded, so CSS transitions, smooth scrolling and requestAnimationFrame stall mid-way. For layout checks, load the page in a same-origin iframe at the exact size, set `scroll-behavior: auto`, inject `*{transition:none!important}`, and `scrollTo` the section's `offsetTop`. Screenshots are scaled (1912 px viewport shown at 1568). Keep each `javascript_exec` under 45 s. Bump the `?v=` numbers before testing changed CSS/JS, or the browser serves the cached file.
 - **Production check:** after a push, poll `https://milindparwani.com/?cb=<random>` for the new `?v=` numbers. The plain `/` can be edge-cached for a minute or two after a deploy.
 - `gh` is not installed. Merge with `git merge --ff-only` on `main` and push.
 
@@ -71,7 +73,8 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 
 - Media: Reel posters are 300×450. A free TMDB API key, stored with `wrangler secret bulk` as `TMDB_API_KEY`, turns on 780 px posters with no code change; Milind has to create the TMDB account. VOX and ROXY extras depend on the weekly routine, which may also be blocked from those sites, so they are best-effort.
 
-- Journal: there are no article pages yet for `Read more` to link to.
+- Journal: no article text is written yet. When one is, it goes inline in that entry's `.pdos-journal-article` panel (replacing the "in progress" note) and the status changes; there are no separate article pages any more.
+- Paper theme contrast: `--warn`/`--ok` status text on the light panels is weak (Phase 9).
 - Reminders: `worker/reminders.json` holds Milind's general daily phone reminders (added 2026-10-05); `sendDailyReminders` in the cron pushes each active one to the `REMINDERS_TOPIC` secret (`shawshankreminder`) once per Dubai day from 12:00. Add entries there when he asks for a reminder; prune expired ones occasionally.
 - PlayStation: the PSN refresh token lasts 10 days, so Milind re-submits `/api/psn/authorize` with a fresh NPSSO about every 10 days; since 2026-10-04 the cron pushes an ntfy reminder from 2 days before expiry (`checkPsnExpiry`). Open question: whether the refresh token's lifetime actually resets on each refresh. If Milind gets a reminder and the card still works days after the recorded expiry, the token slides and the reminder can be dropped. If that becomes a chore, the alternative he turned down was storing the NPSSO in KV (~60-day life, but it is effectively his Sony login).
 
@@ -82,6 +85,33 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 - Lighthouse `valid-source-maps` flags a third-party library map; it doesn't affect the score categories that matter (production: 90 / 100 / 100).
 
 ## Work log (newest first)
+
+### 2026-10-07 — Parwani-DOS redesign, Phase 3: Journal (+ Phase 2 widget fixes)
+
+Pulled on the Windows laptop; Phase 2 had been built on the other device without a browser. Milind's Phase 2 comment: the steps count ran off its box.
+
+**Phase 2 fixes (all seen on production first, at 1440 wide):**
+- Steps: `.v2-steps` had `container-type: size` and sized the count with `min(48cqh, 26cqw)` of the *whole widget*, so in a 161 px column the count rendered at 42 px and `/10,000` was cut to `/10,0`. Now `.pdos-mini-grid .pdos-widget-body` is an `inline-size` container and the count is `clamp(1rem, 19cqw, 3rem)` of the body (the widest case, `10,000/10,000`, is about 4.9em). Label/goal sizes are fixed `.62rem` (their `cqh` units no longer have a size container). Heart BPM overflowed the same way: `.pdos-mini-grid .v2-value` is now `clamp(1.3rem, 34cqw, 3rem)`.
+- Weather: `.pdos-weather { container-type: size }` inside an auto-height grid row gave the widget 0 px height — it was invisible on production. Removed; the humidity/wind line now hides with a `max-height: 860px` media query instead of a container query, and the conditions + high/low share one wrapped line.
+- Headlines: `fitHeadline()` measured the h2 alone, but the h2 had shrunk to 0 px height next to the fixed summary, so it bailed and the headline vanished. Rewritten to the spec: binary search 72→14 px on the headline against the whole body's `scrollHeight`, the summary at 0.36× clamped 12–20 px; if it still overflows at 14 px the summary is hidden and the search reruns. A `ResizeObserver` on the body refits when other widgets fill with data (the first fit ran before them and left the headline too big), and `renderHeadline()` now fits synchronously instead of via rAF.
+- Short screens (`max-height: 860px`, paging mode): widget heads 22 px, tighter body padding, no "Dubai" label, smaller Spotify/Game art, so `headlines.feed` keeps its room. Game art fixed at 40 px (30 px short) and Spotify at 48 px (their `cqw` units had been falling back to the viewport).
+- Phones: the extras row stacks to one column (the Champion Run label spilled out of its half-width button).
+
+**Phase 3, Journal** (`index.html` section `#v2-journal`, CSS block after the card-foot rules, `initJournal()` at the end of `ui-v2.js`):
+- New generic window chrome: `.pdos-window` (flex column, 1px `--line` outline), `.pdos-window-bar` (30 px, `.75rem`, weight 500, background `var(--bar)`, text `--on`), `.pdos-window-nav` for the bar's links. Each section sets `--bar` on a modifier (`.pdos-window--journal { --bar: oklch(0.75 0.16 40) }`). Reuse for Projects/Toolbox/Media/Playlists/Gigs.
+- `.pdos-journal` grid `clamp(290px, 31vw, 440px) minmax(0,1fr)`. Left: JOURNAL title (`clamp(3rem, min(6.2vw, 11vh), 5.85rem)` — at 6rem it was 2 px too wide for the 440 px column), kicker, "All entries · 03", the scrolling list, foot line. Rows are `button[role=tab]` with `aria-controls` → `article[role=tabpanel]`; selected row gets `--p2` and an inset 3px `--bar` bar. Right: one `<article>` per entry, the others `hidden`; photo `clamp(150px, 31vh, 280px)` reusing `.v2-journal-media` (caption, gradient, credit), chip (`.pdos-journal-chip`) or `.v2-score.pdos-journal-score` (`clamp(84px, 15vh, 136px)`), head (title + meta row), `.pdos-journal-article` scrolling body with `overscroll-behavior: contain`.
+- Status colours as in the mockup: Researching `--warn`, Planned `--dim`, Writing `--ok` (`.pdos-status--*`). The chip is always black, so its Planned colour is fixed `#aaa9a3`. Photo captions and credit hover are now fixed `#f4f3ef` (they had used the theme's `--fg`, which made captions invisible on Paper).
+- `initJournal()`: `select(i)` sets `aria-selected`, roving `tabIndex`, `hidden` on panels and `scrollTop = 0` on the selected article; ArrowUp/Down/Left/Right, Home, End move and focus. On phones (≤720) a click scrolls the entry into view.
+- The mockup fills the article body with lorem ipsum labelled "Placeholder article text"; I didn't ship that (Rulebook §2.4). Each body has the summary plus a dim "in progress" note.
+- Removed: the old three-card markup, `.v2-section-head`/strip/scroll cue for Journal, and the now-unused CSS (`.v2-journal-grid/-card/-copy/-foot/-state/-more`, `.v2-review-*`). Kept `.v2-journal-media`, `.v2-journal-credit`, `.v2-score*`.
+- Versions `ui-v2.css?v=29`, `ui-v2.js?v=25`.
+
+Tested (Chrome, `wrangler dev`, production API fixtures; method in "Testing approach"):
+- Home at all ten sizes (2560×1300 … 360×740): no widget collapsed, no child outside its widget/tile/extra box, steps `10,000/10,000` and heart `188 BPM` fit, headline fitted (desc hidden only at 1366×657 and 1100×620). Also `?nodata` at 1440×789. On a 390 phone the headline stayed inside its 170 px box across three rotations.
+- Journal at all ten sizes, every entry selected: window inside the section, no photo/header child spills sideways, headers don't overflow, article body ≥60 px tall on desktop, list rows don't overflow, JOURNAL title fits.
+- Interaction: clicking row 3 shows only panel 3 and moves `aria-selected`/`tabIndex`; an article scrolled to 500/700 px is back at 0 after switching; ArrowUp, End, ArrowDown at the end (stays), Home all correct with focus following; the page itself doesn't scroll. Phone: tapping row 3 brings the entry to 16 px from the top.
+- Themes: Night, Mono and Paper looked at by screenshot. No console errors.
+- Not tested: the CRT transition itself (Chrome stalls transitions in a backgrounded window); untouched this phase.
 
 ### 2026-10-07 — Parwani-DOS redesign, Phase 2: Home rebuilt
 
