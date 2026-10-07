@@ -112,6 +112,7 @@ Tested (Chrome, `wrangler dev`, production API fixtures; method in "Testing appr
 - Interaction: clicking row 3 shows only panel 3 and moves `aria-selected`/`tabIndex`; an article scrolled to 500/700 px is back at 0 after switching; ArrowUp, End, ArrowDown at the end (stays), Home all correct with focus following; the page itself doesn't scroll. Phone: tapping row 3 brings the entry to 16 px from the top.
 - Themes: Night, Mono and Paper looked at by screenshot. No console errors.
 - Not tested: the CRT transition itself (Chrome stalls transitions in a backgrounded window); untouched this phase.
+- Deploy: the push (`389c29e`) did **not** trigger Workers Builds (`wrangler deployments list` still showed the Phase 2 deploy 10+ min later), so I ran `npx wrangler deploy` from the same clean commit. Production then served `?v=29`/`?v=25`, and on the live site steps `2,610/10,000` and `98 BPM` fit their windows, weather showed 34°C and the Journal had its 3 rows. If a future push doesn't go live within ~3 min, check `wrangler deployments list` and the Workers Builds settings in the dashboard.
 
 ### 2026-10-07 — Parwani-DOS redesign, Phase 2: Home rebuilt
 
