@@ -80,7 +80,7 @@ Long-term goal: a portfolio that feels like an enterprise-quality product — fa
 Priorities, in order:
 
 1. Close the open security findings (see [Security Handoff](security-handoff.md) §4) before shipping new public endpoints. Most urgent operational item: confirm Workers Builds' non-production branch command is `npx wrangler versions upload` — until then every branch push deploys to production.
-2. **In progress:** the Parwani-DOS redesign (design handoff in `design_handoff_parwani_dos/`, full spec in its `README.md`). Nine phases, one push per phase with Milind reviewing the live result before the next starts (see the Claude handoff's current assignment and work log). Phase 1 (theme tokens, top bar, CRT section transition, keyboard, reduced-motion) shipped 2026-10-07.
+2. **Next implementation:** Victory Road. Its master handoff is [`docs/victory-road-master-prompt.md`](victory-road-master-prompt.md); the next agent starts with the read-only Phase 0 discovery/architecture audit and does not implement until Milind approves the plan. The existing setup remains disabled as "Coming soon."
 3. Finish API-integrated projects: Sounds Like, then Where Next (with Liveliness Index).
 4. Activate remaining Toolbox placeholders, client-side tools first (no new backend risk).
 5. Parked: real-time multiplayer "swipe to decide where to go out" — needs WebSockets/Durable Objects or Supabase, a places API and match logic. Do not start until 1–4 are done.
@@ -118,6 +118,16 @@ External accounts connected (owner-only): Spotify (re-authorize at `/api/spotify
 Settled removals (do not re-propose without flagging): YouTube to MP3/MP4/WAV converters (ToS and backend complexity), Seamless Set project, standalone Liveliness Index (merged into Where Next), public location card (built and dropped 2026-10-04: Milind judged showing his whereabouts not responsible).
 
 ## Session log (newest first)
+
+### 2026-10-07 — Victory Road master implementation handoff
+Agent: Codex
+Done:
+- Added [`docs/victory-road-master-prompt.md`](victory-road-master-prompt.md), the implementation authority for the next agent. It turns Milind's UI and battle brief into a Phase 0–6 plan with acceptance criteria for the full sprite catalog, animated/reorderable team slots, concealed random teams, nine ordered modifiers, and a browser battle.
+- Verified the official 2026 opponent: VGC Masters champion Takuma Yamazaki, playing Pokémon Champions Regulation Set M-B with Eternal Flower Floette, male Basculegion, Kingambit, Dragonite, Garchomp and Sneasler. Finer build data is explicitly treated as community-sourced until verified.
+- Recorded architecture and rights guardrails: investigate the MIT Pokémon Showdown simulator without copying its AGPL client; inventory/licence sprite assets before committing them; use original/licensed chiptune audio rather than ripped Pokémon music; treat the experience as a browser battle engine, not a ROM emulator.
+- Updated the Requirements Tracker and Codex handoff. No portfolio code, dependencies, Worker routes, assets, secrets, or external services changed.
+Next:
+- The other agent pulls this commit, reads the repository handoffs, and returns only the Phase 0 audit/architecture proposal for Milind's approval. Victory Road stays disabled until the phased implementation passes its full acceptance criteria.
 
 ### 2026-10-07 — Home matched 1:1 to the Claude Design mockup; six per batch on Media / Gigs
 Agent: Claude · Model: Opus 5.5

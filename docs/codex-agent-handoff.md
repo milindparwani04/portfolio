@@ -13,23 +13,57 @@
 
 ## Current assignment
 
-Status: Journal redesign mockup complete — latest card states approved; awaiting an explicit implementation assignment.
+Status: Victory Road master implementation prompt complete and handed off for the other agent's Phase 0 discovery/architecture work.
 
-Scope: Refine the Journal section within the selected Soft Monolith direction without changing the strict section-by-section viewport structure. Mockups only until Milind explicitly assigns implementation.
+Scope: Research the 2026 VGC Masters champion and convert Milind's full Victory Road brief into a repository-native, phased master prompt. No game implementation is assigned to Codex in this session.
 
 Files changed:
 
-- `docs/session-handoff.md` — added the parallel-agent coordination boundary.
-- `docs/codex-agent-handoff.md` — created this isolated work record.
-- No site files changed. The mockup gallery lives outside the repository in the task's visualization workspace.
+- `docs/victory-road-master-prompt.md` — implementation authority for the next agent.
+- `docs/session-handoff.md` — shared project state and new session-log entry.
+- `docs/requirements-tracker.md` — Victory Road specification status and handoff link.
+- `docs/codex-agent-handoff.md` — this assignment record.
+- No site, Worker, asset, secret, or deployment configuration files changed.
 
 Validation:
 
-- Read the repository instructions, communal handoff, rulebook, requirements tracker, and security handoff.
-- Confirmed the working tree was clean before these documentation edits.
-- Rendered eight mockup variants, the refined Soft Monolith home, and the complete six-section mock site; verified every section navigation target, responsive reflow, and an error-free browser console.
+- Read the repository handoffs, rulebook, requirements tracker, security handoff, existing Victory Road markup/styles/logic, and the current `origin/main` history.
+- Verified the 2026 VGC Masters winner and registered team against official Pokémon event pages; separated official facts from community team-sheet details.
+- Reviewed Pokémon Showdown's simulator/client architecture and licence split, plus PokéAPI sprite licensing, so the handoff does not casually prescribe copied client code, commercial audio, or uncleared assets.
+- Preserved the pre-existing uncommitted 2026-10-02 Codex handoff entries; no unrelated work was overwritten.
 
 ## Work log
+
+### 2026-10-07 — Victory Road master implementation prompt
+
+- Read the current project handoff and the disabled Victory Road scaffold: Generation I–IX setup modes, six team slots, five modifiers, multipliers/tiers, `pdosChampionRun` persistence, and the unimplemented Enter Battle action.
+- Verified Takuma Yamazaki as the 2026 Pokémon VGC Masters world champion and the official registered team: Eternal Flower Floette, male Basculegion, Kingambit, Dragonite, Garchomp, and Sneasler; the event used Pokémon Champions Regulation Set M-B.
+- Wrote [`victory-road-master-prompt.md`](victory-road-master-prompt.md), covering the full sprite catalog, bobbing team sprites, accessible drag/keyboard reordering, red remove controls, concealed random teams, four new modifiers, ordered multipliers, original taunts, the boot/battle experience, deterministic AI, audio/IP boundaries, accessibility, performance, test coverage, and a Phase 0–6 delivery plan.
+- The prompt makes the next agent begin with a read-only Phase 0 audit. It requires verification of public team-sheet details and Regulation M-B mechanics before implementation, and keeps Victory Road disabled until the complete flow passes acceptance testing.
+- No portfolio code, assets, dependencies, Worker routes, secrets, or external services changed in this Codex session.
+
+### 2026-10-02 — Final Steps-card visual selected for other-agent implementation
+
+- Milind selected the oversized-metric variant as the final visual direction for the existing live Steps card.
+- Preserve the live card's outer dimensions, position, charcoal surface, square corners, top-left `05`, top-right `[ STEPS / TODAY ]`, condensed display face and monospace metadata.
+- Inside the card, place a small `DAILY STEPS` label toward the upper-left, then use the middle of the card for an extremely large current count (`2,500`) with a smaller `/10,000` attached on the same baseline. The current number is the dominant element.
+- Run a nearly full-width hairline progress track beneath the number; fill it proportionally (25% in the selected example). Place `25% OF DAILY GOAL` directly below the track.
+- Remove the current `LATEST READING / age` footer from this selected visual. The larger count, denominator, progress line and percentage metadata intentionally consume the previously unused space.
+- Retain the established goal behavior: before 10,000 the count treatment stays white; at 10,000 the count/goal treatment and fully filled progress line turn green and the completion metadata should signal that the daily goal was reached.
+- The earlier centered layout and all alternate split/ledger variants are superseded. The attached/selected reference is the oversized count variant generated from the live card's style.
+- Handoff only: Codex did not edit HTML, CSS, JavaScript, Worker/API code or assets, and did not commit, push or deploy. Milind explicitly said the live-site refinement will be implemented with the other agent.
+
+### 2026-10-02 — Home Steps card placement and goal states
+
+- Milind approved replacing card `05 [ TIME / LOCATION ]` entirely with a dedicated daily Steps card. Remove the Dubai, London and Sydney clocks, city labels and time zones; the card becomes Steps-only.
+- Keep card `02 [ HEALTH ]` exactly as it is on the live site: the existing Heart Rate title, live BPM value and latest-reading metadata remain untouched. Do not combine steps with Heart Rate.
+- Move `FRI, 02 OCT 2026` from the former Time / Location card to the bottom of `ABOUT THIS SPACE [ 00 ]`, using the existing small monospace metadata style. Preserve the About copy and dimensions.
+- Keep card 05's current outer dimensions, grid position, margins and square-corner treatment. The contents must remain fully contained with no clipping or overlap into the top-left Spotify/card boundary.
+- Approved unfinished state: top-right label `[ STEPS / TODAY ]`, centered `DAILY STEPS`, white dynamic value `2,500/10,000`, small `25% OF DAILY GOAL`, and an understated 25%-filled hairline progress indicator.
+- Approved completed state: `10,000/10,000`, `DAILY GOAL REACHED`, and the fully filled hairline all turn green. The first number is intended to count upward with the live daily step total; it remains white until the total reaches 10,000.
+- Generated both full landing-page states from a fresh screenshot of the actual live site so the current grid, typography, spacing, imagery and card sizes remained the source of truth. Earlier concepts that combined Health and Steps or retained clocks alongside Steps are superseded.
+- Mockups only: no HTML, CSS, JavaScript, Worker, API, asset, commit, push or deployment changed. A live step-count data source and refresh path still need to be confirmed during implementation planning.
+- Superseded implementation note: the Steps card, date move and data source were subsequently implemented by Claude. The remaining work is only the selected oversized-metric visual refinement documented above.
 
 ### 2026-10-02 — Journal article and review card states
 
