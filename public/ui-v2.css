@@ -42,7 +42,11 @@
 }
 .portfolio-v2[data-theme="paper"] {
   --bg: #ecebe4; --fg: #141414; --p0: #e3e1d9; --p1: #dcdad1; --p2: #d0cec4; --p3: #c6c4b9;
-  --dim: #5c5a53; --line: rgba(20, 20, 20, .18); --ok: #2fbf63; --warn: #e0a526; --on: #141414;
+  --dim: #55534c; --line: rgba(20, 20, 20, .18); --ok: #2fbf63; --warn: #e0a526; --on: #141414;
+  /* Accessibility pass (Phase 9): Paper's --ok/--warn are fill colours; as text on its light panels
+     they fall to 1.4-1.7:1, so status text uses darker variants (>= 4.9:1 on --p2). --dim is a
+     shade darker than the mockup's #5c5a53 for the same reason (4.37:1 on --p2 before). */
+  --v2-green: #1d5e33; --v2-yellow: #6b4700;
 }
 
 #boot { display: none !important; }
@@ -171,8 +175,10 @@ body.locked { overflow: auto !important; height: auto !important; }
 .pdos-home-left { min-width: 0; min-height: 0; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; gap: 10px; }
 .pdos-home-right { min-width: 0; min-height: 0; display: grid; grid-template-rows: auto auto auto minmax(0, 1fr) auto auto; gap: 8px; }
 
-.pdos-title-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(220px, 380px); gap: 10px; align-items: stretch; }
+.pdos-title-row { display: grid; grid-template-columns: minmax(0, 1fr) clamp(180px, 30%, 380px); gap: 10px; align-items: stretch; }
 .pdos-title-cell { min-width: 0; display: flex; align-items: flex-end; overflow: hidden; }
+/* The title spans its whole cell so fitPortfolioTitle() fits the widest line to the cell, not to itself. */
+.pdos-title-cell .v2-display { flex: 1 1 auto; min-width: 0; }
 .v2-display { margin: 0; font-family: var(--display); font-weight: 400; text-transform: uppercase; line-height: 1.02; letter-spacing: -.02em; white-space: nowrap; font-size: 12vw; }
 
 /* Generic "window": a filled title bar (filename + index) over a flat body. Every Home widget
@@ -222,9 +228,10 @@ body.locked { overflow: auto !important; height: auto !important; }
 
 /* Extras: Champion Run and Crack, both jump to Projects (the windows themselves are Phase 4/5). */
 .pdos-extras { flex: 0 0 auto; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; font-size: .72rem; text-transform: uppercase; letter-spacing: .04em; }
-.pdos-extra { display: flex; align-items: center; justify-content: space-between; gap: .75rem; padding: .5rem .85rem; border: 1px solid var(--v2-soft-line); color: var(--v2-fg); transition: border-color .15s ease, color .15s ease; }
+.pdos-extra { display: flex; align-items: center; justify-content: space-between; gap: .75rem; padding: 4px .85rem; border: 1px solid var(--v2-soft-line); color: var(--v2-fg); transition: border-color .15s ease, color .15s ease; }
 .pdos-extra > span:first-of-type { display: flex; align-items: center; gap: .75rem; min-width: 0; }
-.pdos-extra-icon { flex: 0 0 auto; width: 1.4em; height: 1.4em; }
+.pdos-extra-icon { flex: 0 0 auto; display: flex; align-items: center; }
+.pdos-extra > span:nth-of-type(2) { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .pdos-extra-label { color: var(--v2-dim); }
 .pdos-extra--champion:hover, .pdos-extra--champion:focus-visible { border-color: var(--warn); color: var(--warn); }
 .pdos-extra--crack:hover, .pdos-extra--crack:focus-visible { border-color: var(--ok); color: var(--ok); }
@@ -306,9 +313,8 @@ body.locked { overflow: auto !important; height: auto !important; }
 .v2-strip { flex: 0 0 auto; display: flex; flex-wrap: wrap; row-gap: .35rem; background: var(--v2-panel); padding: .75rem 1rem; font-size: .74rem; letter-spacing: .05em; text-transform: uppercase; }
 .v2-strip span + span::before { content: '/'; margin: 0 1.3rem; color: var(--v2-dim); }
 
-.v2-tool, .v2-project, .v2-playlist, .v2-gig { transition: outline-color .15s ease; outline: 1px solid transparent; outline-offset: 3px; }
-.v2-tool:hover, .v2-project:hover, .v2-playlist:hover, .v2-gig:hover,
-.v2-tool:focus-within, .v2-project:focus-within, .v2-playlist:focus-within, .v2-gig:focus-within { outline-color: var(--v2-soft-line); }
+.v2-playlist, .v2-gig { transition: outline-color .15s ease; outline: 1px solid transparent; outline-offset: 3px; }
+.v2-playlist:hover, .v2-gig:hover, .v2-playlist:focus-within, .v2-gig:focus-within { outline-color: var(--v2-soft-line); }
 
 /* Card foot: hairline, status on the left, action on the right. Shared by projects and tools. */
 .v2-card-foot { flex: 0 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-top: auto; padding-top: clamp(.45rem, 1.4vh, .85rem); border-top: 1px solid var(--v2-soft-line); font-size: clamp(.56rem, 1.25vh, .72rem); letter-spacing: .05em; text-transform: uppercase; }
@@ -365,6 +371,8 @@ body.locked { overflow: auto !important; height: auto !important; }
 .pdos-journal-chip { position: absolute; z-index: 1; right: 14px; top: 12px; padding: 6px 10px; background: #070707; font-size: .69rem; letter-spacing: .05em; text-transform: uppercase; }
 /* The chip is always black (it sits on a photo), so "Planned" cannot use the theme's --dim. */
 .pdos-journal-chip.pdos-status--dim { color: #aaa9a3; }
+.pdos-journal-chip.pdos-status--warn { color: #f7c947; }
+.pdos-journal-chip.pdos-status--ok { color: #1ed760; }
 .pdos-journal-score { --v2-score-size: clamp(84px, 15vh, 136px); position: absolute; z-index: 1; right: 18px; top: 14px; }
 .pdos-journal-entry-head { flex: 0 0 auto; display: flex; flex-direction: column; gap: 8px; padding: 14px 22px 12px; border-bottom: 1px solid var(--v2-soft-line); }
 .pdos-journal-entry-head h3 { margin: 0; font-family: var(--display); font-weight: 700; font-size: clamp(1.8rem, min(3.4vw, 6vh), 3rem); line-height: .95; text-transform: uppercase; }
@@ -397,26 +405,186 @@ body.locked { overflow: auto !important; height: auto !important; }
 .v2-score--green { background: #1f9d55; }
 .v2-score--purple { background: #5b21ff; }
 
-/* Projects */
-.v2-project-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
-.v2-project { min-width: 0; min-height: 170px; padding: clamp(.6rem, 1.5vh, .9rem) clamp(.7rem, 1vw, .95rem); display: flex; flex-direction: column; overflow: hidden; }
-.v2-project-copy { min-height: 0; overflow: hidden; }
-.v2-project h3 { margin: clamp(.5rem, 2.2vh, 1.3rem) 0 .35rem; font-family: var(--display); font-weight: 400; font-size: clamp(1.3rem, min(2.4vw, 5vh), 3.2rem); text-transform: uppercase; line-height: .95; }
-.v2-project p { margin: 0 0 .6rem; color: var(--v2-fg); font-size: clamp(.6rem, 1.4vh, .8rem); line-height: 1.5; }
-/* Wide card: title, description and foot share one bottom line. */
-.v2-project-wide { grid-column: 1 / -1; min-height: 110px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(200px, 27%); grid-template-rows: auto minmax(0, 1fr); column-gap: 1.5rem; }
-.v2-project-wide .v2-index-row { grid-column: 1 / -1; }
-.v2-project-wide .v2-project-copy { display: contents; }
-.v2-project-wide h3, .v2-project-wide p, .v2-project-wide .v2-card-foot { align-self: end; margin: 0; }
-.v2-project-wide p { padding-bottom: .1rem; }
+/* Section windows (Phases 4-7): each section's title-bar colour. */
+.pdos-window--projects { --bar: oklch(0.72 0.16 290); }
+.pdos-window--toolbox { --bar: oklch(0.74 0.14 245); }
+.pdos-window--media { --bar: oklch(0.74 0.16 0); }
+.pdos-window--playlists { --bar: var(--ok); }
+.pdos-window--gigs { --bar: oklch(0.86 0.15 95); }
+.pdos-window-body { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; gap: 12px; padding: clamp(10px, 1.8vh, 16px); background: var(--v2-panel); }
+.pdos-sec-head { flex: 0 0 auto; }
+.pdos-sec-title { margin: 0; font-family: var(--display); font-weight: 700; font-size: clamp(2.6rem, min(6.4vw, 10vh), 6.5rem); line-height: .86; text-transform: uppercase; }
+.pdos-sec-kicker { margin: 6px 0 0; font-size: .75rem; letter-spacing: .12em; text-transform: uppercase; }
+/* Cards inside a window body sit one step lighter than the body. */
+.pdos-window-body .v2-panel, .pdos-window-body .v2-gig-controls, .pdos-window-body .v2-strip { background: var(--v2-panel-raised); }
+.pdos-window-body .v2-gig-buttons { background: var(--v2-panel); }
+.pdos-window-body .v2-gig:hover, .pdos-window-body .v2-gig:focus-within { outline-color: var(--bar); }
+.pdos-chip { border: 1px solid currentColor; padding: 1px 6px; }
 
-/* Toolbox: text only. */
-.v2-tool-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
-.v2-tool { min-width: 0; min-height: 150px; padding: clamp(.6rem, 1.5vh, .9rem) clamp(.7rem, 1vw, .95rem); display: flex; flex-direction: column; overflow: hidden; }
-.v2-tool-copy { margin-top: auto; min-width: 0; min-height: 0; }
-.v2-tool-copy h3 { margin: 0 0 .35rem; font-family: var(--display); font-weight: 400; font-size: clamp(1.15rem, min(2.1vw, 4.3vh), 2.4rem); text-transform: uppercase; line-height: 1; }
-.v2-tool-copy p { margin: 0 0 clamp(.3rem, .9vh, .55rem); color: var(--v2-fg); font-size: clamp(.58rem, min(.95vw, 1.35vh), .78rem); line-height: 1.5; min-height: 3em; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.v2-tool .v2-card-foot { margin-top: 0; padding-bottom: clamp(.2rem, 1.2vh, .8rem); }
+/* Pixel icons (pdos-icons.js). A fitted icon fills its box and its sprite is centred inside it
+   without taking up layout space, so the box is sized by the card, never by the sprite. */
+.pdos-icon { display: inline-flex; flex: 0 0 auto; }
+.pdos-icon--fit { position: relative; display: block; width: 100%; height: 100%; }
+.pdos-icon--fit > div { position: absolute !important; left: 50%; top: 50%; translate: -50% -50%; }
+.pdos-tile-icon { display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 4px 0; }
+
+/* Projects (Phase 4): six cards and the Champion Run cartridge; each opens a window. */
+.pdos-projects { flex: 1 1 auto; min-height: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: minmax(0, 1fr) minmax(0, 1fr) clamp(118px, 19vh, 168px); gap: 8px; padding: 12px; background: var(--p0); }
+.pdos-project {
+  min-width: 0; min-height: 0; overflow: hidden; display: flex; flex-direction: column; padding: clamp(10px, 1.6vh, 14px);
+  border: 0; background: var(--v2-panel); color: var(--v2-fg); font: inherit; text-align: left; cursor: pointer;
+  transition: background .15s, color .15s;
+}
+.pdos-project:focus-visible { outline: 2px solid var(--v2-fg); outline-offset: 2px; }
+.pdos-project-head { flex: 0 0 auto; display: flex; justify-content: space-between; align-items: center; font-size: .69rem; text-transform: uppercase; }
+.pdos-project-icon { flex: 1 1 auto; min-height: 24px; overflow: hidden; }
+.pdos-project-title { flex: 0 0 auto; font-family: var(--display); font-weight: 700; font-size: clamp(1.15rem, min(2.1vw, 3.8vh), 1.9rem); line-height: .95; text-transform: uppercase; }
+.pdos-project-desc { flex: 0 0 auto; margin: 6px 0 10px; font-size: .75rem; line-height: 1.45; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.pdos-project-foot { flex: 0 0 auto; display: flex; justify-content: space-between; gap: 1rem; padding-top: 8px; border-top: 1px solid currentColor; font-size: .69rem; text-transform: uppercase; white-space: nowrap; }
+.pdos-project-foot > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.pdos-project--music:hover, .pdos-project--music:focus-visible { background: #1ed760; color: #070707; }
+.pdos-project--today:hover, .pdos-project--today:focus-visible { background: oklch(0.3 0.07 265); color: #f4f3ef; }
+.pdos-project--where:hover, .pdos-project--where:focus-visible { background: oklch(0.88 0.07 85); color: #070707; }
+.pdos-project--speed:hover, .pdos-project--speed:focus-visible { background: oklch(0.74 0.16 0); color: #070707; }
+.pdos-project--terminal:hover, .pdos-project--terminal:focus-visible { background: oklch(0.75 0.16 40); color: #070707; }
+.pdos-project--crack:hover, .pdos-project--crack:focus-visible { background: #f4f3ef; color: #070707; }
+.pdos-champ-card { grid-column: 1 / -1; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: clamp(16px, 2.2vw, 32px); padding: 10px 22px; outline: 1px dashed var(--v2-soft-line); outline-offset: -1px; }
+.pdos-champ-card:hover, .pdos-champ-card:focus-visible { background: #f7c947; color: #070707; outline-color: transparent; }
+.pdos-champ-lockup { align-self: stretch; display: flex; align-items: center; gap: 20px; min-height: 0; }
+.pdos-champ-ball { width: clamp(56px, 6vw, 90px); align-self: stretch; }
+.pdos-champ-word { margin: 0; font-family: var(--display); font-weight: 700; font-size: clamp(1.9rem, min(4.2vw, 6.6vh), 3.9rem); line-height: .88; text-transform: uppercase; white-space: nowrap; }
+.pdos-champ-copy { min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+.pdos-champ-meta { display: flex; gap: 10px; align-items: center; font-size: .69rem; text-transform: uppercase; }
+.pdos-champ-desc { max-width: 62ch; font-size: .82rem; line-height: 1.45; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.pdos-champ-chips { display: flex; flex-wrap: wrap; gap: 6px; font-size: .62rem; letter-spacing: .04em; text-transform: uppercase; }
+.pdos-champ-chips span { border: 1px solid currentColor; padding: 3px 7px; }
+.pdos-champ-cta { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; font-size: .69rem; text-transform: uppercase; white-space: nowrap; }
+.pdos-champ-insert { border: 1px solid currentColor; padding: 12px 16px; font-size: .75rem; font-weight: 600; letter-spacing: .05em; }
+
+/* Windows over the page (projects, Champion Run). Moved to the end of .portfolio-v2 by
+   initProjects so no section's clip-path or transform can trap them. */
+.pdos-overlay { position: fixed; inset: 0; z-index: 80; display: flex; align-items: center; justify-content: center; padding: 52px 16px 16px; }
+.pdos-overlay[hidden] { display: none; }
+.pdos-overlay-scrim { position: absolute; inset: 0; background: rgba(0, 0, 0, .6); }
+.pdos-dialog { position: relative; max-width: 100%; max-height: 100%; display: flex; flex-direction: column; background: var(--v2-panel); color: var(--v2-fg); box-shadow: 0 0 0 1px var(--v2-line), 14px 14px 0 rgba(0, 0, 0, .55); outline: 0; }
+.pdos-dialog .pdos-window-bar { --bar: var(--dialog-bar, var(--v2-fg)); color: #070707; }
+.pdos-close { padding: 0 4px; border: 0; background: none; color: inherit; font: inherit; font-size: .85rem; cursor: pointer; }
+.pdos-close:hover, .pdos-close:focus-visible { outline: 1px solid currentColor; }
+.pdos-dialog--project { width: 780px; }
+.pdos-dialog-body { min-height: 0; overflow: auto; display: flex; flex-direction: column; gap: 12px; padding: 20px; }
+.pdos-dialog-meta { display: flex; justify-content: space-between; font-size: .69rem; text-transform: uppercase; }
+.pdos-dialog-title { margin: 0; font-family: var(--display); font-weight: 700; font-size: clamp(2rem, min(5vw, 8vh), 4rem); line-height: .92; text-transform: uppercase; }
+.pdos-dialog-desc { margin: 0; font-size: .875rem; line-height: 1.5; }
+.pdos-dialog-stage { position: relative; height: clamp(200px, 42vh, 440px); background: repeating-linear-gradient(45deg, rgba(128, 128, 128, .12) 0 6px, transparent 6px 12px); display: flex; align-items: flex-end; padding: 10px; color: var(--v2-dim); font-size: .69rem; text-transform: uppercase; }
+.pdos-dialog-stage iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: #070707; }
+.pdos-dialog-foot { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; padding-top: 10px; border-top: 1px solid var(--v2-soft-line); font-size: .69rem; letter-spacing: .05em; text-transform: uppercase; }
+.pdos-dialog-foot > span:first-child { color: var(--v2-dim); }
+.pdos-dialog-foot a { color: inherit; text-decoration: underline; text-underline-offset: .25em; }
+html.pdos-locked { overflow: hidden; }
+/* Keep the scrollbar gutter while locked, so opening a window does not shift the page sideways. */
+html { scrollbar-gutter: stable; }
+
+/* Champion Run setup window (Phase 5). */
+.pdos-dialog--champ { --dialog-bar: #f7c947; width: min(1320px, 100%); height: 100%; }
+.pdos-cr { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; gap: 12px; padding: 14px 16px 16px; overflow: auto; }
+.pdos-cr-top { flex: 0 0 auto; display: flex; justify-content: space-between; align-items: center; gap: 20px; }
+.pdos-cr-lockup { display: flex; align-items: center; gap: 14px; }
+.pdos-cr-lockup .pdos-champ-word { font-size: clamp(1.8rem, 4vw, 2.9rem); line-height: .9; }
+.pdos-cr-mult { display: flex; flex-direction: column; align-items: flex-end; }
+.pdos-cr-mult span { color: var(--v2-dim); font-size: .69rem; letter-spacing: .05em; text-transform: uppercase; }
+.pdos-cr-mult strong { font-family: var(--display); font-weight: 700; font-size: clamp(2.2rem, 5vw, 3.5rem); line-height: 1; }
+.pdos-cr-mult strong.is-up { color: var(--v2-green); }
+.pdos-cr-mult strong.is-gold { color: var(--v2-yellow); }
+.pdos-cr-grid { flex: 1 1 auto; min-height: 0; display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 10px; }
+.pdos-cr-box { min-height: 0; display: flex; flex-direction: column; gap: 10px; padding: 12px; background: var(--v2-panel-raised); }
+.pdos-cr-label { display: flex; justify-content: space-between; gap: 1rem; font-size: .69rem; letter-spacing: .05em; text-transform: uppercase; }
+.pdos-cr-label > span:last-child:not(:first-child) { color: var(--v2-dim); }
+.pdos-cr button { font: inherit; color: inherit; border: 0; cursor: pointer; }
+.pdos-cr-toggle, .pdos-cr-gens { display: flex; flex-wrap: wrap; gap: 4px; font-size: .75rem; text-transform: uppercase; letter-spacing: .04em; }
+.pdos-cr-toggle button { padding: 7px 12px; background: var(--v2-panel); }
+.pdos-cr-gens button { padding: 5px 10px; background: var(--v2-panel); }
+.pdos-cr-toggle button[aria-pressed="true"], .pdos-cr-gens button[aria-pressed="true"] { background: var(--v2-fg); color: var(--v2-bg); }
+.pdos-cr-list { flex: 1 1 auto; min-height: 120px; overflow: auto; overscroll-behavior: contain; display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); grid-auto-rows: min-content; gap: 6px; }
+.pdos-cr-list.is-locked { opacity: .35; }
+.pdos-cr-list button { display: flex; justify-content: space-between; gap: 6px; padding: 8px; background: var(--v2-panel); font-size: .69rem; text-transform: uppercase; text-align: left; }
+.pdos-cr-list button span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pdos-cr-list button span:last-child { color: var(--v2-dim); }
+.pdos-cr-list button:hover { background: var(--p3); }
+.pdos-cr-list button[aria-pressed="true"] { background: var(--p3); outline: 1px solid var(--v2-green); outline-offset: -1px; }
+.pdos-cr-list button:disabled { cursor: default; }
+.pdos-cr-side { min-height: 0; display: flex; flex-direction: column; gap: 10px; }
+.pdos-cr-reroll { padding: 0; background: none; color: var(--v2-green) !important; text-transform: uppercase; }
+.pdos-cr-team { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; }
+.pdos-cr-team button { height: 42px; padding: 5px; display: flex; flex-direction: column; justify-content: space-between; background: transparent; border: 1px dashed var(--v2-soft-line); font-size: .58rem; text-transform: uppercase; text-align: left; }
+.pdos-cr-team button.is-filled { background: var(--v2-panel); border-color: transparent; }
+.pdos-cr-team button span:first-child { color: var(--v2-dim); }
+.pdos-cr-team button span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
+.pdos-cr-mods { flex: 1 1 auto; overflow: auto; gap: 0; }
+.pdos-cr-mods .pdos-cr-label { margin-bottom: 6px; }
+.pdos-cr-mod { width: 100%; display: grid; grid-template-columns: 14px minmax(0, 1fr) auto; gap: 8px; align-items: start; padding: 7px 0 !important; border-top: 1px solid var(--v2-soft-line) !important; background: none; color: var(--v2-dim) !important; text-align: left; }
+.pdos-cr-mod[aria-pressed="true"] { color: var(--v2-green) !important; }
+.pdos-cr-mod-box { width: 11px; height: 11px; margin-top: 2px; border: 1px solid currentColor; }
+.pdos-cr-mod[aria-pressed="true"] .pdos-cr-mod-box { background: currentColor; }
+.pdos-cr-mod-text { display: flex; flex-direction: column; gap: 2px; }
+.pdos-cr-mod-text span:first-child { font-size: .69rem; letter-spacing: .04em; text-transform: uppercase; }
+.pdos-cr-mod-text span:last-child { color: var(--v2-dim); font-size: .62rem; line-height: 1.35; }
+.pdos-cr-mod-x { font-size: .69rem; }
+.pdos-cr-cta { display: flex; justify-content: space-between; padding: 13px 16px; background: var(--v2-fg); color: var(--v2-bg) !important; font-size: .75rem !important; font-weight: 600 !important; letter-spacing: .05em; text-transform: uppercase; }
+.pdos-cr-cta:hover:not(:disabled), .pdos-cr-cta:focus-visible { background: #f7c947; color: #070707 !important; }
+.pdos-cr-cta:disabled { opacity: .5; cursor: default; }
+.pdos-cr-status { min-height: 1.2em; margin: 0; color: var(--v2-dim); font-size: .69rem; line-height: 1.5; text-transform: uppercase; }
+
+/* Toolbox (Phase 6): 3x3 grid; opening a tool shrinks the grid and slides in a 520px panel. */
+.pdos-toolbox { flex: 1 1 auto; min-height: 0; display: flex; overflow: hidden; background: var(--v2-panel); }
+.pdos-toolbox-main { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 14px; padding: clamp(10px, 1.8vh, 16px); }
+.pdos-toolbox-title { flex: 0 0 auto; margin: 0; overflow: hidden; font-family: var(--display); font-weight: 700; font-size: clamp(1.8rem, min(4.6vw, 7.6vh), 4.75rem); line-height: 1.02; text-transform: uppercase; white-space: nowrap; }
+.pdos-tools { flex: 1 1 auto; min-height: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.pdos-tool {
+  min-width: 0; min-height: 0; overflow: hidden; display: flex; flex-direction: column; padding: clamp(8px, 1.4vh, 14px) 16px;
+  border: 0; background: var(--v2-panel-raised); color: var(--v2-fg); font: inherit; text-align: left; cursor: pointer;
+  transition: background .15s, color .15s;
+}
+/* Unbuilt tools read as dimmed through --dim text rather than 50% opacity, which fails AA contrast. */
+.pdos-tool.is-soon { color: var(--v2-dim); }
+.pdos-tool.is-soon .pdos-tool-desc { opacity: 1; }
+.pdos-tool:hover, .pdos-tool:focus-visible { background: var(--hover); color: #070707; opacity: 1; }
+.pdos-tool:focus-visible { outline: 2px solid var(--v2-fg); outline-offset: 2px; }
+.pdos-tool[aria-pressed="true"] { background: var(--v2-fg); color: var(--v2-bg); opacity: 1; }
+.pdos-tool-head { display: flex; justify-content: space-between; font-size: .69rem; text-transform: uppercase; }
+.pdos-tool-name { margin-top: auto; font-family: var(--display); font-weight: 700; font-size: clamp(1rem, min(1.9vw, 3.4vh), 1.9rem); line-height: 1.2; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pdos-tool-desc { margin-top: 6px; font-size: .75rem; line-height: 1.4; opacity: .75; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.pdos-toolbox.is-open .pdos-tool-desc { display: none; }
+.pdos-tool-panel { flex: 0 0 auto; width: 0; overflow: hidden; transition: width .55s cubic-bezier(.7, 0, .2, 1); }
+.pdos-toolbox.is-open .pdos-tool-panel { width: min(520px, 55%); }
+.pdos-tool-panel-inner { width: 520px; max-width: 100vw; height: 100%; display: flex; flex-direction: column; border-left: 1px solid var(--v2-soft-line); transform: translateX(80px); opacity: 0; transition: transform .55s cubic-bezier(.7, 0, .2, 1), opacity .3s ease .12s; }
+.pdos-toolbox.is-open .pdos-tool-panel-inner { transform: none; opacity: 1; }
+.pdos-tool-panel-bar { flex: 0 0 auto; height: 30px; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; background: var(--v2-fg); color: var(--v2-bg); font-size: .75rem; font-weight: 500; letter-spacing: .04em; text-transform: uppercase; }
+.pdos-tool-panel-body { flex: 1 1 auto; min-height: 0; overflow: auto; overscroll-behavior: contain; display: flex; flex-direction: column; gap: 16px; padding: 20px; background: var(--p0); }
+.pdos-tool-panel-name { margin: 0; font-family: var(--display); font-weight: 700; font-size: clamp(1.8rem, 3.4vw, 3rem); line-height: .95; text-transform: uppercase; outline: 0; }
+.pdos-tool-soon { display: flex; flex-direction: column; justify-content: center; gap: 8px; padding: 20px; border: 1px solid var(--v2-soft-line); font-size: .69rem; letter-spacing: .05em; text-transform: uppercase; }
+.pdos-tool-soon[hidden] { display: none; }
+.pdos-tool-soon p { margin: 0; color: var(--v2-dim); font-size: .82rem; line-height: 1.5; letter-spacing: 0; text-transform: none; }
+.pdos-tool-panel-foot { margin-top: auto; color: var(--v2-dim); font-size: .62rem; letter-spacing: .06em; text-transform: uppercase; }
+/* A borrowed legacy tool modal, shown inline in the panel: no backdrop, no own header or frame. */
+.pdos-tool-slot { --sans: var(--mono); }
+.pdos-tool-slot .tool-modal { position: static; display: block; z-index: auto; }
+.pdos-tool-slot .tool-modal-backdrop, .pdos-tool-slot .tool-modal-head { display: none; }
+.pdos-tool-slot .tool-modal-panel { margin: 0; width: auto; max-height: none; overflow: visible; padding: 0; border: 0; background: none; animation: none; }
+.pdos-tool-slot .tool-modal-sub { margin-top: 0; }
+
+/* Playlists window (Phase 7): title and the three playlists on the left, listening history right. */
+.pdos-window--playlists .pdos-window-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr); grid-template-rows: auto minmax(0, 1fr); }
+.pdos-window--playlists .v2-stage { display: contents; }
+.pdos-window--playlists .v2-playlists { grid-column: 1; grid-template-columns: 1fr; grid-template-rows: repeat(3, minmax(0, 1fr)); gap: 8px; min-height: 0; }
+.pdos-window--playlists .v2-tracks { grid-column: 2; grid-row: 1 / span 2; }
+.pdos-window--playlists .v2-playlist { padding: 12px; outline: 0; transition: background .15s, color .15s; }
+.pdos-window--playlists .v2-playlist:hover, .pdos-window--playlists .v2-playlist:focus-within { background: var(--ok); color: var(--on); }
+.pdos-window--playlists .v2-playlist .v2-index-row { display: none; }
+.pdos-window--playlists .v2-playlist-body { flex: 1 1 auto; min-height: 0; margin: 0; align-items: stretch; }
+.pdos-window--playlists .v2-playlist-cover { width: auto; height: 100%; max-height: 120px; }
+.pdos-window--playlists .v2-playlist-copy { padding-bottom: 18px; justify-content: flex-end; }
+.pdos-window--playlists .v2-playlist-copy p, .pdos-window--playlists .v2-playlist .v2-card-foot a { color: inherit; }
+.pdos-window--playlists .v2-playlist .v2-card-foot { border-top-color: currentColor; }
 
 /* Playlists: compact cover cards over the listening-history table. */
 .v2-playlists { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
@@ -577,9 +745,6 @@ body.locked { overflow: auto !important; height: auto !important; }
 
   .v2-strip { font-size: clamp(.62rem, 1.4vh, .78rem); padding: clamp(.45rem, 1.3vh, .8rem) 1rem; }
 
-  .v2-project-grid { grid-template-rows: minmax(0, 1fr) minmax(0, 1fr) minmax(0, .55fr); }
-  .v2-project, .v2-project-wide, .v2-tool { min-height: 0; }
-  .v2-tool-grid { grid-template-rows: repeat(3, minmax(0, 1fr)); }
 
   .v2-playlists { flex: 0 0 auto; }
   .v2-tracks { flex: 1 1 0; }
@@ -603,6 +768,13 @@ body.locked { overflow: auto !important; height: auto !important; }
   .pdos-weather .pdos-widget-label { display: none; }
   .v2-spotify-art { width: 40px; }
   .v2-game-art { width: 30px; }
+}
+/* Very short screens: the Champion Run card drops its modifier chips (the window lists them). */
+@media (min-width: 721px) and (min-height: 620px) and (max-height: 700px) {
+  .pdos-champ-chips { display: none; }
+  .pdos-tile { padding: 8px 10px; }
+  .pdos-tile-foot { padding-top: 4px; }
+  .pdos-boot-log { display: none; }
 }
 
 @media (max-width: 720px) {
@@ -637,15 +809,40 @@ body.locked { overflow: auto !important; height: auto !important; }
   .pdos-weather .v2-value { font-size: 1.8rem; }
   .v2-game-text h3 { font-size: 1rem; }
   .pdos-status-bar { flex-wrap: wrap; }
-  .v2-project-grid, .v2-tool-grid, .v2-playlists { grid-template-columns: 1fr; }
+  .v2-playlists { grid-template-columns: 1fr; }
   .v2-gigs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .v2-score { --v2-score-size: 92px; }
-  .v2-project-wide { grid-column: 1; display: flex; }
-  .v2-project-wide .v2-project-copy { display: block; }
-  .v2-project-wide h3 { margin: .8rem 0 .35rem; }
-  .v2-project-wide p { margin-bottom: .6rem; }
-  .v2-project-wide .v2-card-foot { align-self: stretch; margin-top: auto; }
   .v2-strip { flex-direction: column; }
+  .v2-tracks-head { flex-wrap: wrap; }
+  /* Phase 4-7 windows on phones: everything stacks and grows with its content. */
+  .pdos-window-bar > span:last-child:not(:only-child) { display: none; }
+  .pdos-window-bar > .pdos-close { display: block !important; }
+  .pdos-projects { grid-template-columns: 1fr; grid-template-rows: none; grid-auto-rows: minmax(210px, auto); padding: 8px; }
+  .pdos-project-title { font-size: 1.5rem; }
+  .pdos-project-icon { flex: 0 0 96px; margin: 8px 0; }
+  .pdos-project-desc, .pdos-champ-desc, .pdos-tool-desc { font-size: .75rem; }
+  .pdos-project-head, .pdos-project-foot, .pdos-champ-meta, .pdos-champ-cta, .pdos-champ-chips, .pdos-tool-head, .pdos-dialog-meta, .pdos-dialog-foot,
+  .pdos-cr-label, .pdos-cr-list button, .pdos-cr-team button, .pdos-cr-mod-text span, .pdos-cr-status, .pdos-sec-kicker, .pdos-tool-panel-foot { font-size: .75rem !important; }
+  .pdos-champ-card { grid-template-columns: 1fr; grid-auto-rows: auto; gap: 14px; padding: 16px; }
+  .pdos-champ-lockup { height: 120px; }
+  .pdos-champ-cta { align-items: flex-start; }
+  .pdos-overlay { padding: 8px; }
+  .pdos-dialog--project, .pdos-dialog--champ { width: 100%; height: 100%; }
+  .pdos-cr-grid { grid-template-columns: 1fr; flex: 0 0 auto; }
+  .pdos-cr-side, .pdos-cr-box { flex-shrink: 0; }
+  .pdos-cr-mods { overflow: visible; }
+  .pdos-cr-mult { align-items: flex-start; }
+  .pdos-cr-list { max-height: 260px; }
+  .pdos-cr-top { flex-wrap: wrap; }
+  .pdos-toolbox-title { font-size: clamp(1.5rem, 8vw, 2.2rem); white-space: normal; }
+  .pdos-tools { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: none; grid-auto-rows: minmax(120px, auto); }
+  .pdos-tool-panel { position: fixed; inset: 0; z-index: 90; width: 100% !important; transform: translateX(100%); transition: transform .4s cubic-bezier(.7, 0, .2, 1); }
+  .pdos-toolbox.is-open .pdos-tool-panel { transform: none; }
+  .pdos-tool-panel-inner { width: 100%; }
+  .pdos-sec-title { font-size: clamp(3rem, 16vw, 4.5rem); }
+  .pdos-window--playlists .pdos-window-body { display: flex; }
+  .pdos-window--playlists .v2-playlists { grid-template-rows: none; }
+  .pdos-window--playlists .v2-playlist-cover { width: 96px; height: 96px; }
   /* Journal on phones: the list stacks above the selected entry and nothing scrolls inside the
      window; picking a row scrolls the entry into view instead (initJournal). */
   .pdos-journal { grid-template-columns: 1fr; }
@@ -669,13 +866,30 @@ body.locked { overflow: auto !important; height: auto !important; }
   /* Phones: no small print below 12px. */
   .v2-index-row, .v2-ref, .v2-scroll-prev, .v2-scroll-next, .v2-card-foot, .v2-metric-foot, .v2-spotify-state, .v2-spotify-status,
   .v2-steps-label, .v2-steps-goal, .v2-about-date, .v2-bottom-card p, .v2-news-desc, .pdos-journal-row-text, .pdos-journal-meta, .pdos-journal-note,
-  .v2-journal-media figcaption, .pdos-journal-count, .pdos-journal-foot, .pdos-journal-kicker, .pdos-journal-chip, .pdos-window-bar, .v2-journal-credit, .v2-gig-credit, .v2-project p, .v2-tool-copy p, .v2-playlist-copy p, .v2-track-row, .v2-top-toggle button,
+  .v2-journal-media figcaption, .pdos-journal-count, .pdos-journal-foot, .pdos-journal-kicker, .pdos-journal-chip, .pdos-window-bar, .v2-journal-credit, .v2-gig-credit, .v2-playlist-copy p, .v2-track-row, .v2-top-toggle button,
   .v2-gig p, .v2-gig-link, .v2-gig-controls, .v2-strip, .v2-footer,
   .pdos-widget-head, .pdos-widget-tag, .pdos-widget-foot, .pdos-tile-head, .pdos-tile-key, .pdos-tile-foot, .pdos-tile-foot > span:first-child,
   .pdos-extra, .pdos-status-bar, .pdos-boot-log, .v2-game-text p { font-size: .75rem; }
 }
 
+/* Pixel icon animations (pdos-icons.js), copied from the design mockup. */
+@keyframes pxscroll { from { transform: translateY(0); } to { transform: translateY(-50%); } }
+@keyframes pxblink { 50% { opacity: 0; } }
+@keyframes pxspin { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@keyframes pxeq { 0% { transform: scaleY(.25); } 50% { transform: scaleY(1); } 100% { transform: scaleY(.45); } }
+@keyframes pxrot { to { transform: rotate(360deg); } }
+@keyframes pxflame { 0% { opacity: .95; transform: translateY(0); } 50% { opacity: .35; transform: translateY(-100%); } 100% { opacity: .95; transform: translateY(0); } }
+@keyframes pxglow { 0%, 100% { filter: drop-shadow(0 0 3px #1ed760) drop-shadow(0 0 0 #1ed760); } 50% { filter: drop-shadow(0 0 10px #1ed760) drop-shadow(0 0 22px rgba(30, 215, 96, .6)); } }
+@keyframes pxflick { 0%, 100% { opacity: 1; } 37% { opacity: .82; } 41% { opacity: 1; } 73% { opacity: .9; } }
+@keyframes pxfr { 0%, 33% { visibility: visible; } 33.1%, 100% { visibility: hidden; } }
+@keyframes pxfirepulse { from { opacity: .6; transform: scale(.96); } to { opacity: 1; transform: scale(1.06); } }
+@keyframes pxshake { 0% { transform: translate(0, 0); } 50% { transform: translate(2px, -1px); } 100% { transform: translate(-1px, 1px); } }
+@keyframes crbob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-16%); } }
+@keyframes crshadow { 0%, 100% { transform: scaleX(1); opacity: .55; } 50% { transform: scaleX(.62); opacity: .25; } }
+
 @media (prefers-reduced-motion: reduce) {
+  .pdos-icon * { animation: none !important; transition: none !important; }
+  .pdos-tool-panel, .pdos-tool-panel-inner { transition: none !important; }
   .v2-cursor { animation: none; }
   .pdos-crt-clip { clip-path: none !important; transition: none !important; }
   .pdos-crt-slide { transform: none !important; opacity: 0; transition: opacity .2s linear !important; }

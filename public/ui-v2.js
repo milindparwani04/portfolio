@@ -54,21 +54,20 @@
       title.style.fontSize = '';
       return;
     }
-    let low = 48;
-    // Capped by height too, so the title never pushes the dashboard out of the home section.
-    let high = Math.min(window.innerWidth * .15, window.innerHeight * .26, 300);
-    let best = low;
-    for (let i = 0; i < 10; i += 1) {
-      const size = (low + high) / 2;
-      title.style.fontSize = `${size}px`;
-      if (title.scrollWidth <= title.clientWidth + 1) {
-        best = size;
-        low = size;
-      } else {
-        high = size;
-      }
-    }
-    title.style.fontSize = `${best}px`;
+    // The widest line fills the title cell. The element itself spans the cell, so its own
+    // scrollWidth says nothing about the text: measure the text with a Range instead. Pixel-font
+    // text scales linearly, so one measurement at 100px gives the size. Capped by height (two
+    // lines) so the tiles below keep their room.
+    const avail = title.parentElement.clientWidth;
+    if (!avail) return;
+    const range = document.createRange();
+    range.selectNodeContents(title);
+    title.style.fontSize = '100px';
+    const width = range.getBoundingClientRect().width;
+    if (!width) return;
+    // Short screens (< 800px tall) cap it lower so the tiles below keep room for their icons.
+    const cap = Math.min(window.innerHeight * (window.innerHeight < 800 ? .15 : .235), 340);
+    title.style.fontSize = `${Math.max(28, Math.min(cap, Math.floor(100 * avail / width * .99)))}px`;
   }
 
   // Shrinks [data-fit] titles until they fit their box in data-fit lines (1 or 2), down to 70%
@@ -796,6 +795,8 @@
       if (event.key === 'Escape') { openThemeMenu(false); return; }
       const n = parseInt(event.key, 10);
       if (!(n >= 1 && n <= 7)) return;
+      // An open window locks the page: no section jumps until it is closed.
+      if (document.documentElement.classList.contains('pdos-locked')) return;
       const target = sections[n - 1];
       if (target) target.scrollIntoView({ behavior: reduceMotion.matches ? 'auto' : 'smooth', block: 'start' });
     });
@@ -837,6 +838,341 @@
     });
   }
 
+  // Windows over the page (Parwani-DOS Phases 4-6): project windows, the Champion Run setup window
+  // and the Toolbox panel. While any of them is open the page is locked (html.pdos-locked: no
+  // scrolling, no 1-7 keys, no in-page jump links) until it is closed with ✕, the scrim or Esc.
+  const PDOS_PROJECTS = {
+    music: { n: '01', tag: 'Music', title: 'Sounds Like + Prompt Playlist', desc: 'A similarity engine for music discovery. Turn text into personalised playlists.', status: 'Phase 02 / Similarity engine', color: '#1ed760', file: 'sounds_like.vol', src: '/sounds-like.html' },
+    today: { n: '02', tag: 'Experiment', title: 'Today Somewhere', desc: 'A collection of places, moments and photographs.', status: 'Planned · In development', color: 'oklch(0.78 0.1 265)', file: 'today_somewhere.vol' },
+    where: { n: '03', tag: 'Tool', title: 'Where Next', desc: 'A simple tool for exploring new destinations.', status: 'Planned · In development', color: 'oklch(0.88 0.07 85)', file: 'where_next.vol' },
+    speed: { n: '04', tag: 'Game', title: 'Speed Round', desc: 'A fast-paced trivia game for curious minds.', status: 'Planned · In development', color: 'oklch(0.74 0.16 0)', file: 'speed_round.exe' },
+    terminal: { n: '05', tag: 'Game', title: 'Untitled Terminal Adventure', desc: 'A text-based experiment in choice and consequence.', status: 'Planned · In development', color: 'oklch(0.75 0.16 40)', file: 'terminal_adventure.exe' },
+    crack: { n: '06', tag: 'Game', title: 'Crack', desc: 'Visual experiments with fracture, distortion and decay.', status: 'Playable', color: '#f4f3ef', file: 'crack.exe', src: '/crack.html' }
+  };
+
+  function initWindows() {
+    const root = document.querySelector('.portfolio-v2');
+    const projectOverlay = byId('pdosProjectOverlay');
+    const champOverlay = byId('pdosChampOverlay');
+    if (!root || !projectOverlay || !champOverlay) return;
+    // Sections clip and transform their content for the CRT effect, which would trap a fixed
+    // overlay inside them, so the overlays live at the end of the page root instead.
+    root.appendChild(projectOverlay);
+    root.appendChild(champOverlay);
+
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const locks = { window: false, tool: false };
+    const setLock = (key, on) => {
+      locks[key] = on;
+      document.documentElement.classList.toggle('pdos-locked', locks.window || locks.tool);
+    };
+    let openOverlay = null;
+    let returnFocus = null;
+
+    const focusables = (el) => [...el.querySelectorAll('button:not(:disabled), a[href], iframe, input, select, textarea, [tabindex]:not([tabindex="-1"])')]
+      .filter((node) => node.offsetParent !== null || node === document.activeElement);
+
+    function showOverlay(overlay) {
+      if (openOverlay) hideOverlay({ restoreFocus: false });
+      returnFocus = document.activeElement;
+      overlay.hidden = false;
+      openOverlay = overlay;
+      setLock('window', true);
+      overlay.querySelector('.pdos-dialog').focus();
+    }
+
+    function hideOverlay({ restoreFocus = true } = {}) {
+      if (!openOverlay) return;
+      openOverlay.hidden = true;
+      // Stop anything running inside the window (Crack, Sounds Like) by unloading its frame.
+      openOverlay.querySelectorAll('iframe').forEach((frame) => frame.remove());
+      openOverlay = null;
+      setLock('window', false);
+      if (restoreFocus && returnFocus && document.contains(returnFocus)) returnFocus.focus();
+    }
+
+    function openProject(key) {
+      if (key === 'champion') { showOverlay(champOverlay); return; }
+      const p = PDOS_PROJECTS[key];
+      if (!p) return;
+      projectOverlay.querySelector('.pdos-dialog').style.setProperty('--dialog-bar', p.color);
+      byId('pdosProjectFile').textContent = `${p.file} — project ${p.n}`;
+      byId('pdosProjectNum').textContent = p.n;
+      byId('pdosProjectTag').textContent = `[ ${p.tag} ]`;
+      byId('pdosProjectTitle').textContent = p.title;
+      byId('pdosProjectDesc').textContent = p.desc;
+      byId('pdosProjectStatus').textContent = p.status;
+      const stage = byId('pdosProjectStage');
+      const link = byId('pdosProjectLink');
+      stage.replaceChildren();
+      link.replaceChildren();
+      if (p.src) {
+        const frame = document.createElement('iframe');
+        frame.src = p.src;
+        frame.title = p.title;
+        frame.loading = 'lazy';
+        stage.appendChild(frame);
+        const a = document.createElement('a');
+        a.href = p.src;
+        a.target = '_blank';
+        a.rel = 'noopener';
+        a.textContent = 'Open full screen ↗';
+        link.appendChild(a);
+      } else {
+        stage.textContent = 'Planned — nothing to run yet. It will run here, inside this window.';
+      }
+      showOverlay(projectOverlay);
+    }
+
+    document.addEventListener('click', (event) => {
+      const target = event.target instanceof Element ? event.target : null;
+      if (!target) return;
+      if (target.closest('[data-close-window]') && openOverlay) { hideOverlay(); return; }
+      const opener = target.closest('[data-open-project]');
+      if (opener && !document.documentElement.classList.contains('pdos-locked')) {
+        event.preventDefault();
+        // Home's extras open their window in Projects: go there first, then open it.
+        if (opener.tagName === 'A') {
+          const projects = byId('v2-projects');
+          if (projects) projects.scrollIntoView({ behavior: reduceMotion.matches ? 'auto' : 'smooth', block: 'start' });
+        }
+        openProject(opener.getAttribute('data-open-project'));
+        return;
+      }
+      // Locked: in-page jump links do nothing until the window is closed.
+      if (document.documentElement.classList.contains('pdos-locked') && target.closest('a[href^="#"]') && !target.closest('.pdos-dialog, .pdos-tool-panel')) {
+        event.preventDefault();
+      }
+    }, true);
+
+    document.addEventListener('keydown', (event) => {
+      if (!openOverlay) return;
+      if (event.key === 'Escape') { event.preventDefault(); hideOverlay(); return; }
+      if (event.key !== 'Tab') return;
+      // Keep keyboard focus inside the open window.
+      const dialog = openOverlay.querySelector('.pdos-dialog');
+      const items = focusables(dialog);
+      if (!items.length) { event.preventDefault(); dialog.focus(); return; }
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (event.shiftKey && (document.activeElement === first || document.activeElement === dialog)) { event.preventDefault(); last.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+    });
+
+    initChampionRun(champOverlay);
+    initToolbox((on) => setLock('tool', on), () => Boolean(openOverlay));
+  }
+
+  // Champion Run setup (Phase 5): pool mode, generations, a team of up to 6, modifiers and the
+  // reward tier they add up to. The battle itself is a later spec; the setup is remembered.
+  function initChampionRun(overlay) {
+    const DEX = {
+      1: ['Bulbasaur', 'Charmander', 'Squirtle', 'Pikachu', 'Gengar', 'Dragonite', 'Snorlax', 'Lapras'],
+      2: ['Chikorita', 'Cyndaquil', 'Totodile', 'Ampharos', 'Scizor', 'Tyranitar', 'Umbreon', 'Heracross'],
+      3: ['Treecko', 'Torchic', 'Mudkip', 'Gardevoir', 'Aggron', 'Salamence', 'Metagross', 'Milotic'],
+      4: ['Turtwig', 'Chimchar', 'Piplup', 'Lucario', 'Garchomp', 'Togekiss', 'Weavile', 'Roserade'],
+      5: ['Snivy', 'Tepig', 'Oshawott', 'Excadrill', 'Hydreigon', 'Volcarona', 'Chandelure', 'Zoroark'],
+      6: ['Chespin', 'Fennekin', 'Froakie', 'Greninja', 'Aegislash', 'Sylveon', 'Talonflame', 'Goodra'],
+      7: ['Rowlet', 'Litten', 'Popplio', 'Mimikyu', 'Toxapex', 'Kommo-o', 'Decidueye', 'Lycanroc'],
+      8: ['Grookey', 'Scorbunny', 'Sobble', 'Dragapult', 'Corviknight', 'Toxtricity', 'Grimmsnarl', 'Cinderace'],
+      9: ['Sprigatito', 'Fuecoco', 'Quaxly', 'Kingambit', 'Gholdengo', 'Tinkaton', 'Baxcalibur', 'Annihilape']
+    };
+    const ROMAN = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX'];
+    const MODS = [
+      { k: 'random', label: 'Random team — all generations', note: 'Six Pokémon drawn from Gen I–IX. Pool locked.', m: 1.4 },
+      { k: 'moves', label: 'Random moves', note: 'Every moveset is rerolled.', m: 1.5 },
+      { k: 'potions', label: 'No potions', note: 'No healing items in battle.', m: 1.3 },
+      { k: 'cap', label: 'Level cap 50', note: 'Your team is capped. The champion is not.', m: 1.2 },
+      { k: 'noswitch', label: 'No switching', note: 'A Pokémon stays in until it faints.', m: 1.25 }
+    ];
+    const TIERS = [['Master', 4], ['Gold', 2.5], ['Silver', 1.75], ['Bronze', 1]];
+    const ALL = Object.values(DEX).flat();
+    const genOf = (name) => Number(Object.keys(DEX).find((g) => DEX[g].includes(name)));
+    const STORE = 'pdosChampionRun';
+
+    let st = { mode: 'cross', gen: 4, gens: [1, 4, 9], team: [], mods: { random: false, moves: false, potions: false, cap: false, noswitch: false } };
+    try {
+      const saved = JSON.parse(window.localStorage.getItem(STORE) || 'null');
+      if (saved && Array.isArray(saved.team) && Array.isArray(saved.gens)) st = { ...st, ...saved, mods: { ...st.mods, ...saved.mods } };
+    } catch (_) { /* private mode or bad data: start fresh */ }
+
+    const el = {
+      gens: byId('pdosCrGens'), pool: byId('pdosCrPool'), poolNote: byId('pdosCrPoolNote'), team: byId('pdosCrTeam'),
+      teamLabel: byId('pdosCrTeamLabel'), reroll: byId('pdosCrReroll'), mods: byId('pdosCrMods'), mult: byId('pdosCrMult'),
+      tier: byId('pdosCrTier'), cta: byId('pdosCrCta'), ctaText: byId('pdosCrCtaText'), status: byId('pdosCrStatus')
+    };
+    if (Object.values(el).some((node) => !node)) return;
+
+    const active = () => (st.mode === 'single' ? [st.gen] : st.gens);
+    const fitTeam = (team, gens) => (st.mods.random ? team : team.filter((n) => gens.includes(genOf(n))));
+    const rollTeam = () => [...ALL].sort(() => Math.random() - 0.5).slice(0, 6);
+    const button = (cls, html, onClick, pressed) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      if (cls) b.className = cls;
+      b.innerHTML = html;
+      if (pressed !== undefined) b.setAttribute('aria-pressed', String(pressed));
+      b.addEventListener('click', onClick);
+      return b;
+    };
+    const say = (text) => { el.status.textContent = text; };
+
+    function render() {
+      const gens = active();
+      const random = st.mods.random;
+      overlay.querySelectorAll('[data-cr-mode]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.crMode === st.mode)));
+      el.gens.replaceChildren(...[1, 2, 3, 4, 5, 6, 7, 8, 9].map((g) => button('', `Gen ${ROMAN[g]}`, () => {
+        if (st.mode === 'single') { st.gen = g; st.team = fitTeam(st.team, [g]); }
+        else {
+          st.gens = st.gens.includes(g) ? st.gens.filter((x) => x !== g) : [...st.gens, g].sort((a, b) => a - b);
+          if (!st.gens.length) st.gens = [g];
+          st.team = fitTeam(st.team, st.gens);
+        }
+        update();
+      }, gens.includes(g))));
+      el.pool.classList.toggle('is-locked', random);
+      el.poolNote.textContent = random ? 'Locked — random team is on' : (st.mode === 'single' ? `Gen ${ROMAN[st.gen]} only` : `${gens.length} gens mixed`);
+      el.pool.replaceChildren(...gens.flatMap((g) => DEX[g].map((name) => {
+        const b = button('', `<span>${escapeHtml(name)}</span><span>${ROMAN[g]}</span>`, () => {
+          if (st.team.includes(name)) st.team = st.team.filter((x) => x !== name);
+          else if (st.team.length < 6) st.team = [...st.team, name];
+          else { say('Team is full — remove one first.'); return; }
+          update();
+        }, st.team.includes(name));
+        b.disabled = random;
+        return b;
+      })));
+      el.teamLabel.textContent = `02 / Team ${st.team.length}/6`;
+      el.reroll.hidden = !random;
+      el.team.replaceChildren(...Array.from({ length: 6 }, (_, i) => {
+        const name = st.team[i];
+        const b = button(name ? 'is-filled' : '', `<span>${String(i + 1).padStart(2, '0')}</span><span>${name ? `${escapeHtml(name)} · ${ROMAN[genOf(name)]}` : 'Empty'}</span>`, () => {
+          if (!name || random) return;
+          st.team = st.team.filter((x) => x !== name);
+          update();
+        });
+        b.setAttribute('aria-label', name ? `Slot ${i + 1}: ${name}${random ? '' : ', remove'}` : `Slot ${i + 1}: empty`);
+        return b;
+      }));
+      el.mods.replaceChildren(...MODS.map((m) => button('pdos-cr-mod', `<span class="pdos-cr-mod-box" aria-hidden="true"></span><span class="pdos-cr-mod-text"><span>${m.label}</span><span>${m.note}</span></span><span class="pdos-cr-mod-x">×${m.m}</span>`, () => {
+        st.mods = { ...st.mods, [m.k]: !st.mods[m.k] };
+        if (m.k === 'random') st.team = st.mods.random ? rollTeam() : [];
+        update();
+      }, st.mods[m.k])));
+      const mult = MODS.reduce((acc, m) => acc * (st.mods[m.k] ? m.m : 1), 1);
+      el.mult.textContent = `×${mult.toFixed(2)}`;
+      el.mult.classList.toggle('is-up', mult > 1 && mult < 2.5);
+      el.mult.classList.toggle('is-gold', mult >= 2.5);
+      el.tier.textContent = `Reward multiplier · ${TIERS.find((t) => mult >= t[1])[0]} tier`;
+      el.ctaText.textContent = st.team.length ? `Enter battle · ${st.team.length} Pokémon` : 'Pick at least one Pokémon';
+      el.cta.disabled = !st.team.length;
+    }
+
+    function update() {
+      say('');
+      try { window.localStorage.setItem(STORE, JSON.stringify(st)); } catch (_) { /* private mode */ }
+      render();
+    }
+
+    overlay.querySelectorAll('[data-cr-mode]').forEach((b) => b.addEventListener('click', () => {
+      st.mode = b.dataset.crMode;
+      st.team = fitTeam(st.team, active());
+      update();
+    }));
+    el.reroll.addEventListener('click', () => { st.team = rollTeam(); update(); });
+    el.cta.addEventListener('click', () => say('The battle isn’t built yet — your setup is saved for when it is.'));
+    render();
+  }
+
+  // Toolbox (Phase 6): picking a tool shrinks the grid and slides in a panel. Working tools borrow
+  // their legacy .tool-modal (and with it every id and listener) into the panel while open.
+  function initToolbox(setLock, overlayOpen) {
+    const box = document.querySelector('.pdos-toolbox');
+    const panel = byId('pdosToolPanel');
+    const slot = byId('pdosToolSlot');
+    const soon = byId('pdosToolSoon');
+    if (!box || !panel || !slot || !soon) return;
+    const buttons = [...box.querySelectorAll('.pdos-tool')];
+    const statusEl = byId('pdosToolStatus');
+    const nameEl = byId('pdosToolName');
+    const exeEl = byId('pdosToolExe');
+    const footEl = panel.querySelector('.pdos-tool-panel-foot');
+    let borrowed = null;
+    let home = null;
+    let current = null;
+
+    panel.hidden = false;
+    panel.inert = true;
+    panel.setAttribute('aria-hidden', 'true');
+
+    function giveBack() {
+      if (!borrowed) return;
+      if (borrowed.classList.contains('open')) {
+        borrowed.classList.remove('open');
+        borrowed.dispatchEvent(new CustomEvent('toolmodalclose'));
+      }
+      borrowed.setAttribute('aria-hidden', 'true');
+      if (home) home.parent.insertBefore(borrowed, home.next);
+      borrowed = null;
+      home = null;
+    }
+
+    function open(btn) {
+      if (current === btn) return;
+      giveBack();
+      current = btn;
+      const id = btn.dataset.tool;
+      const name = btn.dataset.toolName;
+      buttons.forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
+      nameEl.textContent = name;
+      exeEl.textContent = `${name.toLowerCase().replace(/[^a-z]+/g, '_').replace(/^_|_$/g, '')}.exe — ref. 03.${btn.dataset.toolN}`;
+      if (statusEl) statusEl.textContent = `${name} open`;
+      const modal = id !== 'soon' ? byId(id) : null;
+      soon.hidden = Boolean(modal);
+      if (modal) {
+        home = { parent: modal.parentNode, next: modal.nextSibling };
+        slot.appendChild(modal);
+        modal.classList.add('open');
+        modal.setAttribute('aria-hidden', 'false');
+        borrowed = modal;
+      } else {
+        byId('pdosToolSoonText').textContent = btn.dataset.toolLong || '';
+      }
+      // Key / BPM Lookup asks the Worker (Spotify catalogue), so the "nothing leaves" line is false there.
+      if (footEl) footEl.hidden = id === 'bpmLookupModal';
+      box.classList.add('is-open');
+      panel.inert = false;
+      panel.removeAttribute('aria-hidden');
+      setLock(true);
+      nameEl.focus({ preventScroll: true });
+    }
+
+    function close() {
+      if (!current) return;
+      const btn = current;
+      giveBack();
+      current = null;
+      buttons.forEach((b) => b.setAttribute('aria-pressed', 'false'));
+      if (statusEl) statusEl.textContent = '9 tools · click one to open';
+      box.classList.remove('is-open');
+      panel.inert = true;
+      panel.setAttribute('aria-hidden', 'true');
+      setLock(false);
+      btn.focus({ preventScroll: true });
+    }
+
+    buttons.forEach((btn) => {
+      btn.setAttribute('aria-pressed', 'false');
+      btn.setAttribute('aria-controls', 'pdosToolPanel');
+      btn.addEventListener('click', () => open(btn));
+    });
+    byId('pdosToolClose').addEventListener('click', close);
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && current && !overlayOpen()) close();
+    });
+  }
+
   initShell();
   initJournal();
+  initWindows();
 }());

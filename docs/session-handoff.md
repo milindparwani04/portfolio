@@ -93,6 +93,8 @@ Priorities, in order:
 
 **Phase 3 (2026-10-07): Journal rebuilt, plus Phase 2 fixes.** Journal is now one window (orange `journal.log — ref. 01` title bar with `↑ Home` / `Projects ↓`): on the left a big JOURNAL title, kicker and a scrollable list of every entry (64 px thumbnail, kind, tag, title, coloured status: Researching yellow, Planned dim, Writing green); on the right the selected entry — photo with caption, credit and either a status chip or the review score badge, then title, meta row and a scrollable article body that resets to the top on every switch. Rows are ARIA tabs (arrow keys / Home / End). Phones stack the list above the entry, and tapping a row scrolls the entry into view. Bodies show the summary and an "in progress" note until the articles are written — no placeholder text. The generic window chrome (`.pdos-window`, `.pdos-window-bar`, per-section `--bar` colour) is shared for the later phases. Phase 2 fixes found in a real browser: the steps count overflowed its window (`/10,0` cut off), heart BPM did too, and the weather window had collapsed to 0 px height (`container-type: size` in an auto-height grid row), so it was invisible; the headline now fits its panel as the spec says.
 
+**Phases 4–9 (2026-10-07): redesign complete.** Every section is now a Parwani-DOS window. Projects opens each project in a window over the page (page locked until closed; Crack and Sounds Like run inside); Champion Run has its setup window (pool, team of 6, modifiers, reward tier; the battle is a later spec); Toolbox opens tools in a sliding side panel that borrows the legacy tool modals, so every tool's logic is unchanged; Media/Playlists/Gigs are windows around the same carousels; pixel icons (`public/pdos-icons.js`, ported from the mockup) animate on every tile, extra and project card; Paper's status and dim text were darkened for WCAG AA. The Home title fills the space beside about.txt.
+
 Shell: opens directly onto a clean `C:\PARWANI>` navigation bar and the `MY DIGITAL PORTFOLIO.` dashboard. The former ENTER/CRT boot gate, floating navigation and bottom status bar are no longer visible.
 
 Home dashboard: one CSS grid with named areas (`.v2-dashboard` in `public/ui-v2.css`), so cards cannot overlap. Headline card (text only, fitted on each rotation from `/api/news`); grey "About this space" card; heart rate from `/api/heart-rate`; Dubai weather from Open-Meteo (humidity/wind line hides when the card is short; temperature scales to the card); Spotify card with the cover centred, track and artist beneath and "Now playing / Last played" bottom-left from `/api/now-playing` (grey square until a cover loads); Steps card (`05 [ STEPS / TODAY ]`, since 2026-10-02, oversized-count design): small `DAILY STEPS` label, today's total from `/api/steps` very large with `/10,000` on its baseline, a full-width progress line and the percent-of-goal line; no age footer. It all turns green at 10,000. The Dubai date sits at the foot of About this space; bottom row with dissertation, current focus (Sounds Like) and the Game card (08 `[ Game ]`, since 2026-10-04: art the card's full height on the left — square for PlayStation, a 2:3 cover for Steam, falling back to Steam's header cropped square — then the title and `Playing now / PS5|Steam` or `Last played / 17h ago / PS5|Steam`, from `/api/game`; on phones it gets its own full-width row). Heart rate, steps, now-playing and the Game card refresh every 30 s without a reload. Every API-backed card keeps its layout when data is unavailable. Card titles marked `data-fit` (`fitText` in `ui-v2.js`) shrink to fit their box instead of being cut off: one-line titles shrink down to 55%; the Spotify track name shrinks up to 30% on two lines, then may take a third line; playlist and gig titles wrap onto two lines.
@@ -116,6 +118,24 @@ External accounts connected (owner-only): Spotify (re-authorize at `/api/spotify
 Settled removals (do not re-propose without flagging): YouTube to MP3/MP4/WAV converters (ToS and backend complexity), Seamless Set project, standalone Liveliness Index (merged into Where Next), public location card (built and dropped 2026-10-04: Milind judged showing his whereabouts not responsible).
 
 ## Session log (newest first)
+
+### 2026-10-07 — Parwani-DOS Phases 4–9 (all in one push) + Home title fills its space
+Agent: Claude · Model: Opus 5.5
+Phase: 4–9 of 9 (Milind asked for them in one go without per-phase approval)
+Done:
+- Home: the "MY DIGITAL / PORTFOLIO." title now fills the space beside about.txt (it was being reset by the generic title fitter).
+- Projects: six icon cards + the Champion Run cartridge; each opens a window over the page that locks scrolling (Esc / ✕ / click outside closes). Crack and Sounds Like run inside their windows.
+- Champion Run setup window: pool mode, generations, team of 6, modifiers and reward tier (setup only; the battle is a later spec).
+- Toolbox: 3×3 grid; a tool opens in a 520px side panel (full-screen on phones) with all the existing tool logic.
+- Media, Playlists, Gigs: restyled as pink / green / yellow windows, same carousels.
+- Pixel icons on every Home tile, extra and project card (`public/pdos-icons.js`), animating on hover/focus.
+- Accessibility pass: Paper theme status/dim text darkened to meet AA; Lighthouse accessibility 100.
+Tested (how, result):
+- Headless Edge at ten sizes for all seven sections: no overflow, no page errors. Every window, the Champion Run logic and the working tools exercised by script. Details in the Claude handoff.
+Known issues / not done:
+- Not built from the mockup: Media/Gigs filter chips and the playlists now-playing strip (no such behaviour existed). The four planned projects open a window that says they're planned.
+Next session starts with:
+- Milind's feedback on the live site.
 
 ### 2026-10-07 — Parwani-DOS Phase 3: Journal; Phase 2 widget fixes
 Agent: Claude · Model: Opus 5.5
