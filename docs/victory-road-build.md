@@ -43,8 +43,8 @@ Living record of the Victory Road build (spec: [`victory-road-master-prompt.md`]
 | 1 Setup experience | Done 2026-10-07 — see below |
 | 2 Battle engine vertical slice | Done 2026-10-07 — see below |
 | 3 Champion fidelity | Done 2026-10-07 — see below |
-| 4 Catalog integration + modifier behaviour | Next |
-| 5 Presentation, audio, accessibility polish | — |
+| 4 Catalog integration + modifier behaviour | Done 2026-10-07 — see below |
+| 5 Presentation, audio, accessibility polish | Next |
 | 6 Hardening and release | — |
 
 ## Phase 1 — setup experience (2026-10-07)
@@ -76,3 +76,10 @@ Living record of the Victory Road build (spec: [`victory-road-master-prompt.md`]
 - **AI changes:** Mega preference Floette → Dragonite when both could Mega Evolve; Protect +18 when a foe on the field could knock the Pokémon out (threat from the foe's revealed moves, otherwise an 80-power attack of each of its types — no hidden info); Sucker Punch trusted less (×0.35) against a Pokémon whose last move was a status move; difficulty margins easy 25 / normal 8 / hard 3 points (`config.difficulty`, the champion uses hard).
 - **Intro and avatar** shipped in Phase 2: an original 16×19 pixel figure (no photo used, no invented traits) with the factual label "Takuma Yamazaki · Japan · 2026 VGC Masters World Champion", and the fan-project disclaimer on the battle screen.
 - **Tests:** 24 pass (Phase 3 adds: Champions stat formula and Mega data; Floette preferred for Mega; AI deterministic and legal at all three difficulties; the hard AI beats a first-legal-option player in ≥ 14 of 20 seeded battles).
+
+## Phase 4 — full catalog and every modifier (2026-10-07)
+
+- **Team building** (`VRCore.buildTeam(ids, mods, seed, data)`, shared by the page and the tests): the default set from `sets.json`; **Random Held Items** gives six different items from 51 ordinary held items (`RANDOM_ITEMS`, all checked to exist in the engine; no Mega Stones or species items — so a random item replaces a Mega Stone); **Random Moves** gives four distinct moves from the Pokémon's learnable list in `movepools.json` (now 476 moves, with an `attacks` list) with at least two attacks whenever it knows two; **All Shiny** marks every set shiny. Seeded by the battle seed.
+- **Trainer Taunts:** after each player action (move, Potion or voluntary switch) the champion's speech bubble shows a line chosen by what the action did — knocked out his Pokémon > super effective > hit his Protect > missed > resisted > left his Pokémon under 25% > Potion > switch > generic — never the same line twice in a row for a context. 30 original lines; playful, never cruel; fictional dialogue for the in-game opponent (the disclaimer says so). The bubble sits inside the arena (never over the menus), has a dismiss button, auto-hides after 3.2 s, is announced in a polite live region, and doesn't animate with reduced motion.
+- **Combinations:** none are impossible. No Switching + Chaotic Replacement: you never choose who comes in (shown as a note in setup). Random Team + Random Moves: a full surprise. Random Held Items respects Item Clause by construction.
+- **Tests:** 28 pass. Phase 4 adds: random items (six distinct, real, seeded); random moves over 400 seeded species (distinct, learnable, ≥ 2 attacks when possible); all 36 modifier pairs and all nine together, each played to a result with no engine errors; ×6.72 Master for all nine. Browser: a full battle with Taunts + Random Items + Random Moves + All Shiny shows shiny back sprites, narrates a taunt, no errors.

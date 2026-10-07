@@ -161,3 +161,61 @@ test('the hard AI beats a first-legal-option player most of the time', () => {
   for (let seed = 1; seed <= 20; seed += 1) if (playBattle(E, { seed }).winner === 'p2') wins += 1;
   assert.ok(wins >= 14, `champion won ${wins}/20`);
 });
+
+// ---- Phase 4: modifier behaviour ----
+const movepools = read('movepools.json');
+const data = { byId, sets, movepools, attacks: new Set(movepools.attacks) };
+
+test('Random Held Items: six different real items, repeatable for a seed', () => {
+  const ids = ['garchomp', 'pikachu', 'snorlax', 'gengar', 'lucario', 'rotomwash'];
+  for (let seed = 1; seed <= 50; seed += 1) {
+    const team = C.buildTeam(ids, { items: true }, seed, data);
+    assert.equal(new Set(team.map((s) => s.item)).size, 6);
+    team.forEach((s) => assert.ok(E.Dex.items.get(s.item).exists, s.item));
+  }
+  assert.deepEqual(C.buildTeam(ids, { items: true }, 9, data), C.buildTeam(ids, { items: true }, 9, data));
+  assert.equal(C.buildTeam(ids, {}, 9, data)[0].item, sets.garchomp[1]);
+});
+
+test('Random Moves: four distinct learnable moves, at least two attacks', () => {
+  const ids = pool.map((e) => e.id);
+  for (let seed = 1; seed <= 400; seed += 1) {
+    const id = ids[(seed * 7919) % ids.length];
+    const [set] = C.buildTeam([id], { moves: true }, seed, data);
+    const learn = new Set(movepools.pools[id].map((i) => movepools.moves[i]));
+    assert.equal(new Set(set.moves).size, set.moves.length);
+    assert.ok(set.moves.length === Math.min(4, learn.size), `${id} ${set.moves.length}`);
+    set.moves.forEach((m) => assert.ok(learn.has(m), `${id} can't learn ${m}`));
+    const attacksKnown = [...learn].filter((m) => data.attacks.has(m)).length;
+    assert.ok(set.moves.filter((m) => data.attacks.has(m)).length >= Math.min(2, attacksKnown), id);
+  }
+});
+
+test('every pair of modifiers (and all nine) plays to a result', () => {
+  const keys = C.MODS.map((m) => m.k);
+  const combos = [];
+  for (let i = 0; i < keys.length; i += 1) for (let j = i + 1; j < keys.length; j += 1) combos.push({ [keys[i]]: true, [keys[j]]: true });
+  combos.push(Object.fromEntries(keys.map((k) => [k, true])));
+  combos.forEach((mods, n) => {
+    const seed = 1000 + n;
+    const ids = mods.random ? C.rollTeam(pool, C.rng(seed)) : ['incineroar', 'rillaboom', 'gholdengo', 'amoonguss', 'dragonite', 'pikachu'];
+    const team = C.buildTeam(ids, mods, seed, data);
+    let req = null;
+    let winner = null;
+    const errs = [];
+    const eng = E.createEngine({ seed, player: { name: 'You', team }, rules: C.engineRules(mods) }, (e) => { if (e.t === 'request') req = e.request; if (e.t === 'end') winner = e.winner; if (e.t === 'fatal') errs.push(e.message); });
+    for (let i = 0; i < 300 && winner === null && req; i += 1) {
+      const r = req; req = null;
+      // With No Switching, 'default' never switches voluntarily; forced replacements still arrive.
+      eng.choose('default');
+    }
+    assert.notEqual(winner, null, JSON.stringify(mods));
+    assert.equal(errs.length, 0, errs.join());
+  });
+});
+
+test('the multiplier for all nine modifiers is x6.72 (Master tier)', () => {
+  const all = Object.fromEntries(C.MODS.map((m) => [m.k, true]));
+  assert.equal(C.multiplier(all).toFixed(2), '6.72');
+  assert.equal(C.tier(C.multiplier(all)), 'Master');
+});

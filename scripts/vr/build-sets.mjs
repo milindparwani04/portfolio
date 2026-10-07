@@ -135,5 +135,7 @@ for (const [id, , , , , , ] of dex.pool) {
   });
 }
 fs.writeFileSync(path.join(repo, 'public/vr/sets.json'), JSON.stringify({ fields: ['ability', 'item', 'nature', 'moves', 'stat points hp,atk,def,spa,spd,spe'], sets }));
-fs.writeFileSync(path.join(repo, 'public/vr/movepools.json'), JSON.stringify({ moves: moveList, pools }));
+// attacks: names of the moves that deal damage (Random Moves keeps at least two of them).
+const attacks = moveList.filter((name) => Moves[name.toLowerCase().replace(/[^a-z0-9]/g, '')].category !== 'Status');
+fs.writeFileSync(path.join(repo, 'public/vr/movepools.json'), JSON.stringify({ moves: moveList, attacks, pools }));
 console.log(`sets ${Object.keys(sets).length} (${curated} from curated movepools), movepool moves ${moveList.length}`);

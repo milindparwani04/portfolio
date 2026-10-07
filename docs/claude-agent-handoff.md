@@ -88,6 +88,10 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 
 ## Work log (newest first)
 
+### 2026-10-07 — Victory Road Phase 4 (every modifier works)
+
+- `VRCore.buildTeam` (random items/moves, shiny), Trainer Taunts in `vr-battle.js`, `movepools.json` gains `attacks`; `sets.json?v=2`, `movepools.json?v=2`, `VR_VERSION` 5, `ui-v2.js?v=35`. Detail in [`victory-road-build.md`](victory-road-build.md).
+
 ### 2026-10-07 — Victory Road Phase 3 (champion fidelity)
 
 - Engine data verified against the official team sheet and the Champions stat formula; AI Mega preference, threat-aware Protect, Sucker Punch caution and difficulty margins. Detail in [`victory-road-build.md`](victory-road-build.md).

@@ -105,11 +105,31 @@
     return `<svg viewBox="0 0 16 19" shape-rendering="crispEdges" aria-hidden="true" focusable="false">${cells.join('')}</svg>`;
   }
 
+  // ---------- Trainer Taunts (modifier): original lines, picked by what the player's move did ----------
+  const TAUNTS = {
+    generic: ['Nice form. Shame about the follow-through.', 'Is that the whole playbook? I brought snacks.', 'Bold. Not smart, but bold.', 'Keep that up and I might break a sweat. Eventually.', 'Plot twist: that barely tickled.', 'Cute move. Did it come with instructions?'],
+    super: ['Okay, okay, that one stung. Lucky shot.', 'Rude! I just polished that Pokémon.', 'Fine, you found the weak spot. Want a medal?', 'Ow. Writing that down for the sequel.'],
+    resisted: ['Not very effective. Was the type chart upside down?', 'A gentle breeze. Refreshing, thanks.', 'Resisted! My Pokémon says thanks for the massage.'],
+    miss: ['Swing and a miss! The crowd goes mild.', 'Missed! Don’t worry, the floor had it coming.', 'Aim is a skill. You’ll get there.'],
+    protect: ['Knock knock. Nobody’s home.', 'Shields up! Try again next turn.', 'That’s a wall. Walls are undefeated.'],
+    faint: ['Hey! I was using that!', 'Okay. Respect. Now it’s personal.', 'Noted. Revenge is scheduled for next turn.', 'That one was on loan anyway.'],
+    lowhp: ['Still standing. That’s what counts.', 'Just a flesh wound. A very large flesh wound.', 'Totally planned. All of it.'],
+    switch: ['Tag-team tactics? Cute.', 'Swapping out already? Was it something I said?'],
+    potion: ['A Potion? Mid-fight? Brave.', 'Heal up all you like. Same ending, longer movie.']
+  };
+  const RANK = ['faint', 'super', 'protect', 'miss', 'resisted', 'lowhp', 'potion', 'switch', 'generic'];
+
   // ---------- Sets ----------
   let setsPromise = null;
+  let poolsPromise = null;
+  const getJson = (url) => fetch(url).then((r) => { if (!r.ok) throw new Error(url); return r.json(); });
   const loadSets = () => {
-    if (!setsPromise) setsPromise = fetch('/vr/sets.json?v=1').then((r) => { if (!r.ok) throw new Error('sets'); return r.json(); }).catch((e) => { setsPromise = null; throw e; });
+    if (!setsPromise) setsPromise = getJson('/vr/sets.json?v=2').catch((e) => { setsPromise = null; throw e; });
     return setsPromise;
+  };
+  const loadPools = () => {
+    if (!poolsPromise) poolsPromise = getJson('/vr/movepools.json?v=2').catch((e) => { poolsPromise = null; throw e; });
+    return poolsPromise;
   };
 
   // ---------- Battle view ----------
@@ -135,7 +155,7 @@
     const textbox = h('div', { class: 'vr-textbox' }, h('p', { class: 'vr-text' }));
     const menu = h('div', { class: 'vr-menu' });
     screen.append(bar, h('div', { class: 'vr-frame' }, stage, textbox), menu, live,
-      h('p', { class: 'vr-disclaimer', text: 'Unofficial fan project, not affiliated with or endorsed by Nintendo, Game Freak, Creatures, The Pokémon Company or Takuma Yamazaki. The champion’s team is his official 2026 Worlds team sheet; stat spreads are a community reconstruction and the AI is a heuristic, not his play.' }));
+      h('p', { class: 'vr-disclaimer', text: 'Unofficial fan project, not affiliated with or endorsed by Nintendo, Game Freak, Creatures, The Pokémon Company or Takuma Yamazaki. The champion’s team is his official 2026 Worlds team sheet; stat spreads are a community reconstruction, the AI is a heuristic, not his play, and taunts are fictional lines for the in-game opponent.' }));
     root.append(screen);
     const textEl = textbox.querySelector('.vr-text');
 
@@ -193,6 +213,33 @@
       stage.append(spot, h('div', { class: `vr-hpslot vr-hpslot--${pos}` }, box));
       slots[pos] = { sprite, name, lvl, fill, nums, status, box, spot, ident: '', species: '', hp: 0, max: 0 };
     });
+    const tauntLive = h('p', { class: 'vr-sr-only', 'aria-live': 'polite' });
+    const tauntText = h('span', { class: 'vr-taunt-text' });
+    const taunt = h('div', { class: 'vr-taunt', hidden: true }, h('span', { class: 'vr-taunt-who', text: 'Champion' }), tauntText,
+      h('button', { type: 'button', class: 'vr-taunt-x', 'aria-label': 'Dismiss taunt', text: '×', onclick: () => { taunt.hidden = true; } }));
+    stage.append(taunt);
+    screen.append(tauntLive);
+    let tauntTimer = 0;
+    const lastTaunt = {};
+    function showTaunt(kind) {
+      if (!mods.taunts || disposed) return;
+      const pool = TAUNTS[kind] || TAUNTS.generic;
+      let line = pool[Math.floor(Math.random() * pool.length)];
+      if (pool.length > 1 && line === lastTaunt[kind]) line = pool[(pool.indexOf(line) + 1) % pool.length];
+      lastTaunt[kind] = line;
+      tauntText.textContent = line;
+      tauntLive.textContent = `Champion: ${line}`;
+      taunt.hidden = false;
+      window.clearTimeout(tauntTimer);
+      tauntTimer = window.setTimeout(() => { taunt.hidden = true; }, 3200);
+      timers.add(tauntTimer);
+    }
+    // Context of the player's latest action, upgraded by what follows it in the log, then shown when
+    // the next action starts or the turn ends.
+    let tauntCtx = null;
+    const noteTaunt = (kind) => { if (tauntCtx && RANK.indexOf(kind) < RANK.indexOf(tauntCtx)) tauntCtx = kind; };
+    const flushTaunt = () => { if (tauntCtx) { showTaunt(tauntCtx); tauntCtx = null; } };
+
     const trainer = h('div', { class: 'vr-trainer', hidden: true });
     trainer.innerHTML = avatarSvg();
     const trainerLabel = h('p', { class: 'vr-trainer-label', text: CHAMP.label, hidden: true });
@@ -269,6 +316,19 @@
     async function handle(line) {
       const parts = line.split('|');
       const cmd = parts[1];
+      if (mods.taunts) {
+        if (cmd === 'move' || cmd === 'turn' || cmd === 'upkeep' || cmd === 'win') flushTaunt();
+        if (cmd === 'move' && parts[2].startsWith('p1')) tauntCtx = parts[3] === 'Potion' ? 'potion' : 'generic';
+        else if (cmd === 'switch' && parts[2].startsWith('p1') && lastRequest && !lastRequest.forceSwitch && !lastRequest.teamPreview) { flushTaunt(); tauntCtx = 'switch'; }
+        else if (tauntCtx) {
+          if (cmd === 'faint' && parts[2].startsWith('p2')) noteTaunt('faint');
+          else if (cmd === '-supereffective' && parts[2].startsWith('p2')) noteTaunt('super');
+          else if ((cmd === '-activate' || cmd === '-singleturn') && parts[2].startsWith('p2') && /Protect|Detect/.test(parts[3])) noteTaunt('protect');
+          else if (cmd === '-miss' && parts[2].startsWith('p1')) noteTaunt('miss');
+          else if (cmd === '-resisted' && parts[2].startsWith('p2')) noteTaunt('resisted');
+          else if (cmd === '-damage' && parts[2].startsWith('p2') && readHp(parts[3]).pct > 0 && readHp(parts[3]).pct < 25) noteTaunt('lowhp');
+        }
+      }
       switch (cmd) {
         case 'switch': case 'drag': case 'replace': {
           const p = parseIdent(parts[2]);
@@ -384,7 +444,7 @@
     }
 
     let queue = Promise.resolve();
-    const playLines = (lines) => { queue = queue.then(async () => { for (const l of lines) { if (disposed) return; await handle(l); } }); return queue; };
+    const playLines = (lines) => { queue = queue.then(async () => { for (const l of lines) { if (disposed) return; await handle(l); } if (mods.taunts && lines.length) flushTaunt(); }); return queue; };
 
     // ----- menus -----
     const clearMenu = () => menu.replaceChildren();
@@ -587,8 +647,9 @@
       live.textContent = 'Victory Road is loading.';
       Sound.play('boot');
       let sets;
+      let pools = null;
       try {
-        [sets] = await Promise.all([loadSets(), sleep(1300)]);
+        [sets, pools] = await Promise.all([loadSets(), mods.moves ? loadPools() : null, sleep(1300)]);
       } catch (_) {
         boot.remove();
         await say('The battle data didn’t load. Exit and try again.');
@@ -597,7 +658,8 @@
       }
       if (disposed) return;
       boot.remove();
-      const team = detail.team.map((id) => C.toSet(dex.byId[id], sets.sets[id], { shiny: mods.shiny }));
+      const seed = C.newSeed();
+      const team = C.buildTeam(detail.team, mods, seed, { byId: dex.byId, sets: sets.sets, movepools: pools, attacks: new Set(pools ? pools.attacks : []) });
       trainer.hidden = false;
       trainerLabel.hidden = false;
       await say(`${CHAMP.name} would like to battle!`, 900);
@@ -623,7 +685,7 @@
         else if (msg.t === 'end') finish(msg.winner);
         else if (msg.t === 'fatal') say('The battle engine hit an error.').then(() => showMenu('Battle stopped', [menuButton('Back to setup', () => exit())]));
       };
-      worker.postMessage({ t: 'start', config: { seed: C.newSeed(), player: { name: 'You', team }, rules } });
+      worker.postMessage({ t: 'start', config: { seed, player: { name: 'You', team }, rules } });
     })();
   }
 

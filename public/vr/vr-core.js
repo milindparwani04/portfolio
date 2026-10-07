@@ -150,10 +150,45 @@
     return set;
   }
 
+  // Random Held Items draws from these, never repeating within a team (Item Clause). Ordinary held
+  // items that work for any Pokémon in doubles; no Mega Stones, Z-Crystals or species items.
+  const RANDOM_ITEMS = ['Sitrus Berry', 'Lum Berry', 'Leftovers', 'Life Orb', 'Choice Band', 'Choice Specs', 'Choice Scarf', 'Focus Sash',
+    'Assault Vest', 'Rocky Helmet', 'Expert Belt', 'Muscle Band', 'Wise Glasses', 'Shell Bell', 'Mental Herb', 'White Herb', 'Safety Goggles',
+    'Covert Cloak', 'Clear Amulet', 'Bright Powder', 'Scope Lens', 'Light Clay', 'Throat Spray', 'Weakness Policy', 'Air Balloon', 'Red Card',
+    'Eject Button', 'Eject Pack', 'Mirror Herb', 'Loaded Dice', 'Punching Glove', 'Quick Claw', 'Kings Rock', 'Black Glasses', 'Charcoal',
+    'Mystic Water', 'Miracle Seed', 'Magnet', 'Never-Melt Ice', 'Black Belt', 'Poison Barb', 'Soft Sand', 'Sharp Beak', 'Twisted Spoon',
+    'Silver Powder', 'Hard Stone', 'Spell Tag', 'Dragon Fang', 'Metal Coat', 'Silk Scarf', 'Fairy Feather'];
+
+  // Random Moves: four distinct moves from the Pokémon's learnable list (movepools.json), with at
+  // least two attacks whenever it knows two, so no team is left unable to deal damage.
+  function randomMoves(pool, moveNames, isAttack, rand) {
+    const names = shuffle(pool.map((i) => moveNames[i]), rand);
+    const attacks = names.filter(isAttack);
+    const picked = attacks.slice(0, Math.min(2, attacks.length));
+    for (const n of names) { if (picked.length >= 4) break; if (!picked.includes(n)) picked.push(n); }
+    return picked;
+  }
+
+  // The player's battle team from the chosen ids and modifiers. data: { byId, sets, movepools,
+  // attacks } where attacks is a Set of move names that deal damage. Seeded, so Retry with the
+  // same seed rebuilds the same team.
+  function buildTeam(ids, mods, seed, data) {
+    const rand = rng(seed ^ 0x13579bdf);
+    const items = mods.items ? shuffle(RANDOM_ITEMS, rand) : null;
+    return ids.map((id, n) => {
+      const set = toSet(data.byId[id], data.sets[id], { shiny: mods.shiny });
+      if (items) set.item = items[n];
+      if (mods.moves && data.movepools && data.movepools.pools[id] && data.movepools.pools[id].length) {
+        set.moves = randomMoves(data.movepools.pools[id], data.movepools.moves, (m) => data.attacks.has(m), rand);
+      }
+      return set;
+    });
+  }
+
   // Engine rules from the chosen modifiers (cosmetic ones don't reach the engine).
   function engineRules(mods) {
     return { noSwitch: !!mods.noswitch, chaos: !!mods.chaos, noPotions: !!mods.nopotions, levelCap: !!mods.cap };
   }
 
-  return { TEAM_SIZE, ROMAN, MODS, toSet, engineRules, TIERS, multiplier, tier, rng, newSeed, shuffle, rollTeam, eligible, moveSlot, addToTeam, modNotes, serialize, restore };
+  return { TEAM_SIZE, ROMAN, MODS, RANDOM_ITEMS, toSet, engineRules, buildTeam, randomMoves, TIERS, multiplier, tier, rng, newSeed, shuffle, rollTeam, eligible, moveSlot, addToTeam, modNotes, serialize, restore };
 }));
