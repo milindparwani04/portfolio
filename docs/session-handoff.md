@@ -839,3 +839,8 @@ Next session starts with: verify the dashboard checklist in Security Handoff sec
 ### 2026-10-10 — Ground battle Pokémon on the field
 
 Corrected opposing Pokémon platforms overlapping the fence: all four slots now anchor from the bottom of the playing surface rather than from sprite tops, with matching phone rules. Background SVG scales to the stage instead of cropping the horizon at wide aspect ratios. Court/stadium scenery remains visible; near sprites capped at 46% of stage height. Loader v17 / UI v47. Browser verification passed at 1280×440, 800×450 and 360×420 for both phases; all platform bounds lie below the field horizon and inside the stage. Desktop court screenshot inspected. Existing cinematic/audio and battle-dispatch browser checks passed. No engine/Worker changes.
+
+
+### 2026-10-10 — Single visible cinematic subtitle track
+
+Removed the duplicate HTML caption from visual layout while retaining its aria-live dialogue for screen readers. Only the video’s existing bottom subtitles remain visible. Loader v18 / UI v48. Court/stadium layout screenshots are in the session visualization folder (`court-1280.png`, `stadium-1280.png`); these are arena previews with actual sprites, without battle HUD. Browser regression rerun before push.
