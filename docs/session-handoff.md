@@ -859,3 +859,13 @@ Grouped each side’s two health bars into a flex stack with the same 4px gap. R
 ### 2026-10-10 — Symmetric HUD corner margins
 
 Set Ren’s health-bar stack to 8px from both top and left; player stack to 8px from both bottom and right. Ren’s vertical party indicators are now on the right of his stack; player indicators remain on its left. Existing 4px inter-bar gap and button UI preserved. Browser checks passed with measured 8px matching margins and correct dot sides at desktop/mobile, plus existing playback/dispatch/arena tests. Loader v21 / UI v51. No engine/Worker changes.
+
+
+### 2026-10-10 — Codex session complete
+
+Milind ended the cinematic/HUD assignment. Latest code release `94e7ccd` is pushed and verified live: UI v51 / VR v21, matching 8px HUD corner margins, 4px bar gaps, vertical party dots right of Ren and left of player. Cutscene soundtrack/subtitle and grounded court/stadium changes were completed earlier in this session. Button UI unchanged. No further Codex implementation work assigned. Closing handoff edits remain local.
+
+
+### 2026-10-10 — Random team randomizes items; player's held item in the battle HUD (Claude)
+
+At Milind's request the Random held items modifier is removed (eight modifiers now, all on ×6.11, still Master tier). A Random team now gets six distinct random held items; a manual party keeps its chosen items. In battle, the player's HP boxes show the held item to the right of the name (updated when it is used up, knocked off or swapped); Ren's items stay hidden. Files: `public/vr/vr-core.js`, `vr-setup.js`, `vr-battle.js`, `vr.css`, tests. VR v22 / UI v52. 52/52 Node tests; browser-checked at desktop and phone widths. No engine/Worker changes. Detail in [`claude-agent-handoff.md`](claude-agent-handoff.md).

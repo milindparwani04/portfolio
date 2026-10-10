@@ -68,6 +68,9 @@
     let cinematic = null;
     const timers = new Set();
     const stats = { turns: 0, yourKOs: 0, renKOs: 0, renMoves: {}, escalated: false };
+    // The player's held items by nickname, shown beside the name in their HP boxes. Filled from the
+    // battle loadout, then kept current from the log (-enditem, -item). The champion's stay hidden.
+    const heldItems = {};
 
     G.battleActive = () => !ended && !disposed;
 
@@ -100,6 +103,7 @@
       arena.innerHTML = ART.arena(next, seed);
     }
     setPhase('court');
+    const fieldVisuals = window.TVBField.mount(stage);
 
     // ----- message box -----
     let skip = null;
@@ -160,19 +164,20 @@
     ['p2a', 'p2b', 'p1a', 'p1b'].forEach((pos) => {
       const sprite = h('img', { class: 'tvb-mon-sprite', alt: '', width: 96, height: 96, decoding: 'async' });
       const name = h('span', { class: 'tvb-hp-name' });
+      const item = h('span', { class: 'tvb-hp-item', hidden: true });
       const lvl = h('span', { class: 'tvb-hp-lv' });
       const fill = h('span', { class: 'tvb-hp-fill' });
       const nums = h('span', { class: 'tvb-hp-nums' });
       const status = h('span', { class: 'tvb-hp-status' });
       const types = h('span', { class: 'tvb-hp-types' });
       const box = h('div', { class: 'tvb-hpbox', hidden: true },
-        h('div', { class: 'tvb-hp-top' }, name, lvl),
+        h('div', { class: 'tvb-hp-top' }, name, item, lvl),
         h('div', { class: 'tvb-hp-row' }, h('span', { class: 'tvb-hp-label', text: 'HP' }), h('span', { class: 'tvb-hp-bar' }, fill)),
         h('div', { class: 'tvb-hp-bottom' }, types, status, nums));
       const spot = h('div', { class: `tvb-spot tvb-spot--${pos}` }, h('span', { class: 'tvb-platform', 'aria-hidden': 'true' }), sprite);
       stage.append(spot);
       healthPairs[pos.slice(0, 2)].append(h('div', { class: `tvb-hpslot tvb-hpslot--${pos}` }, box));
-      slots[pos] = { sprite, name, lvl, fill, nums, status, types, box, spot, ident: '', species: '', hp: 0, max: 0, pct: 0, typeList: [] };
+      slots[pos] = { sprite, name, item, nick: '', lvl, fill, nums, status, types, box, spot, ident: '', species: '', hp: 0, max: 0, pct: 0, typeList: [] };
     });
     // Remaining Pokémon indicators (filled = able to battle).
     const balls = { p1: h('div', { class: 'tvb-left tvb-left--p1', 'aria-hidden': 'true' }), p2: h('div', { class: 'tvb-left tvb-left--p2', 'aria-hidden': 'true' }) };
@@ -248,7 +253,7 @@
         s.tween = window.setInterval(() => { n += 1; s.nums.textContent = text(n / 11); if (n >= 11) window.clearInterval(s.tween); }, PACE.impact / 11);
         timers.add(s.tween);
       } else s.nums.textContent = text(1);
-      s.box.setAttribute('aria-label', `${s.name.textContent}, ${s.typeList.join(' and ')} type: ${Math.round(pct)}% HP${hp.status && hp.status !== 'fnt' ? `, ${hp.status}` : ''}`);
+      s.box.setAttribute('aria-label', `${s.name.textContent}${s.item.textContent ? `, holding ${s.item.textContent}` : ''}, ${s.typeList.join(' and ')} type: ${Math.round(pct)}% HP${hp.status && hp.status !== 'fnt' ? `, ${hp.status}` : ''}`);
       if (hp.status !== undefined) {
         s.status.textContent = hp.status && hp.status !== 'fnt' ? hp.status.toUpperCase() : '';
         s.status.dataset.status = hp.status || '';
@@ -264,6 +269,8 @@
       s.ident = ident.replace(/^(p\d)[ab]:/, '$1:');
       s.species = species;
       s.name.textContent = p.name + gender;
+      s.nick = p.name;
+      drawItem(p.pos);
       s.lvl.textContent = `Lv${lv}`;
       s.box.hidden = false;
       setSprite(p.pos, species, rest.includes('shiny'));
@@ -273,6 +280,21 @@
       s.pct = readHp(hpText).pct;
       drawHp(p.pos, readHp(hpText), false);
     }
+    // The held item beside the name, player side only; hidden when it has none (eaten, knocked off).
+    function drawItem(pos) {
+      const s = slots[pos];
+      if (!s) return;
+      const held = pos.startsWith('p1') ? heldItems[s.nick] || '' : '';
+      s.item.textContent = held;
+      s.item.title = held ? `Held item: ${held}` : '';
+      s.item.hidden = !held;
+    }
+    const setItem = (ident, held) => {
+      const p = parseIdent(ident);
+      if (p.side !== 'p1') return;
+      heldItems[p.name] = held;
+      Object.keys(slots).forEach((pos) => { if (slots[pos].nick === p.name) drawItem(pos); });
+    };
     // The types shown under an HP bar: the species' typing (forms and Megas included) unless the
     // battle has reported a change (Soak, Protean, Reflect Type, Transform...), which is marked.
     function setTypes(pos, list, changed) {
@@ -343,6 +365,7 @@
       const parts = line.split('|');
       const cmd = parts[1];
       noteLine(parts);
+      fieldVisuals.update(line);
       switch (cmd) {
         case 'poke': {
           const side = parts[2];
@@ -490,7 +513,9 @@
           break;
         }
         case '-singleturn': if (/Protect|Detect/.test(parts[3])) await say(`${Display(parts[2])} protected itself!`); break;
+        case '-item': setItem(parts[2], parts[3]); break;
         case '-enditem': {
+          setItem(parts[2], '');
           if (parts[3] === 'Focus Sash') await say(`${Display(parts[2])} hung on using its Focus Sash!`);
           else if (line.includes('[eat]')) await say(`${Display(parts[2])} ate its ${parts[3]}!`);
           break;
@@ -806,6 +831,7 @@
     function dispose() {
       if (disposed) return;
       disposed = true;
+      fieldVisuals.dispose();
       if (cinematic) cinematic.cancel();
       cinematic = null;
       skip = null;
@@ -846,6 +872,7 @@
       let loadout = null;
       try {
         loadout = C.battleLoadout(G.cat, G.draft, seed, { movepools: pools });
+        loadout.sets.forEach((s) => { heldItems[s.name] = s.item || ''; });
       } catch (_) {
         await say('The random team couldn’t be built from this catalog.');
         showMenu('Couldn’t start the battle', [menuButton('Back to party', () => leave('builder'))]);

@@ -18,7 +18,7 @@ const draftOf = (ids, mods = {}) => ({ filterGen: 0, party: partyOf(ids), mods: 
 test('modifiers run from least to most reward, ending with the level cap', () => {
   const ms = C.MODS.map((m) => m.m);
   assert.deepEqual([...ms].sort((a, b) => a - b), ms);
-  assert.deepEqual(C.MODS.map((m) => m.k), ['shiny', 'taunts', 'items', 'chaos', 'noswitch', 'nopotions', 'random', 'moves', 'cap']);
+  assert.deepEqual(C.MODS.map((m) => m.k), ['shiny', 'taunts', 'chaos', 'noswitch', 'nopotions', 'random', 'moves', 'cap']);
   assert.equal(C.MODS.at(-1).label, 'Level cap 45');
 });
 
@@ -26,7 +26,7 @@ test('multipliers compound and tiers keep their boundaries', () => {
   assert.equal(C.multiplier(all(false)), 1);
   assert.equal(C.multiplier({ shiny: true, taunts: true }), 1);
   assert.equal(C.multiplier({ random: true, moves: true }).toFixed(4), (1.35 * 1.5).toFixed(4));
-  assert.equal(C.multiplier(all(true)).toFixed(3), '6.724');
+  assert.equal(C.multiplier(all(true)).toFixed(3), '6.113');
   assert.equal(C.tier(1.7499), 'Bronze');
   assert.equal(C.tier(1.75), 'Silver');
   assert.equal(C.tier(2.5), 'Gold');
@@ -38,7 +38,7 @@ test('spectrum: empty at no handicaps, cosmetics never count, full only with eve
   assert.equal(C.difficulty({ shiny: true, taunts: true }), 0);
   assert.equal(C.difficulty(all(true)), 1);
   const gameplay = C.MODS.filter((m) => !m.cosmetic).map((m) => m.k);
-  assert.deepEqual(gameplay, ['items', 'chaos', 'noswitch', 'nopotions', 'random', 'moves', 'cap']);
+  assert.deepEqual(gameplay, ['chaos', 'noswitch', 'nopotions', 'random', 'moves', 'cap']);
   assert.equal(C.difficulty(Object.fromEntries(gameplay.map((k) => [k, true]))), 1);
   // Every subset that leaves one gameplay modifier out stays below full, cosmetics or not.
   for (const left of gameplay) {
@@ -48,10 +48,10 @@ test('spectrum: empty at no handicaps, cosmetics never count, full only with eve
   // Adding a handicap always moves the fill up; the log scale agrees with the multiplier's order.
   let prev = 0;
   for (const k of gameplay) { const p = C.difficulty(Object.fromEntries(gameplay.slice(0, gameplay.indexOf(k) + 1).map((x) => [x, true]))); assert.ok(p > prev); prev = p; }
-  assert.ok(C.difficulty({ cap: true }) > C.difficulty({ items: true }));
+  assert.ok(C.difficulty({ cap: true }) > C.difficulty({ chaos: true }));
   assert.equal(C.difficultyLabel(0), 'Standard');
   assert.equal(C.difficultyLabel(1), 'The Very Best');
-  assert.equal(C.difficultyLabel(C.difficulty({ items: true })), 'Tough');
+  assert.equal(C.difficultyLabel(C.difficulty({ chaos: true })), 'Tough');
 });
 
 test('the catalog lists every National Dex species once as a base form, ordered by generation and number', () => {
@@ -156,11 +156,11 @@ test('catalog search: an exact type name shows only that type, within the genera
   assert.equal(C.TYPES.length, 18);
 });
 
-test('the draft is byte-for-byte unchanged through Random moves, items and team on and off', () => {
+test('the draft is byte-for-byte unchanged through Random moves and team on and off', () => {
   const draft = draftOf(['garchomp', 'pikachu', 'snorlax']);
   draft.party = C.updateMember(draft.party, draft.party[1].uid, { moves: ['Thunderbolt', 'Protect', 'Fake Out'], item: 'Light Ball' });
   const before = C.serialize(draft);
-  for (const mods of [{ moves: true }, { items: true }, { random: true }, { moves: true, items: true, random: true }, {}]) {
+  for (const mods of [{ moves: true }, { random: true }, { moves: true, random: true }, {}]) {
     draft.mods = { ...all(false), ...mods };
     const bl = C.battleLoadout(cat, draft, 77, { movepools });
     assert.ok(bl.sets.length);
@@ -171,10 +171,10 @@ test('the draft is byte-for-byte unchanged through Random moves, items and team 
   const plain = C.battleLoadout(cat, draft, 78, { movepools });
   assert.deepEqual(plain.sets[1].moves, ['Thunderbolt', 'Protect', 'Fake Out']);
   assert.equal(plain.sets[1].item, 'Light Ball');
-  draft.mods = { ...all(false), moves: true, items: true };
+  draft.mods = { ...all(false), moves: true };
   const random = C.battleLoadout(cat, draft, 78, { movepools });
   assert.notDeepEqual(random.sets.map((s) => s.moves), plain.sets.map((s) => s.moves));
-  assert.equal(new Set(random.sets.map((s) => s.item)).size, 3);
+  assert.equal(random.sets[1].item, 'Light Ball', 'random moves never touch a chosen item');
 });
 
 test('members keep their moves and items by identity through reordering and removal', () => {
@@ -230,7 +230,8 @@ test('six default sets never clash under Item Clause (a taken default item is sw
     assert.deepEqual(C.partyProblems(cat, party), [], ids.join());
     const bl = C.battleLoadout(cat, { filterGen: 0, party: [], mods: { ...all(false), random: true } }, seed, {});
     const items = bl.sets.map((s) => s.item).filter(Boolean);
-    assert.equal(new Set(items).size, items.length);
+    assert.equal(new Set(items).size, 6, 'six distinct held items');
+    items.forEach((it) => assert.ok(C.RANDOM_ITEMS.includes(it), it));
   }
 });
 

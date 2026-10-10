@@ -22,17 +22,16 @@
   const MODS = [
     { k: 'shiny', label: 'All shiny', note: 'Your Pokémon use their shiny colours. Cosmetic only.', m: 1, cosmetic: true },
     { k: 'taunts', label: 'Trainer taunts', note: 'The champion reacts to each of your moves. Cosmetic only.', m: 1, cosmetic: true },
-    { k: 'items', label: 'Random held items', note: 'For this battle each Pokémon holds a random item, no two the same. Your chosen items are kept for next time.', m: 1.1 },
     { k: 'chaos', label: 'Chaotic replacement', note: 'When one of yours faints, its replacement is picked at random.', m: 1.15 },
     { k: 'noswitch', label: 'No switching', note: 'You can’t switch out. Replacing a fainted Pokémon still works.', m: 1.2 },
     { k: 'nopotions', label: 'No potions', note: 'Your bag’s two Potions are gone.', m: 1.25 },
-    { k: 'random', label: 'Random team', note: 'Six random Pokémon from every generation, hidden until the battle: five fully evolved Pokémon and one legendary or mythical. Your own party is kept.', m: 1.35 },
+    { k: 'random', label: 'Random team', note: 'Six random Pokémon from every generation, hidden until the battle: five fully evolved Pokémon and one legendary or mythical, each holding a random item. Your own party is kept.', m: 1.35 },
     { k: 'moves', label: 'Random moves', note: 'For this battle each Pokémon gets four random moves it can learn. Your chosen moves are kept for next time.', m: 1.5 },
     { k: 'cap', label: 'Level cap 45', note: 'Your team is Lv 45; the champion stays at Lv 50. (At Worlds everyone is Lv 50.)', m: 1.75 }
   ];
   const TIERS = [['Master', 4], ['Gold', 2.5], ['Silver', 1.75], ['Bronze', 1]];
 
-  // Multipliers compound (multiply). All nine: x6.72.
+  // Multipliers compound (multiply). All eight: x6.11.
   function multiplier(mods) {
     return MODS.reduce((acc, m) => acc * (mods && mods[m.k] ? m.m : 1), 1);
   }
@@ -419,7 +418,7 @@
     return '';
   }
 
-  // Random Held Items draws from these, never repeating within a team (Item Clause). Ordinary held
+  // A Random Team's held items are drawn from these, never repeating within a team (Item Clause). Ordinary held
   // items that work for any Pokémon in doubles; no Mega Stones, Z-Crystals or species items.
   const RANDOM_ITEMS = ['Sitrus Berry', 'Lum Berry', 'Leftovers', 'Life Orb', 'Choice Band', 'Choice Specs', 'Choice Scarf', 'Focus Sash',
     'Assault Vest', 'Rocky Helmet', 'Expert Belt', 'Muscle Band', 'Wise Glasses', 'Shell Bell', 'Mental Herb', 'White Herb', 'Safety Goggles',
@@ -440,8 +439,8 @@
 
   // ---------- Battle snapshot ----------
   // Enter Battle copies the validated draft into a separate battle loadout, then applies the
-  // modifiers to the copy only: the draft (and storage) never sees random moves, random items or a
-  // random team. data: { movepools } for Random Moves. Seeded, so the same seed rebuilds the same
+  // modifiers to the copy only: the draft (and storage) never sees random moves or a random team
+  // (whose held items are random too). data: { movepools } for Random Moves. Seeded, so the same seed rebuilds the same
   // team. Returns { members: [{ uid, id }], sets: [engine sets] }.
   function battleLoadout(cat, draft, seed, data) {
     const mods = draft.mods;
@@ -453,7 +452,7 @@
       if (problem) throw new Error(problem);
       members = ids.reduce((list, id, n) => [...list, freeItem(list, defaultMember(cat, id, `r${n + 1}`))], []);
     } else members = draft.party.map((m) => ({ ...m, moves: m.moves.slice() }));
-    const items = mods.items ? shuffle(RANDOM_ITEMS, rand) : null;
+    const items = mods.random ? shuffle(RANDOM_ITEMS, rand) : null;
     const pools = data && data.movepools;
     const attacks = pools ? new Set(pools.attacks) : null;
     const sets = members.map((m, n) => {
@@ -520,7 +519,6 @@
     if (mods.noswitch && mods.chaos) notes.push('No switching + chaotic replacement: you never choose who comes in.');
     if (mods.random && mods.moves) notes.push('Random team + random moves: everything is a surprise until the battle starts.');
     if (mods.random && partySize && partySize !== TEAM_SIZE) notes.push(`Random team brings six Pokémon; your party of ${partySize} waits on the bench.`);
-    if (mods.random && mods.items) notes.push('Random team + random held items: the random team’s items are random too.');
     return notes;
   }
   // Pending battle-only overrides, explained before the battle.
@@ -528,7 +526,6 @@
     const out = [];
     if (mods.random) out.push('Random team replaces your party for this battle only.');
     if (mods.moves) out.push('Random moves replace your chosen moves for this battle only.');
-    if (mods.items) out.push('Random held items replace your chosen items for this battle only.');
     if (mods.cap) out.push('Your Pokémon fight at Lv 45.');
     return out;
   }

@@ -219,16 +219,16 @@ test('Level Cap 45: the player is Lv 45, the champion Lv 50', () => {
   assert.ok(log.some((l) => /^\|poke\|p2\|[^|]*L50/.test(l)));
 });
 
-test('random items and random moves are real and legal in the engine', () => {
+test('random-team items and random moves are real and legal in the engine', () => {
   for (let seed = 1; seed <= 30; seed += 1) {
-    const sets = teamOf(['garchomp', 'pikachu', 'snorlax', 'gengar', 'lucario', 'rotomwash'], { items: true, moves: true }, seed);
+    const sets = C.battleLoadout(cat, draftOf([], { random: true, moves: true }), seed, { movepools }).sets;
     assert.equal(new Set(sets.map((s) => s.item)).size, 6);
     sets.forEach((s) => assert.ok(D.items.get(s.item).exists, s.item));
-    E.validateTeam(sets, D, raw.learnsets);
+    E.validateTeam(sets, D, raw.learnsets, { randomTeam: true });
   }
 });
 
-test('every pair of modifiers (and all nine) plays to a result', () => {
+test('every pair of modifiers (and all eight) plays to a result', () => {
   const keys = C.MODS.map((m) => m.k);
   const combos = [];
   for (let i = 0; i < keys.length; i += 1) for (let j = i + 1; j < keys.length; j += 1) combos.push({ [keys[i]]: true, [keys[j]]: true });

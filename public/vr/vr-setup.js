@@ -390,7 +390,7 @@
         h('ol', { class: 'tvb-moves' }, moves),
         problems.length ? h('ul', { class: 'tvb-problems', role: 'status' }, problems.map((p) => h('li', { text: p }))) : h('p', { class: 'tvb-ok', role: 'status', text: 'Ready to battle.' }),
         statsBlock(m),
-        G.draft.mods.moves || G.draft.mods.items ? h('p', { class: 'tvb-note', text: C.overrides(G.draft.mods).filter((t) => /moves|items/.test(t)).join(' ') + ' What you set here is what you keep.' }) : null);
+        G.draft.mods.moves ? h('p', { class: 'tvb-note', text: C.overrides(G.draft.mods).filter((t) => /moves/.test(t)).join(' ') + ' What you set here is what you keep.' }) : null);
     }
     // Move picker: every move this Pokémon can legally learn.
     function movesPicker() {

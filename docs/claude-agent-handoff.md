@@ -12,7 +12,7 @@
 
 ## Current assignment
 
-Status: **The Very Best refinements (second 2026-10-10 brief, [`the-very-best-refinement-master-prompt.md`](the-very-best-refinement-master-prompt.md)) released 2026-10-10** (`c365262`), followed by random Ren leads (any four of his six, any two lead). Before that: **The Very Best (Victory Road overhaul) released 2026-10-10** at Milind's instruction (build record [`victory-road-build.md`](victory-road-build.md)). Production check and Lighthouse (performance 91–97, others 100) done. Open: rights blockers, licensed music, real Firefox/Safari/iOS. Before that: **Victory Road shipped 2026-10-07** (Phases 0–6). Earlier the same day: Parwani-DOS redesign complete (all 9 phases), Home drawn on the mockup's scaled canvas, Media/Gigs six per batch. Open items: article pages for the Journal, an optional TMDB key for sharper media posters, Victory Road AI depth (see its known limitations). Two weekly routines still run on Mondays (Gig Finder 06:00, Media 06:30 Dubai).
+Status: **Random held items folded into Random team; player's held item shown in the battle HP boxes (2026-10-10, see work log).** Before that: **The Very Best refinements (second 2026-10-10 brief, [`the-very-best-refinement-master-prompt.md`](the-very-best-refinement-master-prompt.md)) released 2026-10-10** (`c365262`), followed by random Ren leads (any four of his six, any two lead). Before that: **The Very Best (Victory Road overhaul) released 2026-10-10** at Milind's instruction (build record [`victory-road-build.md`](victory-road-build.md)). Production check and Lighthouse (performance 91–97, others 100) done. Open: rights blockers, licensed music, real Firefox/Safari/iOS. Before that: **Victory Road shipped 2026-10-07** (Phases 0–6). Earlier the same day: Parwani-DOS redesign complete (all 9 phases), Home drawn on the mockup's scaled canvas, Media/Gigs six per batch. Open items: article pages for the Journal, an optional TMDB key for sharper media posters, Victory Road AI depth (see its known limitations). Two weekly routines still run on Mondays (Gig Finder 06:00, Media 06:30 Dubai).
 
 Areas Claude has most recently owned (coordinate before Codex changes these):
 
@@ -87,6 +87,15 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 - Lighthouse `valid-source-maps` flags a third-party library map; it doesn't affect the score categories that matter (production: 90 / 100 / 100).
 
 ## Work log (newest first)
+
+### 2026-10-10 — Random held items folded into Random team; held item in the player's HP boxes
+
+- Milind's request: remove the Random held items modifier; a Random team now also randomizes items; show the player's item in the battle HP box to the right of the name (not the champion's).
+- `vr-core.js`: `items` removed from `MODS` (eight modifiers, all on ×6.113, still Master). `battleLoadout` shuffles `RANDOM_ITEMS` when `mods.random` (six distinct, Item Clause by construction); a manual party keeps its chosen items. Random team note says "each holding a random item"; the items note/override lines are gone. Old saves with `items: true` drop it on restore (restore only reads keys in `MODS`). Checked with a scratch script: no form in `randomPools` has a `requiredItem`/`requiredItems` or is a Mega, so replacing the default item never breaks a form.
+- `vr-setup.js`: editor note only mentions Random moves.
+- `vr-battle.js`: `heldItems` (nickname → item) filled from `loadout.sets`; `.tvb-hp-item` between name and level, p1 slots only, hidden when empty; kept current from `-item` (Trick, Switcheroo, Bestow…) and `-enditem` (eaten, popped, knocked off). The HP box `aria-label` adds "holding X". `vr.css`: outlined label, `.58rem`, ellipsis at 50% width (full name in `title`).
+- Cache: VR v22, `ui-v2.js?v=52`.
+- Tests: `core.test.mjs`/`engine.test.mjs` updated (MODS order, ×6.113, spectrum, draft byte-identical through Random moves/team, random team items six distinct and all from `RANDOM_ITEMS`, random-team items + random moves legal in the engine over 30 seeds, all 28 pairs + all eight play to a result). 52/52 pass. Browser (scratch Playwright + headless Edge, random-team battle seed 4242, 1280×720 and 390×800): player boxes show "Eject Pack" / "Mystic Water", Ren's box shows no item, no page errors; at phone width a long name truncates to "Eject …". Not exercised in the browser: an item being consumed or swapped mid-battle.
 
 ### 2026-10-10 — Card type chips sized to their text
 
