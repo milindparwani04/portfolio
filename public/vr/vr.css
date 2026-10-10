@@ -346,8 +346,8 @@
 @keyframes tvb-mega { 0%, 30%, 60% { filter: brightness(3) saturate(0); } 15%, 45%, 100% { filter: none; } }
 
 .tvb-health-pair { position: absolute; z-index: 2; width: clamp(140px, 30cqw, 270px); display: flex; flex-direction: column; gap: 4px; }
-.tvb-health-pair--p2 { left: calc(2% + 16px); top: 4%; }
-.tvb-health-pair--p1 { right: 2%; bottom: 1%; }
+.tvb-health-pair--p2 { left: 8px; top: 8px; }
+.tvb-health-pair--p1 { right: 8px; bottom: 8px; }
 .tvb-hpslot { position: relative; width: 100%; }
 .tvb-hpbox { padding: 4px 9px 5px; background: #f8f6e0; color: #2b2b33; border: 3px solid #2b2b33; border-radius: 0 0 14px 0; box-shadow: 4px 4px 0 rgba(0, 0, 0, .25); font-size: .72rem; line-height: 1.25; }
 .tvb-hpslot--p1a .tvb-hpbox, .tvb-hpslot--p1b .tvb-hpbox { border-radius: 14px 0 0 0; }
@@ -373,6 +373,7 @@
 .tvb-hp-status[data-status="psn"], .tvb-hp-status[data-status="tox"] { background: #7f3896; }
 .tvb-hp-status[data-status="frz"] { background: #23688e; }
 .tvb-left { position: absolute; left: -16px; top: 50%; transform: translateY(-50%); z-index: 2; display: flex; flex-direction: column; gap: 3px; }
+.tvb-left--p2 { left: calc(100% + 6px); }
 .tvb-left span { width: 10px; height: 10px; border: 2px solid #2b2b33; border-radius: 50%; background: #f7c947; }
 .tvb-left span.is-out { background: #6d6d7c; }
 

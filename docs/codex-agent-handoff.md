@@ -36,6 +36,11 @@ Validation:
 
 ## Work log
 
+### 2026-10-10 — Symmetric HUD corner margins
+
+Set Ren’s health-bar stack to 8px from both top and left; player stack to 8px from both bottom and right. Ren’s vertical party indicators are now on the right of his stack; player indicators remain on its left. Existing 4px inter-bar gap and button UI preserved. Browser checks passed with measured 8px matching margins and correct dot sides at desktop/mobile, plus existing playback/dispatch/arena tests. Loader v21 / UI v51. No engine/Worker changes.
+
+
 ### 2026-10-10 — Equal health-bar spacing and vertical party dots
 
 Grouped each side’s two health bars into a flex stack with the same 4px gap. Ren remains top-left, player bottom-right. Each remaining-party indicator is now a vertical column centered to the left of its pair; Ren’s pair has 16px extra left inset to keep dots inside the frame. Removed the old phone dot-position override. Button UI unchanged. Browser checks passed at desktop/phone widths for equal measured gaps and dots outside bars/inside viewport, plus existing cinematic/audio/dispatch and arena tests. Loader v20 / UI v50. No engine or Worker changes.
