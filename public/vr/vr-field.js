@@ -20,7 +20,7 @@
     stage.append(ground, atmosphere, label);
     function render() {
       stage.dataset.terrain = terrain; stage.dataset.weather = sky;
-      label.textContent = [weather[sky], terrains[terrain]].filter(Boolean).join(' · ');
+      label.textContent = [weather[sky], terrains[terrain]].filter(Boolean).join(' \u00b7 ');
       label.hidden = !label.textContent;
     }
     render();

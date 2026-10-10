@@ -19,7 +19,7 @@ await setup();await page.evaluate(()=>{HTMLMediaElement.prototype.play=()=>Promi
 await setup(360);await page.evaluate(()=>{testAudio.settings.muted=true;start('Sneasler')});await page.waitForFunction(()=>document.querySelector('video').currentTime>.2);assert.equal(await page.evaluate(()=>document.querySelector('.tvb-cinematic').getBoundingClientRect().right<=innerWidth),true);await page.locator('.tvb-cinematic-controls button').last().press('Enter');assert.deepEqual(await page.evaluate(()=>calls),['skipped']);
 await setup();await page.evaluate(()=>start('Dragonite'));await page.waitForFunction(()=>document.querySelector('video').currentTime>.2);if(!process.env.REN_FULL_LENGTH)await page.evaluate(()=>{testAudio.recording.current.currentTime=37.8});await page.waitForFunction(()=>calls.length===1,null,{timeout:45000});assert.equal(await page.evaluate(()=>testAudio.recording.current.currentTime>=38&&!testAudio.recording.current.paused),true);assert.deepEqual(await page.evaluate(()=>calls),['ended']);assert.equal(errors.length,0,errors.join('\n'));console.log('PASS: six remote assets, species selection, invalid data, mute/volume, background pause/resume, duplicate skip, cancellation, missing video, autoplay denial, mobile/keyboard, actual video completion, no page errors');
 await setup();
-for(let f of ['vr-core.js','vr-art.js','vr-game.js','vr-setup.js','vr-battle.js'])await page.addScriptTag({url:base+'/vr/'+f});
+for(let f of ['vr-core.js','vr-art.js','vr-game.js','vr-setup.js','vr-field.js','vr-battle.js'])await page.addScriptTag({url:base+'/vr/'+f});
 await page.evaluate(async()=>{
   const raw={};for(let f of ['dex','species','sets','learnsets','items'])raw[f]=await(await fetch('/vr/'+f+'.json')).json();
   const {G,C}=TVB;G.cat=C.catalog(raw);G.draft=C.blankDraft();for(let id of ['dragonite','garchomp'])G.draft.party=C.addMember(G.cat,G.draft.party,G.cat.byId[id]).party;
@@ -33,7 +33,9 @@ await page.setViewportSize({width:1280,height:720});
 await page.waitForSelector('.tvb-cinematic video');assert.equal(await page.locator('.tvb-cinematic video').getAttribute('src'),'/assets/vr/cinematics/ren-v1/ren-38-kingambit.webm');
 await page.locator('.tvb-cinematic-controls button').last().press('Enter');
 await page.waitForFunction(()=>workerMessages.some(m=>m.t==='resume'));assert.equal(await page.evaluate(()=>workerMessages.filter(m=>m.t==='resume').length),1);assert.equal(await page.locator('.tvb-frame').getAttribute('data-phase'),'stadium');assert.equal(await page.evaluate(()=>TVBAudio.recording.current.currentTime>=38&&!TVBAudio.recording.current.paused),true);
-await page.evaluate(()=>{testWorker.onmessage({data:{t:'escalation',id:'real-dispatch-test',fainted:['Kingambit']}})});await page.waitForTimeout(100);assert.equal(await page.locator('.tvb-cinematic').count(),0);assert.equal(await page.evaluate(()=>workerMessages.filter(m=>m.t==='resume').length),1);await page.evaluate(()=>VictoryRoad.dispose());assert.equal(errors.length,0,errors.join('\n'));console.log('PASS: actual battle handler selects payload species, skip resumes worker exactly once, stadium persists, duplicate escalation ignored, disposal');
+await page.evaluate(()=>{testWorker.onmessage({data:{t:'escalation',id:'real-dispatch-test',fainted:['Kingambit']}})});await page.waitForTimeout(100);assert.equal(await page.locator('.tvb-cinematic').count(),0);assert.equal(await page.evaluate(()=>workerMessages.filter(m=>m.t==='resume').length),1);await page.evaluate(()=>testWorker.onmessage({data:{t:'log',lines:['|-fieldstart|move: Misty Terrain|[from] ability: Misty Surge','|-weather|Sandstorm']}}));
+await page.waitForFunction(()=>document.querySelector('.tvb-stage').dataset.terrain==='mistyterrain'&&document.querySelector('.tvb-stage').dataset.weather==='sandstorm');
+await page.evaluate(()=>VictoryRoad.dispose());assert.equal(errors.length,0,errors.join('\n'));console.log('PASS: actual battle handler selects payload species, skip resumes worker exactly once, stadium persists, duplicate escalation ignored, disposal');
 // Check the full backdrop and platform grounding at wide, standard and phone proportions.
 for(const [width,height] of [[1280,440],[800,450],[360,420]])for(const phase of ['court','stadium']){
  await page.setViewportSize({width,height:Math.max(height,720)});
@@ -43,4 +45,13 @@ for(const [width,height] of [[1280,440],[800,450],[360,420]])for(const phase of 
  if(process.env.REN_LAYOUT_SCREENSHOTS)await page.locator('.tvb-frame').screenshot({path:process.env.REN_LAYOUT_SCREENSHOTS+`/${phase}-${width}.png`});
 }
 console.log('PASS: court and stadium backdrop retained; four platforms grounded at wide, standard and phone sizes');
+await page.evaluate(()=>{window.field=TVBField.mount(document.querySelector('.tvb-stage'));field.update('|-fieldstart|move: Misty Terrain|[from] ability: Misty Surge');field.update('|-weather|Sandstorm')});
+assert.equal(await page.locator('.tvb-field-label').textContent(),'Sandstorm · Misty Terrain');
+for(const terrain of ['Grassy Terrain','Electric Terrain','Psychic Terrain','Misty Terrain']){await page.evaluate(terrain=>field.update('|-fieldstart|move: '+terrain),terrain);assert.equal(await page.locator('.tvb-stage').getAttribute('data-terrain'),terrain.toLowerCase().replaceAll(' ',''))}
+await page.evaluate(()=>{field.update('|-fieldstart|move: Trick Room');field.update('|-fieldend|move: Grassy Terrain')});assert.equal(await page.locator('.tvb-stage').getAttribute('data-terrain'),'mistyterrain');
+for(const weather of ['RainDance','SunnyDay','Sandstorm','Snow','Snowscape','Hail','PrimordialSea','DesolateLand','DeltaStream']){await page.evaluate(weather=>{field.update('|-weather|'+weather);field.update('|-weather|'+weather+'|[upkeep]')},weather);assert.equal(await page.locator('.tvb-stage').getAttribute('data-weather'),weather.toLowerCase())}
+await page.evaluate(()=>{field.update('|-weather|none');field.update('|-fieldend|move: Misty Terrain')});assert.equal(await page.locator('.tvb-field-label').isVisible(),false);assert.equal(await page.locator('.tvb-stage').getAttribute('data-weather'),'');
+await page.evaluate(()=>{document.querySelector('.tvb-stage').classList.add('tvb','is-reduced');field.update('|-weather|Sandstorm')});assert.equal(await page.locator('.tvb-field-weather i').first().evaluate(e=>getComputedStyle(e).animationName),'none');await page.evaluate(()=>field.dispose());assert.equal(await page.locator('.tvb-field-weather').count(),0);
+console.log('PASS: actual engine log dispatch, four terrains, nine weather IDs, coexistence, replacement, unrelated fields, expiry, upkeep, reduced motion and cleanup');
+
 }finally{if(browser)await browser.close();server.close();}})().catch(e=>{console.error(e);process.exitCode=1});

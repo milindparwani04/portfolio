@@ -13,7 +13,7 @@
 
 ## Current assignment
 
-Status: Complete; Milind ended this assignment on 2026-10-10. Latest implementation release `94e7ccd` is pushed to main and verified live on milindparwani.com. No outstanding work is authorized for this session.
+Status: Weather and terrain visual assignment implemented and browser-tested (2026-10-10); release in progress.
 
 Scope completed: Six first-fainted-species Ren cinematics; supplied Marnie remix begins at cutscene start and continues into battle at 38 seconds; embedded crowd muted; only bottom video subtitles visible. Court/stadium Pokémon grounded on the field with full scenery. Final HUD: Ren top-left and player bottom-right, matching 8px corner insets, 4px gaps between bars, vertical party dots right of Ren and left of player. Button UI unchanged. Loader v21 / UI v51.
 
@@ -35,6 +35,15 @@ Validation:
 - Preserved the pre-existing uncommitted 2026-10-02 Codex handoff entries; no unrelated work was overwritten.
 
 ## Work log
+
+### 2026-10-10 — Engine-driven weather and terrain visuals
+
+Implemented independent weather/terrain presentation in `vr-field.js`, loaded before battle. Actual paced engine logs drive start, replacement and expiry; upkeep does not reset visuals. Four terrains (Misty, Grassy, Electric, Psychic); RainDance, SunnyDay, Sandstorm, Snow/Snowscape, Hail, PrimordialSea, DesolateLand and DeltaStream weather. Ground effects and atmospheric particles preserve court/stadium and HUD. Static effects under reduced motion. No move-name guesses or frontend turn timers; Showdown owns mechanics/durations. Disposal clears overlays. Loader v22 / UI v52.
+
+Research: official Pokémon terrain guide https://www.pokemon.com/uk/features/the-tapu-transform-terrains confirms Tapu Fini’s Misty Surge creates Misty Terrain on entry. Simulator protocol https://github.com/smogon/pokemon-showdown/blob/master/sim/SIM-PROTOCOL.md specifies separate weather and field start/end messages. Original CSS visuals inspired by those conditions; no game art extracted.
+
+Validation: browser suite passed actual battle log dispatch (Misty Surge + sandstorm), all four terrains/nine weather IDs, independent coexistence/removal, replacement, unrelated Trick Room/old terrain end, upkeep, reduced motion and cleanup, plus existing cinematic/audio/dispatch/desktop/mobile tests. Combined mist/sand stadium preview visually inspected. Existing uncommitted held-item/builder changes from another task preserved and excluded from this release.
+
 
 ### 2026-10-10 — Session closed at Milind’s request
 

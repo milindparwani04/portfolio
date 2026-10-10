@@ -869,3 +869,12 @@ Milind ended the cinematic/HUD assignment. Latest code release `94e7ccd` is push
 ### 2026-10-10 — Random team randomizes items; player's held item in the battle HUD (Claude)
 
 At Milind's request the Random held items modifier is removed (eight modifiers now, all on ×6.11, still Master tier). A Random team now gets six distinct random held items; a manual party keeps its chosen items. In battle, the player's HP boxes show the held item to the right of the name (updated when it is used up, knocked off or swapped); Ren's items stay hidden. Files: `public/vr/vr-core.js`, `vr-setup.js`, `vr-battle.js`, `vr.css`, tests. VR v22 / UI v52. 52/52 Node tests; browser-checked at desktop and phone widths. No engine/Worker changes. Detail in [`claude-agent-handoff.md`](claude-agent-handoff.md).
+
+
+### 2026-10-10 — Engine-driven weather and terrain visuals
+
+Implemented independent weather/terrain presentation in `vr-field.js`, loaded before battle. Actual paced engine logs drive start, replacement and expiry; upkeep does not reset visuals. Four terrains (Misty, Grassy, Electric, Psychic); RainDance, SunnyDay, Sandstorm, Snow/Snowscape, Hail, PrimordialSea, DesolateLand and DeltaStream weather. Ground effects and atmospheric particles preserve court/stadium and HUD. Static effects under reduced motion. No move-name guesses or frontend turn timers; Showdown owns mechanics/durations. Disposal clears overlays. Loader v22 / UI v52.
+
+Research: official Pokémon terrain guide https://www.pokemon.com/uk/features/the-tapu-transform-terrains confirms Tapu Fini’s Misty Surge creates Misty Terrain on entry. Simulator protocol https://github.com/smogon/pokemon-showdown/blob/master/sim/SIM-PROTOCOL.md specifies separate weather and field start/end messages. Original CSS visuals inspired by those conditions; no game art extracted.
+
+Validation: browser suite passed actual battle log dispatch (Misty Surge + sandstorm), all four terrains/nine weather IDs, independent coexistence/removal, replacement, unrelated Trick Room/old terrain end, upkeep, reduced motion and cleanup, plus existing cinematic/audio/dispatch/desktop/mobile tests. Combined mist/sand stadium preview visually inspected. Existing uncommitted held-item/builder changes from another task preserved and excluded from this release.
