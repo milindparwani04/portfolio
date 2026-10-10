@@ -36,6 +36,11 @@ Validation:
 
 ## Work log
 
+### 2026-10-10 — Player health bars bottom-right
+
+At Milind’s direction, only player health-bar positions changed: both stack bottom-right, with the first translated above the second by its own height plus 4px. Ren’s bars stay top-left. Button UI, sprites, arena and battle logic unchanged. Court preview inspected: Dragonite is clear above the bars. Existing browser regression passed for cinematic/audio, battle dispatch and desktop/mobile court/stadium geometry. Loader v19 / UI v49 for cache refresh. Published with this handoff update.
+
+
 ### 2026-10-10 — Single visible cinematic subtitle track
 
 Removed the duplicate HTML caption from visual layout while retaining its aria-live dialogue for screen readers. Only the video’s existing bottom subtitles remain visible. Loader v18 / UI v48. Court/stadium layout screenshots are in the session visualization folder (`court-1280.png`, `stadium-1280.png`); these are arena previews with actual sprites, without battle HUD. Browser regression rerun before push.

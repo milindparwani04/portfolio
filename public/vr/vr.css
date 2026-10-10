@@ -348,8 +348,9 @@
 .tvb-hpslot { position: absolute; z-index: 2; width: clamp(140px, 30cqw, 270px); }
 .tvb-hpslot--p2a { left: 2%; top: 4%; }
 .tvb-hpslot--p2b { left: 2%; top: 26%; }
-.tvb-hpslot--p1a { right: 2%; top: 50%; }
-.tvb-hpslot--p1b { right: 2%; top: 72%; }
+/* Stack the player's health bars at the bottom, below Ren's right-hand Pokémon. */
+.tvb-hpslot--p1a { right: 2%; bottom: 1%; transform: translateY(calc(-100% - 4px)); }
+.tvb-hpslot--p1b { right: 2%; bottom: 1%; }
 .tvb-hpbox { padding: 4px 9px 5px; background: #f8f6e0; color: #2b2b33; border: 3px solid #2b2b33; border-radius: 0 0 14px 0; box-shadow: 4px 4px 0 rgba(0, 0, 0, .25); font-size: .72rem; line-height: 1.25; }
 .tvb-hpslot--p1a .tvb-hpbox, .tvb-hpslot--p1b .tvb-hpbox { border-radius: 14px 0 0 0; }
 .tvb-hp-top { display: flex; justify-content: space-between; gap: 6px; font-weight: 700; text-transform: uppercase; }
