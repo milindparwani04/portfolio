@@ -13,7 +13,7 @@
 
 ## Current assignment
 
-Status: Ren cinematic integration built and tested (2026-10-10), release explicitly authorized by Milind. Six 38-second first-fainted-species videos now wired into the battle; production verification pending push.
+Status: Ren cinematic integration built and tested (2026-10-10), release explicitly authorized by Milind. Six 38-second first-fainted-species videos now wired into the battle; deployed and verified on milindparwani.com (code release 072131b).
 
 Scope: Integrate and deploy the approved Ren championship cinematics with the user-supplied soundtrack, preserving first-fainted revival and continuing the song into battle at its 38-second drop.
 
@@ -40,7 +40,7 @@ Validation:
 
 Milind explicitly authorized wiring the six 38-second species-specific cinematics into the game and pushing live, then supplied the Marnie Battle Theme remix (GlitchxCity ft. Scottay). The player always mutes embedded crowd audio and starts the MP3 at zero. Music is the cutscene clock; at 38 seconds the engine resumes and the same media element continues without restarting. Skip seeks to 38 seconds. Master mute/Music volume, background pause/resume, cancellation and asset failure handling are supported. Actual first-fainted engine payload selects the Pokémon. No Worker/secrets changes.
 
-Validation: browser checks cover six asset URLs, species mapping, mute/music volume, visibility, skip, cancellation, missing video, autoplay denial, mobile/keyboard, actual video completion and battle event dispatch/resume once. Core/engine regression previously 52/52 passing. Full natural 38-second playback also passed: music remains playing after the video disappears. All 52 core/engine checks passed again. Preserved Claude’s latest preview Start battle and chip-height fixes by merging origin/main. Loader v16 / UI v46. Release push/production checks pending below.
+Validation: browser checks cover six asset URLs, species mapping, mute/music volume, visibility, skip, cancellation, missing video, autoplay denial, mobile/keyboard, actual video completion and battle event dispatch/resume once. Core/engine regression previously 52/52 passing. Full natural 38-second playback also passed: music remains playing after the video disappears. All 52 core/engine checks passed again. Preserved Claude’s latest preview Start battle and chip-height fixes by merging origin/main. Loader v16 / UI v46. Published code release `072131b` to main and verified https://milindparwani.com: UI v46, cinematic module, all six WebMs, real MP3 playback, full natural 38-second completion with continuing audio, mute/volume, background pause/resume, mobile/keyboard, error/autoplay fallbacks and injected actual battle event handling. No page errors. Cloudflare may return 200 rather than 206 for Range requests; browser regression validates media content either way. Production encounter dispatch was injected for deterministic testing, not reached by playing a complete match.
 
 
 ### 2026-10-10 — Ren cinematic integration and authorized release
@@ -48,7 +48,7 @@ Validation: browser checks cover six asset URLs, species mapping, mute/music vol
 - Milind explicitly requested wiring the six approved videos into the game and pushing to the live site. Added `public/vr/vr-cinematic.js`, six lazy-loaded WebMs under `public/assets/vr/cinematics/ren-v1/`, battle integration and cinematic layout; bumped game loader and homepage script versions. Updated settings/credits and third-party notices for recorded CC0 crowd audio.
 - The original engine payload selects the first-fainted species. Video time drives the 38-second acknowledgement; normal completion, keyboard/Escape Skip and media failure resume once, preserving the engine's existing 50% revival. Master mute/crowd volume apply; background tabs pause, blocked autoplay offers Play/Skip, loading/stalls time out, disposal stops media/listeners. No synthetic escalation score/teleport/drop sounds play during the video. Stadium persists afterward.
 - Validation: 52 existing core/engine tests pass; browser regressions cover all six asset mappings/HTTP range reads, invalid data, mute/volume, background pause/resume, duplicate Skip, cancellation, missing file, autoplay denial, mobile keyboard and actual media completion. Actual battle handler tested with an injected Kingambit escalation, once-only worker resume, persistent stadium, ignored duplicate event and disposal; no page errors.
-- Release is explicitly authorized; production verification pending push. Unrelated `.claude/worktrees/` left untouched. Engine mechanics unchanged.
+- Release is explicitly authorized; deployed and verified on milindparwani.com (code release 072131b). Unrelated `.claude/worktrees/` left untouched. Engine mechanics unchanged.
 
 ### 2026-10-10 — Full 38-second Ren cinematic and first-fainted species variants
 
