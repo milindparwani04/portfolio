@@ -140,7 +140,7 @@
   }
   function arena(phase, seed = 7) {
     const rand = seeded(seed);
-    return `<svg class="tvb-arena-art" viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice" shape-rendering="crispEdges" aria-hidden="true" focusable="false">${phase === 'stadium' ? stadium(rand) : court(rand)}</svg>`;
+    return `<svg class="tvb-arena-art" viewBox="0 0 320 180" preserveAspectRatio="none" shape-rendering="crispEdges" aria-hidden="true" focusable="false">${phase === 'stadium' ? stadium(rand) : court(rand)}</svg>`;
   }
 
   window.TVBArt = { trainer, drawTrainer, arena, crowd };

@@ -31,4 +31,13 @@ await page.waitForSelector('.tvb-cinematic video');assert.equal(await page.locat
 await page.locator('.tvb-cinematic-controls button').last().press('Enter');
 await page.waitForFunction(()=>workerMessages.some(m=>m.t==='resume'));assert.equal(await page.evaluate(()=>workerMessages.filter(m=>m.t==='resume').length),1);assert.equal(await page.locator('.tvb-frame').getAttribute('data-phase'),'stadium');assert.equal(await page.evaluate(()=>TVBAudio.recording.current.currentTime>=38&&!TVBAudio.recording.current.paused),true);
 await page.evaluate(()=>{testWorker.onmessage({data:{t:'escalation',id:'real-dispatch-test',fainted:['Kingambit']}})});await page.waitForTimeout(100);assert.equal(await page.locator('.tvb-cinematic').count(),0);assert.equal(await page.evaluate(()=>workerMessages.filter(m=>m.t==='resume').length),1);await page.evaluate(()=>VictoryRoad.dispose());assert.equal(errors.length,0,errors.join('\n'));console.log('PASS: actual battle handler selects payload species, skip resumes worker exactly once, stadium persists, duplicate escalation ignored, disposal');
+// Check the full backdrop and platform grounding at wide, standard and phone proportions.
+for(const [width,height] of [[1280,440],[800,450],[360,420]])for(const phase of ['court','stadium']){
+ await page.setViewportSize({width,height:Math.max(height,720)});
+ await page.evaluate(({width,height,phase})=>{document.body.innerHTML=`<div class="tvb-frame" data-phase="${phase}" style="width:${width-40}px;height:${height}px;flex:none"><div class="tvb-stage"></div></div>`;let stage=document.querySelector('.tvb-stage');stage.innerHTML=TVBArt.arena(phase)+['p2a','p2b','p1a','p1b'].map((pos,i)=>`<div class="tvb-spot tvb-spot--${pos}"><span class="tvb-platform"></span><img class="tvb-mon-sprite" src="/assets/vr/sprites/${i<2?'front':'back'}/${['kingambit','sneasler','dunsparce','meowscarada'][i]}.png"></div>`).join('');},{width,height,phase});
+ assert.equal(await page.locator('svg').getAttribute('preserveAspectRatio'),'none');
+ assert.equal(await page.evaluate(()=>{let s=document.querySelector('.tvb-stage').getBoundingClientRect();return [...document.querySelectorAll('.tvb-platform')].every(p=>{let r=p.getBoundingClientRect();return r.top>s.top+s.height*.49&&r.bottom<=s.bottom&&r.left>=s.left&&r.right<=s.right})}),true);
+ if(process.env.REN_LAYOUT_SCREENSHOTS)await page.locator('.tvb-frame').screenshot({path:process.env.REN_LAYOUT_SCREENSHOTS+`/${phase}-${width}.png`});
+}
+console.log('PASS: court and stadium backdrop retained; four platforms grounded at wide, standard and phone sizes');
 }finally{if(browser)await browser.close();server.close();}})().catch(e=>{console.error(e);process.exitCode=1});

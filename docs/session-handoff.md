@@ -834,3 +834,8 @@ Done: created the four project documents (this Handoff, Security Handoff, Requir
 Tested: Worker source and KV namespace confirmed via the Cloudflare connector. Zone-level dashboard settings (SSL, WAF, headers) could not be read and are marked "verify" in the Security Handoff.
 
 Next session starts with: verify the dashboard checklist in Security Handoff section 3, then fix finding S-01 (reflected HTML in the Spotify callback).
+
+
+### 2026-10-10 — Ground battle Pokémon on the field
+
+Corrected opposing Pokémon platforms overlapping the fence: all four slots now anchor from the bottom of the playing surface rather than from sprite tops, with matching phone rules. Background SVG scales to the stage instead of cropping the horizon at wide aspect ratios. Court/stadium scenery remains visible; near sprites capped at 46% of stage height. Loader v17 / UI v47. Browser verification passed at 1280×440, 800×450 and 360×420 for both phases; all platform bounds lie below the field horizon and inside the stage. Desktop court screenshot inspected. Existing cinematic/audio and battle-dispatch browser checks passed. No engine/Worker changes.

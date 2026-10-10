@@ -36,6 +36,11 @@ Validation:
 
 ## Work log
 
+### 2026-10-10 — Ground battle Pokémon on the field
+
+Corrected opposing Pokémon platforms overlapping the fence: all four slots now anchor from the bottom of the playing surface rather than from sprite tops, with matching phone rules. Background SVG scales to the stage instead of cropping the horizon at wide aspect ratios. Court/stadium scenery remains visible; near sprites capped at 46% of stage height. Loader v17 / UI v47. Browser verification passed at 1280×440, 800×450 and 360×420 for both phases; all platform bounds lie below the field horizon and inside the stage. Desktop court screenshot inspected. Existing cinematic/audio and battle-dispatch browser checks passed. No engine/Worker changes.
+
+
 ### 2026-10-10 — Ren cutscene soundtrack and live integration
 
 Milind explicitly authorized wiring the six 38-second species-specific cinematics into the game and pushing live, then supplied the Marnie Battle Theme remix (GlitchxCity ft. Scottay). The player always mutes embedded crowd audio and starts the MP3 at zero. Music is the cutscene clock; at 38 seconds the engine resumes and the same media element continues without restarting. Skip seeks to 38 seconds. Master mute/Music volume, background pause/resume, cancellation and asset failure handling are supported. Actual first-fainted engine payload selects the Pokémon. No Worker/secrets changes.

@@ -314,10 +314,11 @@
 @keyframes tvb-fans { 50% { transform: translateY(-1px); } }
 /* Sprites about 20% larger than before; far (Ren's) slots smaller than near ones for depth. */
 .tvb-spot { position: absolute; z-index: 1; width: min(20.5cqw, 41cqh); aspect-ratio: 1; display: grid; place-items: end center; transition: filter .2s; }
-.tvb-spot--p2a { left: 53%; top: 3%; }
-.tvb-spot--p2b { left: 74%; top: 10%; }
-.tvb-spot--p1a { left: 4%; top: 37%; width: min(25cqw, 52cqh); }
-.tvb-spot--p1b { left: 26%; top: 44%; width: min(25cqw, 52cqh); }
+/* Anchor feet to the playing surface, independently of sprite size and viewport shape. */
+.tvb-spot--p2a { left: 53%; bottom: 34%; }
+.tvb-spot--p2b { left: 74%; bottom: 27%; }
+.tvb-spot--p1a { left: 4%; bottom: 10%; width: min(25cqw, 46cqh); }
+.tvb-spot--p1b { left: 26%; bottom: 3%; width: min(25cqw, 46cqh); }
 .tvb-spot.is-choosing .tvb-platform { box-shadow: 0 0 0 3px var(--t-yellow), inset 0 -4px 0 rgba(0, 0, 0, .18); }
 /* Platforms: a mown pad with an earth rim on the court; dark slate with an amber rim in the stadium. */
 .tvb-platform { position: absolute; left: 4%; right: 4%; bottom: 2%; height: 17%; border-radius: 50%; background: radial-gradient(ellipse at center, #a9d47f 0 52%, #7fae5a 53% 74%, #8a6a44 75% 100%); box-shadow: inset 0 -4px 0 rgba(0, 0, 0, .18); }
@@ -496,10 +497,10 @@
   .tvb-radar { width: 150px; }
   .tvb-stage { min-height: 200px; }
   .tvb-spot { width: min(30cqw, 46cqh); }
-  .tvb-spot--p2a { left: 40%; top: 4%; }
-  .tvb-spot--p2b { left: 68%; top: 10%; }
-  .tvb-spot--p1a { left: 0; top: 41%; width: min(37cqw, 56cqh); }
-  .tvb-spot--p1b { left: 30%; top: 48%; width: min(37cqw, 56cqh); }
+  .tvb-spot--p2a { left: 40%; bottom: 34%; }
+  .tvb-spot--p2b { left: 68%; bottom: 27%; }
+  .tvb-spot--p1a { left: 0; bottom: 10%; width: min(37cqw, 46cqh); }
+  .tvb-spot--p1b { left: 30%; bottom: 3%; width: min(37cqw, 46cqh); }
   .tvb-left--p2 { left: auto; right: 2%; top: 2%; bottom: auto; }
   .tvb-hpslot { width: 46cqw; min-width: 0; }
   .tvb-hpbox { padding: 2px 5px 3px; font-size: .62rem; border-width: 2px; }
