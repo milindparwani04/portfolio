@@ -13,7 +13,7 @@
 
 ## Current assignment
 
-Status: Weather and terrain visual assignment implemented and browser-tested (2026-10-10); release in progress.
+Status: Weather and terrain visual assignment implemented and browser-tested (2026-10-10); released; dedicated weather/terrain production browser checks passed.
 
 Scope completed: Six first-fainted-species Ren cinematics; supplied Marnie remix begins at cutscene start and continues into battle at 38 seconds; embedded crowd muted; only bottom video subtitles visible. Court/stadium Pokémon grounded on the field with full scenery. Final HUD: Ren top-left and player bottom-right, matching 8px corner insets, 4px gaps between bars, vertical party dots right of Ren and left of player. Button UI unchanged. Loader v21 / UI v51.
 
@@ -235,3 +235,6 @@ Validation: browser checks cover six asset URLs, species mapping, mute/music vol
 
 
 Release coordination: the concurrent item-UI commit `90a2469` included the field module/loader/battle hooks while this task was running. The separate weather/terrain CSS and browser tests are completed in the following Codex release; all item work retained.
+
+
+Weather/terrain release verification: `6ab7614` pushed; dedicated live browser checks passed rendered ground styles for all four terrains, sand particles, coexistence, replacements and expiry. Local full browser suite passed. The full production suite timed out in the pre-existing soundtrack Skip seek-to-38 check before terrain tests; do not report a complete production regression pass. Recorded for follow-up; no conclusion about cause.

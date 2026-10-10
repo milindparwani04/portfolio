@@ -115,4 +115,4 @@ The visible Toolbox shows all nine tools. Image Converter, Tempo Tap, Key/BPM Lo
 | Standalone Liveliness Index | Dropped | Merged into Where Next. |
 
 
-Weather/terrain presentation (2026-10-10): engine-driven terrain ground effects and independent weather atmosphere implemented and browser-tested; replacements/expiry and ability starts supported. Mechanics remain in Showdown.
+Weather/terrain presentation (2026-10-10): engine-driven terrain ground effects and independent weather atmosphere live (6ab7614), local suite and dedicated production visuals verified; replacements/expiry and ability starts supported. Mechanics remain in Showdown.

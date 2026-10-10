@@ -881,3 +881,6 @@ Validation: browser suite passed actual battle log dispatch (Misty Surge + sands
 
 
 Release coordination: the concurrent item-UI commit `90a2469` included the field module/loader/battle hooks while this task was running. The separate weather/terrain CSS and browser tests are completed in the following Codex release; all item work retained.
+
+
+Weather/terrain release verification: `6ab7614` pushed; dedicated live browser checks passed rendered ground styles for all four terrains, sand particles, coexistence, replacements and expiry. Local full browser suite passed. The full production suite timed out in the pre-existing soundtrack Skip seek-to-38 check before terrain tests; do not report a complete production regression pass. Recorded for follow-up; no conclusion about cause.
