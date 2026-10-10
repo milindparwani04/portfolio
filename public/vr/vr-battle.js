@@ -16,7 +16,7 @@
 
   const T = window.TVB;
   const { G, C, A, ART, h, go, announce, typeRow, TYPE_COLOURS } = T;
-  const ENGINE_URL = '/vr/vr-engine.js?v=4';
+  const ENGINE_URL = '/vr/vr-engine.js?v=5';
   const CHAMP = { name: 'Ren Kestrel', short: 'Ren', label: 'Ren Kestrel · Reigning Champion' };
   const CUE = A.MANIFEST.escalation.resumeCueSeconds;
   const toId = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');

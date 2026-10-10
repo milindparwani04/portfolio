@@ -271,6 +271,31 @@ test('the engine refuses invalid teams', () => {
   assert.throws(() => E.createEngine({ seed: 1, player: { name: 'You', team: ok.slice(0, 1) } }, () => {}), /two to six/);
 });
 
+test('Ren brings four of his six at random, and any two can lead', () => {
+  const brought = new Map();
+  const leads = new Set();
+  const seen = new Set();
+  for (let seed = 1; seed <= 200; seed += 1) {
+    const r = run({ seed, player: { name: 'You', team: SAMPLE_TEAM } }, () => 'default', { maxSteps: 2 });
+    const log = logOf(r);
+    const switched = log.filter((l) => /^\|switch\|p2[ab]: /.test(l)).map((l) => l.split('|')[3].split(',')[0]);
+    const size = log.find((l) => l.startsWith('|teamsize|p2|'));
+    assert.equal(size, '|teamsize|p2|4');
+    const pair = switched.slice(0, 2).sort().join('+');
+    leads.add(pair);
+    switched.slice(0, 2).forEach((s) => { brought.set(s, (brought.get(s) || 0) + 1); seen.add(s); });
+  }
+  // Only his own six, all of them seen leading, and many different lead pairs (15 possible).
+  const six = plain(E.CHAMPION.team).map((s) => s.species);
+  [...seen].forEach((s) => assert.ok(six.some((x) => s === x || s.startsWith(x.split('-')[0])), s));
+  assert.equal(seen.size, 6, [...seen].join());
+  assert.ok(leads.size >= 12, `${leads.size} lead pairs: ${[...leads].join(' ')}`);
+  // Same seed, same choice.
+  const a = logOf(run({ seed: 77, player: { name: 'You', team: SAMPLE_TEAM } }, () => 'default', { maxSteps: 2 })).filter((l) => /^\|switch\|p2/.test(l));
+  const b = logOf(run({ seed: 77, player: { name: 'You', team: SAMPLE_TEAM } }, () => 'default', { maxSteps: 2 })).filter((l) => /^\|switch\|p2/.test(l));
+  assert.deepEqual(a, b);
+});
+
 test('the engine boundary enforces the random-team composition', () => {
   for (let seed = 1; seed <= 200; seed += 1) {
     const team = C.battleLoadout(cat, draftOf([], { random: true }), seed, {}).sets;
@@ -425,7 +450,7 @@ test('escalation: exactly once, after two different champion Pokémon faint, rev
     const log = logOf(r);
     const heals = log.filter((l) => l.startsWith('|-heal|p2') && l.includes('[from] vr: championship'));
     assert.equal(heals.length, 1);
-    heals.forEach((l) => assert.match(l, /\|(49|50)\/100\|/, l)); // half, shown as a percentage (exact HP: next test)
+    heals.forEach((l) => assert.match(l, /\|(49|50)\/100[gyr]?\|/, l)); // half, shown as a percentage (exact HP: next test)
     // Only Pokémon the champion brought can come back.
     const brought = new Set(log.filter((l) => l.startsWith('|switch|p2')).map((l) => l.split('|')[2].replace(/^p2[ab]: /, '')));
     heals.forEach((l) => assert.ok(brought.has(l.split('|')[2].replace(/^p2[ab]?: /, '')), l));
@@ -502,7 +527,9 @@ test('if the player is out when the second champion Pokémon falls, the loss sta
 function strategicPolicy(seed) {
   const view = E.createView('p1');
   const ai = E.createAI(D, C.rng(seed ^ 0x77777777), 50, 'hard');
-  return { view, pick: (req) => ai.decide(req, view) || 'default' };
+  // Same four as the naive player (team 1234), so the comparison is about in-battle decisions;
+  // the AI's own team preview is Ren's random pick.
+  return { view, pick: (req) => (req.teamPreview ? 'team 1234' : ai.decide(req, view) || 'default') };
 }
 test('strategic play beats the champion more often than naive play (reported sample)', () => {
   const N = 30;

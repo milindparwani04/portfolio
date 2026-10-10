@@ -308,25 +308,21 @@ export function createAI(Dex, rand, level = 50, difficulty = 'normal') {
     }).join(', ');
   }
 
-  // Team preview: bring four. Floette (the Mega) and Sneasler (Fake Out) lead; the back two are the
-  // best of the rest against the Pokémon the player showed.
-  function teamPreview(req, view) {
-    const mons = req.side.pokemon.map((p, n) => ({ p, n: n + 1, sp: p.details.split(',')[0] }));
-    const foeSpecies = view.preview[view.foe].map((s) => species(s));
-    const threat = (m) => {
-      const user = { species: m.sp, stats: m.p.stats, item: m.p.item ? dex.items.get(m.p.item).name : '', ability: dex.abilities.get(m.p.baseAbility).name, level, boosts: {} };
-      return foeSpecies.reduce((sum, f) => sum + Math.min(100, Math.max(0, ...m.p.moves.map((id) => damagePct(dex.moves.get(id), user, { species: f.name, hp: 100, level, moves: [] }, 1, view)))), 0);
-    };
-    const leads = ['Sneasler', 'Floette-Eternal'].map((name) => mons.find((m) => m.sp === name)).filter(Boolean);
-    const rest = mons.filter((m) => !leads.includes(m)).map((m) => ({ m, s: threat(m) + rand() * 5 }));
-    rest.sort((a, b) => b.s - a.s);
-    const order = [...leads, ...rest.map((r) => r.m)].slice(0, 4);
-    return `team ${order.map((m) => m.n).join('')}`;
+  // Team preview: bring four of the six at random, in a random order, so any two can lead
+  // (Milind, 2026-10-10). Uniform Fisher-Yates on the AI's own seeded stream: every four and every
+  // lead pair is equally likely, and the same seed brings the same team.
+  function teamPreview(req) {
+    const order = req.side.pokemon.map((_, n) => n + 1);
+    for (let i = order.length - 1; i > 0; i -= 1) {
+      const j = Math.floor(rand() * (i + 1));
+      [order[i], order[j]] = [order[j], order[i]];
+    }
+    return `team ${order.slice(0, 4).join('')}`;
   }
 
   function decide(req, view) {
     if (req.wait) return null;
-    if (req.teamPreview) return teamPreview(req, view);
+    if (req.teamPreview) return teamPreview(req);
     if (req.forceSwitch) return chooseSwitches(req, view);
     return chooseMoves(req, view);
   }

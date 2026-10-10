@@ -12,7 +12,7 @@
 
 ## Current assignment
 
-Status: **The Very Best refinements (second 2026-10-10 brief, [`the-very-best-refinement-master-prompt.md`](the-very-best-refinement-master-prompt.md)) built and tested locally, not committed or pushed** — waiting for Milind's go. Before that: **The Very Best (Victory Road overhaul) released 2026-10-10** at Milind's instruction (build record [`victory-road-build.md`](victory-road-build.md)). Production check and Lighthouse (performance 91–97, others 100) done. Open: rights blockers, licensed music, real Firefox/Safari/iOS. Before that: **Victory Road shipped 2026-10-07** (Phases 0–6). Earlier the same day: Parwani-DOS redesign complete (all 9 phases), Home drawn on the mockup's scaled canvas, Media/Gigs six per batch. Open items: article pages for the Journal, an optional TMDB key for sharper media posters, Victory Road AI depth (see its known limitations). Two weekly routines still run on Mondays (Gig Finder 06:00, Media 06:30 Dubai).
+Status: **The Very Best refinements (second 2026-10-10 brief, [`the-very-best-refinement-master-prompt.md`](the-very-best-refinement-master-prompt.md)) released 2026-10-10** (`c365262`), followed by random Ren leads (any four of his six, any two lead). Before that: **The Very Best (Victory Road overhaul) released 2026-10-10** at Milind's instruction (build record [`victory-road-build.md`](victory-road-build.md)). Production check and Lighthouse (performance 91–97, others 100) done. Open: rights blockers, licensed music, real Firefox/Safari/iOS. Before that: **Victory Road shipped 2026-10-07** (Phases 0–6). Earlier the same day: Parwani-DOS redesign complete (all 9 phases), Home drawn on the mockup's scaled canvas, Media/Gigs six per batch. Open items: article pages for the Journal, an optional TMDB key for sharper media posters, Victory Road AI depth (see its known limitations). Two weekly routines still run on Mondays (Gig Finder 06:00, Media 06:30 Dubai).
 
 Areas Claude has most recently owned (coordinate before Codex changes these):
 
@@ -87,6 +87,12 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 - Lighthouse `valid-source-maps` flags a third-party library map; it doesn't affect the score categories that matter (production: 90 / 100 / 100).
 
 ## Work log (newest first)
+
+### 2026-10-10 — Refinements pushed; random Ren leads
+
+- Committed and pushed the refinements together with Codex's uncommitted refinement prompt and handoff record (unchanged), as Milind asked.
+- `ai.js` `teamPreview`: uniform seeded shuffle, first four (no fixed leads). Tried a 'matchup' preview option for the benchmark's strategic player first; it changed nothing, the real cause of the strategic drop was that player bringing weak leads — so both test players now bring `team 1234` and the option was removed. New engine test for random leads; escalation test's HP regex now allows the colour suffix. Engine rebuilt (`?v=5`).
+- Careful: a `sed` with `\|` in Git Bash replaced every `/` in a test file; restored from git. Use the scratchpad patcher for regex-heavy edits.
 
 ### 2026-10-10 — The Very Best refinements (second brief), local
 

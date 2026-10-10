@@ -2,6 +2,7 @@
 // Plays the fixed sample team against Ren with two player policies over the same seeds:
 //   naive      Showdown's first legal option every time
 //   strategic  the champion's own heuristic, driving the player from the player's own view
+//              (both bring the same four, team 1234: the AI's team preview is Ren's random pick)
 // with and without the championship escalation. Reports win counts and average turns.
 import { createRequire } from 'node:module';
 import { loadEngine, SAMPLE_TEAM } from './harness.mjs';
@@ -32,7 +33,7 @@ function battle(seed, strategic, escalation) {
       const lines = events.filter((e) => e.t === 'log').flatMap((e) => e.lines);
       view.feed(lines.slice(fed));
       fed = lines.length;
-      try { choice = ai.decide(req, view) || 'default'; } catch (_) { choice = 'default'; }
+      try { choice = req.teamPreview ? 'team 1234' : ai.decide(req, view) || 'default'; } catch (_) { choice = 'default'; }
     }
     if (!engine.choose(choice, req.rqid) && !request) engine.choose('default', req.rqid);
   }
