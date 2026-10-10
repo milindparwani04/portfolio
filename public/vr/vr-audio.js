@@ -3,8 +3,8 @@
 // clicks Insert cartridge (the AudioContext is created on that gesture or later).
 //
 // AUDIO_MANIFEST lists the four music roles. Every role has an original synthesised fallback, which
-// is what ships today. A role's `src` stays null until a recording is cleared for game use: the
-// requested tracks are recorded here as references with status 'blocked', not as shipped audio
+// backs the menu and normal battle. The escalation recording was supplied by Milind; other
+// requested tracks remain blocked references
 // (see docs/victory-road-build.md, "Audio and rights"). A cleared file would be fetched,
 // decoded and scheduled on the same clock; the escalation role's resumeCueSeconds marks its drop.
 (function () {
@@ -14,7 +14,7 @@
     version: 1,
     menu: { src: null, status: 'blocked', reference: 'Glimmering Pallet Lights (Pixabay) — licence certificate and provenance not yet verified', fallback: 'original synth: menu loop', loop: true },
     battle: { src: null, status: 'blocked', reference: 'Sword and Shield Trailer Theme (Remix), GlitchxCity — not licensed for game use', fallback: 'original synth: battle loop', loop: true },
-    escalation: { src: null, status: 'blocked', reference: 'Marnie Battle Theme, GlitchxCity & Scottay — not licensed for game use', fallback: 'original synth: 38 s build and drop', resumeCueSeconds: 38, loop: false },
+    escalation: { src: '/assets/vr/cinematics/ren-v1/marnie-remix.mp3', status: 'user-supplied', reference: 'Marnie Battle Theme, GlitchxCity & Scottay — supplied by Milind; licence not independently verified', fallback: 'original synth: 38 s build and drop', resumeCueSeconds: 38, loop: false },
     crowd: { src: null, status: 'original', reference: 'original synthesised crowd', fallback: 'original synth: crowd', loop: true }
   });
 
@@ -166,6 +166,29 @@
       };
     })()
   };
+  // The same element continues across the cutscene and final round.
+  let recording = null, recordingWasPlaying = false;
+  function syncRecording() {
+    if (!recording) return;
+    recording.muted = settings.muted;
+    recording.volume = settings.music;
+  }
+  function stopRecording() {
+    if (!recording) return;
+    recording.pause(); recording.removeAttribute('src'); recording.load(); recording = null;
+  }
+  function prepareRecording() {
+    stopMusic();
+    recording = new Audio('/assets/vr/cinematics/ren-v1/marnie-remix.mp3');
+    recording.preload = 'auto';
+    syncRecording();
+    return recording;
+  }
+  document.addEventListener('visibilitychange', () => {
+    if (!recording) return;
+    if (document.hidden) { recordingWasPlaying = !recording.paused; recording.pause(); }
+    else if (recordingWasPlaying) recording.play().catch(() => {});
+  });
   let song = null; // { name, n, next, timer }
   function schedule() {
     if (!song || !ctx) return;
@@ -178,6 +201,8 @@
   }
   let wanted = null; // the role the game wants playing (kept when muted, resumed when unmuted)
   function startMusic(name, at) {
+    if (name === 'finale' && recording) { wanted = 'recording'; return; }
+    stopRecording();
     wanted = name;
     stopSong();
     if (settings.muted || !settings.music) return;
@@ -191,7 +216,7 @@
     if (song) window.clearInterval(song.timer);
     song = null;
   }
-  function stopMusic() { wanted = null; stopSong(); }
+  function stopMusic() { wanted = null; stopSong(); stopRecording(); }
 
   // ---------- Crowd: filtered noise with swells and cheers (original) ----------
   let crowd = null;
@@ -312,12 +337,15 @@
     music: { start: startMusic, stop: stopMusic, get wanted() { return wanted; } },
     crowd: { start: startCrowd, stop: stopCrowd },
     escalationScore,
+    recording: { prepare: prepareRecording, get current() { return recording; }, stop: stopRecording },
     dropHit,
     settings,
     setMuted(on) {
       settings.muted = !!on;
       store.set('pdosVrMuted', on ? '1' : '0');
       if (master && ctx) master.gain.setTargetAtTime(on ? 0 : 1, ctx.currentTime, 0.02);
+      syncRecording();
+      if (recording) return;
       if (on) { const w = wanted; stopSong(); stopCrowd(); wanted = w; } else if (wanted) startMusic(wanted);
     },
     setLevel(kind, v) {
@@ -325,7 +353,8 @@
       settings[kind] = Math.max(0, Math.min(1, Number(v) || 0));
       store.set({ music: 'pdosTvbMusic', sfx: 'pdosTvbSfx', crowd: 'pdosTvbCrowd' }[kind], String(settings[kind]));
       if (bus[kind] && ctx) bus[kind].gain.setTargetAtTime(settings[kind], ctx.currentTime, 0.02);
-      if (kind === 'music' && settings.music > 0 && wanted && !song && !settings.muted) startMusic(wanted);
+      syncRecording();
+      if (!recording && kind === 'music' && settings.music > 0 && wanted && !song && !settings.muted) startMusic(wanted);
     },
     close() {
       stopMusic();

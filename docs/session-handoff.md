@@ -119,7 +119,19 @@ External accounts connected (owner-only): Spotify (re-authorize at `/api/spotify
 
 Settled removals (do not re-propose without flagging): YouTube to MP3/MP4/WAV converters (ToS and backend complexity), Seamless Set project, standalone Liveliness Index (merged into Where Next), public location card (built and dropped 2026-10-04: Milind judged showing his whereabouts not responsible).
 
-## Session log (newest first)
+## Session log
+
+### 2026-10-10 — Ren cutscene soundtrack and live integration
+
+Milind explicitly authorized wiring the six 38-second species-specific cinematics into the game and pushing live, then supplied the Marnie Battle Theme remix (GlitchxCity ft. Scottay). The player always mutes embedded crowd audio and starts the MP3 at zero. Music is the cutscene clock; at 38 seconds the engine resumes and the same media element continues without restarting. Skip seeks to 38 seconds. Master mute/Music volume, background pause/resume, cancellation and asset failure handling are supported. Actual first-fainted engine payload selects the Pokémon. No Worker/secrets changes.
+
+Validation: browser checks cover six asset URLs, species mapping, mute/music volume, visibility, skip, cancellation, missing video, autoplay denial, mobile/keyboard, actual video completion and battle event dispatch/resume once. Core/engine regression previously 52/52 passing. Release push/production checks pending below.
+ (newest first)
+
+### 2026-10-10 — Codex: Ren cinematic wired for authorized release
+
+- Integrated six approved 38-second fixed-shot pixel-art videos into the battle, selecting the engine's first-fainted Pokémon. Crowd-only recorded audio; master mute/crowd volume, Skip, autoplay prompt, background pause, failure timeout and disposal handled. Engine retains authority over the once-only 50% revival; stadium remains after playback.
+- 52 game regressions and dedicated browser/player/battle-dispatch tests pass. Credits/notices updated. Milind explicitly authorized push/live deployment; production verification pending.
 
 ### 2026-10-10 — The Very Best refinements pushed; Ren's leads randomised
 Agent: Claude · Model: Opus 5.5

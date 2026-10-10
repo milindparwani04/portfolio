@@ -461,6 +461,11 @@
 .tvb-esc-dialog { position: absolute; left: 4%; right: 36%; bottom: 8%; padding: 10px 14px; background: rgba(20, 20, 28, .9); border: 3px solid #f4f3ef; box-shadow: 4px 4px 0 rgba(0, 0, 0, .5); }
 .tvb-esc-who { display: block; color: #f7c947; font-size: .66rem; letter-spacing: .08em; text-transform: uppercase; }
 .tvb-esc-line { margin: 2px 0 0; font-size: 1rem; line-height: 1.4; min-height: 1.4em; }
+.tvb-cinematic { position: absolute; inset: 0; z-index: 30; background: #050609; display: flex; flex-direction: column; justify-content: center; overflow: hidden; }
+.tvb-cinematic video { display: block; width: 100%; min-height: 0; max-height: calc(100% - 72px); object-fit: contain; }
+.tvb-cinematic-controls { position: absolute; right: 8px; top: 8px; display: flex; gap: 6px; }
+.tvb-cinematic-caption { margin: 4px 12px; color: #f4e7ce; text-align: center; font-size: .8rem; line-height: 1.4; }
+.tvb-cinematic [hidden] { display: none; }
 .tvb-esc-progress { position: absolute; left: 0; right: 0; top: 0; height: 4px; background: rgba(255, 255, 255, .15); }
 .tvb-esc-progress span { display: block; height: 100%; width: 0; background: #f7c947; }
 .tvb-esc-skip { position: absolute; right: 10px; top: 12px; z-index: 2; }

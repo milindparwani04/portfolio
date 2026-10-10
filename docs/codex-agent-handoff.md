@@ -13,17 +13,11 @@
 
 ## Current assignment
 
-Status: The Very Best follow-up refinement prompt complete (2026-10-10): [`the-very-best-refinement-master-prompt.md`](the-very-best-refinement-master-prompt.md). Prior overhaul is implemented according to the shared handoff. This new assignment is documentation/research only; no game implementation assigned to Codex.
+Status: Ren cinematic integration built and tested (2026-10-10), release explicitly authorized by Milind. Six 38-second first-fainted-species videos now wired into the battle; production verification pending push.
 
-Scope: Inspect the implemented Victory Road game, research licensing/data/timing constraints, and translate Milind's 2026-10-10 overhaul request into [`the-very-best-master-prompt.md`](the-very-best-master-prompt.md). The earlier 2026-10-07 prompt remains historical context; the new prompt supersedes its conflicting requirements. Update this individual handoff and the shared project handoff.
+Scope: Integrate and deploy the approved Ren championship cinematics with the user-supplied soundtrack, preserving first-fainted revival and continuing the song into battle at its 38-second drop.
 
-Files changed in the current assignment:
-
-- `docs/the-very-best-master-prompt.md` — new implementation brief, source links, architecture, acceptance criteria and phased delivery.
-- `docs/session-handoff.md` — shared pending-overhaul note and session entry.
-- `docs/requirements-tracker.md` — planned overhaul linked separately from the live existing game.
-- `docs/codex-agent-handoff.md` — current assignment and research record.
-- No implementation, generated engine, asset, Worker, secret or deployment changes; no commit, push or deploy.
+Current files: `public/vr/vr-cinematic.js`, `vr-audio.js`, `vr-battle.js`, `vr-game.js`, `vr.css`, six cinematic videos and supplied MP3 under `public/assets/vr/cinematics/ren-v1/`, loader/cache versions, NOTICE, browser regression and living handoffs/tracker.
 
 Previous assignment files (2026-10-07):
 
@@ -41,6 +35,20 @@ Validation:
 - Preserved the pre-existing uncommitted 2026-10-02 Codex handoff entries; no unrelated work was overwritten.
 
 ## Work log
+
+### 2026-10-10 — Ren cutscene soundtrack and live integration
+
+Milind explicitly authorized wiring the six 38-second species-specific cinematics into the game and pushing live, then supplied the Marnie Battle Theme remix (GlitchxCity ft. Scottay). The player always mutes embedded crowd audio and starts the MP3 at zero. Music is the cutscene clock; at 38 seconds the engine resumes and the same media element continues without restarting. Skip seeks to 38 seconds. Master mute/Music volume, background pause/resume, cancellation and asset failure handling are supported. Actual first-fainted engine payload selects the Pokémon. No Worker/secrets changes.
+
+Validation: browser checks cover six asset URLs, species mapping, mute/music volume, visibility, skip, cancellation, missing video, autoplay denial, mobile/keyboard, actual video completion and battle event dispatch/resume once. Core/engine regression previously 52/52 passing. Release push/production checks pending below.
+
+
+### 2026-10-10 — Ren cinematic integration and authorized release
+
+- Milind explicitly requested wiring the six approved videos into the game and pushing to the live site. Added `public/vr/vr-cinematic.js`, six lazy-loaded WebMs under `public/assets/vr/cinematics/ren-v1/`, battle integration and cinematic layout; bumped game loader and homepage script versions. Updated settings/credits and third-party notices for recorded CC0 crowd audio.
+- The original engine payload selects the first-fainted species. Video time drives the 38-second acknowledgement; normal completion, keyboard/Escape Skip and media failure resume once, preserving the engine's existing 50% revival. Master mute/crowd volume apply; background tabs pause, blocked autoplay offers Play/Skip, loading/stalls time out, disposal stops media/listeners. No synthetic escalation score/teleport/drop sounds play during the video. Stadium persists afterward.
+- Validation: 52 existing core/engine tests pass; browser regressions cover all six asset mappings/HTTP range reads, invalid data, mute/volume, background pause/resume, duplicate Skip, cancellation, missing file, autoplay denial, mobile keyboard and actual media completion. Actual battle handler tested with an injected Kingambit escalation, once-only worker resume, persistent stadium, ignored duplicate event and disposal; no page errors.
+- Release is explicitly authorized; production verification pending push. Unrelated `.claude/worktrees/` left untouched. Engine mechanics unchanged.
 
 ### 2026-10-10 — Full 38-second Ren cinematic and first-fainted species variants
 

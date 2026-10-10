@@ -193,7 +193,7 @@
       h('div', { class: 'tvb-row' }, mute),
       slider('Music', 'music'), slider('Effects', 'sfx'), slider('Crowd', 'crowd'),
       h('label', { class: 'tvb-setting' }, h('span', { text: 'Motion' }), motionSel),
-      h('p', { class: 'tvb-modal-text tvb-dim', text: 'Music, effects and crowd are original and synthesised in your browser. Volumes and motion are remembered in this browser.' }),
+      h('p', { class: 'tvb-modal-text tvb-dim', text: 'Battle music and effects are synthesised. The championship cutscene and final round share the supplied Marnie remix. Music volume and master mute control the track. Settings are remembered in this browser.' }),
       h('div', { class: 'tvb-row' }, reset, btn('Done', () => closeModal(), { class: 'tvb-btn tvb-btn--go' }))));
   }
   function openCredits() {
@@ -202,7 +202,7 @@
       p('The Very Best — a game by Milind Parwani for PARWANI-DOS. Unofficial fan project, not affiliated with or endorsed by Nintendo, Game Freak, Creatures or The Pokémon Company. Pokémon names and sprites © The Pokémon Company; sprites from the PokeAPI sprites project.'),
       p('Champion team: Takuma Yamazaki’s official 2026 Pokémon VGC Masters World Championship team sheet (species, items, abilities, natures, moves). Stat points: a community reconstruction (ChampionsDex). Ren Kestrel is an original fictional character; Ren’s dialogue, strategy and move variations are this game’s fiction, not statements or strategies of Takuma Yamazaki.'),
       p('Battle engine: Pokémon Showdown simulator (MIT licence, © Guangcong Luo and contributors), commit c046106c. The AI is a heuristic written for this game.'),
-      p('Music, sound effects, crowd, Ren’s pixel sprite, the battle court, the championship stadium and the interface are original. The requested licensed tracks are not included until they are cleared for game use.'),
+      p('Battle music and effects, Ren’s pixel sprite, court, stadium and interface are original. The championship cinematic uses AI-generated pixel art and Pokémon sprites. Championship music: Marnie Battle Theme remix by GlitchxCity featuring Scottay, supplied by Milind. Source and rights notes are in /vr/NOTICE.md.'),
       h('div', { class: 'tvb-row' }, btn('Done', () => closeModal(), { class: 'tvb-btn tvb-btn--go' }))));
   }
 

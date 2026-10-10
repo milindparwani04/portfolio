@@ -18,7 +18,6 @@
   const { G, C, A, ART, h, go, announce, typeRow, TYPE_COLOURS } = T;
   const ENGINE_URL = '/vr/vr-engine.js?v=5';
   const CHAMP = { name: 'Ren Kestrel', short: 'Ren', label: 'Ren Kestrel · Reigning Champion' };
-  const CUE = A.MANIFEST.escalation.resumeCueSeconds;
   const toId = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
   // Pacing (ms). Starting values for playtesting, from the 2026-10-10 refinement brief.
   const PACE = { gap: 320, impact: 560, enter: 450, residual: 420 };
@@ -36,12 +35,6 @@
     potion: ['Resources matter. Good call.', 'Healing up? Fair. Let’s keep going.']
   };
   const RANK = ['faint', 'super', 'protect', 'miss', 'resisted', 'lowhp', 'potion', 'switch', 'generic'];
-  // The championship escalation: original lines, respectful (cues in seconds).
-  const ESC_LINES = [
-    [0.5, 'You’ve earned this stage.'],
-    [5, 'But a championship is decided by how we finish.'],
-    [26, 'Let’s give them a battle to remember.']
-  ];
 
   let poolsPromise = null;
   const loadPools = () => {
@@ -741,92 +734,31 @@
       });
     }
 
-    // ----- championship escalation: a 38 s timeline on the audio clock -----
-    // Visual cues and the revival are scheduled against one clock: the AudioContext's when audio is
-    // running (so the unlock lands on the musical drop), otherwise a performance clock that only
-    // advances while the tab is visible. Background tabs pause both. Skip seeks to the cue and runs
-    // the same once-only revival; reduced motion keeps the timeline but drops the movement.
-    function runEscalation(id) {
+    // Pre-rendered 38-second cinematic. Engine state, not the video, chooses and revives the first faint.
+    function runEscalation(event) {
+      if (cinematic || stats.escalated) return Promise.resolve();
       return new Promise((resolve) => {
         stats.escalated = true;
         clearMenu();
         backAction = null;
         highlight('');
         A.music.stop();
-        const layer = h('div', { class: 'tvb-esc', role: 'group', 'aria-label': 'Championship moment' });
-        const crowd = h('div', { class: 'tvb-esc-crowd', 'aria-hidden': 'true' });
-        crowd.innerHTML = ART.crowd(seedFor(id));
-        const champ = h('div', { class: 'tvb-esc-champ', 'aria-hidden': 'true' }, ART.trainer('tvb-esc-art'));
-        const line = h('p', { class: 'tvb-esc-line', 'aria-live': 'polite' });
-        const progress = h('span', { class: 'tvb-esc-progress', 'aria-hidden': 'true' }, h('span'));
-        const skipBtn = h('button', { type: 'button', class: 'tvb-btn tvb-esc-skip', onclick: () => seekEnd(true) }, 'Skip ▸▸');
-        layer.append(h('div', { class: 'tvb-esc-lights', 'aria-hidden': 'true' }), crowd, h('div', { class: 'tvb-esc-fire', 'aria-hidden': 'true' }), champ, h('div', { class: 'tvb-esc-flash', 'aria-hidden': 'true' }), h('div', { class: 'tvb-esc-dialog' }, h('span', { class: 'tvb-esc-who', text: CHAMP.short }), line), progress, skipBtn);
-        frame.append(layer);
-        menu.append(h('p', { class: 'tvb-dim', text: 'The arena is changing… (Skip to continue)' }));
-        skipBtn.focus();
-        const cues = [
-          [0, () => layer.classList.add('is-on')],
-          ...ESC_LINES.map(([t, text]) => [t, () => { line.textContent = text; liveEl.textContent = `${CHAMP.short}: ${text}`; }]),
-          [10, () => { layer.classList.add('is-arena'); setPhase('stadium'); }],
-          [14, () => { layer.classList.add('is-crowd'); A.crowd.start(0.3); }],
-          [18, () => A.crowd.start(0.6)],
-          [22, () => layer.classList.add('is-fire')],
-          [30, () => { layer.classList.add('is-charge'); A.crowd.start(0.9); line.textContent = `${CHAMP.short} steps forward. The crowd is on its feet.`; }],
-          [36, () => layer.classList.add('is-flash')]
-        ].sort((a, b) => a[0] - b[0]);
-        let next = 0;
-        // The clock.
-        const audioT0 = A.running() ? A.now() + 0.15 : null;
-        const score = audioT0 != null ? A.escalationScore(audioT0) : false;
-        let perfElapsed = 0;
-        let perfLast = performance.now();
-        const now = () => {
-          if (score) { const t = A.now(); return t == null ? lastT : t - audioT0; }
-          const p = performance.now();
-          if (!document.hidden) perfElapsed += (p - perfLast) / 1000;
-          perfLast = p;
-          return perfElapsed;
-        };
-        let lastT = 0;
-        let raf = 0;
-        let finished = false;
-        const fireCues = (t) => { while (next < cues.length && cues[next][0] <= t) { cues[next][1](); next += 1; } };
-        function finish(skipped) {
-          if (finished) return;
-          finished = true;
-          window.cancelAnimationFrame(raf);
-          fireCues(CUE);
-          const audioNow = A.now();
-          if (skipped && score) { score.cancel(); A.dropHit(audioNow); A.music.start('finale', audioNow); }
-          else if (score) A.music.start('finale', audioT0 + CUE);
-          else { A.dropHit(); A.music.start('finale'); }
-          // Measured audiovisual offset: how far the unlock frame is from the scheduled drop (audio
-          // clock), plus the context's reported output latency. Recorded for the build notes.
-          G.lastSync = score && !skipped && audioNow != null ? { offsetMs: Math.round((audioNow - (audioT0 + CUE)) * 1000), outputLatencyMs: Math.round(A.outputLatency() * 1000) } : { skipped: !!skipped, clock: score ? 'audio' : 'performance' };
-          A.crowd.start(0.5);
-          layer.classList.add('is-done');
-          const t = window.setTimeout(() => layer.remove(), reduced ? 0 : 900);
-          timers.add(t);
+        A.crowd.stop();
+        cinematic = window.TVBCinematic.play(frame, event, A, (reason) => {
           cinematic = null;
-          if (worker && !disposed) worker.postMessage({ t: 'resume', battleId, id });
+          if (disposed || ended) { resolve(); return; }
+          setPhase('stadium');
+          if (reason === 'unavailable') {
+            textEl.textContent = 'The cinematic could not play. Ren’s first fainted Pokémon returns for the final round.';
+            liveEl.textContent = textEl.textContent;
+          }
+          G.lastSync = { clock: 'video', skipped: reason === 'skipped', fallback: reason === 'unavailable' };
+          A.music.start('finale');
+          if (worker) worker.postMessage({ t: 'resume', battleId, id: event.id });
           resolve();
-        }
-        function seekEnd(skipped) { A.play('select'); finish(skipped); }
-        function tick() {
-          if (disposed) return;
-          const t = now();
-          lastT = t;
-          fireCues(t);
-          progress.firstChild.style.width = `${Math.min(100, (t / CUE) * 100).toFixed(1)}%`;
-          if (t >= CUE) { finish(false); return; }
-          raf = window.requestAnimationFrame(tick);
-        }
-        // rAF stops in background tabs; a timer catches the cue there only if the clock is moving.
-        cinematic = { skip: () => seekEnd(true), cancel: () => { finished = true; window.cancelAnimationFrame(raf); if (score) score.cancel(); } };
-        tick();
+        });
       });
     }
-    const seedFor = (s) => { let x = 0; for (const ch of s) x = (x * 31 + ch.charCodeAt(0)) >>> 0; return x; };
 
     // ----- the end -----
     function leave(state) {
@@ -949,7 +881,7 @@
           playLines(lines);
         } else if (msg.t === 'request') onRequest(msg.request);
         else if (msg.t === 'error') playLines([]).then(() => say(msg.message));
-        else if (msg.t === 'escalation') playLines([]).then(() => { if (!disposed && !ended) runEscalation(msg.id); });
+        else if (msg.t === 'escalation') playLines([]).then(() => { if (!disposed && !ended) runEscalation(msg); });
         else if (msg.t === 'end') finish(msg.winner, msg.champion);
         else if (msg.t === 'invalid') stopped(`Your team can’t battle: ${msg.message}`);
         else if (msg.t === 'fatal') stopped('The battle engine hit an error.');

@@ -13,11 +13,21 @@ The Very Best (called Victory Road until 2026-10-10) is an unofficial, non-comme
 | Default battle sets and movepools | `public/vr/sets.json`, `public/vr/movepools.json` | Derived by `scripts/vr/build-sets.mjs` from Showdown `data/random-battles/gen9/*.json`, `learnsets.ts`, `moves.ts`, `items.ts` | MIT |
 | Champion team | `scripts/vr/engine/champion.js` | Takuma Yamazaki's official 2026 Worlds open team sheet (pokemon.com); stat points from the ChampionsDex community reconstruction | Facts; credited in the game's Credits. The in-game champion, Ren Kestrel, is an original fictional character; Ren's dialogue, strategy and move variations are the game's fiction, not attributed to Takuma Yamazaki. |
 | Battle court and championship stadium backdrops, cinematic crowd, versus screen (rays, bolt), boot screen, interface | `public/vr/vr-art.js`, `public/vr/vr.css`, `public/vr/vr-*.js` | Original to this site (SVG and CSS drawn in code; nothing traced or extracted; the stock VS images Milind shared as inspiration are not used) | Site's own work |
-| Ren pixel sprite (the only picture of Ren: title, battle intro, championship cinematic) and title screen | `public/vr/vr-art.js` (`drawTrainer`, `trainer`), `public/vr/vr-game.js`, `public/vr/vr.css` | Original: Milind's "Retro Main Menu" design handoff (option 1b) | Site's own work. The earlier vector Ren illustration and the battle capsule were removed on 2026-10-10 |
+| Ren pixel sprite (title and battle intro) and title screen | `public/vr/vr-art.js` (`drawTrainer`, `trainer`), `public/vr/vr-game.js`, `public/vr/vr.css` | Original: Milind's "Retro Main Menu" design handoff (option 1b) | Site's own work; the pre-rendered championship video uses a separate approved cinematic depiction |
 | Title fonts: Press Start 2P, Silkscreen | Loaded from Google Fonts when the game opens | Google Fonts | SIL Open Font License 1.1 |
 | Music, sound effects, crowd | `public/vr/vr-audio.js` | Original, synthesised in the browser | Site's own work |
-| Requested soundtrack (not included) | `AUDIO_MANIFEST` in `public/vr/vr-audio.js` | "Glimmering Pallet Lights" (Pixabay); "Sword and Shield Trailer Theme (Remix)" and "Marnie Battle Theme" (GlitchxCity, Scottay) | **Blocked**: listed as references only. No file is shipped until a recording and composition licence for game use is on record. Spotify is not used for audio. |
+| Other requested soundtrack (not included) | `AUDIO_MANIFEST` in `public/vr/vr-audio.js` | "Glimmering Pallet Lights" (Pixabay); "Sword and Shield Trailer Theme (Remix)" (GlitchxCity) | **Blocked**: listed as references only. No file is shipped until a recording and composition licence for game use is on record. Spotify is not used for audio. |
 | Pixel X, grip, bob animation; the site's pixel ball icon | `public/vr/vr-setup.js`, `public/vr/vr.css`, `public/pdos-icons.js` | Original to this site | Site's own work. The ball icon on the portfolio card resembles a Poké Ball (flagged for review under the strict release goal). |
 | Site icon (boot logo) | `public/favicon.svg` | Milind's MP monogram, pixelated at runtime | Site's own work |
 
-No Pokémon game audio, ROM data or Pokémon Showdown client code is included.
+No extracted Pokémon game audio, ROM data or Pokémon Showdown client code is included.
+
+## Championship cinematic (2026-10-10)
+
+Six 38-second videos in `public/assets/vr/cinematics/ren-v1/` use original dialogue, AI-generated cinematic pixel-art environments/Ren, and the repository Pokémon sprites credited above. The visible Pokémon is selected from the engine's first-fainted payload. These retain the existing Pokémon fan-use rights limitations.
+
+The video audio is always muted in the game. A separate persistent music element plays `marnie-remix.mp3` from zero with the cinematic and continues through phase two, resuming the engine at the 38-second drop. Skip seeks the same recording to 38 seconds. Music volume and master mute apply throughout.
+
+Track: Pokémon Sword and Shield — Marnie Battle Theme ft. Scottay (Remix), GlitchxCity. Local MP3 supplied by Milind on 2026-10-10 with explicit instructions to use and deploy it. This records user direction, not an independently verified recording/composition licence.
+
+The muted original WebMs contain CC0 crowd recordings by kyles (Freesound 629884) and benfree (Freesound 130568); these are inaudible in the shipped player.
