@@ -415,7 +415,9 @@
 .tvb-cmd--mega[aria-pressed="true"] { background: #7a3cc4; color: #fff; }
 .tvb-cmd .tvb-move-meta { color: #4a4a52; text-transform: none; }
 .tvb-cmd:hover .tvb-move-meta, .tvb-cmd:focus-visible .tvb-move-meta { color: inherit; }
-.tvb-cmd-foot { display: flex; justify-content: flex-end; }
+/* Pinned to the bottom of the scrolling panel: six team-preview cards overflow it, and the
+   Start battle button must stay in view (it was clipped below the frame). */
+.tvb-cmd-foot { position: sticky; bottom: -8px; z-index: 1; display: flex; justify-content: flex-end; margin: 0 -8px -8px; padding: 6px 8px 8px; background: #f4f3ef; }
 .tvb-preview-pick .tvb-pickmon { align-items: center; text-align: center; padding: 4px; }
 .tvb-preview-pick .tvb-sprite { width: 56px; height: 56px; }
 .tvb-pickmon[aria-pressed="true"] { border-color: #2fbf63; }

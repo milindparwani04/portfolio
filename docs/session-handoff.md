@@ -121,6 +121,12 @@ Settled removals (do not re-propose without flagging): YouTube to MP3/MP4/WAV co
 
 ## Session log (newest first)
 
+### 2026-10-10 — Team preview: Start battle button always visible
+Agent: Claude · Model: Opus 5.5
+
+- Recovered the repo after a power cut interrupted the previous commit (`07adaf3`: branch ref and index rebuilt, five zeroed docs restored from the commit object).
+- Bug (Milind): after picking four at team preview there was no button to start the battle. The six cards overflow the dock (capped at 50% / 58% of the frame) and the Confirm footer was clipped below the frame. Footer now sticks to the bottom of the command panel, reads **Start battle ▸**, and takes focus once four are picked. `VR_VERSION` 14, `ui-v2.js?v=44`. Verified in headless Edge at 1366×657, 1280×720, 1920×969 and 390×844 (button visible, clickable, starts the battle); 52 Node tests pass.
+
 ### 2026-10-10 — The Very Best refinements pushed; Ren's leads randomised
 Agent: Claude · Model: Opus 5.5
 
