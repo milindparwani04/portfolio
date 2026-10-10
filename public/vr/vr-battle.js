@@ -155,6 +155,8 @@
 
     // ----- arena -----
     const slots = {};
+    const healthPairs = { p1: h('div', { class: 'tvb-health-pair tvb-health-pair--p1' }), p2: h('div', { class: 'tvb-health-pair tvb-health-pair--p2' }) };
+    stage.append(healthPairs.p1, healthPairs.p2);
     ['p2a', 'p2b', 'p1a', 'p1b'].forEach((pos) => {
       const sprite = h('img', { class: 'tvb-mon-sprite', alt: '', width: 96, height: 96, decoding: 'async' });
       const name = h('span', { class: 'tvb-hp-name' });
@@ -168,12 +170,14 @@
         h('div', { class: 'tvb-hp-row' }, h('span', { class: 'tvb-hp-label', text: 'HP' }), h('span', { class: 'tvb-hp-bar' }, fill)),
         h('div', { class: 'tvb-hp-bottom' }, types, status, nums));
       const spot = h('div', { class: `tvb-spot tvb-spot--${pos}` }, h('span', { class: 'tvb-platform', 'aria-hidden': 'true' }), sprite);
-      stage.append(spot, h('div', { class: `tvb-hpslot tvb-hpslot--${pos}` }, box));
+      stage.append(spot);
+      healthPairs[pos.slice(0, 2)].append(h('div', { class: `tvb-hpslot tvb-hpslot--${pos}` }, box));
       slots[pos] = { sprite, name, lvl, fill, nums, status, types, box, spot, ident: '', species: '', hp: 0, max: 0, pct: 0, typeList: [] };
     });
     // Remaining Pokémon indicators (filled = able to battle).
     const balls = { p1: h('div', { class: 'tvb-left tvb-left--p1', 'aria-hidden': 'true' }), p2: h('div', { class: 'tvb-left tvb-left--p2', 'aria-hidden': 'true' }) };
-    stage.append(balls.p1, balls.p2);
+    healthPairs.p1.append(balls.p1);
+    healthPairs.p2.append(balls.p2);
     const roster = { p1: {}, p2: {} };
     const drawBalls = () => ['p1', 'p2'].forEach((s) => { balls[s].replaceChildren(...Object.values(roster[s]).map((alive) => h('span', { class: alive ? 'is-alive' : 'is-out' }))); });
 

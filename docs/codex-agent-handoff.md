@@ -36,6 +36,11 @@ Validation:
 
 ## Work log
 
+### 2026-10-10 — Equal health-bar spacing and vertical party dots
+
+Grouped each side’s two health bars into a flex stack with the same 4px gap. Ren remains top-left, player bottom-right. Each remaining-party indicator is now a vertical column centered to the left of its pair; Ren’s pair has 16px extra left inset to keep dots inside the frame. Removed the old phone dot-position override. Button UI unchanged. Browser checks passed at desktop/phone widths for equal measured gaps and dots outside bars/inside viewport, plus existing cinematic/audio/dispatch and arena tests. Loader v20 / UI v50. No engine or Worker changes.
+
+
 ### 2026-10-10 — Player health bars bottom-right
 
 At Milind’s direction, only player health-bar positions changed: both stack bottom-right, with the first translated above the second by its own height plus 4px. Ren’s bars stay top-left. Button UI, sprites, arena and battle logic unchanged. Court preview inspected: Dragonite is clear above the bars. Existing browser regression passed for cinematic/audio, battle dispatch and desktop/mobile court/stadium geometry. Loader v19 / UI v49 for cache refresh. Published with this handoff update.

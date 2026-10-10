@@ -27,6 +27,9 @@ await page.evaluate(async()=>{
   window.workerMessages=[];window.Worker=class{constructor(){window.testWorker=this}postMessage(msg){workerMessages.push(msg);if(msg.t==='start')queueMicrotask(()=>this.onmessage({data:{t:'escalation',id:'real-dispatch-test',fainted:['Kingambit'],battleId:msg.battleId}}))}terminate(){}};
   TVB.go('battle',{seed:42});
 });
+await page.evaluate(()=>{for(const p of document.querySelectorAll('.tvb-health-pair')){for(const box of p.querySelectorAll('.tvb-hpbox')){box.hidden=false;box.innerHTML='<div>POKÉMON LV50</div><div>HP 100%</div>'}p.querySelector('.tvb-left').innerHTML='<span></span>'.repeat(4)}});
+for(const width of [1280,360]){await page.setViewportSize({width,height:720});assert.equal(await page.evaluate(()=>[...document.querySelectorAll('.tvb-health-pair')].every(p=>{let [a,b]=p.querySelectorAll('.tvb-hpslot'),dots=p.querySelector('.tvb-left'),r=p.getBoundingClientRect(),d=dots.getBoundingClientRect();return Math.abs(b.getBoundingClientRect().top-a.getBoundingClientRect().bottom-4)<1&&d.right<r.left&&d.left>=0&&getComputedStyle(dots).flexDirection==='column'})),true)}
+await page.setViewportSize({width:1280,height:720});
 await page.waitForSelector('.tvb-cinematic video');assert.equal(await page.locator('.tvb-cinematic video').getAttribute('src'),'/assets/vr/cinematics/ren-v1/ren-38-kingambit.webm');
 await page.locator('.tvb-cinematic-controls button').last().press('Enter');
 await page.waitForFunction(()=>workerMessages.some(m=>m.t==='resume'));assert.equal(await page.evaluate(()=>workerMessages.filter(m=>m.t==='resume').length),1);assert.equal(await page.locator('.tvb-frame').getAttribute('data-phase'),'stadium');assert.equal(await page.evaluate(()=>TVBAudio.recording.current.currentTime>=38&&!TVBAudio.recording.current.paused),true);
