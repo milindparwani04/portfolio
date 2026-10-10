@@ -82,7 +82,7 @@ Long-term goal: a portfolio that feels like an enterprise-quality product — fa
 Priorities, in order:
 
 1. Close the open security findings (see [Security Handoff](security-handoff.md) §4) before shipping new public endpoints. Most urgent operational item: confirm Workers Builds' non-production branch command is `npx wrangler versions upload` — until then every branch push deploys to production.
-2. **The Very Best (Victory Road overhaul) released 2026-10-10.** Open: rights blockers, licensed soundtrack, Lighthouse and production check. Revival settled 2026-10-10: one Pokémon at 50%. Build record: [`victory-road-build.md`](victory-road-build.md).
+2. **The Very Best (Victory Road overhaul) released 2026-10-10.** Open: rights blockers, licensed soundtrack, real Firefox/Safari/iOS. Production check and Lighthouse (91–97 performance) done. Revival settled 2026-10-10: one Pokémon at 50%. Build record: [`victory-road-build.md`](victory-road-build.md).
 3. Finish API-integrated projects: Sounds Like, then Where Next (with Liveliness Index).
 4. Activate remaining Toolbox placeholders, client-side tools first (no new backend risk).
 5. Parked: real-time multiplayer "swipe to decide where to go out" — needs WebSockets/Durable Objects or Supabase, a places API and match logic. Do not start until 1–4 are done.
@@ -127,7 +127,7 @@ Agent: Claude · Model: Opus 5.5
 - Milind's decisions: battles with 2–6 Pokémon (bring up to 4), champion picks 4 of 6, the first fainted champion Pokémon revives once at 50% (changed from both after the benchmark), mythicals share the one-legendary allowance, original champion Ren Kestrel, MP favicon as the boot logo, music not blocking.
 - Built every functional phase of the brief: one game viewport from boot to result; new `vr-game.js` (state machine/shell), `vr-audio.js`, `vr-art.js`; rewritten `vr-setup.js`, `vr-battle.js`, `vr.css`, `vr-core.js`; engine (validation, rqid, escalation, champion variants, stronger AI) rebuilt; new catalogs `species.json`, `learnsets.json`, `items.json` from `scripts/vr/build-catalog.mjs`. Portfolio: Projects card and Home extra renamed; boot screen/close routing in `ui-v2.js` (`?v=40`), boot CSS in `ui-v2.css` (`?v=41`).
 - Tested: 44 Node tests; headless Edge full flows at five sizes, 55 lifecycle/failure/accessibility/keyboard checks (axe 0 violations), cinematic at 38.1 s with a 10–18 ms measured offset from the audio drop. Detail in the build record.
-- Released (committed and pushed to `main`) at Milind's instruction. Not done: Lighthouse after deploy, real Firefox/Safari/iOS, licensed music, rights clearance. No Worker, secret or external-service change.
+- Released (committed and pushed to `main`, `191c642`) at Milind's instruction. Production check passed (full flow at 1366×657 and 360×740, no errors). Lighthouse mobile on production: performance 92 / 91 / 97, accessibility, best practices and SEO 100. Not done: real Firefox/Safari/iOS, licensed music, rights clearance. No Worker, secret or external-service change.
 
 ### 2026-10-10 — The Very Best overhaul specification
 Agent: Codex

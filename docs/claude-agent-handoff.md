@@ -12,7 +12,7 @@
 
 ## Current assignment
 
-Status: **The Very Best (Victory Road overhaul) released 2026-10-10** at Milind's instruction (build record [`victory-road-build.md`](victory-road-build.md)). Open: rights blockers, licensed music, Lighthouse/production check, real Firefox/Safari/iOS. Before that: **Victory Road shipped 2026-10-07** (Phases 0–6). Earlier the same day: Parwani-DOS redesign complete (all 9 phases), Home drawn on the mockup's scaled canvas, Media/Gigs six per batch. Open items: article pages for the Journal, an optional TMDB key for sharper media posters, Victory Road AI depth (see its known limitations). Two weekly routines still run on Mondays (Gig Finder 06:00, Media 06:30 Dubai).
+Status: **The Very Best (Victory Road overhaul) released 2026-10-10** at Milind's instruction (build record [`victory-road-build.md`](victory-road-build.md)). Production check and Lighthouse (performance 91–97, others 100) done. Open: rights blockers, licensed music, real Firefox/Safari/iOS. Before that: **Victory Road shipped 2026-10-07** (Phases 0–6). Earlier the same day: Parwani-DOS redesign complete (all 9 phases), Home drawn on the mockup's scaled canvas, Media/Gigs six per batch. Open items: article pages for the Journal, an optional TMDB key for sharper media posters, Victory Road AI depth (see its known limitations). Two weekly routines still run on Mondays (Gig Finder 06:00, Media 06:30 Dubai).
 
 Areas Claude has most recently owned (coordinate before Codex changes these):
 
