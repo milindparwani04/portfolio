@@ -24,7 +24,7 @@ Shared rules:
 
 ## Project snapshot
 
-**Game overhaul (2026-10-10): The Very Best is live.** Victory Road is renamed **The Very Best**: cartridge boot, title, name, all-generation party builder, member editor (stats, every legal move, held items), modifiers with a difficulty spectrum, preview and a fully in-frame doubles battle against Ren Kestrel (original character, real 2026 Worlds team, moves varied per battle) with a once-only 38-second championship revival. Brief: [`the-very-best-master-prompt.md`](the-very-best-master-prompt.md); build record and test evidence: [`victory-road-build.md`](victory-road-build.md). Released at Milind's instruction; still open: Pokémon names/sprites need permission or an original-creature alternative under the new strict rights goal; requested music tracks are uncleared (original synth plays instead); no title search for "The Very Best".
+**Game overhaul (2026-10-10): The Very Best is live.** Victory Road is renamed **The Very Best**: cartridge boot, title, name, all-generation party builder, member editor (stats, every legal move, held items), modifiers with a difficulty spectrum, preview and a fully in-frame doubles battle against Ren Kestrel (original character, real 2026 Worlds team, moves varied per battle) with a once-only 38-second championship revival. Brief: [`the-very-best-master-prompt.md`](the-very-best-master-prompt.md); build record and test evidence: [`victory-road-build.md`](victory-road-build.md). Released at Milind's instruction; still open: Pokémon names/sprites need permission or an original-creature alternative under the new strict rights goal; requested music tracks are uncleared (original synth plays instead); no title search for "The Very Best". **Refinements (second 2026-10-10 brief) built and tested locally, not pushed:** type chips + type search, Party moves panel, random team = five fully evolved + one legendary/mythical (also enforced in the engine), pixel Ren everywhere and no capsule, original vertical VS preview, move-by-move battle playback, larger sprites, court → championship stadium. The reported Poison-into-Steel one-shot did not reproduce (engine correct; regressions added).
 
 | Field | Value |
 |---|---|
@@ -82,7 +82,7 @@ Long-term goal: a portfolio that feels like an enterprise-quality product — fa
 Priorities, in order:
 
 1. Close the open security findings (see [Security Handoff](security-handoff.md) §4) before shipping new public endpoints. Most urgent operational item: confirm Workers Builds' non-production branch command is `npx wrangler versions upload` — until then every branch push deploys to production.
-2. **The Very Best (Victory Road overhaul) released 2026-10-10.** Open: rights blockers, licensed soundtrack, real Firefox/Safari/iOS. Production check and Lighthouse (91–97 performance) done. Revival settled 2026-10-10: one Pokémon at 50%. Build record: [`victory-road-build.md`](victory-road-build.md).
+2. **The Very Best (Victory Road overhaul) released 2026-10-10;** second-brief refinements built locally and awaiting Milind's go to push. Open: rights blockers, licensed soundtrack, real Firefox/Safari/iOS. Production check and Lighthouse (91–97 performance) done. Revival settled 2026-10-10: one Pokémon at 50%. Build record: [`victory-road-build.md`](victory-road-build.md).
 3. Finish API-integrated projects: Sounds Like, then Where Next (with Liveliness Index).
 4. Activate remaining Toolbox placeholders, client-side tools first (no new backend risk).
 5. Parked: real-time multiplayer "swipe to decide where to go out" — needs WebSockets/Durable Objects or Supabase, a places API and match logic. Do not start until 1–4 are done.
@@ -121,11 +121,31 @@ Settled removals (do not re-propose without flagging): YouTube to MP3/MP4/WAV co
 
 ## Session log (newest first)
 
+### 2026-10-10 — Codex: full Ren cinematic assets for review
+
+- Created six full 38-second fixed-shot cinematic pixel-art videos, selected by Ren's first-fainted participating species, with crowd-only recorded audio and visible revival. Preview assets live in the Codex visualization workspace; locations, selector and integration details in Codex's individual handoff.
+- Asset delivery only: game runtime and concurrent refinement edits preserved. Live battle integration/deployment remain pending; the UI must retain the engine escalation payload's `fainted[0]` instead of choosing a party slot.
+
+### 2026-10-10 — The Very Best refinements (second brief) built, not pushed
+Agent: Claude · Model: Opus 5.5
+
+- Implemented all eight items of [`the-very-best-refinement-master-prompt.md`](the-very-best-refinement-master-prompt.md): type chips (catalog, party slots, team pick, under every HP bar, preview) and exact type search; Party moves panel under the party grid; random team exactly five fully evolved non-legendary/mythical + one fully evolved legendary/mythical, re-checked at the engine boundary; capsule and vector Ren removed, the title's pixel Ren used everywhere except the preview (no portrait there); original blue/red VS preview with vertical rosters; one-action-at-a-time battle playback; ~20% larger sprites; an original court backdrop that becomes a dark stadium at the championship cue and stays.
+- Poison → Steel report: not reproduced. Engine and chart correct (24/24 immune in 400 seeded battles; fixed Dire Claw/Gunk Shot/Poison Jab scenarios immune with unchanged HP). Likely a partner's hit read as the Poison move under the old fast playback; unconfirmed without the friend's log.
+- Files: `public/vr/{vr-core,vr-game,vr-setup,vr-battle,vr-art,vr-audio,vr.css,species.json,vr-engine.js,NOTICE.md}`, `scripts/vr/build-catalog.mjs`, `scripts/vr/engine/{engine,worker}.js`, `tests/vr/{core,engine}.test.mjs`, `ui-v2.js` (`VR_VERSION` 12), `index.html` (`ui-v2.js?v=42`). Details and evidence: [`victory-road-build.md`](victory-road-build.md).
+- Tested: 51 Node tests; headless Edge at five sizes, pacing/ordering runs (input never enabled while playing), cinematic watch/reduced/skip with the stadium kept and reset on rematch, random-team concealment, full battles, 55/55 lifecycle/accessibility checks (axe 0). Not pushed: the brief authorises no deploy; waiting for Milind.
+
+### 2026-10-10 — The Very Best follow-up refinements specified
+Agent: Codex
+
+- New implementation handoff: [`the-very-best-refinement-master-prompt.md`](the-very-best-refinement-master-prompt.md). Covers types/search and selected-move overview, five fully evolved non-special + one legendary/mythical random teams, shared pixel Ren/no capsule, vertical original VS preview, slower ordered battle playback, larger Pokémon and distinct persistent dark championship stadium.
+- Poison-versus-Steel immunity checked against primary Showdown sources; friend's specific reported one-shot remains unreproduced. Prompt requires seeded engine regression plus renderer/target/event-order diagnosis, not an unsupported claim of a fixed engine bug.
+- Documentation only; existing game unchanged. This focused prompt supersedes conflicting earlier art/random-team directions. No commit, push or deployment; implementation remains for the other agent.
+
 ### 2026-10-10 — The Very Best: retro title screen (handoff option 1b)
 Agent: Claude · Model: Opus 5.5
 
 - Title screen rebuilt from Milind's "Retro Main Menu" design handoff (option 1b): sky/grass field, pixel-sprite Ren, outlined title, menu and description dialog boxes, 450 ms bob/blink, keyboard/hover selection, integer scaling with letterbox, portrait variant for phones. Press Start 2P + Silkscreen load from Google Fonts only when the game opens. Detail and checks in [`victory-road-build.md`](victory-road-build.md).
-- Tested: title at seven sizes, 55/55 browser checks, full flow, 44 Node tests. Committed, not pushed.
+- Tested: title at seven sizes, 55/55 browser checks, full flow, 44 Node tests. Pushed later the same day (`27259c5`); production check at 1366×657 and 360×740 passed.
 
 ### 2026-10-10 — The Very Best implemented and released
 Agent: Claude · Model: Opus 5.5

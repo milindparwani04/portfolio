@@ -18,7 +18,7 @@
   const SPRITES = '/assets/vr/sprites';
   const DATA = [
     ['dex', '/vr/dex.json?v=1', 'Pokédex'],
-    ['species', '/vr/species.json?v=1', 'species data'],
+    ['species', '/vr/species.json?v=2', 'species data'],
     ['sets', '/vr/sets.json?v=2', 'default sets'],
     ['learnsets', '/vr/learnsets.json?v=1', 'move catalog'],
     ['items', '/vr/items.json?v=1', 'item catalog']
@@ -74,6 +74,17 @@
     img.addEventListener('error', fail, { once: true });
     return img;
   }
+
+  // ---------- Type chips ----------
+  // One treatment everywhere a Pokémon's or a move's type is shown: the type name as text, with its
+  // colour as a bar on the left (the text never sits on the colour, so contrast holds).
+  const TYPE_COLOURS = {
+    Normal: '#a8a77a', Fire: '#ee8130', Water: '#6390f0', Electric: '#d9b416', Grass: '#5fae3e', Ice: '#6cc8c4', Fighting: '#c22e28', Poison: '#a33ea1', Ground: '#c9a75a',
+    Flying: '#8f7fd9', Psychic: '#f95587', Bug: '#8d9c1b', Rock: '#b6a136', Ghost: '#735797', Dragon: '#6f35fc', Dark: '#705746', Steel: '#8a8aa3', Fairy: '#d685ad', Stellar: '#40b5a5'
+  };
+  const typeChip = (type) => h('span', { class: 'tvb-type', style: `--type:${TYPE_COLOURS[type] || '#777'}`, text: type });
+  // A Pokémon's types as a row of chips (both for dual types).
+  const typeRow = (types, cls = '') => h('span', { class: `tvb-types ${cls}`.trim() }, (types || []).map(typeChip));
 
   // ---------- Screen plumbing ----------
   const live = () => G.root.querySelector('.tvb-live');
@@ -191,7 +202,7 @@
       p('The Very Best — a game by Milind Parwani for PARWANI-DOS. Unofficial fan project, not affiliated with or endorsed by Nintendo, Game Freak, Creatures or The Pokémon Company. Pokémon names and sprites © The Pokémon Company; sprites from the PokeAPI sprites project.'),
       p('Champion team: Takuma Yamazaki’s official 2026 Pokémon VGC Masters World Championship team sheet (species, items, abilities, natures, moves). Stat points: a community reconstruction (ChampionsDex). Ren Kestrel is an original fictional character; Ren’s dialogue, strategy and move variations are this game’s fiction, not statements or strategies of Takuma Yamazaki.'),
       p('Battle engine: Pokémon Showdown simulator (MIT licence, © Guangcong Luo and contributors), commit c046106c. The AI is a heuristic written for this game.'),
-      p('Music, sound effects, crowd, the champion illustration, the capsule and the interface are original. The requested licensed tracks are not included until they are cleared for game use.'),
+      p('Music, sound effects, crowd, Ren’s pixel sprite, the battle court, the championship stadium and the interface are original. The requested licensed tracks are not included until they are cleared for game use.'),
       h('div', { class: 'tvb-row' }, btn('Done', () => closeModal(), { class: 'tvb-btn tvb-btn--go' }))));
   }
 
@@ -270,9 +281,7 @@
     G.onBack = null;
     let sel = 0;
     let tick = 0;
-    const canvas = h('canvas', { class: 'tvb-tm-sprite', width: '22', height: '34', 'aria-hidden': 'true' });
-    ART.drawTrainer(canvas);
-    const trainer = h('div', { class: 'tvb-tm-trainer' }, canvas);
+    const trainer = h('div', { class: 'tvb-tm-trainer' }, ART.trainer('tvb-tm-sprite'));
     const items = TITLE_ITEMS.map(([label], i) => h('button', { type: 'button', class: 'tvb-tm-item', 'data-i': i },
       h('span', { class: 'tvb-tm-cursor', 'aria-hidden': 'true', text: '▶' }), h('span', { text: label.toUpperCase() })));
     const arrow = h('span', { class: 'tvb-tm-next', 'aria-hidden': 'true', text: '▼' });
@@ -423,6 +432,6 @@
     return true;
   }
 
-  window.TVB = { G, C, A, ART, h, btn, header, go, sprite, spriteUrl, announce, save, confirm, openModal, closeModal, openSettings, reduced };
+  window.TVB = { G, C, A, ART, h, btn, header, go, sprite, spriteUrl, typeChip, typeRow, TYPE_COLOURS, announce, save, confirm, openModal, closeModal, openSettings, reduced };
   window.VictoryRoad = Object.assign(window.VictoryRoad || {}, { start, dispose, beforeClose });
 }());

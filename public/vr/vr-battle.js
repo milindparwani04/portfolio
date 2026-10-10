@@ -4,20 +4,24 @@
 // back. Everything — intro, commands, targeting, bag, party, dialogue, the championship cinematic
 // and the result — renders inside the battle frame.
 //
+// Playback: the engine's log is played one action at a time (VRCore.beats): who acts and with what,
+// then the impact or immunity on the right target, the HP bar moving, the effect messages, any
+// faint, a short gap, then the next action. Visible HP and status only ever change when their own
+// log line plays, and a new request, the championship cinematic or the result waits until
+// everything before it has played. Reduced motion removes movement and flashing, not reading time.
+//
 // Nothing here persists: closing the window, Quit or a reload ends the battle for good.
 (function () {
   'use strict';
 
   const T = window.TVB;
-  const { G, C, A, ART, h, go, announce } = T;
-  const ENGINE_URL = '/vr/vr-engine.js?v=3';
+  const { G, C, A, ART, h, go, announce, typeRow, TYPE_COLOURS } = T;
+  const ENGINE_URL = '/vr/vr-engine.js?v=4';
   const CHAMP = { name: 'Ren Kestrel', short: 'Ren', label: 'Ren Kestrel · Reigning Champion' };
   const CUE = A.MANIFEST.escalation.resumeCueSeconds;
   const toId = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-  const TYPE_COLOURS = {
-    Normal: '#a8a77a', Fire: '#ee8130', Water: '#6390f0', Electric: '#d9b416', Grass: '#5fae3e', Ice: '#6cc8c4', Fighting: '#c22e28', Poison: '#a33ea1', Ground: '#c9a75a',
-    Flying: '#8f7fd9', Psychic: '#f95587', Bug: '#8d9c1b', Rock: '#b6a136', Ghost: '#735797', Dragon: '#6f35fc', Dark: '#705746', Steel: '#8a8aa3', Fairy: '#d685ad'
-  };
+  // Pacing (ms). Starting values for playtesting, from the 2026-10-10 refinement brief.
+  const PACE = { gap: 320, impact: 560, enter: 450, residual: 420 };
 
   // ---------- Trainer Taunts (modifier): original lines, confident and respectful ----------
   const TAUNTS = {
@@ -56,7 +60,15 @@
     const mult = C.multiplier(mods);
     const rules = C.engineRules(mods);
     const reduced = T.reduced();
-    const sleep = (ms) => new Promise((r) => { const t = window.setTimeout(r, reduced ? Math.min(ms, 60) : ms); timers.add(t); });
+    // Every wait resolves when the battle is disposed (close, quit, rematch), so no playback promise
+    // is left hanging and no stale callback runs afterwards.
+    const waits = new Set();
+    const sleep = (ms) => new Promise((resolve) => {
+      if (disposed) { resolve(); return; }
+      const w = { resolve, t: 0 };
+      w.t = window.setTimeout(() => { waits.delete(w); resolve(); }, ms);
+      waits.add(w);
+    });
     let worker = null;
     let ended = false;
     let disposed = false;
@@ -83,6 +95,18 @@
     const dock = h('div', { class: 'tvb-dock' }, textbox, menu);
     const frame = h('div', { class: 'tvb-frame' }, stage, dock);
     screen.append(h('div', { class: 'tvb-battle', role: 'region', 'aria-label': 'Battle' }, bar, frame, liveEl, tauntLive));
+    // One encounter phase drives the backdrop, platforms, crowd and lighting: 'court' until the
+    // championship escalation turns the arena into the stadium for the rest of this battle.
+    const arena = h('div', { class: 'tvb-arena', 'aria-hidden': 'true' });
+    stage.append(arena);
+    let phase = '';
+    function setPhase(next) {
+      if (phase === next) return;
+      phase = next;
+      frame.dataset.phase = next;
+      arena.innerHTML = ART.arena(next, seed);
+    }
+    setPhase('court');
 
     // ----- message box -----
     let skip = null;
@@ -93,8 +117,18 @@
       if ((e.key === 'Enter' || e.key === ' ') && !e.target.closest('button, input, select')) { e.preventDefault(); advance(); }
     };
     document.addEventListener('keydown', onKey);
-    async function say(text, hold = 650) {
+    // How long a line stays up, typing included: about 900-1200 ms for "X used Y!", 800-1200 ms for
+    // an effect message, more for long ones; 'quick' for send-outs. A number is an exact total.
+    const readMs = (text, kind) => {
+      if (typeof kind === 'number') return kind;
+      if (kind === 'move') return Math.min(1200, Math.max(900, 560 + text.length * 14));
+      if (kind === 'quick') return 700;
+      return Math.min(1500, Math.max(800, 420 + text.length * 18));
+    };
+    async function say(text, kind = 'info') {
       if (disposed || !text) return;
+      const total = readMs(text, kind);
+      const started = performance.now();
       liveEl.textContent = text;
       textEl.textContent = '';
       subEl.textContent = '';
@@ -116,9 +150,11 @@
       textbox.classList.add('is-waiting');
       await new Promise((resolve) => {
         if (disposed) return resolve();
-        const t = window.setTimeout(resolve, done ? 120 : hold);
-        timers.add(t);
-        skip = () => { window.clearTimeout(t); resolve(); };
+        const w = { resolve, t: 0 };
+        const finish = () => { window.clearTimeout(w.t); waits.delete(w); resolve(); };
+        w.t = window.setTimeout(finish, done ? 120 : Math.max(200, total - (performance.now() - started)));
+        waits.add(w);
+        skip = finish;
       });
       skip = null;
       textbox.classList.remove('is-waiting');
@@ -133,13 +169,14 @@
       const fill = h('span', { class: 'tvb-hp-fill' });
       const nums = h('span', { class: 'tvb-hp-nums' });
       const status = h('span', { class: 'tvb-hp-status' });
+      const types = h('span', { class: 'tvb-hp-types' });
       const box = h('div', { class: 'tvb-hpbox', hidden: true },
         h('div', { class: 'tvb-hp-top' }, name, lvl),
         h('div', { class: 'tvb-hp-row' }, h('span', { class: 'tvb-hp-label', text: 'HP' }), h('span', { class: 'tvb-hp-bar' }, fill)),
-        h('div', { class: 'tvb-hp-bottom' }, status, nums));
+        h('div', { class: 'tvb-hp-bottom' }, types, status, nums));
       const spot = h('div', { class: `tvb-spot tvb-spot--${pos}` }, h('span', { class: 'tvb-platform', 'aria-hidden': 'true' }), sprite);
       stage.append(spot, h('div', { class: `tvb-hpslot tvb-hpslot--${pos}` }, box));
-      slots[pos] = { sprite, name, lvl, fill, nums, status, box, spot, ident: '', species: '', hp: 0, max: 0 };
+      slots[pos] = { sprite, name, lvl, fill, nums, status, types, box, spot, ident: '', species: '', hp: 0, max: 0, pct: 0, typeList: [] };
     });
     // Remaining Pokémon indicators (filled = able to battle).
     const balls = { p1: h('div', { class: 'tvb-left tvb-left--p1', 'aria-hidden': 'true' }), p2: h('div', { class: 'tvb-left tvb-left--p2', 'aria-hidden': 'true' }) };
@@ -170,8 +207,7 @@
     const noteTaunt = (kind) => { if (tauntCtx && RANK.indexOf(kind) < RANK.indexOf(tauntCtx)) tauntCtx = kind; };
     const flushTaunt = () => { if (tauntCtx) { showTaunt(tauntCtx); tauntCtx = null; } };
 
-    const trainer = h('div', { class: 'tvb-trainer', hidden: true });
-    trainer.innerHTML = ART.champion('tvb-trainer-art');
+    const trainer = h('div', { class: 'tvb-trainer', hidden: true }, ART.trainer('tvb-trainer-art'));
     const trainerLabel = h('p', { class: 'tvb-trainer-label', text: CHAMP.label, hidden: true });
     stage.append(trainer, trainerLabel);
 
@@ -194,17 +230,28 @@
       const [cur, max] = hpPart.replace(/[gyr]$/, '').split('/').map(Number);
       return { cur, max, pct: max ? (cur / max) * 100 : 0, status };
     }
+    // The number counts to its new value in step with the bar (11 steps over the impact time).
     function drawHp(pos, hp, animate = true) {
       const s = slots[pos];
       if (!s) return;
+      const fromCur = s.hp;
+      const fromPct = s.pct;
       s.hp = hp.cur;
       if (hp.max) s.max = hp.max;
       const pct = Math.max(0, Math.min(100, hp.pct));
+      s.pct = pct;
       s.fill.style.transition = animate && !reduced ? '' : 'none';
       s.fill.style.width = `${pct}%`;
       s.fill.dataset.level = pct > 50 ? 'high' : pct > 20 ? 'mid' : 'low';
-      s.nums.textContent = pos.startsWith('p1') && hp.max ? `${hp.cur}/${hp.max}` : `${Math.round(pct)}%`;
-      s.box.setAttribute('aria-label', `${s.name.textContent}: ${Math.round(pct)}% HP${hp.status && hp.status !== 'fnt' ? `, ${hp.status}` : ''}`);
+      const own = pos.startsWith('p1') && hp.max;
+      const text = (k) => (own ? `${Math.round(fromCur + (hp.cur - fromCur) * k)}/${hp.max}` : `${Math.round(fromPct + (pct - fromPct) * k)}%`);
+      window.clearInterval(s.tween);
+      if (animate && !reduced) {
+        let n = 0;
+        s.tween = window.setInterval(() => { n += 1; s.nums.textContent = text(n / 11); if (n >= 11) window.clearInterval(s.tween); }, PACE.impact / 11);
+        timers.add(s.tween);
+      } else s.nums.textContent = text(1);
+      s.box.setAttribute('aria-label', `${s.name.textContent}, ${s.typeList.join(' and ')} type: ${Math.round(pct)}% HP${hp.status && hp.status !== 'fnt' ? `, ${hp.status}` : ''}`);
       if (hp.status !== undefined) {
         s.status.textContent = hp.status && hp.status !== 'fnt' ? hp.status.toUpperCase() : '';
         s.status.dataset.status = hp.status || '';
@@ -223,7 +270,30 @@
       s.lvl.textContent = `Lv${lv}`;
       s.box.hidden = false;
       setSprite(p.pos, species, rest.includes('shiny'));
+      const entry = entryOf(species);
+      setTypes(p.pos, entry ? entry.types : [], false);
+      s.hp = readHp(hpText).cur;
+      s.pct = readHp(hpText).pct;
       drawHp(p.pos, readHp(hpText), false);
+    }
+    // The types shown under an HP bar: the species' typing (forms and Megas included) unless the
+    // battle has reported a change (Soak, Protean, Reflect Type, Transform...), which is marked.
+    function setTypes(pos, list, changed) {
+      const s = slots[pos];
+      if (!s) return;
+      s.typeList = list.slice();
+      s.types.replaceChildren(typeRow(list, 'tvb-types--hp'));
+      s.types.classList.toggle('is-changed', !!changed);
+      s.types.title = changed ? 'Type changed in this battle' : '';
+    }
+    // A short label over a Pokémon ("No effect", "Miss"); the narration says it in words too.
+    function pop(pos, text) {
+      const s = slots[pos];
+      if (!s) return;
+      const el = h('span', { class: 'tvb-pop', 'aria-hidden': 'true', text });
+      s.spot.append(el);
+      const t = window.setTimeout(() => el.remove(), 1500);
+      timers.add(t);
     }
     const posOf = (ident) => parseIdent(ident).pos;
     async function anim(pos, cls, ms) {
@@ -235,25 +305,13 @@
       await sleep(ms);
       el.classList.remove(cls);
     }
-    // Ren's capsule: a short arc from the trainer's side to the slot, then the Pokémon appears.
-    async function throwCapsule(pos) {
-      if (reduced) return;
-      const cap = h('span', { class: `tvb-throw tvb-throw--${pos}`, 'aria-hidden': 'true' });
-      cap.innerHTML = ART.capsule('tvb-capsule');
-      stage.append(cap);
-      A.play('throw');
-      await sleep(520);
-      cap.remove();
-    }
 
     const STAT = { atk: 'Attack', def: 'Defense', spa: 'Sp. Atk', spd: 'Sp. Def', spe: 'Speed', accuracy: 'accuracy', evasion: 'evasiveness' };
     const STATUS = { brn: 'was burned', par: 'is paralyzed! It may be unable to move', slp: 'fell asleep', psn: 'was poisoned', tox: 'was badly poisoned', frz: 'was frozen solid' };
     const from = (parts) => { const f = parts.find((x) => x && x.startsWith('[from]')); return f ? f.replace('[from] ', '').replace(/^(item|ability|move): /, '') : ''; };
-    let throwsLeft = 2;
 
-    // One log line -> animation + narration. Unknown lines are skipped.
-    async function handle(line) {
-      const parts = line.split('|');
+    // Trainer Taunts: remembers the most notable thing in the player's latest action.
+    function noteLine(parts) {
       const cmd = parts[1];
       if (mods.taunts) {
         if (cmd === 'move' || cmd === 'turn' || cmd === 'upkeep' || cmd === 'win') flushTaunt();
@@ -268,6 +326,26 @@
           else if (cmd === '-damage' && parts[2].startsWith('p2') && readHp(parts[3]).pct > 0 && readHp(parts[3]).pct < 25) noteTaunt('lowhp');
         }
       }
+    }
+    // Direct hits from one move (a spread move hits its targets together): every target's bar moves
+    // at once, then one pause for the impact.
+    async function hits(lines) {
+      A.play('hit');
+      lines.forEach((line) => {
+        const parts = line.split('|');
+        noteLine(parts);
+        const pos = posOf(parts[2]);
+        anim(pos, 'is-hit', 420);
+        drawHp(pos, readHp(parts[3]));
+      });
+      await sleep(PACE.impact);
+    }
+
+    // One log line -> animation + narration. Unknown lines are skipped.
+    async function handle(line) {
+      const parts = line.split('|');
+      const cmd = parts[1];
+      noteLine(parts);
       switch (cmd) {
         case 'poke': {
           const side = parts[2];
@@ -283,45 +361,68 @@
           break;
         }
         case 'switch': case 'drag': case 'replace': {
+          // Send-out: a short pixel flash where the Pokémon appears (no capsule).
           const p = parseIdent(parts[2]);
-          if (p.side === 'p2' && throwsLeft > 0) { throwsLeft -= 1; await throwCapsule(p.pos); }
           placeMon(parts[2], parts[3], parts[4]);
           A.play('select');
-          anim(p.pos, 'is-entering', 400);
-          await say(p.side === 'p1' ? `Go! ${p.name}!` : `${CHAMP.short} sent out ${p.name}!`, 450);
+          anim(p.pos, 'is-entering', PACE.enter);
+          await say(p.side === 'p1' ? `Go! ${p.name}!` : `${CHAMP.short} sent out ${p.name}!`, 'quick');
           break;
         }
         case 'detailschange': case '-formechange': {
           const pos = posOf(parts[2]);
-          if (slots[pos]) { slots[pos].species = parts[3].split(',')[0]; setSprite(pos, slots[pos].species, parts[3].includes('shiny')); }
+          if (slots[pos]) {
+            slots[pos].species = parts[3].split(',')[0];
+            setSprite(pos, slots[pos].species, parts[3].includes('shiny'));
+            const entry = entryOf(slots[pos].species);
+            if (entry) setTypes(pos, entry.types, false);
+          }
+          break;
+        }
+        case '-start': {
+          const pos = posOf(parts[2]);
+          if (parts[3] === 'typechange' && slots[pos]) setTypes(pos, parts[4].split('/'), true);
+          else if (parts[3] === 'typeadd' && slots[pos] && !slots[pos].typeList.includes(parts[4])) setTypes(pos, [...slots[pos].typeList, parts[4]], true);
+          if (parts[3] === 'confusion') await say(`${Display(parts[2])} became confused!`);
+          else if (parts[3] === 'typechange' && parts[4]) await say(`${Display(parts[2])} became ${parts[4].replace('/', ' and ')} type!`);
+          break;
+        }
+        case '-transform': {
+          const pos = posOf(parts[2]);
+          const model = slots[posOf(parts[3])];
+          if (slots[pos] && model) setTypes(pos, model.typeList, true);
+          await say(`${Display(parts[2])} transformed into ${parseIdent(parts[3]).name}!`);
           break;
         }
         case '-mega': {
           A.play('mega');
           anim(posOf(parts[2]), 'is-mega', 700);
-          await say(`${Display(parts[2])}’s ${parts[4]} is reacting! ${Display(parts[2])} has Mega Evolved!`, 900);
+          await say(`${Display(parts[2])}’s ${parts[4]} is reacting! ${Display(parts[2])} has Mega Evolved!`);
           break;
         }
         case 'move': {
           const pos = posOf(parts[2]);
           if (parts[3] === 'Potion') { await say('You used a Potion!'); break; }
           if (parts[2].startsWith('p2')) stats.renMoves[parts[3]] = (stats.renMoves[parts[3]] || 0) + 1;
-          anim(pos, pos.startsWith('p1') ? 'is-lunge-up' : 'is-lunge-down', 260);
-          await say(`${Display(parts[2])} used ${parts[3]}!`, 500);
+          // Anticipation: the user lunges and its single target is marked while the line reads.
+          anim(pos, pos.startsWith('p1') ? 'is-lunge-up' : 'is-lunge-down', 300);
+          const target = posOf(parts[4] || '');
+          if (target && target !== pos && !line.includes('[spread]') && !line.includes('[notarget]')) anim(target, 'is-aimed', 900);
+          await say(`${Display(parts[2])} used ${parts[3]}!`, 'move');
           break;
         }
         case '-damage': {
+          // Indirect damage (recoil, Life Orb, poison, weather...): direct hits go through hits().
           const pos = posOf(parts[2]);
-          const hp = readHp(parts[3]);
           const src = from(parts);
-          if (!src) { A.play('hit'); anim(pos, 'is-hit', 420); }
-          drawHp(pos, hp);
-          await sleep(src ? 200 : 450);
-          if (src === 'Recoil') await say(`${Display(parts[2])} is damaged by the recoil!`);
-          else if (src === 'Life Orb') await say(`${Display(parts[2])} lost some of its HP!`);
-          else if (src === 'psn' || src === 'tox') await say(`${Display(parts[2])} is hurt by poison!`);
-          else if (src === 'brn') await say(`${Display(parts[2])} is hurt by its burn!`);
-          else if (src) await say(`${Display(parts[2])} is hurt by ${src}!`);
+          const text = src === 'Recoil' ? `${Display(parts[2])} is damaged by the recoil!`
+            : src === 'Life Orb' ? `${Display(parts[2])} lost some of its HP!`
+              : src === 'psn' || src === 'tox' ? `${Display(parts[2])} is hurt by poison!`
+                : src === 'brn' ? `${Display(parts[2])} is hurt by its burn!`
+                  : src ? `${Display(parts[2])} is hurt by ${src}!` : '';
+          const said = say(text);
+          drawHp(pos, readHp(parts[3]));
+          await Promise.all([said, sleep(PACE.residual)]);
           break;
         }
         case '-heal': {
@@ -333,13 +434,13 @@
             drawBalls();
             if (pos && slots[pos]) { slots[pos].sprite.classList.remove('is-fainted'); drawHp(pos, readHp(parts[3])); }
             A.play('revive');
-            await say(`${CHAMP.short}’s ${p.name} rose again at half strength!`, 800);
+            await say(`${CHAMP.short}’s ${p.name} rose again at half strength!`);
             break;
           }
+          const said = say(src === 'Potion' ? `${Display(parts[2])}’s HP was restored.` : src === 'drain' ? `${Display(parts[2])} drained some HP!` : src ?`${Display(parts[2])} restored HP using ${src === 'Grassy Terrain' ? 'the Grassy Terrain' : `its ${src}`}!` : '');
           drawHp(pos, readHp(parts[3]));
           A.play('heal');
-          if (src === 'Potion') await say(`${Display(parts[2])}’s HP was restored.`);
-          else if (src) await say(`${Display(parts[2])} restored HP using ${src === 'Grassy Terrain' ? 'the Grassy Terrain' : `its ${src}`}!`, 450);
+          await Promise.all([said, sleep(PACE.residual)]);
           break;
         }
         case '-sethp': drawHp(posOf(parts[2]), readHp(parts[3])); break;
@@ -351,21 +452,21 @@
           if (k !== undefined) { roster[side][k] = false; drawBalls(); }
           A.play('faint');
           if (slots[pos]) { slots[pos].sprite.classList.add('is-fainted'); drawHp(pos, { cur: 0, max: slots[pos].max, pct: 0, status: '' }); }
-          await say(`${Display(parts[2])} fainted!`, 700);
+          await say(`${Display(parts[2])} fainted!`);
           if (slots[pos]) slots[pos].box.hidden = true;
           break;
         }
         case '-supereffective': A.play('superHit'); await say('It’s super effective!'); break;
         case '-resisted': await say('It’s not very effective…'); break;
-        case '-immune': await say(`It doesn’t affect ${display(parts[2])}…`); break;
+        case '-immune': pop(posOf(parts[2]), 'No effect'); await say(`It doesn’t affect ${display(parts[2])}…`); break;
         case '-crit': await say('A critical hit!'); break;
-        case '-miss': await say(`${Display(parts[3] || parts[2])} avoided the attack!`); break;
+        case '-miss': pop(posOf(parts[3] || parts[2]), 'Miss'); await say(`${Display(parts[3] || parts[2])} avoided the attack!`); break;
         case '-fail': await say(parts[3] === 'move: Potion' ? (line.includes('full HP') ? 'It won’t have any effect.' : 'The bag is empty!') : 'But it failed!'); break;
         case '-hitcount': await say(`The Pokémon was hit ${parts[3]} time${parts[3] === '1' ? '' : 's'}!`); break;
         case '-boost': case '-unboost': {
           const n = Number(parts[4]);
           const how = n >= 3 ? ' drastically' : n === 2 ? ' sharply' : '';
-          await say(`${Display(parts[2])}’s ${STAT[parts[3]] || parts[3]} ${cmd === '-boost' ? 'rose' : 'fell'}${how}!`, 450);
+          await say(`${Display(parts[2])}’s ${STAT[parts[3]] || parts[3]} ${cmd === '-boost' ? 'rose' : 'fell'}${how}!`);
           break;
         }
         case '-status': {
@@ -377,7 +478,7 @@
         case '-curestatus': {
           const s = slots[posOf(parts[2])];
           if (s) { s.status.textContent = ''; s.status.dataset.status = ''; }
-          await say(parts[3] === 'slp' ? `${Display(parts[2])} woke up!` : `${Display(parts[2])} was cured!`, 450);
+          await say(parts[3] === 'slp' ? `${Display(parts[2])} woke up!` : `${Display(parts[2])} was cured!`);
           break;
         }
         case 'cant': {
@@ -388,30 +489,54 @@
         }
         case '-activate': {
           if (/Protect|Detect/.test(parts[3])) await say(`${Display(parts[2])} protected itself!`);
-          else if (/confusion/.test(parts[3])) await say(`${Display(parts[2])} is confused!`, 450);
+          else if (/confusion/.test(parts[3])) await say(`${Display(parts[2])} is confused!`);
           break;
         }
-        case '-singleturn': if (/Protect|Detect/.test(parts[3])) await say(`${Display(parts[2])} protected itself!`, 450); break;
+        case '-singleturn': if (/Protect|Detect/.test(parts[3])) await say(`${Display(parts[2])} protected itself!`); break;
         case '-enditem': {
           if (parts[3] === 'Focus Sash') await say(`${Display(parts[2])} hung on using its Focus Sash!`);
-          else if (line.includes('[eat]')) await say(`${Display(parts[2])} ate its ${parts[3]}!`, 450);
+          else if (line.includes('[eat]')) await say(`${Display(parts[2])} ate its ${parts[3]}!`);
           break;
         }
-        case '-ability': await say(`[${Display(parts[2])}’s ${parts[3]}]`, 450); break;
-        case '-fieldstart': await say(/Grassy/.test(parts[2]) ? 'Grass grew to cover the battlefield!' : /Electric/.test(parts[2]) ? 'An electric current ran across the battlefield!' : /Psychic/.test(parts[2]) ? 'The battlefield got weird!' : /Misty/.test(parts[2]) ? 'Mist swirled around the battlefield!' : /Trick Room/.test(parts[2]) ? 'The dimensions were twisted!' : `${parts[2].replace('move: ', '')} began!`, 450); break;
-        case '-fieldend': await say(`${parts[2].replace('move: ', '')} ended.`, 400); break;
-        case '-weather': if (parts[2] !== 'none' && !line.includes('[upkeep]')) await say(`The weather became ${parts[2].replace('RainDance', 'rain').replace('SunnyDay', 'harsh sunlight').replace('Sandstorm', 'a sandstorm').replace('Snowscape', 'snow')}!`, 450); break;
-        case '-sidestart': await say(`${parts[3].replace('move: ', '')} started on ${parts[2].startsWith('p1') ? 'your' : 'Ren’s'} side!`, 450); break;
-        case '-sideend': await say(`${parts[3].replace('move: ', '')} ended on ${parts[2].startsWith('p1') ? 'your' : 'Ren’s'} side.`, 400); break;
-        case '-start': if (parts[3] === 'confusion') await say(`${Display(parts[2])} became confused!`); break;
+        case '-ability': await say(`[${Display(parts[2])}’s ${parts[3]}]`); break;
+        case '-fieldstart': await say(/Grassy/.test(parts[2]) ? 'Grass grew to cover the battlefield!' : /Electric/.test(parts[2]) ? 'An electric current ran across the battlefield!' : /Psychic/.test(parts[2]) ? 'The battlefield got weird!' : /Misty/.test(parts[2]) ? 'Mist swirled around the battlefield!' : /Trick Room/.test(parts[2]) ? 'The dimensions were twisted!' : `${parts[2].replace('move: ', '')} began!`); break;
+        case '-fieldend': await say(`${parts[2].replace('move: ', '')} ended.`); break;
+        case '-weather': if (parts[2] !== 'none' && !line.includes('[upkeep]')) await say(`The weather became ${parts[2].replace('RainDance', 'rain').replace('SunnyDay', 'harsh sunlight').replace('Sandstorm', 'a sandstorm').replace('Snowscape', 'snow')}!`); break;
+        case '-sidestart': await say(`${parts[3].replace('move: ', '')} started on ${parts[2].startsWith('p1') ? 'your' : 'Ren’s'} side!`); break;
+        case '-sideend': await say(`${parts[3].replace('move: ', '')} ended on ${parts[2].startsWith('p1') ? 'your' : 'Ren’s'} side.`); break;
         case 'vr-chaos': await say('Chaotic replacement! Your next Pokémon was picked at random.'); break;
         case 'turn': stats.turns = Number(parts[2]); turnEl.textContent = `Turn ${parts[2]}`; textEl.textContent = ''; break;
         default: break;
       }
     }
 
+    // The presentation queue: log batches play strictly in arrival order, one beat (action) at a
+    // time with a gap between actions. frame[data-busy] is set while anything is playing; command
+    // menus only appear after the queue has drained (onRequest), so input is locked meanwhile.
     let queue = Promise.resolve();
-    const playLines = (lines) => { queue = queue.then(async () => { for (const l of lines) { if (disposed) return; await handle(l); } if (mods.taunts && lines.length) flushTaunt(); }); return queue; };
+    let playing = 0;
+    let lastWasAction = false;
+    const ACTIONS = new Set(['move', 'switch', 'drag', 'replace', 'cant', 'detailschange', '-mega', 'residual']);
+    const busy = (d) => { playing += d; frame.dataset.busy = playing > 0 ? '1' : ''; };
+    const playLines = (lines) => {
+      busy(1);
+      queue = queue.then(async () => {
+        for (const beat of C.beats(lines)) {
+          if (disposed) return;
+          const action = ACTIONS.has(beat.kind);
+          if (action && lastWasAction) await sleep(PACE.gap);
+          if (beat.kind === 'turn') lastWasAction = false;
+          else if (action || beat.kind === 'upkeep') lastWasAction = action;
+          for (const step of C.steps(beat.lines)) {
+            if (disposed) return;
+            if (step.hit) await hits(step.lines);
+            else await handle(step.lines[0]);
+          }
+        }
+        if (mods.taunts && lines.length) flushTaunt();
+      }).catch(() => { /* a drawing error must not stall later batches */ }).then(() => busy(-1));
+      return queue;
+    };
 
     // ----- command menus (inside the dock) -----
     const clearMenu = () => menu.replaceChildren();
@@ -449,12 +574,13 @@
           const n = picks.indexOf(i + 1);
           const img = h('img', { class: 'tvb-sprite', alt: '', width: 96, height: 96, src: entry ? T.spriteUrl(entry, p.details.includes('shiny') ? 'shiny' : 'front') : null });
           const label = p.ident.replace(/^p1: /, '');
-          return menuButton([img, h('span', { text: label }), h('span', { class: 'tvb-pick-n', text: n >= 0 ? (n < 2 ? `Lead ${n + 1}` : `Back ${n - 1}`) : '' })], () => {
+          const types = entry ? entry.types : [];
+          return menuButton([typeRow(types, 'tvb-types--card'), img, h('span', { text: label }), h('span', { class: 'tvb-pick-n', text: n >= 0 ? (n < 2 ? `Lead ${n + 1}` : `Back ${n - 1}`) : '' })], () => {
             const at = picks.indexOf(i + 1);
             if (at >= 0) picks.splice(at, 1); else if (picks.length < need) picks.push(i + 1);
             render();
             menu.querySelectorAll('.tvb-pickmon')[i]?.focus();
-          }, { class: 'tvb-cmd tvb-pickmon', 'aria-pressed': String(n >= 0), 'aria-label': `${label}${n >= 0 ? `, picked ${n + 1}` : ''}` });
+          }, { class: 'tvb-cmd tvb-pickmon', 'aria-pressed': String(n >= 0), 'aria-label': `${label}, ${types.join(' and ')} type${n >= 0 ? `, picked ${n + 1}${n < 2 ? ', leads' : ''}` : ''}` });
         });
         const confirm = menuButton(picks.length === need ? 'Confirm ▸' : `Pick ${need - picks.length} more`, () => { A.play('confirm'); send(`team ${picks.join('')}`); }, { class: 'tvb-cmd tvb-cmd--go' });
         confirm.disabled = picks.length !== need;
@@ -630,8 +756,7 @@
         const layer = h('div', { class: 'tvb-esc', role: 'group', 'aria-label': 'Championship moment' });
         const crowd = h('div', { class: 'tvb-esc-crowd', 'aria-hidden': 'true' });
         crowd.innerHTML = ART.crowd(seedFor(id));
-        const champ = h('div', { class: 'tvb-esc-champ', 'aria-hidden': 'true' });
-        champ.innerHTML = ART.champion('tvb-esc-art');
+        const champ = h('div', { class: 'tvb-esc-champ', 'aria-hidden': 'true' }, ART.trainer('tvb-esc-art'));
         const line = h('p', { class: 'tvb-esc-line', 'aria-live': 'polite' });
         const progress = h('span', { class: 'tvb-esc-progress', 'aria-hidden': 'true' }, h('span'));
         const skipBtn = h('button', { type: 'button', class: 'tvb-btn tvb-esc-skip', onclick: () => seekEnd(true) }, 'Skip ▸▸');
@@ -642,11 +767,11 @@
         const cues = [
           [0, () => layer.classList.add('is-on')],
           ...ESC_LINES.map(([t, text]) => [t, () => { line.textContent = text; liveEl.textContent = `${CHAMP.short}: ${text}`; }]),
-          [10, () => layer.classList.add('is-arena')],
+          [10, () => { layer.classList.add('is-arena'); setPhase('stadium'); }],
           [14, () => { layer.classList.add('is-crowd'); A.crowd.start(0.3); }],
           [18, () => A.crowd.start(0.6)],
           [22, () => layer.classList.add('is-fire')],
-          [30, () => { layer.classList.add('is-charge'); A.crowd.start(0.9); line.textContent = `${CHAMP.short} raises a capsule. The crowd is on its feet.`; }],
+          [30, () => { layer.classList.add('is-charge'); A.crowd.start(0.9); line.textContent = `${CHAMP.short} steps forward. The crowd is on its feet.`; }],
           [36, () => layer.classList.add('is-flash')]
         ].sort((a, b) => a[0] - b[0]);
         let next = 0;
@@ -720,7 +845,7 @@
       A.crowd.stop();
       A.play(won ? 'win' : 'lose');
       frame.classList.add(won ? 'is-won' : 'is-lost');
-      await say(won ? `You defeated ${CHAMP.name}! ${G.name} is the very best!` : `You lost to ${CHAMP.name}…`, 900);
+      await say(won ? `You defeated ${CHAMP.name}! ${G.name} is the very best!` : `You lost to ${CHAMP.name}…`);
       if (worker) { worker.terminate(); worker = null; }
       const used = Object.entries(stats.renMoves).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([m, n]) => `${m} ×${n}`).join(', ');
       const insights = [
@@ -747,7 +872,9 @@
       if (cinematic) cinematic.cancel();
       cinematic = null;
       skip = null;
-      timers.forEach((t) => window.clearTimeout(t));
+      timers.forEach((t) => { window.clearTimeout(t); window.clearInterval(t); });
+      waits.forEach((w) => { window.clearTimeout(w.t); w.resolve(); });
+      waits.clear();
       document.removeEventListener('keydown', onKey);
       if (worker) { worker.terminate(); worker = null; }
       A.crowd.stop();
@@ -779,11 +906,18 @@
         return;
       }
       if (disposed) return;
-      const loadout = C.battleLoadout(G.cat, G.draft, seed, { movepools: pools });
+      let loadout = null;
+      try {
+        loadout = C.battleLoadout(G.cat, G.draft, seed, { movepools: pools });
+      } catch (_) {
+        await say('The random team couldn’t be built from this catalog.');
+        showMenu('Couldn’t start the battle', [menuButton('Back to party', () => leave('builder'))]);
+        return;
+      }
       trainer.hidden = false;
       trainerLabel.hidden = false;
       if (!reduced) trainer.classList.add('is-arriving');
-      await say(`${CHAMP.name} would like to battle!`, 1100);
+      await say(`${CHAMP.name} would like to battle!`, 1300);
       if (disposed) return;
       try {
         worker = new Worker(ENGINE_URL);

@@ -996,7 +996,7 @@
   // cartridge opens the window and paints the boot screen at once; the game's CSS and scripts load
   // next (the first 40% of the bar), then the game loads its data (/vr/vr-game.js, the rest). The
   // battle engine loads only when a battle starts. Technical paths keep the old "vr" name.
-  const VR_VERSION = '11';
+  const VR_VERSION = '12';
   const VR_FILES = ['/vr/vr-core.js', '/vr/vr-audio.js', '/vr/vr-art.js', '/vr/vr-game.js', '/vr/vr-setup.js', '/vr/vr-battle.js'];
   let vrLoading = null;
   let vrCss = null;

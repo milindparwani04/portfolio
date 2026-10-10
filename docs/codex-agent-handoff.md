@@ -13,7 +13,7 @@
 
 ## Current assignment
 
-Status: The Very Best overhaul master prompt complete (2026-10-10), ready for the other agent's discovery and implementation planning. Game implementation was not assigned to Codex in this session.
+Status: The Very Best follow-up refinement prompt complete (2026-10-10): [`the-very-best-refinement-master-prompt.md`](the-very-best-refinement-master-prompt.md). Prior overhaul is implemented according to the shared handoff. This new assignment is documentation/research only; no game implementation assigned to Codex.
 
 Scope: Inspect the implemented Victory Road game, research licensing/data/timing constraints, and translate Milind's 2026-10-10 overhaul request into [`the-very-best-master-prompt.md`](the-very-best-master-prompt.md). The earlier 2026-10-07 prompt remains historical context; the new prompt supersedes its conflicting requirements. Update this individual handoff and the shared project handoff.
 
@@ -41,6 +41,45 @@ Validation:
 - Preserved the pre-existing uncommitted 2026-10-02 Codex handoff entries; no unrelated work was overwritten.
 
 ## Work log
+
+### 2026-10-10 — Full 38-second Ren cinematic and first-fainted species variants
+
+- Milind approved the fixed cinematic pixel style and requested the full 38 seconds, showing whichever champion Pokémon fainted first. Produced six species-specific video assets (Floette-Eternal, male Basculegion, Kingambit, Dragonite, Garchomp, Sneasler), matching fainted and revived forms, complete dialogue/stadium/fire-aura/revival timeline, crowd-only recorded audio.
+- Art no longer contains the generic dragon. Correct repository Pokémon sprites are composited into the shot. Artifacts: visualization `ren-cutscene/ren-38-*.webm`; preview chooser `full38-player.html`; payload selector `ren-cutscene-selector.js`; integration/provenance/validation notes `FULL38-HANDOFF.md` and `full38-validation.json`.
+- Selector uses the engine's `escalation.fainted[0]`, not party slot zero. Verified mappings and invalid-data rejection; inspected keyframes, corrected crop alignment and decoded each 1280×480 export with approximately 38-second audio. No human listening or in-battle integration claimed.
+- No runtime/battle/engine files changed, preserving concurrent agent edits. Integration still needs to pass the existing fainted payload through to playback, preserve authoritative 38-second resume, and verify skip/mute/background/disposal/error paths. No commit, push or deployment.
+
+### 2026-10-10 — Fixed cinematic pixel panorama, real crowd-only audio
+
+- Milind superseded the animation direction: one static cinematic pixel wide shot, arena transition, no foreground trainer/fan overlays, only louder crowd audio. Created `ren-fixed-shot-crowd-24s.webm` in visualization `ren-cutscene`, 1280×480, about 24 seconds. Static outdoor and stadium states with fade through black and subtitles; no procedural animation.
+- Replaced all synthetic effects/chant/music with two real CC0 crowd recordings (kyles arena chant/applause/whistle; benfree roaring crowd). Sources and rendering details in `FIXED-SHOT.md` and `crowd-sources.json` beside the video. Stadium decoded RMS 0.206, peak 0.789; opening effectively silent. Keyframes inspected, video/audio decode verified; no human listening QA claimed.
+- Generated matched art from the original top pixel reference. Generic dragon and minor art-state differences remain preview limitations. No game code, runtime revival or deployment changes; preserve concurrent repository work.
+
+### 2026-10-10 — Ren continuous pixel-animation revision
+
+- Milind selected cinematic pixel and requested continuous performance instead of a sequence of stills. Built a 24-second motion prototype with an articulated procedural Ren: animated expression, breathing, posture, raised capsule/casting arm, fear-to-anger progression; a full fade out/in reveals the stadium, then animated fans/chants and growing flames.
+- Artifact: visualization `ren-cutscene/ren-continuous-pixel-24s.webm`; renderer, scene, environment asset and scope notes in `CONTINUOUS.md` alongside it. Environment art generated with image_gen; character art is simpler than the concept portraits. Retimed synthesized audio; Ren unvoiced.
+- Inspected keyframes and corrected casting-arm direction. Export validated for dimensions and non-silent approximately 24-second audio. No runtime changes, production integration, Pokémon revival implementation or deployment.
+
+### 2026-10-10 — Ren cinematic: three 15-second audiovisual style tests
+
+- Milind approved cinematic pixel, anime-inspired 2.5D and graphic fighting-game tests; no voiced Ren, audible crowd chants/effects. Produced animated concept-board WebMs using generated key art, camera motion, transitions, particles and original synthesized audio, with layered synthesized name chants. Not full character animation or production-ready integration.
+- Files in the same visualization `ren-cutscene` directory: `ren-pixel-15s.webm`, `ren-anime-15s.webm`, `ren-fighter-15s.webm`, local `compare.html`, and reproducible sources. Detailed scope/provenance/limitations in `STYLE-TESTS.md`. Short tests end on power-up, before Pokémon revival.
+- Validation: inspected keyframes, decoded exports at 1280×720 with approximately 15-second non-silent audio; no human listening QA claimed. No game runtime, engine, or external deployment changes. Preserve concurrent refinement work in the repository.
+
+### 2026-10-10 — Standalone Ren stadium/revival video preview
+
+- Created a 38-second, 960×540 silent pixel-art WebM with Ren dialogue, stadium transformation, and Garchomp revival at Milind's request. Existing original Ren sprite and repository Pokémon sprite used. This preview depicts Garchomp; runtime selection of the first fainted species requires variants and integration.
+- Artifact and reproducible renderer: `C:/Users/milin/.codex/visualizations/2026/10/08/01a11cb9-4c6d-73b2-ae9f-ff641a0524c6/ren-cutscene/ren-stadium-revival.webm` (approximately 10.5 MB). Inspected keyframes and verified exported video decodes at 960×540. Reddit reference could not be fetched.
+- No game implementation or deployment changes. Integration remains pending, including authoritative timing, skip, background and error handling.
+
+### 2026-10-10 — Follow-up refinement specification
+
+- Created [`the-very-best-refinement-master-prompt.md`](the-very-best-refinement-master-prompt.md) for type chips/search, party moves overview, exactly five fully evolved non-special random picks plus one legendary/mythical, capsule removal and shared main-menu pixel Ren, vertical original VS preview, readable serialized turns, larger battle sprites and persistent dark second-stage stadium.
+- Inspected current `vr-art`, setup, battle and engine landmarks; existing `drawTrainer(canvas)` is the requested reusable pixel asset. Current battle move/damage delays are short; the prompt requires event-order investigation, not only increasing sleeps.
+- Researched Showdown primary type/move sources: standard Poison damage is blocked by Steel immunity. Friend's particular Sneasler/Revavroom incident was not reproduced in this documentation session; next agent must test the pinned custom engine and audit target/HP playback before claiming a root cause or fix.
+- Clarified user's correction: the panel between the party grid and Modifiers is a selected-moves summary with move types; species-type chips are separate requested placements. Pre-battle preview has no Ren portrait, while remaining trainer presentations reuse the pixel asset.
+- Initial tree clean; only documentation edited. No runtime tests, commit, push or deployment. Next agent starts with this focused refinement prompt; it supersedes conflicting illustrated/capsule and random-team directions in the original overhaul.
 
 ### 2026-10-10 — The Very Best overhaul handoff
 

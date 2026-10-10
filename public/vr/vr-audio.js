@@ -103,7 +103,6 @@
     faint: (d) => tone(d, 520, 0.5, { type: 'triangle', slide: -460, vol: 0.07 }),
     heal: (d) => [523, 659, 784].forEach((f, i) => tone(d, f, 0.09, { type: 'triangle', at: ctx.currentTime + i * 0.08 })),
     mega: (d) => [392, 523, 659, 784, 1047].forEach((f, i) => tone(d, f, 0.12, { at: ctx.currentTime + i * 0.07 })),
-    throw: (d) => { tone(d, 300, 0.25, { type: 'triangle', slide: 500, vol: 0.05 }); noise(d, 0.2, { vol: 0.04, filter: 'highpass', freq: 3000, at: ctx.currentTime + 0.28 }); },
     boot: (d) => [262, 330, 392, 523, 659].forEach((f, i) => tone(d, f, 0.14, { vol: 0.05, at: ctx.currentTime + i * 0.09 })),
     revive: (d) => [392, 494, 587, 784, 988, 1175].forEach((f, i) => tone(d, f, 0.3, { type: 'triangle', vol: 0.06, at: ctx.currentTime + i * 0.05 })),
     win: (d) => [523, 523, 523, 659, 784, 659, 784, 1047].forEach((f, i) => tone(d, f, 0.16, { at: ctx.currentTime + i * 0.13 })),

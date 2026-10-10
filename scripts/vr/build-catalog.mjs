@@ -4,8 +4,9 @@
 // Usage: node scripts/vr/build-catalog.mjs <pokemon-showdown checkout>   (after build-dex + build-sim)
 //
 // Writes:
-//   public/vr/species.json    base stats, legal abilities and classification (legendary / mythical /
-//                             ultra beast / paradox) for every pool entry, plus ability descriptions
+//   public/vr/species.json    base stats, legal abilities, classification (legendary / mythical /
+//                             ultra beast / paradox) and fully-evolved flag for every pool entry,
+//                             plus ability descriptions
 //   public/vr/learnsets.json  every move a pool entry can legally learn under this game's ruleset,
 //                             and a move catalog (type, category, power, accuracy, PP, priority,
 //                             target, description) with the engine's own numbers
@@ -120,6 +121,11 @@ const classOf = (sp) => {
   if (tags.includes('Paradox')) return 'P';
   return '';
 };
+// Fully evolved: no further ordinary evolution in this engine's data (`evos`, which Showdown keeps
+// per form: Meowth-Galar -> Perrserker, Primeape -> Annihilape). Single-stage species count.
+// Battle-only forms are not in the pool at all (build-dex.mjs). engine.js's isFinal() is the same
+// rule, so the random-team check at the engine boundary agrees with this flag.
+const isFinal = (sp) => !(sp.evos || []).some((e) => { const n = D.species.get(e); return n.exists && !['CAP', 'Custom'].includes(n.isNonstandard); });
 const species = {};
 const learnsets = {};
 const problems = [];
@@ -128,7 +134,7 @@ for (const [id] of dex.pool) {
   if (!sp.exists) { problems.push(`${id}: not in engine`); continue; }
   const b = sp.baseStats;
   const abilities = [...new Set(Object.values(sp.abilities))].filter(Boolean).map(abilityRef);
-  species[id] = [b.hp, b.atk, b.def, b.spa, b.spd, b.spe, abilities, classOf(sp), sp.weightkg];
+  species[id] = [b.hp, b.atk, b.def, b.spa, b.spd, b.spe, abilities, classOf(sp), sp.weightkg, isFinal(sp) ? 1 : 0];
   const moves = legalMoves(id).map(moveRef).sort((x, y) => x - y);
   if (moves.length < 1) problems.push(`${id}: no legal moves`);
   // Sorted indices as base-36 gaps: about a third of the size of a plain number list.
@@ -159,7 +165,7 @@ const write = (file, data) => {
   return fs.statSync(out).size;
 };
 const sizes = {
-  species: write('species.json', { source: `Pokémon Showdown ${SHOWDOWN_COMMIT.slice(0, 8)} (MIT), via vr-engine.js`, fields: ['hp', 'atk', 'def', 'spa', 'spd', 'spe', 'abilities', 'class L/M/U/P', 'weightkg'], species, abilities: abilityRows }),
+  species: write('species.json', { source: `Pokémon Showdown ${SHOWDOWN_COMMIT.slice(0, 8)} (MIT), via vr-engine.js`, fields: ['hp', 'atk', 'def', 'spa', 'spd', 'spe', 'abilities', 'class L/M/U/P', 'weightkg', 'fully evolved 1/0'], species, abilities: abilityRows }),
   learnsets: write('learnsets.json', { source: `Pokémon Showdown ${SHOWDOWN_COMMIT.slice(0, 8)} learnsets (MIT)`, rule: 'any method, any generation, prevolutions and parent forms; Sketch', fields: ['name', 'type', 'category P/S/-', 'power', 'accuracy (0 = never misses)', 'pp', 'priority', 'target', 'description'], moves: moveRows, learnsets }),
   items: write('items.json', { source: `Pokémon Showdown ${SHOWDOWN_COMMIT.slice(0, 8)} (MIT)`, fields: ['name', 'description', 'only for', 'kind'], items })
 };

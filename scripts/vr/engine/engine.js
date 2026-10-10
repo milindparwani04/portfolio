@@ -71,9 +71,16 @@ export class TeamError extends Error {}
 const toId = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
 const EXCLUDED_SETS = new Set(['CAP', 'Custom', 'LGPE', 'Gmax', 'Unobtainable', 'Future']);
 const STAT_KEYS = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'];
+// Fully evolved: no further ordinary evolution in the engine's data. Same rule as the
+// fully-evolved flag in species.json (scripts/vr/build-catalog.mjs).
+export const isFinal = (dex, sp) => !(sp.evos || []).some((e) => { const n = dex.species.get(e); return n.exists && !['CAP', 'Custom'].includes(n.isNonstandard); });
+const SPECIAL_TAGS = ['Restricted Legendary', 'Sub-Legendary', 'Mythical'];
+
 // learnsets: the parsed /vr/learnsets.json, or null to skip the learnset check (tests that build
 // teams by hand). Everything else is checked against the engine's own data.
-export function validateTeam(team, dex, learnsets) {
+// options.randomTeam: the Random Team modifier's composition — exactly six, five fully evolved
+// Pokémon that are neither legendary nor mythical and one fully evolved legendary or mythical.
+export function validateTeam(team, dex, learnsets, options = {}) {
   if (!Array.isArray(team) || team.length < 2 || team.length > 6) throw new TeamError('A team has two to six Pokémon.');
   const nums = new Set();
   const items = new Set();
@@ -87,7 +94,8 @@ export function validateTeam(team, dex, learnsets) {
     if (nums.has(sp.num)) throw new TeamError('Species Clause: one of each species.');
     nums.add(sp.num);
     const tags = (dex.species.get(sp.baseSpecies).tags || []).concat(sp.tags || []);
-    if (tags.some((t) => ['Restricted Legendary', 'Sub-Legendary', 'Mythical'].includes(t))) special += 1;
+    if (tags.some((t) => SPECIAL_TAGS.includes(t))) special += 1;
+    if (options.randomTeam && !isFinal(dex, sp)) throw new TeamError(`Random team: ${sp.name} isn't fully evolved.`);
     if (!Array.isArray(set.moves) || set.moves.length < 1 || set.moves.length > 4) throw new TeamError(`${sp.name}: one to four moves.`);
     const ids = set.moves.map(toId);
     if (new Set(ids).size !== ids.length) throw new TeamError(`${sp.name}: each move once.`);
@@ -123,6 +131,7 @@ export function validateTeam(team, dex, learnsets) {
     if (total > 66) throw new TeamError(`${sp.name}: 66 stat points at most.`);
   });
   if (special > 1) throw new TeamError('Only one legendary or mythical Pokémon per team.');
+  if (options.randomTeam && (team.length !== 6 || special !== 1)) throw new TeamError('Random team: six Pokémon, exactly one of them legendary or mythical.');
 }
 
 export function createEngine(config, emit) {
@@ -135,7 +144,7 @@ export function createEngine(config, emit) {
   const viewP1 = createView('p1');
   const viewP2 = createView('p2');
   const dex = Dex.forFormat(FORMAT_ID);
-  validateTeam(config.player && config.player.team, dex, config.learnsets || null);
+  validateTeam(config.player && config.player.team, dex, config.learnsets || null, { randomTeam: !!rules.randomTeam });
   const ai = createAI(dex, aiRand, 50, config.difficulty || 'hard');
   const escalationOn = rules.escalation !== false;
   let pending = { p1: null, p2: null };
@@ -346,4 +355,5 @@ export function createEngine(config, emit) {
   };
 }
 
-export { CHAMPION, VARIANTS, championTeam, Dex, createView, createAI };
+// Battle is exported for the tests' fixed scenarios (no AI); the page never uses it.
+export { CHAMPION, VARIANTS, championTeam, Dex, createView, createAI, Battle };

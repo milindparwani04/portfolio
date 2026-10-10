@@ -6,13 +6,8 @@
   'use strict';
 
   const T = window.TVB;
-  const { G, C, A, h, btn, header, go, sprite, announce, save } = T;
-  const TYPE_COLOURS = {
-    Normal: '#a8a77a', Fire: '#ee8130', Water: '#6390f0', Electric: '#d9b416', Grass: '#5fae3e', Ice: '#6cc8c4', Fighting: '#c22e28', Poison: '#a33ea1', Ground: '#c9a75a',
-    Flying: '#8f7fd9', Psychic: '#f95587', Bug: '#8d9c1b', Rock: '#b6a136', Ghost: '#735797', Dragon: '#6f35fc', Dark: '#705746', Steel: '#8a8aa3', Fairy: '#d685ad', Stellar: '#40b5a5'
-  };
+  const { G, C, A, h, btn, header, go, sprite, announce, save, typeChip, typeRow } = T;
   const STAT_LABEL = { hp: 'HP', atk: 'Attack', def: 'Defense', spa: 'Sp. Atk', spd: 'Sp. Def', spe: 'Speed' };
-  const typeChip = (t) => h('span', { class: 'tvb-type', style: `--type:${TYPE_COLOURS[t] || '#777'}`, text: t });
   const classBadge = (id) => {
     const cls = C.classOf(G.cat, id);
     if (cls === 'L') return h('span', { class: 'tvb-badge tvb-badge--l', text: '★ Legendary' });
@@ -35,13 +30,15 @@
     let liftedFrom = null;
     const nodes = {};
     nodes.filters = h('div', { class: 'tvb-chips', role: 'group', 'aria-label': 'Show generation' });
-    nodes.search = h('input', { class: 'tvb-input tvb-search', type: 'search', placeholder: 'Search by name or number', 'aria-label': 'Search Pokémon', autocomplete: 'off', spellcheck: 'false' });
+    nodes.search = h('input', { class: 'tvb-input tvb-search', type: 'search', placeholder: 'Search by name, number or type', 'aria-label': 'Search Pokémon by name, number or type (for example: fire)', autocomplete: 'off', spellcheck: 'false' });
     nodes.pool = h('div', { class: 'tvb-pool', role: 'group', 'aria-label': 'Pokémon catalog' });
     nodes.count = h('p', { class: 'tvb-dim tvb-count', 'aria-live': 'polite' });
     nodes.party = h('ol', { class: 'tvb-party', 'aria-labelledby': 'tvbPartyLabel' });
     nodes.partyLabel = h('span', { id: 'tvbPartyLabel' });
     nodes.status = h('p', { class: 'tvb-status', role: 'status' });
     nodes.note = h('p', { class: 'tvb-note' });
+    nodes.moves = h('ol', { class: 'tvb-pm-list', 'aria-labelledby': 'tvbPmLabel' });
+    nodes.movesNote = h('p', { class: 'tvb-note tvb-pm-note' });
     nodes.edit = btn('Edit members ▸', () => go('editor', G.draft.party[0] && G.draft.party[0].uid));
     nodes.next = btn('Modifiers ▸', () => go('modifiers'), { class: 'tvb-btn tvb-btn--go' });
     screen.append(header(`Party · ${G.name}`, () => go('title')),
@@ -54,6 +51,9 @@
           nodes.party,
           h('p', { class: 'tvb-dim tvb-hint', id: 'tvbPartyHint', text: 'Reorder: drag a grip, or focus it and press Space, then the arrow keys.' }),
           nodes.note, nodes.status,
+          h('section', { class: 'tvb-pm', 'aria-labelledby': 'tvbPmLabel' },
+            h('div', { class: 'tvb-panel-head' }, h('span', { id: 'tvbPmLabel', text: 'Party moves' }), h('span', { class: 'tvb-dim', text: 'Move types shown' })),
+            nodes.movesNote, nodes.moves),
           h('div', { class: 'tvb-row tvb-row--end' }, nodes.edit, nodes.next))));
 
     const say = (text, sound) => { nodes.status.textContent = text; if (sound) A.play(sound); };
@@ -64,6 +64,7 @@
         sprite(entry, 'front', 'tvb-sprite'),
         h('span', { class: 'tvb-mon-name', text: entry.name }),
         h('span', { class: 'tvb-mon-meta', text: formLabel(entry) }),
+        typeRow(entry.types, 'tvb-types--card'),
         classBadge(entry.id));
       button.addEventListener('click', () => {
         const at = G.draft.party.find((m) => m.id === entry.id);
@@ -77,7 +78,7 @@
         renderParty();
         markPool();
       });
-      return { entry, button, key: `${entry.name.toLowerCase()} ${entry.num} ${String(entry.num).padStart(4, '0')} ${entry.form.toLowerCase()}` };
+      return { entry, button };
     });
     nodes.pool.append(...cards.map((c) => c.button));
 
@@ -87,14 +88,16 @@
     }
     // Filtering changes what's shown, never the party.
     function filterPool() {
-      const q = query.trim().toLowerCase().replace(/^#/, '');
+      const type = C.typeQuery(query);
       let shown = 0;
-      cards.forEach(({ entry, button, key }) => {
-        const visible = (!G.draft.filterGen || entry.gen === G.draft.filterGen) && (!q || key.includes(q));
+      cards.forEach(({ entry, button }) => {
+        const visible = C.matches(entry, query, G.draft.filterGen);
         button.hidden = !visible;
         if (visible) shown += 1;
       });
-      nodes.count.textContent = shown ? `${shown} shown` : 'No Pokémon match. Try another name, number or generation.';
+      const where = G.draft.filterGen ? ` in Gen ${C.ROMAN[G.draft.filterGen]}` : '';
+      if (type) nodes.count.textContent = shown ? `${shown} ${type}-type shown${where}` : `No ${type}-type Pokémon${where}. Try All generations.`;
+      else nodes.count.textContent = shown ? `${shown} shown` : 'No Pokémon match. Try another name, number, type or generation.';
       setRoving(cards.find((c) => c.button.tabIndex === 0 && !c.button.hidden)?.button || null);
     }
     function markPool() {
@@ -148,6 +151,7 @@
       const open = h('button', { type: 'button', class: 'tvb-slot-open', 'aria-label': `Edit ${entry.name}${problems ? ', needs attention' : ''}`, onclick: () => { A.play('select'); go('editor', m.uid); } },
         h('span', { class: 'tvb-bob' }, sprite(entry, G.draft.mods.shiny ? 'shiny' : 'front', 'tvb-sprite', true)),
         h('span', { class: 'tvb-slot-name', text: entry.name }),
+        typeRow(entry.types, 'tvb-types--sm'),
         problems ? h('span', { class: 'tvb-warn', 'aria-hidden': 'true', text: '!' }) : null);
       slot.classList.add('is-filled');
       if (lifted === i) slot.classList.add('is-lifted');
@@ -169,6 +173,35 @@
       if (G.savedNote) notes.push(G.savedNote);
       nodes.note.textContent = notes.join(' ');
       nodes.note.hidden = !notes.length;
+      renderMoves();
+    }
+    // Party moves: each member's saved moves, in party order, with move types. Only real members
+    // and real moves; battle-only overrides are explained, never shown as if chosen, and a hidden
+    // random team is never listed.
+    function renderMoves() {
+      const p = G.draft.party;
+      const mods = G.draft.mods;
+      const notes = [];
+      if (mods.random) notes.push('Random team is on: a hidden team battles instead, and its moves appear in the battle. Below is your saved party.');
+      if (mods.moves) notes.push('Random moves is on: these saved moves are replaced with random ones for the battle only, and stay saved.');
+      nodes.movesNote.textContent = notes.join(' ');
+      nodes.movesNote.hidden = !notes.length;
+      if (!p.length) {
+        nodes.moves.replaceChildren(h('li', { class: 'tvb-pm-empty tvb-dim', text: 'No Pokémon yet. Add some from the catalog and their moves show here.' }));
+        return;
+      }
+      nodes.moves.replaceChildren(...p.map((m, i) => {
+        const entry = entryOf(m);
+        const moves = m.moves.map((n) => G.cat.moveByName[n]).filter(Boolean);
+        return h('li', { class: 'tvb-pm-item', 'data-uid': m.uid },
+          h('button', { type: 'button', class: 'tvb-pm-head', 'aria-label': `Edit ${entry.name}, slot ${i + 1}`, onclick: () => { A.play('select'); go('editor', m.uid); } },
+            h('span', { class: 'tvb-pm-n', 'aria-hidden': 'true', text: String(i + 1) }),
+            h('span', { class: 'tvb-pm-name', text: entry.name }),
+            typeRow(entry.types, 'tvb-types--sm')),
+          moves.length
+            ? h('ul', { class: 'tvb-pm-moves', 'aria-label': `${entry.name}’s moves` }, moves.map((mv) => h('li', {}, typeChip(mv.type), h('span', { class: 'tvb-pm-move', text: mv.name }))))
+            : h('p', { class: 'tvb-dim tvb-pm-none', text: 'No moves chosen yet.' }));
+      }));
     }
     function removeMember(uid, focusParty) {
       const i = G.draft.party.findIndex((m) => m.uid === uid);
@@ -482,16 +515,25 @@
   };
 
   // ======================= Battle preview =======================
+  // An original versus screen: your party on the blue side, Ren's on the red side, both as vertical
+  // rosters (sprite, name, types) on solid panels over a low-resolution ray pattern, with a pixel
+  // lightning bolt and VS at the seam. No portrait of Ren here (Milind, 2026-10-10). Rules, reward
+  // and Enter battle sit in a compact footer. A hidden random team stays hidden: placeholder rows only.
+  const CHAMP_IDS = ['floetteeternal', 'basculegion', 'kingambit', 'dragonite', 'garchomp', 'sneasler'];
+  const BOLT = '<svg viewBox="0 0 16 40" shape-rendering="crispEdges" aria-hidden="true" focusable="false"><path fill="#16121f" d="M7 0h9l-5 15h5L4 40l3-19H2z"/><path fill="#f7c947" d="M8 2h5l-5 14h5L6 33l2-14H4z"/><path fill="#fff3c4" d="M8 2h2L7 16H6z"/></svg>';
   G.screens.preview = (screen) => {
     G.escapeHook = null;
     const mods = G.draft.mods;
     const problems = mods.random ? [] : C.partyProblems(G.cat, G.draft.party);
+    const row = (entry, kind, i) => h('li', { class: 'tvb-vsb-row', style: `--i:${i}` },
+      h('span', { class: 'tvb-vsb-sprite' }, sprite(entry, kind, 'tvb-sprite', true)),
+      h('span', { class: 'tvb-vsb-id' }, h('span', { class: 'tvb-vsb-name', text: entry.name }), typeRow(entry.types, 'tvb-types--sm')));
     const ours = mods.random
-      ? Array.from({ length: 6 }, (_, i) => h('li', { class: 'tvb-preview-mon is-hidden', style: `--i:${i}` }, h('span', { class: 'tvb-q', role: 'img', 'aria-label': `Hidden random Pokémon ${i + 1}`, text: '?' })))
-      : G.draft.party.map((m, i) => h('li', { class: 'tvb-preview-mon', style: `--i:${i}` }, sprite(entryOf(m), mods.shiny ? 'shiny' : 'front', 'tvb-sprite', true), h('span', { text: entryOf(m).name })));
-    const champArt = h('div', { class: 'tvb-preview-champ', 'aria-hidden': 'true' });
-    champArt.innerHTML = T.ART.champion('tvb-champ-art');
-    const champTeam = ['floetteeternal', 'basculegion', 'kingambit', 'dragonite', 'garchomp', 'sneasler'].map((id) => G.cat.byId[id]).filter(Boolean);
+      ? Array.from({ length: C.TEAM_SIZE }, (_, i) => h('li', { class: 'tvb-vsb-row is-hidden', style: `--i:${i}` },
+        h('span', { class: 'tvb-vsb-sprite' }, h('span', { class: 'tvb-q', 'aria-hidden': 'true', text: '?' })),
+        h('span', { class: 'tvb-vsb-id' }, h('span', { class: 'tvb-vsb-name', text: `Hidden Pokémon ${i + 1}` }), h('span', { class: 'tvb-dim tvb-vsb-sub', text: 'Revealed at team preview' }))))
+      : G.draft.party.map((m, i) => row(entryOf(m), mods.shiny ? 'shiny' : 'front', i));
+    const champTeam = CHAMP_IDS.map((id) => G.cat.byId[id]).filter(Boolean);
     const mult = C.multiplier(mods);
     const p = C.difficulty(mods);
     const bring = mods.random ? C.BRING : Math.min(C.BRING, G.draft.party.length);
@@ -500,25 +542,24 @@
       A.play('confirm');
       go('battle', { seed: C.newSeed() });
     }, { class: 'tvb-btn tvb-btn--go tvb-btn--big', disabled: !!problems.length });
+    const side = (cls, id, title, sub, rows) => h('section', { class: `tvb-vsb-side ${cls}`, 'aria-labelledby': id },
+      h('div', { class: 'tvb-vsb-head' }, h('h4', { id, class: 'tvb-vsb-title', text: title }), h('p', { class: 'tvb-vsb-sub', text: sub })),
+      h('ol', { class: 'tvb-vsb-roster' }, rows));
+    const bolt = h('div', { class: 'tvb-vsb-mid', 'aria-hidden': 'true' }, h('span', { class: 'tvb-vsb-bolt' }), h('span', { class: 'tvb-vsb-vs', text: 'VS' }));
+    bolt.firstChild.innerHTML = BOLT;
     screen.append(header('Battle preview', () => go('modifiers')),
-      h('div', { class: 'tvb-preview' },
-        h('section', { class: 'tvb-panel' },
-          h('div', { class: 'tvb-panel-head' }, h('span', { text: G.name }), h('span', { class: 'tvb-dim', text: mods.random ? 'Random team · hidden until team preview' : `${G.draft.party.length} Pokémon · bring ${bring}` })),
-          h('ol', { class: 'tvb-preview-team' }, ours),
-          problems.length ? h('div', {}, h('ul', { class: 'tvb-problems', role: 'alert' }, problems.map((t) => h('li', { text: t }))), btn('Fix party ▸', () => go('builder'))) : null),
-        h('section', { class: 'tvb-panel tvb-vs' },
-          champArt,
-          h('div', {},
-            h('p', { class: 'tvb-kicker', text: 'Reigning Champion' }),
-            h('h4', { class: 'tvb-champ-name', text: 'Ren Kestrel' }),
-            h('ol', { class: 'tvb-preview-team tvb-preview-team--small' }, champTeam.map((e) => h('li', { class: 'tvb-preview-mon' }, sprite(e, 'front', 'tvb-sprite', true), h('span', { text: e.name })))),
-            h('p', { class: 'tvb-dim', text: 'Ren brings 4 of these 6. Ren’s moves change every battle and stay hidden until used; the full sets are shown after the battle.' }))),
-        h('section', { class: 'tvb-panel tvb-rules' },
-          h('p', { text: `Doubles · Lv ${mods.cap ? '45 (Ren: Lv 50)' : 50} · Species Clause · Item Clause · ${mods.nopotions ? 'No Potions' : '2 Potions'}` }),
-          h('p', { text: `Reward ×${mult.toFixed(2)} · ${C.tier(mult)} tier · Difficulty: ${C.difficultyLabel(p)}` }),
+      h('div', { class: 'tvb-vsb' },
+        h('div', { class: 'tvb-vsb-bg', 'aria-hidden': 'true' }, h('span', { class: 'tvb-vsb-blue' }), h('span', { class: 'tvb-vsb-red' })),
+        side('tvb-vsb-side--you', 'tvbVsYou', G.name, mods.random ? 'Random team · hidden until team preview' : `${G.draft.party.length} Pokémon · bring ${bring}`, ours),
+        bolt,
+        side('tvb-vsb-side--ren', 'tvbVsRen', 'Ren Kestrel', 'Reigning Champion · brings 4 of 6', champTeam.map((e, i) => row(e, 'front', i)))),
+      h('div', { class: 'tvb-vsb-foot' },
+        h('div', { class: 'tvb-vsb-rules' },
+          h('p', { text: `Doubles · Lv ${mods.cap ? '45 (Ren: Lv 50)' : 50} · Species Clause · Item Clause · ${mods.nopotions ? 'No Potions' : '2 Potions'} · Reward ×${mult.toFixed(2)} · ${C.tier(mult)} tier · ${C.difficultyLabel(p)}` }),
           ...C.overrides(mods).map((t) => h('p', { class: 'tvb-note', text: t })),
-          h('p', { class: 'tvb-dim', text: 'A championship surprise waits once two of Ren’s Pokémon have fainted.' }),
-          h('div', { class: 'tvb-row tvb-row--end' }, enter))));
-    (problems.length ? screen.querySelector('.tvb-problems + .tvb-btn, .tvb-btn--back') : enter).focus();
+          h('p', { class: 'tvb-dim', text: 'Ren’s moves change every battle and stay hidden until used. A championship surprise waits once two of Ren’s Pokémon have fainted.' }),
+          problems.length ? h('ul', { class: 'tvb-problems', role: 'alert' }, problems.map((t) => h('li', { text: t }))) : null),
+        h('div', { class: 'tvb-vsb-actions' }, problems.length ? btn('Fix party ▸', () => go('builder')) : null, enter)));
+    (problems.length ? screen.querySelector('.tvb-vsb-actions .tvb-btn') : enter).focus();
   };
 }());

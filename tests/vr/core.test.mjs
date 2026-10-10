@@ -82,15 +82,22 @@ test('classification: legendaries and mythicals share one allowance; regional fo
   assert.ok(C.partyProblems(cat, [...partyOf(['garchomp']), { ...C.defaultMember(cat, 'mew', 'm9') }, { ...C.defaultMember(cat, 'mewtwo', 'm8') }]).some((t) => /legendary or mythical/.test(t)), 'party-level check too');
 });
 
-test('random team: the whole pool whatever the catalog filter shows, six unique species, at most one legendary or mythical', () => {
+test('random team: whole pool whatever the filter shows, exactly five fully evolved non-specials plus one legendary or mythical', () => {
   const gens = new Set();
-  for (let seed = 1; seed <= 300; seed += 1) {
+  const specialAt = new Set();
+  for (let seed = 1; seed <= 1000; seed += 1) {
     const team = C.rollTeam(cat, C.rng(seed));
     assert.equal(team.length, 6);
-    assert.equal(new Set(team.map((id) => byId[id].num)).size, 6);
-    assert.ok(team.filter((id) => C.isSpecial(cat, id)).length <= 1);
+    assert.equal(new Set(team.map((id) => byId[id].num)).size, 6, 'unique species');
+    assert.equal(team.filter((id) => C.isSpecial(cat, id)).length, 1, `seed ${seed}: one special`);
+    assert.equal(team.filter((id) => !C.isSpecial(cat, id) && C.isFinal(cat, id)).length, 5, `seed ${seed}: five fully evolved`);
+    assert.ok(team.every((id) => C.isFinal(cat, id)), 'the special is fully evolved too');
+    assert.ok(team.every((id) => cat.pool.includes(byId[id])), 'pickable forms only, never battle-only forms');
+    assert.equal(C.randomTeamProblem(cat, team), '');
+    specialAt.add(team.findIndex((id) => C.isSpecial(cat, id)));
     team.forEach((id) => gens.add(byId[id].gen));
   }
+  assert.equal(specialAt.size, 6, 'the special slot is shuffled');
   assert.equal(gens.size, 9);
   // The same through the battle snapshot with a Gen I filter saved in the draft.
   const draft = draftOf(['pikachu'], { random: true });
@@ -99,6 +106,54 @@ test('random team: the whole pool whatever the catalog filter shows, six unique 
   for (let seed = 1; seed <= 100; seed += 1) C.battleLoadout(cat, draft, seed, {}).members.forEach((m) => seen.add(byId[m.id].gen));
   assert.ok(seen.size >= 8);
   assert.deepEqual(C.rollTeam(cat, C.rng(42)), C.rollTeam(cat, C.rng(42)));
+});
+
+test('fully evolved: ordinary evolution stages and forms, from the engine data', () => {
+  const final = ['annihilape', 'vaporeon', 'sylveon', 'raichualola', 'perrserker', 'persian', 'tauros', 'scizor', 'kleavor', 'wyrdeer', 'basculin', 'basculegion', 'sneasler', 'clodsire', 'rotomwash', 'gholdengo', 'archaludon', 'sirfetchd', 'mrrime', 'floetteeternal'];
+  const not = ['primeape', 'eevee', 'pikachu', 'meowth', 'meowthgalar', 'scyther', 'dunsparce', 'girafarig', 'stantler', 'ursaring', 'basculinwhitestriped', 'qwilfishhisui', 'sneaselhisui', 'slowpokegalar', 'wooperpaldea', 'gimmighoul', 'duraludon', 'applin', 'dipplin', 'farfetchdgalar', 'mrmimegalar', 'cosmog', 'kubfu', 'typenull', 'floette'];
+  final.forEach((id) => assert.equal(C.isFinal(cat, id), true, id));
+  not.forEach((id) => assert.equal(C.isFinal(cat, id), false, id));
+  // Ultra Beasts and Paradox Pokémon are ordinary picks, not the special slot.
+  assert.equal(C.isSpecial(cat, 'nihilego'), false);
+  assert.equal(C.isSpecial(cat, 'fluttermane'), false);
+  const { finals, specials } = C.randomPools(cat);
+  const flat = (g) => g.flat();
+  assert.ok(flat(finals).includes('nihilego') && flat(finals).includes('fluttermane'));
+  assert.ok(!flat(finals).some((id) => flat(specials).includes(id)), 'disjoint pools');
+  assert.ok(!flat(specials).includes('cosmog') && flat(specials).includes('mewtwo') && flat(specials).includes('mew'));
+  // The validator refuses teams that break the rule.
+  const ok = C.rollTeam(cat, C.rng(5));
+  assert.match(C.randomTeamProblem(cat, ok.map((id) => (C.isSpecial(cat, id) ? 'garchomp' : id))), /species|legendary/);
+  assert.match(C.randomTeamProblem(cat, [...ok.filter((id) => !C.isSpecial(cat, id)).slice(0, 5), 'primeape']), /legendary|fully evolved/);
+  assert.match(C.randomTeamProblem(cat, ok.map((id, i) => (i === ok.findIndex((x) => !C.isSpecial(cat, x)) ? 'mew' : id))), /exactly one/);
+  assert.match(C.randomTeamProblem(cat, ok.slice(0, 5)), /six/);
+});
+
+test('catalog search: an exact type name shows only that type, within the generation filter', () => {
+  const shown = (q, gen = 0) => cat.pool.filter((e) => C.matches(e, q, gen));
+  const fire = shown('fire');
+  assert.ok(fire.length > 50);
+  assert.ok(fire.every((e) => e.types.includes('Fire')), 'only Fire types');
+  assert.deepEqual(fire, cat.pool.filter((e) => e.types.includes('Fire')), 'every Fire type, dual types included');
+  assert.ok(fire.some((e) => e.types.length === 2 && e.types[0] !== 'Fire'), 'a secondary Fire type is included');
+  assert.deepEqual(shown('FIRE'), fire);
+  assert.deepEqual(shown('  Fire '), fire);
+  // Names containing a type word don't leak in: "Steelix" is Steel, but "rock" must not bring in
+  // a non-Rock "Rockruff"-like name, and "ice" must not match "Pikachu"-like substrings.
+  assert.ok(shown('ice').every((e) => e.types.includes('Ice')));
+  assert.ok(shown('dark').every((e) => e.types.includes('Dark')));
+  assert.ok(!shown('normal').some((e) => !e.types.includes('Normal')));
+  // Generation filter intersects (forms count in their species' generation, as the chips show).
+  assert.ok(shown('fire', 1).every((e) => e.gen === 1 && e.types.includes('Fire')));
+  assert.deepEqual(shown('fire', 1).map((e) => e.id), ['charmander', 'charmeleon', 'charizard', 'vulpix', 'ninetales', 'growlithe', 'growlithehisui', 'arcanine', 'arcaninehisui', 'ponyta', 'rapidash', 'marowakalola', 'magmar', 'taurospaldeablaze', 'flareon', 'moltres']);
+  // Names and numbers still work; a partial type word is a name search; empty restores the filter.
+  assert.deepEqual(shown('pikachu').map((e) => e.id), ['pikachu']);
+  assert.deepEqual(shown('#25').map((e) => e.id).slice(0, 1), ['pikachu']);
+  assert.ok(shown('fir').every((e) => e.name.toLowerCase().includes('fir') || e.form.toLowerCase().includes('fir')));
+  assert.equal(shown('').length, cat.pool.length);
+  assert.equal(shown('', 3).length, cat.pool.filter((e) => e.gen === 3).length);
+  assert.equal(shown('zzzz').length, 0);
+  assert.equal(C.TYPES.length, 18);
 });
 
 test('the draft is byte-for-byte unchanged through Random moves, items and team on and off', () => {

@@ -44,12 +44,19 @@
 .tvb-error { margin: 0; color: var(--t-bad); font-size: .82rem; min-height: 1.2em; }
 .tvb-ok { margin: 4px 0; color: var(--t-ok); font-size: .8rem; }
 .tvb-status { margin: 0; min-height: 1.2em; color: var(--t-yellow); font-size: .8rem; }
+.tvb-status:empty { min-height: 0; }
 .tvb-desc { margin: 2px 0 4px; color: var(--t-dim); font-size: .78rem; line-height: 1.45; }
 .tvb-problems { margin: 4px 0; padding: 8px 10px 8px 26px; border: 2px solid var(--t-bad); color: var(--t-fg); font-size: .8rem; line-height: 1.5; }
 .tvb-badge { display: inline-block; padding: 1px 6px; border: 1px solid var(--t-line); color: var(--t-dim); font-size: .62rem; letter-spacing: .04em; text-transform: uppercase; white-space: nowrap; }
 .tvb-badge--l { border-color: var(--t-yellow); color: var(--t-yellow); }
 .tvb-badge--m { border-color: #c79bff; color: #d9bcff; }
-.tvb-type { display: inline-block; padding: 1px 7px 1px 5px; border-left: 7px solid var(--type); background: var(--t-raised); font-size: .68rem; letter-spacing: .04em; text-transform: uppercase; }
+.tvb-type { display: inline-block; padding: 1px 7px 1px 5px; border-left: 7px solid var(--type); background: var(--t-raised); color: var(--t-fg); font-size: .68rem; letter-spacing: .04em; text-transform: uppercase; white-space: nowrap; }
+/* A Pokémon's types: one chip each, same treatment, smaller where space is tight. */
+.tvb-types { display: inline-flex; flex-wrap: wrap; gap: 3px; }
+.tvb-types--sm .tvb-type, .tvb-types--card .tvb-type, .tvb-types--hp .tvb-type { padding: 0 4px 0 3px; border-left-width: 4px; font-size: .56rem; line-height: 1.5; }
+.tvb-types--card { align-self: flex-start; order: -1; min-height: 1.6em; }
+/* Ren's pixel sprite: whole-pixel multiples of 22 x 34, never smoothed. */
+.tvb-ren { display: block; width: calc(22px * var(--px, 4)); height: calc(34px * var(--px, 4)); image-rendering: pixelated; image-rendering: crisp-edges; }
 .tvb-warn { display: inline-grid; place-items: center; width: 18px; height: 18px; background: var(--t-bad); color: #111; font-size: .72rem; font-weight: 700; }
 .tvb-sprite { display: block; width: 100%; height: auto; aspect-ratio: 1; image-rendering: pixelated; object-fit: contain; }
 .tvb-sprite.is-missing { background: linear-gradient(45deg, transparent 45%, var(--t-line) 45% 55%, transparent 55%), linear-gradient(-45deg, transparent 45%, var(--t-line) 45% 55%, transparent 55%); }
@@ -131,8 +138,9 @@
 .tvb-chips button { min-width: 40px; min-height: 36px; padding: 4px 9px; background: var(--t-raised); border: 2px solid var(--t-line); cursor: pointer; font-size: .78rem; }
 .tvb-chips button[aria-pressed="true"] { background: var(--t-fg); color: var(--t-bg); border-color: var(--t-fg); }
 .tvb-count { margin: 0; text-transform: none; letter-spacing: 0; }
-.tvb-pool { flex: 1 1 auto; min-height: 180px; overflow: auto; overscroll-behavior: contain; display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); grid-auto-rows: min-content; gap: 6px; padding: 2px; }
+.tvb-pool { flex: 1 1 auto; min-height: 180px; overflow: auto; overscroll-behavior: contain; display: grid; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); grid-auto-rows: min-content; gap: 6px; padding: 2px; }
 .tvb-mon { min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 4px 4px 6px; background: var(--t-raised); border: 2px solid transparent; cursor: pointer; text-align: center; }
+.tvb-mon .tvb-type { background: var(--t-bg); }
 .tvb-mon[hidden] { display: none; }
 .tvb-mon .tvb-sprite { width: 64px; height: 64px; }
 .tvb-mon:hover { border-color: var(--t-fg); }
@@ -142,6 +150,10 @@
 .tvb-party-panel { gap: 8px; }
 .tvb-party { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
 .tvb-slot { position: relative; min-width: 0; height: 112px; background: var(--t-raised); border: 2px solid var(--t-line); }
+.tvb-slot .tvb-types { justify-content: center; max-width: 100%; }
+.tvb-slot .tvb-bob { width: 58px; height: 58px; }
+.tvb-slot .tvb-bob > .tvb-sprite { width: 56px; height: 56px; }
+.tvb-slot .tvb-type { background: var(--t-bg); }
 .tvb-slot.is-empty { display: grid; place-items: center; padding: 6px; background: transparent; border-style: dashed; text-align: center; }
 .tvb-slot-n { position: absolute; left: 5px; bottom: 4px; color: var(--t-dim); font-size: .62rem; }
 .tvb-slot.is-empty .tvb-slot-n { top: 4px; bottom: auto; }
@@ -165,6 +177,21 @@
 .tvb-ghost { position: fixed; left: 0; top: 0; z-index: 10000; pointer-events: none; list-style: none; opacity: .9; outline: 2px solid var(--t-yellow); }
 .tvb-ghost * { animation: none !important; }
 .tvb-hint { margin: 0; font-size: .7rem; }
+/* Party moves: fills the column between the grid and the actions, scrolling inside itself. */
+.tvb-pm { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; gap: 6px; padding-top: 6px; border-top: 2px solid var(--t-line); }
+.tvb-pm-list { flex: 1 1 auto; min-height: 64px; overflow: auto; overscroll-behavior: contain; margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; }
+.tvb-pm-item { padding: 4px 6px 6px; background: var(--t-raised); }
+.tvb-pm-head { width: 100%; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 2px 0; background: none; border: 0; cursor: pointer; text-align: left; }
+.tvb-pm-head:hover .tvb-pm-name { text-decoration: underline; }
+.tvb-pm-n { color: var(--t-dim); font-size: .62rem; }
+.tvb-pm-name { font-size: .74rem; text-transform: uppercase; letter-spacing: .03em; }
+.tvb-pm-head .tvb-type, .tvb-pm-moves .tvb-type { background: var(--t-bg); }
+.tvb-pm-moves { margin: 2px 0 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 3px 8px; }
+.tvb-pm-moves li { min-width: 0; display: flex; align-items: center; gap: 5px; }
+.tvb-pm-moves .tvb-type { flex: 0 0 auto; padding: 0 3px; border-left-width: 4px; font-size: .52rem; line-height: 1.6; }
+.tvb-pm-move { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .7rem; }
+.tvb-pm-none, .tvb-pm-empty { margin: 2px 0 0; font-size: .72rem; }
+.tvb-pm-note { font-size: .72rem; }
 
 /* ---------- Member editor ---------- */
 .tvb-editor { flex: 1 1 auto; min-height: 0; display: grid; grid-template-columns: 210px minmax(0, 1fr); gap: 10px; }
@@ -229,22 +256,42 @@
 .tvb-reward { margin: 0; color: var(--t-yellow); font-size: .9rem; }
 .tvb-notes { margin: 0; padding-left: 18px; color: var(--t-dim); font-size: .78rem; line-height: 1.5; }
 
-/* ---------- Battle preview ---------- */
-.tvb-preview { flex: 1 1 auto; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-auto-rows: min-content; gap: 10px; }
-.tvb-rules { grid-column: 1 / -1; }
-.tvb-rules p { margin: 0; font-size: .82rem; }
-.tvb-preview-team { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 6px; }
-.tvb-preview-team--small { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-.tvb-preview-mon { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 4px; background: var(--t-raised); font-size: .66rem; text-transform: uppercase; text-align: center; }
-.tvb-preview-mon .tvb-sprite { width: 64px; height: 64px; }
-.tvb-preview-team--small .tvb-sprite { width: 48px; height: 48px; }
-.tvb-preview-mon.is-hidden { height: 92px; justify-content: center; }
+/* ---------- Battle preview: the versus board ----------
+   Blue for you on the left, red for Ren on the right: low-resolution rays (hard-stop conic
+   gradients) behind solid roster panels, split by a stepped seam with a pixel bolt and VS. The six
+   rows share the board's height, so the rosters use the whole screen. */
+.tvb-vsb { position: relative; flex: 1 1 auto; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) 72px minmax(0, 1fr); gap: 0; padding: 12px; overflow: hidden; border: 3px solid #16121f; box-shadow: 0 0 0 2px var(--t-line); }
+.tvb-vsb-bg { position: absolute; inset: 0; overflow: hidden; }
+.tvb-vsb-blue, .tvb-vsb-red { position: absolute; inset: 0; }
+.tvb-vsb-blue { background: repeating-conic-gradient(from 0deg at 0% 55%, #1c3c94 0deg 7deg, #142c70 7deg 14deg); }
+.tvb-vsb-red { background: repeating-conic-gradient(from 0deg at 100% 45%, #9a1e2c 0deg 7deg, #721522 7deg 14deg);
+  clip-path: polygon(54% 0, 100% 0, 100% 100%, 46% 100%, 46% 74%, 51% 74%, 48% 46%, 53% 46%, 50% 22%, 54% 22%); }
+.tvb-vsb-side { position: relative; z-index: 1; min-height: 0; display: flex; flex-direction: column; gap: 6px; padding: 10px; background: rgba(13, 13, 16, .94); border: 3px solid #16121f; }
+.tvb-vsb-side--you { box-shadow: inset 0 0 0 2px #4f7df0; }
+.tvb-vsb-side--ren { box-shadow: inset 0 0 0 2px #f0584f; }
+.tvb-vsb-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 2px 10px; }
+.tvb-vsb-title { margin: 0; font-family: var(--t-font); font-size: 1.15rem; letter-spacing: .05em; text-transform: uppercase; }
+.tvb-vsb-side--you .tvb-vsb-title { color: #9fbaff; }
+.tvb-vsb-side--ren .tvb-vsb-title { color: #ffaaa2; }
+.tvb-vsb-sub { margin: 0; color: var(--t-dim); font-size: .7rem; }
+.tvb-vsb-roster { flex: 1 1 auto; min-height: 0; margin: 0; padding: 0; list-style: none; display: grid; grid-template-rows: repeat(6, minmax(0, 1fr)); gap: 5px; }
+.tvb-vsb-row { min-height: 0; display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 10px; padding: 2px 8px 2px 2px; background: var(--t-raised); }
+.tvb-vsb-sprite { position: relative; height: 100%; max-height: 88px; min-height: 40px; aspect-ratio: 1; display: grid; place-items: center; }
+.tvb-vsb-sprite .tvb-sprite { position: absolute; left: -22%; top: -22%; width: 144%; height: 144%; }
+.tvb-vsb-row { position: relative; clip-path: inset(-50% 0 -50% 0); }
+.tvb-vsb-row .tvb-vsb-id { position: relative; z-index: 1; }
+.tvb-vsb-id { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.tvb-vsb-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .86rem; text-transform: uppercase; letter-spacing: .03em; }
+.tvb-vsb-id .tvb-type { background: var(--t-bg); }
+.tvb-vsb-row.is-hidden .tvb-q { font-size: 1.8rem; }
+.tvb-vsb-mid { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; }
+.tvb-vsb-bolt svg { display: block; width: 32px; height: 80px; }
+.tvb-vsb-vs { font-family: 'Press Start 2P', var(--t-font); font-size: 1.5rem; color: #fff; text-shadow: 3px 0 0 #16121f, -3px 0 0 #16121f, 0 3px 0 #16121f, 0 -3px 0 #16121f, 4px 5px 0 #16121f; }
+.tvb-vsb-foot { flex: 0 0 auto; display: flex; align-items: flex-end; justify-content: space-between; gap: 10px; }
+.tvb-vsb-rules { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.tvb-vsb-rules p { margin: 0; font-size: .76rem; line-height: 1.4; }
+.tvb-vsb-actions { flex: 0 0 auto; display: flex; gap: 6px; }
 .tvb-q { color: var(--t-yellow); font-family: var(--t-font); font-size: 2.6rem; font-weight: 700; text-shadow: 3px 3px 0 #8a5a00; animation: tvb-bob 2.6s ease-in-out infinite; animation-delay: calc(var(--i) * -.43s); }
-.tvb-vs { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 10px; align-items: start; }
-.tvb-vs p { margin: 4px 0; font-size: .78rem; }
-.tvb-preview-champ { background: radial-gradient(circle at 50% 40%, rgba(43, 179, 163, .3), transparent 70%); }
-.tvb-champ-art { display: block; width: 100%; height: auto; }
-.tvb-champ-name { margin: 0; font-family: var(--t-font); font-size: 1.4rem; text-transform: uppercase; }
 
 /* ---------- Battle ---------- */
 .tvb-screen--battle { padding: 8px; gap: 8px; }
@@ -256,25 +303,41 @@
 .tvb-frame.is-won .tvb-stage { filter: saturate(1.15) brightness(1.05); }
 .tvb-frame.is-lost .tvb-stage { filter: grayscale(.6) brightness(.85); }
 /* The arena keeps its proportions inside whatever space the frame gives it. */
-.tvb-stage { position: relative; flex: 1 1 auto; min-height: 150px; overflow: hidden; container-type: size; background:
-  linear-gradient(180deg, #cfe8f2 0 34%, #e6f2d6 34% 36%, #bfe0a8 36% 52%, #a8d48e 52% 70%, #94c47c 70%); }
-.tvb-spot { position: absolute; width: min(17cqw, 34cqh); aspect-ratio: 1; display: grid; place-items: end center; transition: filter .2s; }
-.tvb-spot--p2a { left: 56%; top: 6%; }
-.tvb-spot--p2b { left: 75%; top: 13%; }
-.tvb-spot--p1a { left: 7%; top: 38%; width: min(21cqw, 44cqh); }
-.tvb-spot--p1b { left: 27%; top: 46%; width: min(21cqw, 44cqh); }
-.tvb-spot.is-choosing .tvb-platform { box-shadow: 0 0 0 3px var(--t-yellow), inset 0 -4px 0 rgba(0, 0, 0, .12); }
-.tvb-platform { position: absolute; left: 6%; right: 6%; bottom: 2%; height: 18%; border-radius: 50%; background: radial-gradient(ellipse at center, #8fbf73 0 55%, #77a85f 56% 100%); box-shadow: inset 0 -4px 0 rgba(0, 0, 0, .12); }
+/* The arena keeps its proportions inside whatever space the frame gives it. The backdrop is an
+   original low-resolution SVG (vr-art.js arena()); frame[data-phase] switches court -> stadium. */
+.tvb-stage { position: relative; flex: 1 1 auto; min-height: 150px; overflow: hidden; container-type: size; background: #7cc4e8; }
+.tvb-frame[data-phase="stadium"] .tvb-stage { background: #0b0a12; }
+.tvb-arena { position: absolute; inset: 0; z-index: 0; }
+.tvb-arena-art { display: block; width: 100%; height: 100%; }
+.tvb-frame[data-phase="stadium"] .tvb-arena-fans { animation: tvb-fans 1.6s steps(2) infinite; animation-delay: calc(var(--r) * -.4s); }
+@keyframes tvb-fans { 50% { transform: translateY(-1px); } }
+/* Sprites about 20% larger than before; far (Ren's) slots smaller than near ones for depth. */
+.tvb-spot { position: absolute; z-index: 1; width: min(20.5cqw, 41cqh); aspect-ratio: 1; display: grid; place-items: end center; transition: filter .2s; }
+.tvb-spot--p2a { left: 53%; top: 3%; }
+.tvb-spot--p2b { left: 74%; top: 10%; }
+.tvb-spot--p1a { left: 4%; top: 37%; width: min(25cqw, 52cqh); }
+.tvb-spot--p1b { left: 26%; top: 44%; width: min(25cqw, 52cqh); }
+.tvb-spot.is-choosing .tvb-platform { box-shadow: 0 0 0 3px var(--t-yellow), inset 0 -4px 0 rgba(0, 0, 0, .18); }
+/* Platforms: a mown pad with an earth rim on the court; dark slate with an amber rim in the stadium. */
+.tvb-platform { position: absolute; left: 4%; right: 4%; bottom: 2%; height: 17%; border-radius: 50%; background: radial-gradient(ellipse at center, #a9d47f 0 52%, #7fae5a 53% 74%, #8a6a44 75% 100%); box-shadow: inset 0 -4px 0 rgba(0, 0, 0, .18); }
+.tvb-spot--p2a .tvb-platform, .tvb-spot--p2b .tvb-platform { height: 15%; }
+.tvb-frame[data-phase="stadium"] .tvb-platform { background: radial-gradient(ellipse at center, #3a3f57 0 52%, #2a2e42 53% 74%, #f0a73a 75% 82%, #6a2a14 83% 100%); box-shadow: 0 0 14px rgba(255, 140, 60, .35), inset 0 -4px 0 rgba(0, 0, 0, .3); }
+/* A target marker while a single-target move is announced, and short labels over a Pokémon. */
+.tvb-spot.is-aimed::after { content: '▼'; position: absolute; left: 50%; top: -2%; z-index: 3; color: var(--t-yellow); font-size: clamp(.8rem, 4cqh, 1.4rem); text-shadow: 2px 2px 0 #16121f; transform: translateX(-50%); animation: tvb-aim .45s steps(2) infinite; }
+@keyframes tvb-aim { 50% { transform: translate(-50%, 3px); } }
+.tvb-pop { position: absolute; left: 50%; top: 18%; z-index: 4; padding: 3px 7px; background: #16121f; color: #fff; border: 2px solid var(--t-yellow); font-family: 'Press Start 2P', var(--t-font); font-size: clamp(.5rem, 2.6cqh, .7rem); white-space: nowrap; text-transform: uppercase; transform: translateX(-50%); animation: tvb-pop 1.5s steps(6) forwards; pointer-events: none; }
+@keyframes tvb-pop { 0% { transform: translate(-50%, 6px); opacity: 0; } 15%, 80% { transform: translate(-50%, 0); opacity: 1; } 100% { opacity: 0; } }
 .tvb-mon-sprite { position: relative; z-index: 1; width: 100%; height: auto; aspect-ratio: 1; image-rendering: pixelated; object-fit: contain; }
 .tvb-mon-sprite:not([src]) { visibility: hidden; }
 .tvb-mon-sprite.is-fainted { animation: tvb-faint .6s steps(6) forwards; }
-.tvb-spot.is-entering .tvb-mon-sprite { animation: tvb-enter .4s steps(5); }
+.tvb-spot.is-entering .tvb-mon-sprite { animation: tvb-enter .45s steps(5); }
 .tvb-spot.is-hit .tvb-mon-sprite { animation: tvb-blink .42s steps(1); }
 .tvb-spot.is-lunge-up .tvb-mon-sprite { animation: tvb-lunge-up .26s steps(3); }
 .tvb-spot.is-lunge-down .tvb-mon-sprite { animation: tvb-lunge-down .26s steps(3); }
 .tvb-spot.is-mega .tvb-mon-sprite { animation: tvb-mega .7s steps(7); }
 @keyframes tvb-faint { to { transform: translateY(40%); opacity: 0; } }
-@keyframes tvb-enter { from { transform: scale(.2); opacity: 0; filter: brightness(3); } }
+/* Send-out: the Pokémon materialises in a few bright pixel steps (no capsule). */
+@keyframes tvb-enter { 0% { opacity: 0; filter: brightness(4) saturate(0); } 40% { opacity: 1; filter: brightness(3) saturate(0); } 70% { filter: brightness(1.6); } }
 @keyframes tvb-blink { 0%, 50% { opacity: 0; } 25%, 75%, 100% { opacity: 1; } }
 @keyframes tvb-lunge-up { 50% { transform: translate(8%, -6%); } }
 @keyframes tvb-lunge-down { 50% { transform: translate(-8%, 6%); } }
@@ -295,7 +358,12 @@
 .tvb-hp-fill { display: block; height: 100%; width: 100%; background: #46c46c; transition: width .55s steps(11); }
 .tvb-hp-fill[data-level="mid"] { background: #f2c230; }
 .tvb-hp-fill[data-level="low"] { background: #ec5a3a; }
-.tvb-hp-bottom { display: flex; justify-content: space-between; gap: 6px; margin-top: 2px; min-height: 1.1em; font-size: .64rem; }
+.tvb-hp-bottom { display: flex; align-items: center; gap: 4px 6px; margin-top: 3px; min-height: 1.1em; font-size: .64rem; }
+.tvb-hp-bottom .tvb-hp-nums { margin-left: auto; }
+.tvb-hp-types { min-width: 0; }
+.tvb-hp-types .tvb-types { flex-wrap: nowrap; }
+.tvb-hp-types .tvb-type { background: #2b2b33; color: #f8f6e0; }
+.tvb-hp-types.is-changed .tvb-type { outline: 1px dashed #2b2b33; outline-offset: 1px; }
 .tvb-hp-status { padding: 0 4px; color: #fff; font-size: .58rem; font-weight: 700; }
 .tvb-hp-status:empty { padding: 0; }
 .tvb-hp-status[data-status="brn"] { background: #b8401c; }
@@ -309,15 +377,14 @@
 .tvb-left span { width: 10px; height: 10px; border: 2px solid #2b2b33; border-radius: 50%; background: #f7c947; }
 .tvb-left span.is-out { background: #6d6d7c; }
 
-.tvb-trainer { position: absolute; right: 6%; top: 2%; z-index: 3; width: min(18cqw, 60cqh); }
+.tvb-trainer { position: absolute; right: 8%; top: 4%; z-index: 3; --px: 3; }
+@container (min-height: 230px) { .tvb-trainer { --px: 4; } }
+@container (min-height: 300px) { .tvb-trainer { --px: 5; } }
+@container (min-height: 380px) { .tvb-trainer { --px: 6; } }
+@container (min-height: 470px) { .tvb-trainer { --px: 7; } }
 .tvb-trainer.is-arriving { animation: tvb-trainer-in .5s steps(6); }
-.tvb-trainer-art { display: block; width: 100%; height: auto; }
 .tvb-trainer-label { position: absolute; right: 2%; top: 72%; z-index: 3; margin: 0; padding: 4px 8px; max-width: 50%; background: #2b2b33; color: #f7c947; font-size: .68rem; letter-spacing: .03em; text-transform: uppercase; }
 @keyframes tvb-trainer-in { from { transform: translateX(60%); opacity: 0; } }
-.tvb-throw { position: absolute; z-index: 4; width: min(6cqw, 14cqh); right: 14%; top: 22%; animation: tvb-throw .52s cubic-bezier(.3, .6, .4, 1) forwards; }
-.tvb-throw--p2b { --dx: -8cqw; } .tvb-throw--p2a { --dx: -26cqw; }
-.tvb-capsule { display: block; width: 100%; height: auto; }
-@keyframes tvb-throw { 0% { transform: translate(0, 0) rotate(0); } 50% { transform: translate(calc(var(--dx) * .55), -14cqh) rotate(240deg); } 100% { transform: translate(var(--dx), 2cqh) rotate(480deg) scale(1.3); opacity: 0; } }
 
 .tvb-taunt { position: absolute; left: 50%; top: 3%; z-index: 5; max-width: min(46%, 340px); padding: 8px 30px 9px 12px; background: #fff; color: #1b1b22; border: 3px solid #1b1b22; box-shadow: 4px 4px 0 rgba(0, 0, 0, .3); font-size: .8rem; line-height: 1.35; transform: translateX(-50%); }
 .tvb-taunt-who { display: block; margin-bottom: 2px; color: #a8240a; font-size: .62rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
@@ -359,7 +426,9 @@
 .tvb-reveal ul { margin: 4px 0; padding-left: 18px; }
 
 /* ---------- Championship escalation ---------- */
-.tvb-esc { position: absolute; inset: 0; z-index: 20; overflow: hidden; background: #08080c; color: #f4f3ef; opacity: 0; transition: opacity .6s; }
+.tvb-esc { position: absolute; inset: 0; z-index: 20; overflow: hidden; container-type: size; background: rgba(8, 8, 12, .96); color: #f4f3ef; opacity: 0; transition: opacity .6s, background-color 4s; }
+/* From the 10 s cue the arena behind is the stadium; the overlay thins so it shows through. */
+.tvb-esc.is-arena { background: rgba(8, 8, 12, .45); }
 .tvb-esc.is-on { opacity: 1; }
 .tvb-esc.is-done { opacity: 0; transition: opacity .8s; }
 .tvb-esc-lights { position: absolute; inset: 0; opacity: 0; background:
@@ -380,9 +449,11 @@
   mix-blend-mode: screen; transform-origin: 50% 100%; transition: opacity 3s; }
 .tvb-esc.is-fire .tvb-esc-fire { opacity: .95; animation: tvb-flame 1.3s ease-in-out infinite alternate; }
 @keyframes tvb-flame { to { transform: scaleY(1.12) scaleX(.98); } }
-.tvb-esc-champ { position: absolute; right: 4%; bottom: 8%; width: min(28%, 220px); transform: translateX(130%); transition: transform 1.2s cubic-bezier(.2, .8, .2, 1); filter: drop-shadow(0 0 18px rgba(255, 140, 60, .45)); }
+.tvb-esc-champ { position: absolute; right: 8%; bottom: 10%; --px: 3; transform: translateX(160%); transition: transform 1.2s steps(8); filter: drop-shadow(0 0 14px rgba(255, 140, 60, .5)); }
+@container (min-height: 260px) { .tvb-esc-champ { --px: 4; } }
+@container (min-height: 340px) { .tvb-esc-champ { --px: 5; } }
+@container (min-height: 440px) { .tvb-esc-champ { --px: 6; } }
 .tvb-esc.is-on .tvb-esc-champ { transform: none; }
-.tvb-esc-art { display: block; width: 100%; height: auto; }
 .tvb-esc.is-charge .tvb-esc-champ { filter: drop-shadow(0 0 26px rgba(255, 210, 120, .9)); }
 .tvb-esc-flash { position: absolute; inset: 0; background: radial-gradient(circle at 70% 60%, #fff6d8, rgba(255, 200, 90, .4) 40%, transparent 70%); opacity: 0; }
 .tvb-esc.is-flash .tvb-esc-flash { animation: tvb-flash 2s ease-in forwards; }
@@ -396,7 +467,8 @@
 
 /* ---------- Small screens ---------- */
 @media (max-width: 860px) {
-  .tvb-builder, .tvb-modifiers, .tvb-preview { grid-template-columns: minmax(0, 1fr); }
+  .tvb-builder, .tvb-modifiers { grid-template-columns: minmax(0, 1fr); }
+  .tvb-pm-list { max-height: 44vh; }
   .tvb-builder { min-height: auto; }
   .tvb-pool { max-height: 46vh; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); }
   .tvb-editor { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
@@ -414,23 +486,40 @@
   .tvb-summary-art { width: 140px; }
   .tvb-stats { grid-template-columns: minmax(0, 1fr); }
   .tvb-radar { width: 150px; }
-  .tvb-vs { grid-template-columns: 80px minmax(0, 1fr); }
   .tvb-stage { min-height: 200px; }
-  .tvb-spot { width: min(26cqw, 40cqh); }
-  .tvb-spot--p2a { left: 46%; top: 6%; }
-  .tvb-spot--p2b { left: 70%; top: 12%; }
-  .tvb-spot--p1a { left: 2%; top: 40%; width: min(32cqw, 50cqh); }
-  .tvb-spot--p1b { left: 30%; top: 48%; width: min(32cqw, 50cqh); }
+  .tvb-spot { width: min(30cqw, 46cqh); }
+  .tvb-spot--p2a { left: 40%; top: 4%; }
+  .tvb-spot--p2b { left: 68%; top: 10%; }
+  .tvb-spot--p1a { left: 0; top: 41%; width: min(37cqw, 56cqh); }
+  .tvb-spot--p1b { left: 30%; top: 48%; width: min(37cqw, 56cqh); }
+  .tvb-left--p2 { left: auto; right: 2%; top: 2%; bottom: auto; }
   .tvb-hpslot { width: 46cqw; min-width: 0; }
   .tvb-hpbox { padding: 2px 5px 3px; font-size: .62rem; border-width: 2px; }
-  .tvb-hp-bottom { font-size: .58rem; }
+  .tvb-hp-bottom { font-size: .58rem; gap: 3px; }
+  .tvb-types--hp .tvb-type { padding: 0 2px; border-left-width: 3px; font-size: .48rem; letter-spacing: .02em; }
   .tvb-cmd-grid--3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .tvb-cmd { min-height: 44px; padding: 6px 8px; font-size: .76rem; }
   .tvb-taunt { max-width: 80%; font-size: .74rem; }
   .tvb-trainer-label { max-width: 70%; }
   .tvb-esc-dialog { right: 4%; bottom: 4%; }
-  .tvb-esc-champ { width: 34%; bottom: 30%; }
+  .tvb-esc-champ { bottom: 34%; }
   .tvb-frame { margin: 4px; }
+}
+
+/* The versus board on narrow screens: the rosters stack (yours, VS, Ren's) and the board scrolls
+   inside itself; the footer with Enter battle stays put. */
+@media (max-width: 640px) {
+  /* The rays become the scrolling board's own background (local), blue above red. */
+  .tvb-vsb { grid-template-columns: minmax(0, 1fr); grid-auto-rows: min-content; gap: 6px; padding: 8px; overflow: auto; overscroll-behavior: contain;
+    background: repeating-conic-gradient(from 0deg at 0% 25%, #1c3c94 0deg 7deg, #142c70 7deg 14deg) top / 100% 50% no-repeat local,
+      repeating-conic-gradient(from 0deg at 100% 75%, #9a1e2c 0deg 7deg, #721522 7deg 14deg) bottom / 100% 50% no-repeat local; }
+  .tvb-vsb-bg { display: none; }
+  .tvb-vsb-mid { flex-direction: row; }
+  .tvb-vsb-bolt svg { width: 16px; height: 40px; }
+  .tvb-vsb-roster { grid-template-rows: none; grid-auto-rows: 56px; }
+  .tvb-vsb-sprite { height: 52px; }
+  .tvb-vsb-foot { flex-direction: column; align-items: stretch; }
+  .tvb-vsb-actions { justify-content: flex-end; }
 }
 
 /* Reduced motion: .is-reduced follows the system setting unless the in-game Motion setting

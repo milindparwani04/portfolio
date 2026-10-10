@@ -12,7 +12,7 @@
 
 ## Current assignment
 
-Status: **The Very Best (Victory Road overhaul) released 2026-10-10** at Milind's instruction (build record [`victory-road-build.md`](victory-road-build.md)). Production check and Lighthouse (performance 91–97, others 100) done. Open: rights blockers, licensed music, real Firefox/Safari/iOS. Before that: **Victory Road shipped 2026-10-07** (Phases 0–6). Earlier the same day: Parwani-DOS redesign complete (all 9 phases), Home drawn on the mockup's scaled canvas, Media/Gigs six per batch. Open items: article pages for the Journal, an optional TMDB key for sharper media posters, Victory Road AI depth (see its known limitations). Two weekly routines still run on Mondays (Gig Finder 06:00, Media 06:30 Dubai).
+Status: **The Very Best refinements (second 2026-10-10 brief, [`the-very-best-refinement-master-prompt.md`](the-very-best-refinement-master-prompt.md)) built and tested locally, not committed or pushed** — waiting for Milind's go. Before that: **The Very Best (Victory Road overhaul) released 2026-10-10** at Milind's instruction (build record [`victory-road-build.md`](victory-road-build.md)). Production check and Lighthouse (performance 91–97, others 100) done. Open: rights blockers, licensed music, real Firefox/Safari/iOS. Before that: **Victory Road shipped 2026-10-07** (Phases 0–6). Earlier the same day: Parwani-DOS redesign complete (all 9 phases), Home drawn on the mockup's scaled canvas, Media/Gigs six per batch. Open items: article pages for the Journal, an optional TMDB key for sharper media posters, Victory Road AI depth (see its known limitations). Two weekly routines still run on Mondays (Gig Finder 06:00, Media 06:30 Dubai).
 
 Areas Claude has most recently owned (coordinate before Codex changes these):
 
@@ -87,6 +87,15 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 - Lighthouse `valid-source-maps` flags a third-party library map; it doesn't affect the score categories that matter (production: 90 / 100 / 100).
 
 ## Work log (newest first)
+
+### 2026-10-10 — The Very Best refinements (second brief), local
+
+- Phase A audit first: read the brief, the code and the pinned Showdown data. Reproduction scripts (scratchpad `repro/`): `poison.mjs` (400 seeded AI battles, Revavroom on the player's side: 24 Poison attacks at it, all immune, all from Scarf Garchomp's locked Poison Jab), `why.mjs`, `scen.mjs` (direct `Battle` on the bundle). Conclusion in the build record: not reproduced, no engine change.
+- Data/core: `species.json` field 10 = fully evolved (`build-catalog.mjs` `isFinal`, from engine `evos`); `vr-core.js`: `TYPES`, `typeQuery`, `matches`, `isFinal`, `randomPools`, `rollTeam` (5 + 1), `randomTeamProblem`, `beats`/`steps` (playback grouping), `engineRules().randomTeam`. Engine: `isFinal` + `validateTeam(…, { randomTeam })`; worker passes `rules.randomTeam === true` and exports `Battle`/`isFinal` on `self.VREngine` (tests only). Rebuilt with `build-sim.mjs` (`ENGINE_URL ?v=4`).
+- UI: shell `TVB.typeChip`/`typeRow` replace the per-file colour tables; builder chips, type search, Party moves panel (`renderMoves`); preview rewritten (`.tvb-vsb-*`); battle: `setPhase`, `setTypes`, `pop`, `hits`, `noteLine`, beat queue with `frame[data-busy]`, `waits` that resolve on dispose, `readMs` pacing (`PACE`), capsule code removed; `vr-art.js` rewritten around `trainer()` and `arena()`; CSS for all of it; `throw` sound removed.
+- Scratch browser kit additions: `refine.mjs <w> <h>` (types, search, moves panel, preview, intro, chips, HP types, box overlaps), `pace.mjs <seed> [reduce]` (timeline of narration and HP mutations, input sampling every 40 ms, immunity window), `random.mjs` (concealment + composition), `esc.mjs` now logs the phase after the cinematic, at the result and after Rematch.
+- Found and fixed while testing: builder actions overflowed the party panel at 1366×657 (slot height, status line, panel min-height); move chips truncated; phone VS background was `position: fixed` and covered the screen; dual types wrapped and grew the phone HP cards; Charizard's head met the Floette card on phones; end-of-turn poison ran on from the previous move (now its own beat, line before bar).
+- Patch scripts lived in the scratchpad (`patch/*.cjs`, an exact-match patcher that keeps line endings) because heredocs mangled backslashes.
 
 ### 2026-10-10 — Retro title screen (design handoff option 1b)
 

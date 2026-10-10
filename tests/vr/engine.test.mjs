@@ -245,7 +245,7 @@ test('every pair of modifiers (and all nine) plays to a result', () => {
 test('fuzz: 60 random full-pool teams play to a result without errors', () => {
   for (let seed = 1; seed <= 60; seed += 1) {
     const team = C.battleLoadout(cat, draftOf([], { random: true }), seed * 7919, {}).sets;
-    const r = run({ seed, player: { name: 'You', team } });
+    const r = run({ seed, rules: { randomTeam: true }, player: { name: 'You', team } });
     assert.ok(r.winner === 'p1' || r.winner === 'p2' || r.winner === '', `seed ${seed} did not finish`);
   }
 });
@@ -269,6 +269,106 @@ test('the engine refuses invalid teams', () => {
   bad([{ ...ok[1], evs: { hp: 32, atk: 32, def: 32 } }, ok[0]], /66/);
   bad([{ ...ok[1], species: 'Charizard-Mega-X' }, ok[0]], /can't battle/);
   assert.throws(() => E.createEngine({ seed: 1, player: { name: 'You', team: ok.slice(0, 1) } }, () => {}), /two to six/);
+});
+
+test('the engine boundary enforces the random-team composition', () => {
+  for (let seed = 1; seed <= 200; seed += 1) {
+    const team = C.battleLoadout(cat, draftOf([], { random: true }), seed, {}).sets;
+    E.validateTeam(team, D, raw.learnsets, { randomTeam: true });
+  }
+  const team = C.battleLoadout(cat, draftOf([], { random: true }), 9, {}).sets;
+  const bad = (t, re) => assert.throws(() => E.validateTeam(t, D, raw.learnsets, { randomTeam: true }), (e) => re.test(e.message), re);
+  const plainAt = team.findIndex((s) => !['L', 'M'].includes(C.classOf(cat, C.toId(s.species))));
+  const specialAt = team.findIndex((s) => ['L', 'M'].includes(C.classOf(cat, C.toId(s.species))));
+  bad(team.slice(0, 5), /six Pokémon/);
+  bad(team.map((s, i) => (i === specialAt ? { ...teamOf(['snorlax'])[0], item: '' } : s)), /exactly one/);
+  bad(team.map((s, i) => (i === plainAt ? { ...teamOf(['primeape'])[0], item: '' } : s)), /fully evolved/);
+  bad(team.map((s, i) => (i === plainAt ? { ...teamOf(['eevee'])[0], item: '' } : s)), /fully evolved/);
+  // The same rule as species.json's flag (built by build-catalog.mjs): every pool entry agrees.
+  cat.pool.forEach((e) => assert.equal(E.isFinal(D, D.species.get(e.id)), C.isFinal(cat, e.id), e.id));
+  // A manual party is not held to it.
+  E.validateTeam(teamOf(['eevee', 'pikachu']), D, raw.learnsets);
+  // The worker passes the flag through from the page's rules.
+  assert.deepEqual(C.engineRules({ random: true }).randomTeam, true);
+});
+
+// ---------- Type immunity: Poison into Steel (player report, 2026-10-10) ----------
+// A player reported Sneasler's Poison move one-shotting Poison/Steel Revavroom. Not reproduced:
+// these fixed scenarios run the shipped bundle's simulator directly (no AI) and pin the rule.
+function scenario(p1, p2) {
+  const b = new E.Battle({ formatid: E.FORMAT_ID, seed: 'sodium,00000000000000000000000000000001', send: () => {} });
+  const mon = ([species, ability, moves]) => ({ species, name: species, ability, item: '', nature: 'Hardy', moves, evs: { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 }, level: 50 });
+  b.setPlayer('p1', { name: 'A', team: p1.map(mon) });
+  b.setPlayer('p2', { name: 'B', team: p2.map(mon) });
+  b.choose('p1', 'team 12');
+  b.choose('p2', 'team 12');
+  // The public log (what a player's channel shows): after |split|, skip the exact-HP copy.
+  const publicLog = () => { const out = []; for (let i = 0; i < b.log.length; i += 1) { if (b.log[i].startsWith('|split|')) { i += 1; continue; } if (!b.log[i].startsWith('|t:|')) out.push(b.log[i]); } return out; };
+  return { b, publicLog };
+}
+const SNEASLER = ['Sneasler', 'Poison Touch', ['Dire Claw', 'Gunk Shot', 'Poison Jab', 'Close Combat']];
+const PIKACHU = ['Pikachu', 'Static', ['Thunderbolt', 'Protect']];
+const REVAVROOM = ['Revavroom', 'Overcoat', ['Shift Gear', 'Protect']];
+const FOE_PIKACHU = ['Pikachu', 'Static', ['Growl', 'Protect']];
+
+test('Steel blocks Poison damage: Dire Claw, Gunk Shot and Poison Jab do nothing to Revavroom', () => {
+  for (const n of [1, 2, 3]) {
+    const { b, publicLog } = scenario([SNEASLER, PIKACHU], [REVAVROOM, FOE_PIKACHU]);
+    const rev = b.p2.active[0];
+    assert.deepEqual(plain(rev.getTypes()), ['Steel', 'Poison']);
+    const hp = rev.hp;
+    b.choose('p1', `move ${n} 1, move 2`);
+    b.choose('p2', 'move 1, move 2');
+    const log = publicLog();
+    const at = log.findIndex((l) => l.startsWith('|move|p1a: Sneasler|'));
+    assert.ok(log[at].endsWith('|p2a: Revavroom'), log[at]);
+    assert.equal(log[at + 1], '|-immune|p2a: Revavroom');
+    assert.equal(rev.hp, hp, 'no damage');
+    assert.equal(rev.status, '', 'no hit-derived status');
+    assert.equal(rev.fainted, false);
+  }
+});
+
+test('immunity then a partner hit: each in its own beat, damage only on the hit', () => {
+  const { b, publicLog } = scenario([SNEASLER, PIKACHU], [REVAVROOM, FOE_PIKACHU]);
+  const rev = b.p2.active[0];
+  b.choose('p1', 'move 1 1, move 1 1'); // Dire Claw and Thunderbolt, both into Revavroom
+  b.choose('p2', 'move 1, move 2');
+  const turn = publicLog().slice(publicLog().lastIndexOf('|turn|1'));
+  const beats = C.beats(turn).filter((x) => x.kind === 'move');
+  const claw = beats.find((x) => /Dire Claw/.test(x.lines[0]));
+  const bolt = beats.find((x) => /Thunderbolt/.test(x.lines[0]));
+  assert.ok(claw && bolt);
+  assert.ok(beats.indexOf(claw) < beats.indexOf(bolt), 'simulator order kept');
+  assert.ok(claw.lines.includes('|-immune|p2a: Revavroom'));
+  assert.ok(!claw.lines.some((l) => l.startsWith('|-damage|')), 'the immune beat carries no damage');
+  assert.ok(bolt.lines.some((l) => l.startsWith('|-damage|p2a: Revavroom|') && !l.includes('[from]')), 'the partner hit carries the damage');
+  assert.ok(rev.hp < rev.maxhp && rev.hp > 0);
+  // Every line of the turn is in exactly one beat, in order.
+  assert.deepEqual(C.beats(turn).flatMap((x) => x.lines), turn);
+});
+
+test('ordinary damage still lands: Close Combat hits Revavroom', () => {
+  const { b } = scenario([SNEASLER, PIKACHU], [REVAVROOM, FOE_PIKACHU]);
+  const rev = b.p2.active[0];
+  b.choose('p1', 'move 4 1, move 2');
+  b.choose('p2', 'move 1, move 2');
+  assert.ok(rev.hp < rev.maxhp, 'Fighting into Steel/Poison is neutral and deals damage');
+});
+
+test('playback beats: Mega Evolution stays together, spread hits group, nothing reordered', () => {
+  const lines = ['|', '|detailschange|p2a: Charizard|Charizard-Mega-Y, L50', '|-mega|p2a: Charizard|Charizard|Charizardite Y', '|move|p2a: Charizard|Heat Wave|p1a: Pikachu|[spread] p1a,p1b',
+    '|-damage|p1a: Pikachu|40/110', '|-damage|p1b: Eevee|60/130', '|-supereffective|p1b: Eevee', '|-damage|p2a: Charizard|90/100|[from] item: Life Orb', '|faint|p1a: Pikachu', '|upkeep', '|turn|2'];
+  const bs = C.beats(lines);
+  assert.deepEqual(bs.map((x) => x.kind), ['', 'detailschange', 'move', 'upkeep', 'turn']);
+  assert.deepEqual(bs.flatMap((x) => x.lines), lines);
+  const st = C.steps(bs[2].lines);
+  assert.deepEqual(st.map((x) => x.lines.length), [1, 2, 1, 1, 1]);
+  assert.equal(st[1].hit, true);
+  assert.equal(st[3].hit, false, 'Life Orb recoil is not a hit');
+  // End-of-turn effects get their own beat after the last move; consecutive ones share it.
+  const turn = ['|move|p1a: Dragonite|Dragon Claw|p2a: Floette', '|-immune|p2a: Floette', '|-damage|p2a: Floette|7/100 psn|[from] psn', '|-heal|p1a: Dragonite|90/100|[from] item: Leftovers', '|upkeep', '|turn|4'];
+  assert.deepEqual(C.beats(turn).map((x) => [x.kind, x.lines.length]), [['move', 2], ['residual', 2], ['upkeep', 1], ['turn', 1]]);
 });
 
 test('worker choice pattern: allowlisted commands only', () => {
