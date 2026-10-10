@@ -13,11 +13,19 @@
 
 ## Current assignment
 
-Status: Victory Road master implementation prompt complete and handed off for the other agent's Phase 0 discovery/architecture work.
+Status: The Very Best overhaul master prompt complete (2026-10-10), ready for the other agent's discovery and implementation planning. Game implementation was not assigned to Codex in this session.
 
-Scope: Research the 2026 VGC Masters champion and convert Milind's full Victory Road brief into a repository-native, phased master prompt. No game implementation is assigned to Codex in this session.
+Scope: Inspect the implemented Victory Road game, research licensing/data/timing constraints, and translate Milind's 2026-10-10 overhaul request into [`the-very-best-master-prompt.md`](the-very-best-master-prompt.md). The earlier 2026-10-07 prompt remains historical context; the new prompt supersedes its conflicting requirements. Update this individual handoff and the shared project handoff.
 
-Files changed:
+Files changed in the current assignment:
+
+- `docs/the-very-best-master-prompt.md` — new implementation brief, source links, architecture, acceptance criteria and phased delivery.
+- `docs/session-handoff.md` — shared pending-overhaul note and session entry.
+- `docs/requirements-tracker.md` — planned overhaul linked separately from the live existing game.
+- `docs/codex-agent-handoff.md` — current assignment and research record.
+- No implementation, generated engine, asset, Worker, secret or deployment changes; no commit, push or deploy.
+
+Previous assignment files (2026-10-07):
 
 - `docs/victory-road-master-prompt.md` — implementation authority for the next agent.
 - `docs/session-handoff.md` — shared project state and new session-log entry.
@@ -33,6 +41,16 @@ Validation:
 - Preserved the pre-existing uncommitted 2026-10-02 Codex handoff entries; no unrelated work was overwritten.
 
 ## Work log
+
+### 2026-10-10 — The Very Best overhaul handoff
+
+- Inspected clean initial working tree, repository rules/handoffs, implemented UI/engine entry points, build scripts, tests inventory, format decisions and third-party notices. Existing game is named Victory Road, not Champion Road; retained this mapping explicitly.
+- Wrote [`the-very-best-master-prompt.md`](the-very-best-master-prompt.md) for boot/title/name → all-generation party → stats/moves/items → modifiers → entirely in-frame doubles battle → once-only championship escalation → result. Included deterministic snapshots, one-legendary enforcement, filtered catalog versus global random pool, fair coherent champion variants and 38-second revival/audio timeline.
+- Verified Spotify policy prohibits game integration and audiovisual synchronization; identified linked track metadata. Exact tracks require independently cleared recordings/compositions and delivery, with original/cleared fallback audio. The requested Pixabay track page could not be fetched; its specific provenance/certificate remains unverified despite general license research.
+- Read Showdown MIT and PokeAPI sprite rights. Explicitly distinguished original UI from rights in Pokémon characters/sprites and existing fan-use approval from clearance; public release needs permission/review or an approved original-creature alternative to meet the user's strict rights goal.
+- Recorded unresolved product decisions: three-member editor versus existing minimum four battle participants, champion pick-four versus six, mythical allowance, revive one versus both fainted members, intended website logo, and exact soundtrack clearance. Four attachments are visual references only; no standalone logo was identifiable.
+- Validation: checked documentation links/file existence and diff whitespace; no game tests run because only documentation changed. No runtime features are claimed implemented or tested.
+- Next agent: start with the new prompt's Phase 0 and current sources; preserve existing game while preparing an original, reviewable overhaul. No external release authorization is conveyed by this handoff.
 
 ### 2026-10-07 — Victory Road master implementation prompt
 
