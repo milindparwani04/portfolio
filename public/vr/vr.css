@@ -54,7 +54,8 @@
 /* A Pokémon's types: one chip each, same treatment, smaller where space is tight. */
 .tvb-types { display: inline-flex; flex-wrap: wrap; gap: 3px; }
 .tvb-types--sm .tvb-type, .tvb-types--card .tvb-type, .tvb-types--hp .tvb-type { padding: 0 4px 0 3px; border-left-width: 4px; font-size: .56rem; line-height: 1.5; }
-.tvb-types--card { align-self: flex-start; order: -1; min-height: 1.6em; }
+/* min-height keeps cards aligned; align-items stops it stretching the chips taller than their text. */
+.tvb-types--card { align-self: flex-start; align-items: flex-start; order: -1; min-height: 1.6em; }
 /* Ren's pixel sprite: whole-pixel multiples of 22 x 34, never smoothed. */
 .tvb-ren { display: block; width: calc(22px * var(--px, 4)); height: calc(34px * var(--px, 4)); image-rendering: pixelated; image-rendering: crisp-edges; }
 .tvb-warn { display: inline-grid; place-items: center; width: 18px; height: 18px; background: var(--t-bad); color: #111; font-size: .72rem; font-weight: 700; }

@@ -121,6 +121,11 @@ Settled removals (do not re-propose without flagging): YouTube to MP3/MP4/WAV co
 
 ## Session log (newest first)
 
+### 2026-10-10 — Type chips on catalog and team-preview cards sized to their text
+Agent: Claude · Model: Opus 5.5
+
+- Milind: the type chips on the builder's catalog cards were bigger than their text. The card chip row's `min-height: 1.6em` stretched the chips (flex default) to 25.6 px around 11 px text; `align-items: flex-start` on `.tvb-types--card` makes them 13.4 px, the same as the party-slot and Party moves chips. Also applies to the team-preview cards. `VR_VERSION` 15, `ui-v2.js?v=45`. Measured in headless Edge at 1920×1040 and 390×844; team preview re-checked.
+
 ### 2026-10-10 — Team preview: Start battle button always visible
 Agent: Claude · Model: Opus 5.5
 

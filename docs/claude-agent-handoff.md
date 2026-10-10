@@ -88,6 +88,11 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 
 ## Work log (newest first)
 
+### 2026-10-10 — Card type chips sized to their text
+
+- `.tvb-types--card` is an inline-flex row with `min-height: 1.6em` (in the card's font, so it reserves a row and keeps cards aligned); the default `align-items: stretch` pulled each `.tvb-type` to that height (25.6 px box, 11 px text). Added `align-items: flex-start`; chips are now 13.4 px like `.tvb-slot`/`.tvb-pm-*` chips, row height unchanged. Used by the catalog (`vr-setup.js`) and team-preview cards (`vr-battle.js`).
+- Tested with a scratch CDP script (job tmp `chips.mjs`: builder with two members, measures chip box vs text range per context) at 1920×1040 and 390×844, plus `preview.mjs` at 1366×657; 52 Node tests.
+
 ### 2026-10-10 — Power-cut recovery; team preview Start battle button
 
 - Power cut during the `07adaf3` commit: `refs/heads/main` was zeroed, `.git/index` corrupt, and the five living docs written at 15:07:48 were all null bytes. The commit object and all 5,085 objects it references were intact, so `main` was pointed at it, the index rebuilt with `git read-tree`, and the docs restored with `git show 07adaf3:<path>`. `git fsck` clean.
