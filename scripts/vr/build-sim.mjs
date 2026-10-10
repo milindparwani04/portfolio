@@ -129,7 +129,7 @@ const common = {
   legalComments: 'none',
   logLevel: 'warning',
   target: ['es2020'],
-  banner: { js: `/* Victory Road engine. Includes Pokémon Showdown sim (MIT, (c) Guangcong Luo and contributors, ${SHOWDOWN_COMMIT}). See /vr/NOTICE.md */` }
+  banner: { js: `/* The Very Best engine. Includes Pokémon Showdown sim (MIT, (c) Guangcong Luo and contributors, ${SHOWDOWN_COMMIT}). See /vr/NOTICE.md */` }
 };
 const out = path.join(repo, 'public/vr/vr-engine.js');
 await esbuild.build({ ...common, format: 'iife', platform: 'browser', outfile: out });

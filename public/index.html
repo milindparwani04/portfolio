@@ -976,7 +976,7 @@
     .tools{ grid-template-columns:1fr; }
   }
 </style>
-<link rel="stylesheet" href="/ui-v2.css?v=40">
+<link rel="stylesheet" href="/ui-v2.css?v=41">
 </head>
 <body class="locked">
 
@@ -1076,7 +1076,7 @@
           </div>
 
           <div class="pdos-extras">
-            <a class="pdos-extra pdos-extra--champion" href="#v2-projects" data-open-project="champion" data-icon-host><span class="pdos-extra-icon" aria-hidden="true"><span class="pdos-icon" data-icon="ball" data-icon-p="2"></span></span><span><span class="pdos-extra-label">Extras /</span> victory_road.cart &mdash; insert cartridge</span><span aria-hidden="true">&#9656;</span></a>
+            <a class="pdos-extra pdos-extra--champion" href="#v2-projects" data-open-project="champion" data-icon-host><span class="pdos-extra-icon" aria-hidden="true"><span class="pdos-icon" data-icon="ball" data-icon-p="2"></span></span><span><span class="pdos-extra-label">Extras /</span> the_very_best.cart &mdash; insert cartridge</span><span aria-hidden="true">&#9656;</span></a>
             <a class="pdos-extra pdos-extra--crack" href="#v2-projects" data-open-project="crack" data-icon-host><span class="pdos-extra-icon" aria-hidden="true"><span class="pdos-icon" data-icon="safe" data-icon-p="2"></span></span><span><span class="pdos-extra-label">Extras /</span> crack.exe &mdash; play</span><span aria-hidden="true">&#9656;</span></a>
           </div>
         </div>
@@ -1241,7 +1241,7 @@
     </div></div><div class="pdos-crt-line" aria-hidden="true"></div></section>
 
     <section class="v2-section" id="v2-projects" data-sec="projects"><div class="pdos-crt-clip"><div class="pdos-crt-slide">
-      <!-- Projects (Parwani-DOS Phase 4): six cards and the full-width Victory Road cartridge (coming soon, not openable yet). Every other card
+      <!-- Projects (Parwani-DOS Phase 4): six cards and the full-width The Very Best cartridge (project 07, playable). Every other card
            is a button that opens a window over the page (initProjects in ui-v2.js); while one is open the
            page can't scroll or jump. Project details live in PDOS_PROJECTS in ui-v2.js. -->
       <div class="pdos-window pdos-window--projects">
@@ -1290,10 +1290,10 @@
             <span class="pdos-project-foot"><span>Playable</span><span>Play &#9656;</span></span>
           </button>
           <button class="pdos-project pdos-champ-card" type="button" data-open-project="champion" data-icon-host>
-            <span class="pdos-champ-lockup"><span class="pdos-icon pdos-champ-ball" data-icon="ball" data-icon-max="6"></span><span class="pdos-champ-word">Victory<br>Road</span></span>
+            <span class="pdos-champ-lockup"><span class="pdos-icon pdos-champ-ball" data-icon="ball" data-icon-max="6"></span><span class="pdos-champ-word">The Very<br>Best</span></span>
             <span class="pdos-champ-copy">
               <span class="pdos-champ-meta"><span>07 &middot; cartridge</span><span class="pdos-chip">&#9654; Game</span></span>
-              <span class="pdos-champ-desc">Pick six from all 1,025 Pok&eacute;mon, then take on 2026 world champion Takuma Yamazaki&rsquo;s real team in a doubles battle. Stack modifiers for bigger rewards.</span>
+              <span class="pdos-champ-desc">Build a party from all 1,025 Pok&eacute;mon, then take on the reigning champion in a doubles battle. Stack modifiers for bigger rewards.</span>
               <span class="pdos-champ-chips"><span>Random team &times;1.35</span><span>Random moves &times;1.5</span><span>No potions &times;1.25</span><span>Level cap 45 &times;1.75</span><span>No switching &times;1.2</span></span>
             </span>
             <span class="pdos-champ-cta"><span class="pdos-champ-insert">Insert cartridge &#9656;</span></span>
@@ -1316,20 +1316,13 @@
         </div>
       </div>
 
-      <!-- Victory Road window: setup only (pool, team, modifiers, reward tier). Nothing opens it yet: the card is
-           marked coming soon until the game is built (to re-enable, give the card and the Home extra
-           data-open-project="champion" again). -->
+      <!-- The Very Best window: one game screen. ui-v2.js paints the boot screen into #tvbRoot and loads
+           /vr/*.js on the first Insert cartridge; everything after that renders inside the screen. -->
       <div class="pdos-overlay" id="pdosChampOverlay" hidden>
         <div class="pdos-overlay-scrim" data-close-window></div>
         <div class="pdos-dialog pdos-dialog--champ" role="dialog" aria-modal="true" aria-labelledby="pdosChampTitle" tabindex="-1">
-          <div class="pdos-window-bar"><span>victory_road.cart &mdash; project 07 / game</span><button class="pdos-close" type="button" data-close-window aria-label="Close window">&#10005;</button></div>
-          <div class="pdos-cr">
-            <div class="pdos-cr-top">
-              <div class="pdos-cr-lockup" data-icon-host><span class="pdos-icon" data-icon="ball" data-icon-p="4"></span><h3 class="pdos-champ-word" id="pdosChampTitle">Victory<br>Road</h3></div>
-              <div class="pdos-cr-mult"><span id="pdosCrTier">Bronze tier</span><strong id="pdosCrMult">&times;1.00</strong></div>
-            </div>
-            <!-- Setup (pool, team, modifiers) is rendered by /vr/vr-setup.js, loaded the first time this window opens. -->
-          </div>
+          <div class="pdos-window-bar"><span id="pdosChampTitle">the_very_best.cart &mdash; project 07 / game</span><button class="pdos-close" type="button" data-close-window aria-label="Close window">&#10005;</button></div>
+          <div class="tvb" id="tvbRoot"><p class="tvb-live tvb-sr" aria-live="polite"></p></div>
         </div>
       </div>
     </div></div><div class="pdos-crt-line" aria-hidden="true"></div></section>
@@ -5258,7 +5251,7 @@
 
 </script>
 
-<script src="/ui-v2.js?v=39"></script>
+<script src="/ui-v2.js?v=40"></script>
 <script src="/pdos-icons.js?v=5" defer></script>
 
 </body>

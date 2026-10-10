@@ -506,40 +506,18 @@ html { scrollbar-gutter: stable; }
 
 /* Champion Run setup window (Phase 5). */
 .pdos-dialog--champ { --dialog-bar: #f7c947; width: min(1320px, 100%); height: 100%; }
-.pdos-cr { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; gap: 12px; padding: 14px 16px 16px; overflow: auto; }
-.pdos-cr-top { flex: 0 0 auto; display: flex; justify-content: space-between; align-items: center; gap: 20px; }
-.pdos-cr-lockup { display: flex; align-items: center; gap: 14px; }
-.pdos-cr-lockup .pdos-champ-word { font-size: clamp(1.8rem, 4vw, 2.9rem); line-height: .9; }
-.pdos-cr-mult { display: flex; flex-direction: column; align-items: flex-end; }
-.pdos-cr-mult span { color: var(--v2-dim); font-size: .69rem; letter-spacing: .05em; text-transform: uppercase; }
-.pdos-cr-mult strong { font-family: var(--display); font-weight: 700; font-size: clamp(2.2rem, 5vw, 3.5rem); line-height: 1; }
-.pdos-cr-mult strong.is-up { color: var(--v2-green); }
-.pdos-cr-mult strong.is-gold { color: var(--v2-yellow); }
-.pdos-cr-grid { flex: 1 1 auto; min-height: 0; display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 10px; }
-.pdos-cr-box { min-height: 0; display: flex; flex-direction: column; gap: 10px; padding: 12px; background: var(--v2-panel-raised); }
-.pdos-cr-label { display: flex; justify-content: space-between; gap: 1rem; font-size: .69rem; letter-spacing: .05em; text-transform: uppercase; }
-.pdos-cr-label > span:last-child:not(:first-child) { color: var(--v2-dim); }
-.pdos-cr button { font: inherit; color: inherit; border: 0; cursor: pointer; }
-.pdos-cr-toggle, .pdos-cr-gens { display: flex; flex-wrap: wrap; gap: 4px; font-size: .75rem; text-transform: uppercase; letter-spacing: .04em; }
-.pdos-cr-toggle button { padding: 7px 12px; background: var(--v2-panel); }
-.pdos-cr-gens button { padding: 5px 10px; background: var(--v2-panel); }
-.pdos-cr-toggle button[aria-pressed="true"], .pdos-cr-gens button[aria-pressed="true"] { background: var(--v2-fg); color: var(--v2-bg); }
-.pdos-cr-side { min-height: 0; display: flex; flex-direction: column; gap: 10px; }
-.pdos-cr-reroll { padding: 0; background: none; color: var(--v2-green) !important; text-transform: uppercase; }
-.pdos-cr-mods { flex: 1 1 auto; overflow: auto; gap: 0; }
-.pdos-cr-mods .pdos-cr-label { margin-bottom: 6px; }
-.pdos-cr-mod { width: 100%; display: grid; grid-template-columns: 14px minmax(0, 1fr) auto; gap: 8px; align-items: start; padding: 7px 0 !important; border-top: 1px solid var(--v2-soft-line) !important; background: none; color: var(--v2-dim) !important; text-align: left; }
-.pdos-cr-mod[aria-pressed="true"] { color: var(--v2-green) !important; }
-.pdos-cr-mod-box { width: 11px; height: 11px; margin-top: 2px; border: 1px solid currentColor; }
-.pdos-cr-mod[aria-pressed="true"] .pdos-cr-mod-box { background: currentColor; }
-.pdos-cr-mod-text { display: flex; flex-direction: column; gap: 2px; }
-.pdos-cr-mod-text span:first-child { font-size: .69rem; letter-spacing: .04em; text-transform: uppercase; }
-.pdos-cr-mod-text span:last-child { color: var(--v2-dim); font-size: .62rem; line-height: 1.35; }
-.pdos-cr-mod-x { font-size: .69rem; }
-.pdos-cr-cta { display: flex; justify-content: space-between; padding: 13px 16px; background: var(--v2-fg); color: var(--v2-bg) !important; font-size: .75rem !important; font-weight: 600 !important; letter-spacing: .05em; text-transform: uppercase; }
-.pdos-cr-cta:hover:not(:disabled), .pdos-cr-cta:focus-visible { background: #f7c947; color: #070707 !important; }
-.pdos-cr-cta:disabled { opacity: .5; cursor: default; }
-.pdos-cr-status { min-height: 1.2em; margin: 0; color: var(--v2-dim); font-size: .69rem; line-height: 1.5; text-transform: uppercase; }
+/* The Very Best: the game viewport and its boot screen (painted before /vr/vr.css loads). */
+.tvb { position: relative; flex: 1 1 auto; min-height: 0; overflow: hidden; background: #0d0d10; color: #f4f3ef; font-family: 'PixC', 'Pixelify Sans', ui-monospace, monospace; }
+.tvb-sr { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.tvb-screen--boot { position: absolute; inset: 0; display: grid; place-items: center; padding: 16px; }
+.tvb-boot { width: min(100%, 420px); display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; }
+.tvb-boot-logo { width: 100px; height: 100px; image-rendering: pixelated; }
+.tvb-boot-name { margin: 0; color: #b4b3ad; font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; }
+.tvb-boot-title { margin: 0; font-size: clamp(1.6rem, 5vw, 2.4rem); font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.tvb-boot-bar { width: 100%; height: 18px; padding: 3px; border: 3px solid #f4f3ef; }
+.tvb-boot-bar span { display: block; width: 0; height: 100%; background: repeating-linear-gradient(90deg, #f7c947 0 10px, transparent 10px 12px); transition: width .2s steps(4); }
+.tvb-boot-log { margin: 0; min-height: 1.3em; color: #f7c947; font-size: .78rem; }
+.tvb-boot-actions { display: flex; gap: 8px; }
 
 /* Toolbox (Phase 6): 3x3 grid; opening a tool shrinks the grid and slides in a 520px panel. */
 .pdos-toolbox { flex: 1 1 auto; min-height: 0; display: flex; overflow: hidden; background: var(--v2-panel); }
@@ -889,17 +867,12 @@ html { scrollbar-gutter: stable; }
   .pdos-project-icon { flex: 0 0 96px; margin: 8px 0; }
   .pdos-project-desc, .pdos-champ-desc, .pdos-tool-desc { font-size: .75rem; }
   .pdos-project-head, .pdos-project-foot, .pdos-champ-meta, .pdos-champ-cta, .pdos-champ-chips, .pdos-tool-head, .pdos-dialog-meta, .pdos-dialog-foot,
-  .pdos-cr-label, .pdos-cr-mod-text span, .pdos-cr-status, .pdos-sec-kicker, .pdos-tool-panel-foot { font-size: .75rem !important; }
+  .pdos-sec-kicker, .pdos-tool-panel-foot { font-size: .75rem !important; }
   .pdos-champ-card { grid-template-columns: 1fr; grid-auto-rows: auto; gap: 14px; padding: 16px; }
   .pdos-champ-lockup { height: 120px; }
   .pdos-champ-cta { align-items: flex-start; }
   .pdos-overlay { padding: 8px; }
   .pdos-dialog--project, .pdos-dialog--champ { width: 100%; height: 100%; }
-  .pdos-cr-grid { grid-template-columns: 1fr; flex: 0 0 auto; }
-  .pdos-cr-side, .pdos-cr-box { flex-shrink: 0; }
-  .pdos-cr-mods { overflow: visible; }
-  .pdos-cr-mult { align-items: flex-start; }
-  .pdos-cr-top { flex-wrap: wrap; }
   .pdos-toolbox-title { font-size: clamp(1.5rem, 8vw, 2.2rem); white-space: normal; }
   .pdos-tools { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: none; grid-auto-rows: minmax(120px, auto); }
   .pdos-tool-panel { position: fixed; inset: 0; z-index: 90; width: 100% !important; transform: translateX(100%); transition: transform .4s cubic-bezier(.7, 0, .2, 1); }

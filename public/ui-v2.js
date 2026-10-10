@@ -903,14 +903,23 @@
     function hideOverlay({ restoreFocus = true } = {}) {
       if (!openOverlay) return;
       openOverlay.hidden = true;
-      // A Victory Road battle lives only while its window is open.
-      openOverlay.querySelector('.pdos-cr')?.dispatchEvent(new CustomEvent('vr:dispose'));
+      // The Very Best lives only while its window is open: closing ends the battle, audio and timers.
+      if (openOverlay === champOverlay && window.VictoryRoad && window.VictoryRoad.dispose) window.VictoryRoad.dispose();
       // Stop anything running inside the window (Crack, Sounds Like) by unloading its frame.
       openOverlay.querySelectorAll('iframe').forEach((frame) => frame.remove());
       openOverlay = null;
       setLock('window', false);
       if (restoreFocus && returnFocus && document.contains(returnFocus)) returnFocus.focus();
     }
+
+    // ✕, the scrim and Escape: the game may ask first (a battle in progress confirms inside the
+    // game screen, then closes through the callback).
+    function requestClose() {
+      const game = window.VictoryRoad;
+      if (openOverlay === champOverlay && game && game.beforeClose && !game.beforeClose(() => hideOverlay())) return;
+      hideOverlay();
+    }
+    window.VictoryRoad = Object.assign(window.VictoryRoad || {}, { close: () => { if (openOverlay === champOverlay) hideOverlay(); } });
 
     function openProject(key) {
       if (key === 'champion') { showOverlay(champOverlay); openVictoryRoad(); return; }
@@ -948,7 +957,7 @@
     document.addEventListener('click', (event) => {
       const target = event.target instanceof Element ? event.target : null;
       if (!target) return;
-      if (target.closest('[data-close-window]') && openOverlay) { hideOverlay(); return; }
+      if (target.closest('[data-close-window]') && openOverlay) { requestClose(); return; }
       const opener = target.closest('[data-open-project]');
       if (opener && !document.documentElement.classList.contains('pdos-locked')) {
         event.preventDefault();
@@ -968,7 +977,7 @@
 
     document.addEventListener('keydown', (event) => {
       if (!openOverlay) return;
-      if (event.key === 'Escape') { event.preventDefault(); hideOverlay(); return; }
+      if (event.key === 'Escape') { event.preventDefault(); requestClose(); return; }
       if (event.key !== 'Tab') return;
       // Keep keyboard focus inside the open window.
       const dialog = openOverlay.querySelector('.pdos-dialog');
@@ -983,36 +992,77 @@
     initToolbox((on) => setLock('tool', on), () => Boolean(openOverlay));
   }
 
-  // Victory Road (project 07). Its code and Pokédex load only the first time the window opens
-  // (/vr/*.js, /vr/vr.css, /vr/dex.json); the battle engine only when a battle starts.
-  const VR_VERSION = '8';
+  // The Very Best (project 07, formerly Victory Road). Nothing loads with the page. Insert
+  // cartridge opens the window and paints the boot screen at once; the game's CSS and scripts load
+  // next (the first 40% of the bar), then the game loads its data (/vr/vr-game.js, the rest). The
+  // battle engine loads only when a battle starts. Technical paths keep the old "vr" name.
+  const VR_VERSION = '10';
+  const VR_FILES = ['/vr/vr-core.js', '/vr/vr-audio.js', '/vr/vr-art.js', '/vr/vr-game.js', '/vr/vr-setup.js', '/vr/vr-battle.js'];
   let vrLoading = null;
-  function loadVictoryRoad() {
+  let vrCss = null;
+  function loadVictoryRoad(progress) {
+    if (!vrCss) {
+      vrCss = document.createElement('link');
+      vrCss.rel = 'stylesheet';
+      vrCss.href = `/vr/vr.css?v=${VR_VERSION}`;
+      document.head.appendChild(vrCss);
+    }
     if (!vrLoading) {
-      const css = document.createElement('link');
-      css.rel = 'stylesheet';
-      css.href = `/vr/vr.css?v=${VR_VERSION}`;
-      document.head.appendChild(css);
+      let done = 0;
       const script = (src) => new Promise((resolve, reject) => {
         const s = document.createElement('script');
         s.src = `${src}?v=${VR_VERSION}`;
-        s.onload = resolve;
-        s.onerror = reject;
+        s.onload = () => { done += 1; progress(0.4 * done / VR_FILES.length, 'Loading game code'); resolve(); };
+        s.onerror = () => { s.remove(); reject(new Error(src)); };
         document.body.appendChild(s);
       });
-      vrLoading = script('/vr/vr-core.js').then(() => script('/vr/vr-setup.js')).then(() => script('/vr/vr-battle.js')).catch((error) => { vrLoading = null; throw error; });
-    }
+      vrLoading = VR_FILES.reduce((chain, src) => chain.then(() => script(src)), Promise.resolve()).catch((error) => { vrLoading = null; throw error; });
+    } else progress(0.4, 'Game code ready');
     return vrLoading;
   }
+  // The boot screen: a pixelated copy of the site icon (/favicon.svg drawn small, scaled up
+  // without smoothing), a loading bar that shows real progress, and a log line. Fixed markup only.
+  function paintBoot(root) {
+    root.querySelector('.tvb-screen')?.remove();
+    const screen = document.createElement('div');
+    screen.className = 'tvb-screen tvb-screen--boot';
+    screen.dataset.screen = 'boot';
+    screen.innerHTML = '<div class="tvb-boot"><canvas class="tvb-boot-logo" width="20" height="20" aria-hidden="true"></canvas>'
+      + '<p class="tvb-boot-name">PARWANI-DOS &middot; Cartridge 07</p><p class="tvb-boot-title">The Very Best</p>'
+      + '<div class="tvb-boot-bar" role="progressbar" aria-label="Loading The Very Best" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span></span></div>'
+      + '<p class="tvb-boot-log" aria-live="polite">Reading cartridge&hellip;</p><div class="tvb-boot-actions"></div></div>';
+    root.prepend(screen);
+    const canvas = screen.querySelector('canvas');
+    const img = new Image();
+    img.onload = () => { const c = canvas.getContext('2d'); c.clearRect(0, 0, 20, 20); c.drawImage(img, 0, 0, 20, 20); };
+    img.src = '/favicon.svg';
+    const bar = screen.querySelector('.tvb-boot-bar');
+    const log = screen.querySelector('.tvb-boot-log');
+    let shown = 0;
+    return (fraction, text) => {
+      shown = Math.max(shown, Math.min(1, fraction));
+      bar.firstChild.style.width = `${(shown * 100).toFixed(1)}%`;
+      bar.setAttribute('aria-valuenow', String(Math.round(shown * 100)));
+      if (text) log.textContent = text;
+    };
+  }
   function initChampionRun(overlay) {
-    return () => {
-      const root = overlay.querySelector('.pdos-cr');
-      loadVictoryRoad().then(() => window.VictoryRoad.mount(root)).catch(() => {
-        if (root.querySelector('.vr-loading')) return;
-        const note = document.createElement('p');
-        note.className = 'vr-loading';
-        note.textContent = 'Victory Road didn’t load. Close the window and open it again to retry.';
-        root.appendChild(note);
+    const root = overlay.querySelector('#tvbRoot');
+    return function open() {
+      const progress = paintBoot(root);
+      loadVictoryRoad(progress).then(() => {
+        if (overlay.hidden) return;
+        window.VictoryRoad.start(root, progress);
+      }).catch(() => {
+        if (overlay.hidden) return;
+        progress(0, 'Cartridge read error: the game didn’t load. Check your connection.');
+        const retry = document.createElement('button');
+        retry.type = 'button';
+        retry.className = 'tvb-btn tvb-btn--go';
+        retry.textContent = 'Retry';
+        retry.addEventListener('click', open);
+        root.querySelector('.tvb-boot-actions').replaceChildren(retry);
+        retry.focus();
       });
     };
   }

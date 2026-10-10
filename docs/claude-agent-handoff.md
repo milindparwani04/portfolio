@@ -12,7 +12,7 @@
 
 ## Current assignment
 
-Status: **Victory Road shipped 2026-10-07** (Phases 0–6; build record [`victory-road-build.md`](victory-road-build.md)). Earlier the same day: Parwani-DOS redesign complete (all 9 phases), Home drawn on the mockup's scaled canvas, Media/Gigs six per batch. Open items: article pages for the Journal, an optional TMDB key for sharper media posters, Victory Road AI depth (see its known limitations). Two weekly routines still run on Mondays (Gig Finder 06:00, Media 06:30 Dubai).
+Status: **The Very Best (Victory Road overhaul) released 2026-10-10** at Milind's instruction (build record [`victory-road-build.md`](victory-road-build.md)). Open: rights blockers, licensed music, Lighthouse/production check, real Firefox/Safari/iOS. Before that: **Victory Road shipped 2026-10-07** (Phases 0–6). Earlier the same day: Parwani-DOS redesign complete (all 9 phases), Home drawn on the mockup's scaled canvas, Media/Gigs six per batch. Open items: article pages for the Journal, an optional TMDB key for sharper media posters, Victory Road AI depth (see its known limitations). Two weekly routines still run on Mondays (Gig Finder 06:00, Media 06:30 Dubai).
 
 Areas Claude has most recently owned (coordinate before Codex changes these):
 
@@ -87,6 +87,14 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 - Lighthouse `valid-source-maps` flags a third-party library map; it doesn't affect the score categories that matter (production: 90 / 100 / 100).
 
 ## Work log (newest first)
+
+### 2026-10-10 — The Very Best overhaul (all functional phases, local)
+
+- Read the brief and repository; asked Milind the Phase 0 questions (answers in the build record). Cloned Showdown at the pinned commit into the session scratchpad for `build-catalog.mjs` / `build-sim.mjs` (the rebuilt bundle matched the committed one byte for byte before changes).
+- Files: `public/vr/{vr-core,vr-setup,vr-battle,vr.css,NOTICE.md}` rewritten; new `vr-game.js`, `vr-audio.js`, `vr-art.js`, `species.json`, `learnsets.json`, `items.json`; `scripts/vr/engine/{engine,ai,champion,view,worker}.js` + rebuilt `vr-engine.js` (`ENGINE_URL ?v=3`); `scripts/vr/build-catalog.mjs`; `tests/vr/{core,engine}.test.mjs`, `tests/vr/bench.mjs`; `public/index.html` (card/extra copy, window markup), `ui-v2.js` (`VR_VERSION` 10, boot, `requestClose`), `ui-v2.css` (boot rules replace `.pdos-cr-*`).
+- Browser test kit (session scratchpad, not in the repo): a dependency-free static server (`server.mjs`, `WEAK=1` serves a Lv 1 champion to reach the cinematic), puppeteer-core 23 + axe-core 4.10 with headless Edge: `flow.mjs <w> <h>`, `esc.mjs <w> <h> watch|skip|hidden|reduced|muted`, `checks.mjs`, `card.mjs`. Recreate them from the build record if needed.
+- Revival changed to one Pokémon at 50% at Milind's request (`REVIVE_COUNT`); tests updated, engine rebuilt, benchmark 12/100 strategic, 10/100 naive.
+- Next: Milind reviews locally (serve `public/`), then decides rights/soundtrack and authorises commit + push (push = deploy).
 
 ### 2026-10-07 — Victory Road Phase 6: released
 

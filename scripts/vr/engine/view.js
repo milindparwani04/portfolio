@@ -10,6 +10,7 @@ export function createView(side) {
     mons: {}, // key "p1: Name" -> public facts
     faintedOwn: 0,
     field: { weather: '', terrain: '', trickRoom: false },
+    sideConditions: { [side]: {}, [foe]: {} }, // e.g. tailwind, reflect
     lastMove: {}, // key -> move name used last turn
   };
   const keyOf = (ident) => ident.replace(/^(p\d)[ab]:/, '$1:').trim();
@@ -51,7 +52,13 @@ export function createView(side) {
       case 'detailschange': case '-formechange': mon(parts[2]).species = parts[3].split(',')[0]; break;
       case '-damage': case '-heal': case '-sethp': {
         const hp = parseHp(parts[3]);
-        if (hp) { const m = mon(parts[2]); m.hp = hp.pct; if (hp.status) m.status = hp.status; }
+        if (hp) {
+          const m = mon(parts[2]);
+          m.hp = hp.pct;
+          if (hp.status) m.status = hp.status;
+          // The championship revival heals a fainted Pokémon back to 50%.
+          if (m.fainted && hp.pct > 0) { m.fainted = false; m.status = ''; }
+        }
         break;
       }
       case 'faint': {
@@ -81,6 +88,12 @@ export function createView(side) {
       case '-weather': view.field.weather = parts[2] === 'none' ? '' : parts[2]; break;
       case '-fieldstart': if (/Terrain/.test(parts[2])) view.field.terrain = parts[2].replace('move: ', ''); if (/Trick Room/.test(parts[2])) view.field.trickRoom = true; break;
       case '-fieldend': if (/Terrain/.test(parts[2])) view.field.terrain = ''; if (/Trick Room/.test(parts[2])) view.field.trickRoom = false; break;
+      case '-sidestart': case '-sideend': {
+        const s = parts[2].slice(0, 2);
+        const id = parts[3].replace(/^move: /, '').toLowerCase().replace(/[^a-z]/g, '');
+        if (view.sideConditions[s]) view.sideConditions[s][id] = cmd === '-sidestart';
+        break;
+      }
       default: break;
     }
   }

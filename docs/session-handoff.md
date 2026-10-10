@@ -24,6 +24,8 @@ Shared rules:
 
 ## Project snapshot
 
+**Game overhaul (2026-10-10): The Very Best is live.** Victory Road is renamed **The Very Best**: cartridge boot, title, name, all-generation party builder, member editor (stats, every legal move, held items), modifiers with a difficulty spectrum, preview and a fully in-frame doubles battle against Ren Kestrel (original character, real 2026 Worlds team, moves varied per battle) with a once-only 38-second championship revival. Brief: [`the-very-best-master-prompt.md`](the-very-best-master-prompt.md); build record and test evidence: [`victory-road-build.md`](victory-road-build.md). Released at Milind's instruction; still open: Pokémon names/sprites need permission or an original-creature alternative under the new strict rights goal; requested music tracks are uncleared (original synth plays instead); no title search for "The Very Best".
+
 | Field | Value |
 |---|---|
 | Project | PARWANI — personal website / digital playground |
@@ -80,7 +82,7 @@ Long-term goal: a portfolio that feels like an enterprise-quality product — fa
 Priorities, in order:
 
 1. Close the open security findings (see [Security Handoff](security-handoff.md) §4) before shipping new public endpoints. Most urgent operational item: confirm Workers Builds' non-production branch command is `npx wrangler versions upload` — until then every branch push deploys to production.
-2. **Victory Road shipped 2026-10-07.** Build record: [`victory-road-build.md`](victory-road-build.md). Possible follow-ups: deeper AI, Potion on benched Pokémon.
+2. **The Very Best (Victory Road overhaul) released 2026-10-10.** Open: rights blockers, licensed soundtrack, Lighthouse and production check. Revival settled 2026-10-10: one Pokémon at 50%. Build record: [`victory-road-build.md`](victory-road-build.md).
 3. Finish API-integrated projects: Sounds Like, then Where Next (with Liveliness Index).
 4. Activate remaining Toolbox placeholders, client-side tools first (no new backend risk).
 5. Parked: real-time multiplayer "swipe to decide where to go out" — needs WebSockets/Durable Objects or Supabase, a places API and match logic. Do not start until 1–4 are done.
@@ -118,6 +120,22 @@ External accounts connected (owner-only): Spotify (re-authorize at `/api/spotify
 Settled removals (do not re-propose without flagging): YouTube to MP3/MP4/WAV converters (ToS and backend complexity), Seamless Set project, standalone Liveliness Index (merged into Where Next), public location card (built and dropped 2026-10-04: Milind judged showing his whereabouts not responsible).
 
 ## Session log (newest first)
+
+### 2026-10-10 — The Very Best implemented and released
+Agent: Claude · Model: Opus 5.5
+
+- Milind's decisions: battles with 2–6 Pokémon (bring up to 4), champion picks 4 of 6, the first fainted champion Pokémon revives once at 50% (changed from both after the benchmark), mythicals share the one-legendary allowance, original champion Ren Kestrel, MP favicon as the boot logo, music not blocking.
+- Built every functional phase of the brief: one game viewport from boot to result; new `vr-game.js` (state machine/shell), `vr-audio.js`, `vr-art.js`; rewritten `vr-setup.js`, `vr-battle.js`, `vr.css`, `vr-core.js`; engine (validation, rqid, escalation, champion variants, stronger AI) rebuilt; new catalogs `species.json`, `learnsets.json`, `items.json` from `scripts/vr/build-catalog.mjs`. Portfolio: Projects card and Home extra renamed; boot screen/close routing in `ui-v2.js` (`?v=40`), boot CSS in `ui-v2.css` (`?v=41`).
+- Tested: 44 Node tests; headless Edge full flows at five sizes, 55 lifecycle/failure/accessibility/keyboard checks (axe 0 violations), cinematic at 38.1 s with a 10–18 ms measured offset from the audio drop. Detail in the build record.
+- Released (committed and pushed to `main`) at Milind's instruction. Not done: Lighthouse after deploy, real Firefox/Safari/iOS, licensed music, rights clearance. No Worker, secret or external-service change.
+
+### 2026-10-10 — The Very Best overhaul specification
+Agent: Codex
+
+- Created [`the-very-best-master-prompt.md`](the-very-best-master-prompt.md) from Milind's new request and the implemented repository baseline; updated the Codex handoff and requirements tracker. No game code/assets/Worker changed; no commit, push or deployment.
+- Specifies one game viewport from boot through result, optional name without accounts, all-generation catalog/filter, one-legendary limit, party stats/legal moves/items, non-destructive battle overrides, gradient difficulty, original illustrated trainer, coherent randomized champion moves and an engine-controlled two-KO stadium/revival sequence aligned to a 38-second audio cue.
+- Researched primary Spotify/Pixabay/Showdown/PokeAPI/audio sources. Spotify policy disallows game/synchronized-audio integration. Requested recordings need separate clearance; specific Pixabay track availability/license provenance was not verified. Existing fan-sprite approval and notices are not IP permission; the new strict rights requirement needs resolution before public release.
+- Next: other agent's Phase 0 proposal and decisions on partial-party battle minimum, pick-four versus six, mythical handling, revival count, logo identity and cleared assets. The current game is live according to the prior build record; this overhaul is planned, not shipped. The previous phase-push permission is not authorization to deploy this overhaul.
 
 ### 2026-10-07 — Victory Road is live (Phases 3–6)
 Agent: Claude · Model: Opus 5.5

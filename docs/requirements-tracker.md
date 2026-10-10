@@ -49,6 +49,8 @@ An item only moves to `Live` after the Definition of Done in the [Rulebook](agen
 
 ## Parwani-DOS redesign
 
+**2026-10-10 game overhaul:** [`the-very-best-master-prompt.md`](the-very-best-master-prompt.md) defines the requested Victory Road → **The Very Best** overhaul. Status: **Released 2026-10-10 (Claude)** at Milind's instruction — all functional phases tested ([`victory-road-build.md`](victory-road-build.md)). Rights blockers (sprites/names, music, title search) remain open. Includes in-game boot/setup/editor/modifiers/battle, legal moves/items/stats, global random team, one legendary, curated champion variants, original trainer and timed stadium/revival. Rights clearance and format/revival decisions are explicit dependencies.
+
 Full spec and interactive reference: `design_handoff_parwani_dos/` (`README.md`, `PROMPT.md`, `DOC_UPDATES.md`). Rulebook §3 updated 2026-10-07 to approve it. One push per phase; Milind reviews the live result before the next phase starts.
 
 | ID | Item | Status |
@@ -59,6 +61,7 @@ Full spec and interactive reference: `design_handoff_parwani_dos/` (`README.md`,
 | R-DOS-4 | Journal list/detail with scroll-to-top on switch | Live 2026-10-07 — article bodies show the summary plus an "in progress" note until the posts are written (no placeholder text) |
 | R-DOS-5 | Projects grid + overlay windows + scroll lock | Live 2026-10-07 — six cards + Champion Run cartridge; each opens a window over the page (Esc / ✕ / scrim close, focus kept inside, page locked). Crack and Sounds Like run inside their window (iframe); the other four say they are planned |
 | R-DOS-6 | Victory Road (renamed from Champion Run 2026-10-07): full Gen I–IX team builder, sprites/reordering/modifiers, and an in-browser battle against the 2026 VGC Masters champion | Live 2026-10-07 — all six phases done; record: [`victory-road-build.md`](victory-road-build.md) |
+| R-DOS-6b | The Very Best (Victory Road overhaul, 2026-10-10): one game viewport, boot/title/name, builder + member editor (stats, legal moves, items), modifiers + spectrum, in-frame battle vs Ren Kestrel, 38 s championship revival | Live 2026-10-10 (released at Milind's instruction); rights blockers open, see the build record |
 | R-DOS-7 | Toolbox sliding panel | Live 2026-10-07 — every working tool runs in the panel with its existing logic (the panel borrows the legacy tool modal); unbuilt tools say "Still being built" |
 | R-DOS-8 | Media / Playlists / Gigs restyle | Live 2026-10-07 — windows with pink / green / yellow bars, same carousels. Filter chips added 2026-10-07: Media All / Films / Games (`kind`), Gigs Both / Dubai / Abu Dhabi (from the venue line). The playlists now-playing strip was dropped at Milind's request |
 | R-DOS-9 | Pixel icon sprites (Poké Ball, safe, terminal, bulb, skyline, globe, EQ, book, whiteboard, toolbox, projector, Spotify mark, guitar fire) | Live 2026-10-07 — `public/pdos-icons.js`, ported from the mockup; animate on hover and keyboard focus; still with reduced motion |
