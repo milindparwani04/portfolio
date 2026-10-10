@@ -54,7 +54,8 @@
 /* A Pokémon's types: one chip each, same treatment, smaller where space is tight. */
 .tvb-types { display: inline-flex; flex-wrap: wrap; gap: 3px; }
 .tvb-types--sm .tvb-type, .tvb-types--card .tvb-type, .tvb-types--hp .tvb-type { padding: 0 4px 0 3px; border-left-width: 4px; font-size: .56rem; line-height: 1.5; }
-.tvb-types--card { align-self: flex-start; order: -1; min-height: 1.6em; }
+/* min-height keeps cards aligned; align-items stops it stretching the chips taller than their text. */
+.tvb-types--card { align-self: flex-start; align-items: flex-start; order: -1; min-height: 1.6em; }
 /* Ren's pixel sprite: whole-pixel multiples of 22 x 34, never smoothed. */
 .tvb-ren { display: block; width: calc(22px * var(--px, 4)); height: calc(34px * var(--px, 4)); image-rendering: pixelated; image-rendering: crisp-edges; }
 .tvb-warn { display: inline-grid; place-items: center; width: 18px; height: 18px; background: var(--t-bad); color: #111; font-size: .72rem; font-weight: 700; }
@@ -415,7 +416,9 @@
 .tvb-cmd--mega[aria-pressed="true"] { background: #7a3cc4; color: #fff; }
 .tvb-cmd .tvb-move-meta { color: #4a4a52; text-transform: none; }
 .tvb-cmd:hover .tvb-move-meta, .tvb-cmd:focus-visible .tvb-move-meta { color: inherit; }
-.tvb-cmd-foot { display: flex; justify-content: flex-end; }
+/* Pinned to the bottom of the scrolling panel: six team-preview cards overflow it, and the
+   Start battle button must stay in view (it was clipped below the frame). */
+.tvb-cmd-foot { position: sticky; bottom: -8px; z-index: 1; display: flex; justify-content: flex-end; margin: 0 -8px -8px; padding: 6px 8px 8px; background: #f4f3ef; }
 .tvb-preview-pick .tvb-pickmon { align-items: center; text-align: center; padding: 4px; }
 .tvb-preview-pick .tvb-sprite { width: 56px; height: 56px; }
 .tvb-pickmon[aria-pressed="true"] { border-color: #2fbf63; }

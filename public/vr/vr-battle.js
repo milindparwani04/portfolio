@@ -572,10 +572,11 @@
             const at = picks.indexOf(i + 1);
             if (at >= 0) picks.splice(at, 1); else if (picks.length < need) picks.push(i + 1);
             render();
-            menu.querySelectorAll('.tvb-pickmon')[i]?.focus();
+            // With the team complete, focus Start battle so Enter starts it.
+            (picks.length === need ? menu.querySelector('.tvb-cmd--go') : menu.querySelectorAll('.tvb-pickmon')[i])?.focus();
           }, { class: 'tvb-cmd tvb-pickmon', 'aria-pressed': String(n >= 0), 'aria-label': `${label}, ${types.join(' and ')} type${n >= 0 ? `, picked ${n + 1}${n < 2 ? ', leads' : ''}` : ''}` });
         });
-        const confirm = menuButton(picks.length === need ? 'Confirm ▸' : `Pick ${need - picks.length} more`, () => { A.play('confirm'); send(`team ${picks.join('')}`); }, { class: 'tvb-cmd tvb-cmd--go' });
+        const confirm = menuButton(picks.length === need ? 'Start battle ▸' : `Pick ${need - picks.length} more`, () => { A.play('confirm'); send(`team ${picks.join('')}`); }, { class: 'tvb-cmd tvb-cmd--go' });
         confirm.disabled = picks.length !== need;
         clearMenu();
         backAction = null;

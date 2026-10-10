@@ -125,13 +125,24 @@ Settled removals (do not re-propose without flagging): YouTube to MP3/MP4/WAV co
 
 Milind explicitly authorized wiring the six 38-second species-specific cinematics into the game and pushing live, then supplied the Marnie Battle Theme remix (GlitchxCity ft. Scottay). The player always mutes embedded crowd audio and starts the MP3 at zero. Music is the cutscene clock; at 38 seconds the engine resumes and the same media element continues without restarting. Skip seeks to 38 seconds. Master mute/Music volume, background pause/resume, cancellation and asset failure handling are supported. Actual first-fainted engine payload selects the Pokémon. No Worker/secrets changes.
 
-Validation: browser checks cover six asset URLs, species mapping, mute/music volume, visibility, skip, cancellation, missing video, autoplay denial, mobile/keyboard, actual video completion and battle event dispatch/resume once. Core/engine regression previously 52/52 passing. Release push/production checks pending below.
+Validation: browser checks cover six asset URLs, species mapping, mute/music volume, visibility, skip, cancellation, missing video, autoplay denial, mobile/keyboard, actual video completion and battle event dispatch/resume once. Core/engine regression previously 52/52 passing. Full natural 38-second playback also passed: music remains playing after the video disappears. All 52 core/engine checks passed again. Preserved Claude’s latest preview Start battle and chip-height fixes by merging origin/main. Loader v16 / UI v46. Release push/production checks pending below.
  (newest first)
 
 ### 2026-10-10 — Codex: Ren cinematic wired for authorized release
 
 - Integrated six approved 38-second fixed-shot pixel-art videos into the battle, selecting the engine's first-fainted Pokémon. Crowd-only recorded audio; master mute/crowd volume, Skip, autoplay prompt, background pause, failure timeout and disposal handled. Engine retains authority over the once-only 50% revival; stadium remains after playback.
 - 52 game regressions and dedicated browser/player/battle-dispatch tests pass. Credits/notices updated. Milind explicitly authorized push/live deployment; production verification pending.
+
+### 2026-10-10 — Type chips on catalog and team-preview cards sized to their text
+Agent: Claude · Model: Opus 5.5
+
+- Milind: the type chips on the builder's catalog cards were bigger than their text. The card chip row's `min-height: 1.6em` stretched the chips (flex default) to 25.6 px around 11 px text; `align-items: flex-start` on `.tvb-types--card` makes them 13.4 px, the same as the party-slot and Party moves chips. Also applies to the team-preview cards. `VR_VERSION` 15, `ui-v2.js?v=45`. Measured in headless Edge at 1920×1040 and 390×844; team preview re-checked.
+
+### 2026-10-10 — Team preview: Start battle button always visible
+Agent: Claude · Model: Opus 5.5
+
+- Recovered the repo after a power cut interrupted the previous commit (`07adaf3`: branch ref and index rebuilt, five zeroed docs restored from the commit object).
+- Bug (Milind): after picking four at team preview there was no button to start the battle. The six cards overflow the dock (capped at 50% / 58% of the frame) and the Confirm footer was clipped below the frame. Footer now sticks to the bottom of the command panel, reads **Start battle ▸**, and takes focus once four are picked. `VR_VERSION` 14, `ui-v2.js?v=44`. Verified in headless Edge at 1366×657, 1280×720, 1920×969 and 390×844 (button visible, clickable, starts the battle); 52 Node tests pass.
 
 ### 2026-10-10 — The Very Best refinements pushed; Ren's leads randomised
 Agent: Claude · Model: Opus 5.5

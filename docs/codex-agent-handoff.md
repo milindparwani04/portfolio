@@ -40,7 +40,7 @@ Validation:
 
 Milind explicitly authorized wiring the six 38-second species-specific cinematics into the game and pushing live, then supplied the Marnie Battle Theme remix (GlitchxCity ft. Scottay). The player always mutes embedded crowd audio and starts the MP3 at zero. Music is the cutscene clock; at 38 seconds the engine resumes and the same media element continues without restarting. Skip seeks to 38 seconds. Master mute/Music volume, background pause/resume, cancellation and asset failure handling are supported. Actual first-fainted engine payload selects the Pokémon. No Worker/secrets changes.
 
-Validation: browser checks cover six asset URLs, species mapping, mute/music volume, visibility, skip, cancellation, missing video, autoplay denial, mobile/keyboard, actual video completion and battle event dispatch/resume once. Core/engine regression previously 52/52 passing. Release push/production checks pending below.
+Validation: browser checks cover six asset URLs, species mapping, mute/music volume, visibility, skip, cancellation, missing video, autoplay denial, mobile/keyboard, actual video completion and battle event dispatch/resume once. Core/engine regression previously 52/52 passing. Full natural 38-second playback also passed: music remains playing after the video disappears. All 52 core/engine checks passed again. Preserved Claude’s latest preview Start battle and chip-height fixes by merging origin/main. Loader v16 / UI v46. Release push/production checks pending below.
 
 
 ### 2026-10-10 — Ren cinematic integration and authorized release

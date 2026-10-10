@@ -88,6 +88,17 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 
 ## Work log (newest first)
 
+### 2026-10-10 — Card type chips sized to their text
+
+- `.tvb-types--card` is an inline-flex row with `min-height: 1.6em` (in the card's font, so it reserves a row and keeps cards aligned); the default `align-items: stretch` pulled each `.tvb-type` to that height (25.6 px box, 11 px text). Added `align-items: flex-start`; chips are now 13.4 px like `.tvb-slot`/`.tvb-pm-*` chips, row height unchanged. Used by the catalog (`vr-setup.js`) and team-preview cards (`vr-battle.js`).
+- Tested with a scratch CDP script (job tmp `chips.mjs`: builder with two members, measures chip box vs text range per context) at 1920×1040 and 390×844, plus `preview.mjs` at 1366×657; 52 Node tests.
+
+### 2026-10-10 — Power-cut recovery; team preview Start battle button
+
+- Power cut during the `07adaf3` commit: `refs/heads/main` was zeroed, `.git/index` corrupt, and the five living docs written at 15:07:48 were all null bytes. The commit object and all 5,085 objects it references were intact, so `main` was pointed at it, the index rebuilt with `git read-tree`, and the docs restored with `git show 07adaf3:<path>`. `git fsck` clean.
+- Bug: `.tvb-dock` has `max-height: 50%` (58% under 860 px) and `.tvb-frame` is `overflow: hidden`; six 56 px team-preview cards in three columns plus the `.tvb-cmd-foot` row exceed it, so the Confirm button rendered below the frame (1366×657: button top 627, frame bottom 625) and could not be seen or clicked. Fix: `.tvb-cmd-foot` is `position: sticky; bottom: -8px` with the panel's background and negative margins over the panel padding; label `Start battle ▸`; `teamPreview` focuses it when the fourth pick lands (Enter starts). The pinned footer applies to every `.tvb-cmd-foot`, which only team preview uses today.
+- Tested: scratch CDP script (job tmp `preview.mjs`: static server + headless Edge, random-team battle at seed 7, picks 1/3/4/6, `elementFromPoint` at the button's centre, then clicks and waits for team preview to close) at 1366×657, 1280×720, 1920×969 and 390×844 — visible, focused, clickable, battle starts, no page errors. `node --test tests/vr/core.test.mjs tests/vr/engine.test.mjs`: 52/52.
+
 ### 2026-10-10 — Refinements pushed; random Ren leads
 
 - Committed and pushed the refinements together with Codex's uncommitted refinement prompt and handoff record (unchanged), as Milind asked.
