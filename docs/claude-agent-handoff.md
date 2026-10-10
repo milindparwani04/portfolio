@@ -88,6 +88,10 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 
 ## Work log (newest first)
 
+### 2026-10-10 — Retro title screen (design handoff option 1b)
+
+- `vr-game.js` (title screen, `G.unmount` hook, fit/scale), `vr-art.js` (`drawTrainer`, 22 × 34 sprite), `vr.css` (old title rules replaced by `.tvb-tm-*`), `ui-v2.js` (lazy Google Fonts link, `VR_VERSION` 11), `index.html` (`ui-v2.js?v=41`). Scratch test kit: `title.mjs` (sizes, keys, tick); `checks.mjs`/`flow.mjs` updated for the new menu. Committed locally, not pushed.
+
 ### 2026-10-10 — The Very Best overhaul (all functional phases, local)
 
 - Read the brief and repository; asked Milind the Phase 0 questions (answers in the build record). Cloned Showdown at the pinned commit into the session scratchpad for `build-catalog.mjs` / `build-sim.mjs` (the rebuilt bundle matched the committed one byte for byte before changes).

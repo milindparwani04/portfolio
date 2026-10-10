@@ -87,6 +87,7 @@
     if (!(TRANSITIONS[G.state] || []).includes(next)) return false;
     if (!G.screens[next]) return false;
     closeModal();
+    unmount();
     const prev = G.state;
     G.state = next;
     G.onBack = null;
@@ -98,8 +99,13 @@
     G.screens[next](screen, arg, prev);
     return true;
   }
+  // A screen with timers or listeners sets G.unmount; it runs when the screen is replaced or closed.
+  function unmount() {
+    if (G.unmount) { const fn = G.unmount; G.unmount = null; fn(); }
+  }
   // Re-renders the current screen (after a reset).
   function refresh() {
+    unmount();
     const screen = h('div', { class: `tvb-screen tvb-screen--${G.state}`, 'data-screen': G.state });
     G.root.querySelector('.tvb-screen').replaceWith(screen);
     G.screens[G.state](screen);
@@ -249,25 +255,88 @@
   }
 
   // ---------- Title ----------
+  // Design handoff "Retro Main Menu", option 1b (2026-10-10): a 960 x 540 field-and-dialog-box
+  // artboard, scaled uniformly (whole numbers when it's at least full size, pixelated) and
+  // letterboxed in ink. Narrow portrait screens get a 405 x 720 arrangement of the same parts, since
+  // the 16:9 board would shrink its text below readable sizes there. One 450 ms tick drives the
+  // sprite's bob and the advance arrow's blink; reduced motion holds both still.
+  const TITLE_ITEMS = [
+    ['Play', () => go('name'), 'confirm'],
+    ['Settings', () => openSettings(), 'select'],
+    ['Credits', () => openCredits(), 'select'],
+    ['Quit', () => window.VictoryRoad.close && window.VictoryRoad.close(), 'back']
+  ];
   G.screens.title = (screen) => {
     G.onBack = null;
-    const art = h('div', { class: 'tvb-title-art', 'aria-hidden': 'true' });
-    art.innerHTML = ART.champion('tvb-title-champ');
-    const menu = h('div', { class: 'tvb-menu', role: 'group', 'aria-label': 'Main menu' },
-      btn('Play', () => go('name'), { class: 'tvb-btn tvb-btn--go tvb-btn--big' }),
-      btn('Settings', () => openSettings()),
-      btn('Credits', () => openCredits()),
-      btn('Quit', () => window.VictoryRoad.close && window.VictoryRoad.close(), { 'data-sound': 'back' }));
-    screen.append(
-      h('div', { class: 'tvb-title' },
-        h('div', { class: 'tvb-title-copy' },
-          h('p', { class: 'tvb-kicker', text: 'Cartridge 07 · Doubles challenge' }),
-          h('h3', { class: 'tvb-wordmark' }, h('span', { text: 'The' }), h('span', { text: 'Very' }), h('span', { text: 'Best' })),
-          h('p', { class: 'tvb-title-sub', text: 'Build a party from every generation, then take on Ren Kestrel, the reigning champion.' }),
-          menu,
-          h('p', { class: 'tvb-fine', text: 'Unofficial fan project. Pokémon © The Pokémon Company.' })),
-        art));
-    menu.querySelector('button').focus();
+    let sel = 0;
+    let tick = 0;
+    const canvas = h('canvas', { class: 'tvb-tm-sprite', width: '22', height: '34', 'aria-hidden': 'true' });
+    ART.drawTrainer(canvas);
+    const trainer = h('div', { class: 'tvb-tm-trainer' }, canvas);
+    const items = TITLE_ITEMS.map(([label], i) => h('button', { type: 'button', class: 'tvb-tm-item', 'data-i': i },
+      h('span', { class: 'tvb-tm-cursor', 'aria-hidden': 'true', text: '▶' }), h('span', { text: label.toUpperCase() })));
+    const arrow = h('span', { class: 'tvb-tm-next', 'aria-hidden': 'true', text: '▼' });
+    const board = h('div', { class: 'tvb-tm-board' },
+      ['sky1', 'sky2', 'haze', 'grass', 'grass-hi', 'grass-lo', 'platform'].map((k) => h('div', { class: `tvb-tm-${k}`, 'aria-hidden': 'true' })),
+      trainer,
+      h('div', { class: 'tvb-tm-title' },
+        h('p', { class: 'tvb-tm-eyebrow', text: 'CARTRIDGE 07 · DOUBLES' }),
+        h('h3', { class: 'tvb-tm-name' }, h('span', { class: 'tvb-tm-the', text: 'THE VERY' }), h('span', { class: 'tvb-tm-best', text: 'BEST' }))),
+      h('div', { class: 'tvb-tm-menu', role: 'group', 'aria-label': 'Main menu' }, items),
+      h('div', { class: 'tvb-tm-desc' }, h('p', { text: 'Build a party from every generation, then take on Ren Kestrel, the reigning champion.' }), arrow));
+    const frame = h('div', { class: 'tvb-tm-frame' }, board);
+    const legal = h('p', { class: 'tvb-tm-legal', text: 'Unofficial fan project. Pokémon © The Pokémon Company.' });
+    screen.append(h('div', { class: 'tvb-tm' }, frame, legal));
+
+    const select = (i, focus) => {
+      if (i !== sel) A.play('move');
+      sel = i;
+      items.forEach((b, n) => b.classList.toggle('is-selected', n === sel));
+      if (focus && document.activeElement !== items[sel]) items[sel].focus({ preventScroll: true });
+    };
+    const activate = (i) => { const [, run, sound] = TITLE_ITEMS[i]; A.play(sound); run(); };
+    items.forEach((b, i) => {
+      b.addEventListener('mouseenter', () => select(i, true));
+      b.addEventListener('focus', () => select(i, false));
+      b.addEventListener('click', (e) => { e.preventDefault(); activate(i); });
+    });
+    // Arrows move (and wrap); Enter, Space or Z activate the selected item.
+    const onKey = (e) => {
+      if (G.state !== 'title' || G.modal || e.defaultPrevented) return;
+      const d = { ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 }[e.key];
+      if (d) { e.preventDefault(); select((sel + d + 4) % 4, true); return; }
+      if (e.key === 'Enter' || e.key === ' ' || e.key === 'z' || e.key === 'Z') { e.preventDefault(); activate(sel); }
+    };
+    document.addEventListener('keydown', onKey);
+    const timer = window.setInterval(() => {
+      tick += 1;
+      trainer.classList.toggle('is-up', tick % 2 === 1);
+      arrow.classList.toggle('is-off', tick % 2 === 1);
+    }, 450);
+    // Fit the board: whole-number scale at or above full size, otherwise the largest that fits.
+    const fit = () => {
+      const w = frame.clientWidth;
+      const hgt = frame.clientHeight;
+      if (!w || !hgt) return;
+      const portrait = w < 640 && hgt > w;
+      board.classList.toggle('is-portrait', portrait);
+      const [bw, bh] = portrait ? [405, 720] : [960, 540];
+      let s = Math.min(w / bw, hgt / bh);
+      // Within 4% of full size, draw at 1x and let the frame crop a few pixels of sky and grass
+      // margin (no content sits that close to the edges): crisp pixel fonts beat a 0.99 blur.
+      if (s >= 0.96 && s < 1) s = 1;
+      if (s >= 1) s = Math.floor(s);
+      board.style.transform = `translate(-50%, -50%) scale(${s})`;
+    };
+    const ro = typeof ResizeObserver === 'function' ? new ResizeObserver(fit) : null;
+    if (ro) ro.observe(frame); else window.addEventListener('resize', fit);
+    fit();
+    G.unmount = () => {
+      window.clearInterval(timer);
+      document.removeEventListener('keydown', onKey);
+      if (ro) ro.disconnect(); else window.removeEventListener('resize', fit);
+    };
+    select(0, true);
     announce('The Very Best. Main menu.');
   };
 
@@ -333,6 +402,7 @@
     if (G.abort) G.abort.abort();
     if (window.VictoryRoad.disposeBattle) window.VictoryRoad.disposeBattle();
     closeModal(true);
+    unmount();
     document.removeEventListener('keydown', onKey, true);
     A.close();
     G.state = 'closed';

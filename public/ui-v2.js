@@ -996,7 +996,7 @@
   // cartridge opens the window and paints the boot screen at once; the game's CSS and scripts load
   // next (the first 40% of the bar), then the game loads its data (/vr/vr-game.js, the rest). The
   // battle engine loads only when a battle starts. Technical paths keep the old "vr" name.
-  const VR_VERSION = '10';
+  const VR_VERSION = '11';
   const VR_FILES = ['/vr/vr-core.js', '/vr/vr-audio.js', '/vr/vr-art.js', '/vr/vr-game.js', '/vr/vr-setup.js', '/vr/vr-battle.js'];
   let vrLoading = null;
   let vrCss = null;
@@ -1006,6 +1006,11 @@
       vrCss.rel = 'stylesheet';
       vrCss.href = `/vr/vr.css?v=${VR_VERSION}`;
       document.head.appendChild(vrCss);
+      // The title screen's pixel fonts (Retro Main Menu handoff), only once the game opens.
+      const fonts = document.createElement('link');
+      fonts.rel = 'stylesheet';
+      fonts.href = 'https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Silkscreen:wght@700&display=swap';
+      document.head.appendChild(fonts);
     }
     if (!vrLoading) {
       let done = 0;

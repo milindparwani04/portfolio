@@ -5,6 +5,7 @@
 //   capsule()   the original battle capsule Ren throws: a rounded bar, amber and graphite halves,
 //               a teal band and a diamond catch
 //   crowd(seed) stadium stands with rows of silhouettes, for the championship escalation
+//   drawTrainer(canvas)  Ren as a 22 x 34 pixel sprite, for the title screen
 // Markup is fixed strings and numbers only; nothing user-supplied reaches it.
 (function () {
   'use strict';
@@ -97,5 +98,26 @@
       + `<rect x="0" y="108" width="400" height="12" fill="#0d0e15"/></svg>`;
   }
 
-  window.TVBArt = { champion, capsule, crowd };
+  // Ren as a 22 x 34 pixel sprite for the title screen (design handoff "Retro Main Menu", option
+  // 1b, 2026-10-10). One character per pixel, '.' transparent; rows are padded to 22 on the right.
+  const TRAINER_ROWS = [
+    '........K...K', '.......KHK.KHK..K', '....K.KHHHKHHHKKHK', '...KHKHHhHHHhHHHHK', '...KHHHhhHHhhHHHHHK', '...KHHHHHHHHHHHHHHK',
+    '...KHHHHHHHHHHHHHHK', '...KHHSSHHSSSHHSHHK', '...KHSSSSSSSSSSSSHK', '...KHSKKKSSSSKKKSHK', '...KSSWKSSSSSSWKSSK', '..KsSSWKSSSSSSWKSSsK',
+    '...KSSSSSSsSSSSSSSK', '...KSSSSSSSSSSSSSSK', '....KSSSKKKKKSSSSK', '.....KSSSSSSSSSSK', '......KKsSSSSsKK', '.....KTTKWWWWKTTK',
+    '...KTTTTTKWWKTTTTTK', '..KTTKTTTKWWKTTTKTTK', '..KTtKTTTKOOKTTTKtTK', '..KTtKTWTKWWKTTTKtTK', '..KTtKTWTKOOKTTTKtTK', '..KTtKTWTTKKTTTTKtTK',
+    '..KTtKTTTTTTTTTTKtTK', '..KSSKOOOOOOOOOOKSSK', '...KKKPPPPPPPPPPKKK', '.....KPPPPPPPPPPK', '.....KPPPpKKpPPPK', '.....KPPPpKKpPPPK',
+    '.....KPPPpKKpPPPK', '.....KWWWWKKWWWWK', '....KOOWWWKKWWWOOK', '....KKKKKKKKKKKKKK'
+  ];
+  const TRAINER_PAL = { K: '#16121f', H: '#4a3aa6', h: '#7d6cf0', S: '#f3c39c', s: '#d48a62', W: '#f5f1e8', T: '#1f8f8c', t: '#13605e', O: '#f06a36', P: '#2b3048', p: '#1b1f31' };
+  // Draws the sprite at 1:1 into a 22 x 34 canvas; CSS scales it by an integer, pixelated.
+  function drawTrainer(canvas) {
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    ctx.clearRect(0, 0, 22, 34);
+    TRAINER_ROWS.forEach((row, y) => [...row].forEach((ch, x) => {
+      if (TRAINER_PAL[ch]) { ctx.fillStyle = TRAINER_PAL[ch]; ctx.fillRect(x, y, 1, 1); }
+    }));
+  }
+
+  window.TVBArt = { champion, capsule, crowd, drawTrainer };
 }());
