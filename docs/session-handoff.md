@@ -873,8 +873,11 @@ At Milind's request the Random held items modifier is removed (eight modifiers n
 
 ### 2026-10-10 — Engine-driven weather and terrain visuals
 
-Implemented independent weather/terrain presentation in `vr-field.js`, loaded before battle. Actual paced engine logs drive start, replacement and expiry; upkeep does not reset visuals. Four terrains (Misty, Grassy, Electric, Psychic); RainDance, SunnyDay, Sandstorm, Snow/Snowscape, Hail, PrimordialSea, DesolateLand and DeltaStream weather. Ground effects and atmospheric particles preserve court/stadium and HUD. Static effects under reduced motion. No move-name guesses or frontend turn timers; Showdown owns mechanics/durations. Disposal clears overlays. Loader v22 / UI v52.
+Implemented independent weather/terrain presentation in `vr-field.js`, loaded before battle. Actual paced engine logs drive start, replacement and expiry; upkeep does not reset visuals. Four terrains (Misty, Grassy, Electric, Psychic); RainDance, SunnyDay, Sandstorm, Snow/Snowscape, Hail, PrimordialSea, DesolateLand and DeltaStream weather. Ground effects and atmospheric particles preserve court/stadium and HUD. Static effects under reduced motion. No move-name guesses or frontend turn timers; Showdown owns mechanics/durations. Disposal clears overlays. Loader v23 / UI v53.
 
 Research: official Pokémon terrain guide https://www.pokemon.com/uk/features/the-tapu-transform-terrains confirms Tapu Fini’s Misty Surge creates Misty Terrain on entry. Simulator protocol https://github.com/smogon/pokemon-showdown/blob/master/sim/SIM-PROTOCOL.md specifies separate weather and field start/end messages. Original CSS visuals inspired by those conditions; no game art extracted.
 
 Validation: browser suite passed actual battle log dispatch (Misty Surge + sandstorm), all four terrains/nine weather IDs, independent coexistence/removal, replacement, unrelated Trick Room/old terrain end, upkeep, reduced motion and cleanup, plus existing cinematic/audio/dispatch/desktop/mobile tests. Combined mist/sand stadium preview visually inspected. Existing uncommitted held-item/builder changes from another task preserved and excluded from this release.
+
+
+Release coordination: the concurrent item-UI commit `90a2469` included the field module/loader/battle hooks while this task was running. The separate weather/terrain CSS and browser tests are completed in the following Codex release; all item work retained.

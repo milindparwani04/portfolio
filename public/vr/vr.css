@@ -539,3 +539,34 @@
 .tvb.is-reduced .tvb-esc.is-crowd .tvb-esc-crowd { opacity: 1; }
 .tvb.is-reduced .tvb-esc-champ { transform: none; }
 .tvb.is-reduced .tvb-esc.is-flash .tvb-esc-flash { opacity: .5; }
+
+/* Engine-driven field conditions: ground and sky are independent, HUD remains above both. */
+.tvb-field-ground, .tvb-field-weather { position: absolute; pointer-events: none; overflow: hidden; }
+.tvb-field-ground { inset: 49% 0 0; z-index: 0; }
+.tvb-field-ground::after { content: ''; position: absolute; inset: 0; background-size: 100% 100%; }
+.tvb-stage[data-terrain="mistyterrain"] .tvb-field-ground { background: linear-gradient(0deg, #efb9e580, #e6bbef38); }
+.tvb-stage[data-terrain="mistyterrain"] .tvb-field-ground::after { inset: -10% -20%; background: repeating-radial-gradient(ellipse at 20% 70%, #ffeaff90 0 5%, transparent 12% 25%); filter: blur(5px); animation: tvb-ground-drift 8s ease-in-out infinite alternate; }
+.tvb-stage[data-terrain="grassyterrain"] .tvb-field-ground { background: linear-gradient(0deg, #2fc95880, #80e87b30); }
+.tvb-stage[data-terrain="grassyterrain"] .tvb-field-ground::after { background: repeating-linear-gradient(115deg, transparent 0 24px, #c9ff8e80 25px 27px, transparent 28px 48px); mask-image: repeating-linear-gradient(0deg, #000 0 4px, transparent 5px 25px); animation: tvb-ground-drift 5s ease-in-out infinite alternate; }
+.tvb-stage[data-terrain="electricterrain"] .tvb-field-ground { background: linear-gradient(0deg, #efc63f70, #ffec7820); }
+.tvb-stage[data-terrain="electricterrain"] .tvb-field-ground::after { background: repeating-linear-gradient(150deg, transparent 0 50px, #fff2a7 51px 53px, transparent 54px 100px); mask-image: repeating-linear-gradient(25deg, #000 0 8px, transparent 9px 36px); animation: tvb-electric-shimmer 2.5s steps(3) infinite; }
+.tvb-stage[data-terrain="psychicterrain"] .tvb-field-ground { background: linear-gradient(0deg, #b13fc180, #dc8dec30); }
+.tvb-stage[data-terrain="psychicterrain"] .tvb-field-ground::after { background: repeating-radial-gradient(ellipse at 50% 70%, transparent 0 14%, #f3b4ff80 15% 16%, transparent 17% 25%); animation: tvb-ground-drift 6s ease-in-out infinite alternate; }
+.tvb-field-weather { inset: 0; z-index: 1; }
+.tvb-field-weather i { display: none; position: absolute; left: var(--x); top: var(--y); animation-delay: var(--delay); }
+.tvb-stage[data-weather="sandstorm"] .tvb-field-weather { background: linear-gradient(110deg, #a8782938, #d3a54d50); }
+.tvb-stage[data-weather="sandstorm"] .tvb-field-weather i { display: block; width: 4px; height: 2px; background: #f4cf87b0; animation: tvb-sand var(--speed) linear infinite; animation-delay: var(--delay); }
+.tvb-stage:is([data-weather="raindance"], [data-weather="primordialsea"]) .tvb-field-weather { background: #203c702e; }
+.tvb-stage:is([data-weather="raindance"], [data-weather="primordialsea"]) .tvb-field-weather i { display: block; width: 2px; height: 18px; background: #a6daff90; animation: tvb-rain var(--speed) linear infinite; animation-delay: var(--delay); }
+.tvb-stage:is([data-weather="snow"], [data-weather="snowscape"], [data-weather="hail"]) .tvb-field-weather { background: #d2ecff24; }
+.tvb-stage:is([data-weather="snow"], [data-weather="snowscape"], [data-weather="hail"]) .tvb-field-weather i { display: block; width: 4px; height: 4px; background: #effaffc0; animation: tvb-snow calc(var(--speed) * 3) linear infinite; animation-delay: var(--delay); }
+.tvb-stage:is([data-weather="sunnyday"], [data-weather="desolateland"]) .tvb-field-weather { background: radial-gradient(ellipse at 70% 0, #fff0a080, transparent 65%), linear-gradient(#ffd77328, transparent); }
+.tvb-stage[data-weather="deltastream"] .tvb-field-weather i { display: block; width: 36px; height: 2px; background: #e5f4ff70; animation: tvb-sand var(--speed) linear infinite; animation-delay: var(--delay); }
+.tvb-field-label { position: absolute; z-index: 2; top: 8px; left: 50%; max-width: 30%; transform: translateX(-50%); padding: 4px 6px; background: #171b2de8; color: #fff1cb; border: 1px solid #e0c889; font-size: .62rem; text-align: center; pointer-events: none; }
+.tvb-field-label[hidden] { display: none; }
+@keyframes tvb-ground-drift { to { transform: translate(5%, -3%); } }
+@keyframes tvb-electric-shimmer { 50% { opacity: .35; } }
+@keyframes tvb-sand { from { transform: translate(-60px, -15px); } to { transform: translate(140px, 35px); } }
+@keyframes tvb-rain { from { transform: translate(30px, -90px) rotate(15deg); } to { transform: translate(-30px, 150px) rotate(15deg); } }
+@keyframes tvb-snow { from { transform: translate(-15px, -70px); } to { transform: translate(30px, 140px); } }
+@media (prefers-reduced-motion: reduce) { .tvb-field-ground::after, .tvb-field-weather i { animation: none !important; } }

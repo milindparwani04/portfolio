@@ -38,7 +38,7 @@ Validation:
 
 ### 2026-10-10 — Engine-driven weather and terrain visuals
 
-Implemented independent weather/terrain presentation in `vr-field.js`, loaded before battle. Actual paced engine logs drive start, replacement and expiry; upkeep does not reset visuals. Four terrains (Misty, Grassy, Electric, Psychic); RainDance, SunnyDay, Sandstorm, Snow/Snowscape, Hail, PrimordialSea, DesolateLand and DeltaStream weather. Ground effects and atmospheric particles preserve court/stadium and HUD. Static effects under reduced motion. No move-name guesses or frontend turn timers; Showdown owns mechanics/durations. Disposal clears overlays. Loader v22 / UI v52.
+Implemented independent weather/terrain presentation in `vr-field.js`, loaded before battle. Actual paced engine logs drive start, replacement and expiry; upkeep does not reset visuals. Four terrains (Misty, Grassy, Electric, Psychic); RainDance, SunnyDay, Sandstorm, Snow/Snowscape, Hail, PrimordialSea, DesolateLand and DeltaStream weather. Ground effects and atmospheric particles preserve court/stadium and HUD. Static effects under reduced motion. No move-name guesses or frontend turn timers; Showdown owns mechanics/durations. Disposal clears overlays. Loader v23 / UI v53.
 
 Research: official Pokémon terrain guide https://www.pokemon.com/uk/features/the-tapu-transform-terrains confirms Tapu Fini’s Misty Surge creates Misty Terrain on entry. Simulator protocol https://github.com/smogon/pokemon-showdown/blob/master/sim/SIM-PROTOCOL.md specifies separate weather and field start/end messages. Original CSS visuals inspired by those conditions; no game art extracted.
 
@@ -232,3 +232,6 @@ Validation: browser checks cover six asset URLs, species mapping, mute/music vol
 - Created this individual handoff at Milind's request.
 - No code, configuration, assets, requirements, or security documentation changed.
 - Next action: wait for Milind's explicit Codex-specific assignment, then document its scope here before touching implementation files.
+
+
+Release coordination: the concurrent item-UI commit `90a2469` included the field module/loader/battle hooks while this task was running. The separate weather/terrain CSS and browser tests are completed in the following Codex release; all item work retained.
