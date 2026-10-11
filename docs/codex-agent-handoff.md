@@ -38,6 +38,8 @@ Validation:
 
 ### 2026-10-11 — Journal list and article windows
 
+Released in `3854cba`; the same desktop/mobile regression passed against production.
+
 Journal opens with full-width photo/title/tag/status rows, no selected article. Clicking or keyboard-activating a row moves the existing sidebar/article layout into the shared window system. Article switching, Escape/close/scrim, focus trap/return and page scroll locking reuse existing lifecycle. Portrait window stacks sidebar and article with scrolling. Edge regression passed at 1280px and 390px: no default preview, open/switch/close, focus return, page locking and no horizontal overflow. CSS v43 / UI v57. No Worker changes.
 
 

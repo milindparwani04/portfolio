@@ -123,6 +123,8 @@ Settled removals (do not re-propose without flagging): YouTube to MP3/MP4/WAV co
 
 ### 2026-10-11 — Journal index and article windows
 
+Released in `3854cba`; the same desktop/mobile regression passed against production.
+
 Codex changed Journal to wide article rows with photos/titles/tags/status and no default article preview. Articles open in the shared modal window lifecycle, retaining the existing article/sidebar presentation. Desktop and mobile browser checks passed for open/switch/close, focus restoration, page locking and layout bounds. CSS v43 / UI v57; no Worker changes.
 
 ### 2026-10-11 — Crack gets its own overlay in the original site theme
