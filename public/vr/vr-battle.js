@@ -367,6 +367,7 @@
       noteLine(parts);
       fieldVisuals.update(line);
       switch (cmd) {
+        case 'start': A.music.start('battle'); break;
         case 'poke': {
           const side = parts[2];
           roster[side][`${Object.keys(roster[side]).length}`] = true;
@@ -858,7 +859,7 @@
 
     // ----- intro -> battle -----
     (async () => {
-      A.music.start('battle');
+      A.music.start('menu');
       textEl.textContent = '';
       let pools = null;
       try {

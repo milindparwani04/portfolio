@@ -13,11 +13,11 @@
 
 ## Current assignment
 
-Status: Weather and terrain visual assignment implemented and browser-tested (2026-10-10); released; dedicated weather/terrain production browser checks passed.
+Status: Menu/phase-one soundtrack implemented and browser-tested (2026-10-11); release in progress.
 
-Scope completed: Six first-fainted-species Ren cinematics; supplied Marnie remix begins at cutscene start and continues into battle at 38 seconds; embedded crowd muted; only bottom video subtitles visible. Court/stadium Pokémon grounded on the field with full scenery. Final HUD: Ren top-left and player bottom-right, matching 8px corner insets, 4px gaps between bars, vertical party dots right of Ren and left of player. Button UI unchanged. Loader v21 / UI v51.
+Scope completed: Six first-fainted-species Ren cinematics; supplied Marnie remix begins at cutscene start and continues into battle at 38 seconds; embedded crowd muted; only bottom video subtitles visible. Court/stadium Pokémon grounded on the field with full scenery. Final HUD: Ren top-left and player bottom-right, matching 8px corner insets, 4px gaps between bars, vertical party dots right of Ren and left of player. Button UI unchanged. Weather/terrain visuals subsequently added in `vr-field.js`: four independent terrain presentations and nine weather IDs, driven by engine log events with replacement/expiry and reduced-motion support. Current loader v23 / UI v53.
 
-Current files: `public/vr/vr-cinematic.js`, `vr-audio.js`, `vr-battle.js`, `vr-game.js`, `vr.css`, six cinematic videos and supplied MP3 under `public/assets/vr/cinematics/ren-v1/`, loader/cache versions, NOTICE, browser regression and living handoffs/tracker.
+Current files: `public/vr/vr-cinematic.js`, `vr-field.js`, `vr-audio.js`, `vr-battle.js`, `vr-game.js`, `vr.css`, six cinematic videos and supplied MP3 under `public/assets/vr/cinematics/ren-v1/`, loader/cache versions, NOTICE, browser regression and living handoffs/tracker.
 
 Previous assignment files (2026-10-07):
 
@@ -35,6 +35,18 @@ Validation:
 - Preserved the pre-existing uncommitted 2026-10-02 Codex handoff entries; no unrelated work was overwritten.
 
 ## Work log
+
+### 2026-10-11 — User-supplied menu and phase-one music
+
+Milind supplied two MP3s. Pallet Town - Pokemon Red & Blue (Lofi) by 51383504 plays continuously across boot/title/name/builder/editor/modifiers and lead selection. Video Game Battle Music by NunuSev begins on the engine `|start` event, after team selection, and loops until escalation. The Marnie remix by GlitchxCity featuring Scottay continues to serve the cutscene/final round. One shared recording lifecycle respects master mute/Music volume, tab visibility, close and role changes; menu navigation does not restart its element. Menu/battle asset errors use existing synth fallback; gesture-blocked playback retries on player interaction. All artists and source links are in Credits/NOTICE. Source artist names verified against Pixabay 410591 and 535133. Copies of the supplied MP3s are in `public/assets/vr/music/`. Loader v24 / UI v54.
+
+Browser validation passed: actual MP3 playback, menu element continuity, mute/volume, engine-start track switch, phase-one replacement at escalation, finale continuity, return-to-menu and rendered Credits for all four artist names, alongside existing cinematic/HUD/terrain tests. No battle mechanics or Worker changes.
+
+
+### 2026-10-10 — Weather/terrain assignment closed
+
+Milind confirmed all work is finished for now and requested both handoffs updated. Weather/terrain visuals are live; local full browser suite and dedicated production field-effect checks passed. A separate production full-suite run timed out on soundtrack Skip seeking to 38 seconds before reaching field tests. Cause remains unconfirmed; follow-up requires a new assignment. Preserve this limitation and do not claim the full production suite passed. No further implementation pending in this assignment. Concurrent held-item work retained; unrelated `.claude/worktrees/` untouched. Closing handoff edits saved locally, with no additional push requested.
+
 
 ### 2026-10-10 — Engine-driven weather and terrain visuals
 

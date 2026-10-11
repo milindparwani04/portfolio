@@ -2,18 +2,15 @@
 // separate Music, Effects and Crowd levels under a master mute. Nothing plays before the player
 // clicks Insert cartridge (the AudioContext is created on that gesture or later).
 //
-// AUDIO_MANIFEST lists the four music roles. Every role has an original synthesised fallback, which
-// backs the menu and normal battle. The escalation recording was supplied by Milind; other
-// requested tracks remain blocked references
-// (see docs/victory-road-build.md, "Audio and rights"). A cleared file would be fetched,
-// decoded and scheduled on the same clock; the escalation role's resumeCueSeconds marks its drop.
+// User-supplied recordings serve menu, phase one and escalation; synthesis remains the
+// menu/battle fallback. The escalation recording continues across its 38-second drop.
 (function () {
   'use strict';
 
   const AUDIO_MANIFEST = Object.freeze({
     version: 1,
-    menu: { src: null, status: 'blocked', reference: 'Glimmering Pallet Lights (Pixabay) — licence certificate and provenance not yet verified', fallback: 'original synth: menu loop', loop: true },
-    battle: { src: null, status: 'blocked', reference: 'Sword and Shield Trailer Theme (Remix), GlitchxCity — not licensed for game use', fallback: 'original synth: battle loop', loop: true },
+    menu: { src: '/assets/vr/music/pallet-town-lofi.mp3', status: 'user-supplied', reference: 'Pallet Town - Pokemon Red & Blue (Lofi), 51383504, Pixabay 410591', fallback: 'original synth: menu loop', loop: true },
+    battle: { src: '/assets/vr/music/video-game-battle.mp3', status: 'user-supplied', reference: 'Video Game Battle Music, NunuSev, Pixabay 535133', fallback: 'original synth: battle loop', loop: true },
     escalation: { src: '/assets/vr/cinematics/ren-v1/marnie-remix.mp3', status: 'user-supplied', reference: 'Marnie Battle Theme, GlitchxCity & Scottay — supplied by Milind; licence not independently verified', fallback: 'original synth: 38 s build and drop', resumeCueSeconds: 38, loop: false },
     crowd: { src: null, status: 'original', reference: 'original synthesised crowd', fallback: 'original synth: crowd', loop: true }
   });
@@ -167,7 +164,7 @@
     })()
   };
   // The same element continues across the cutscene and final round.
-  let recording = null, recordingWasPlaying = false;
+  let recording = null, recordingWasPlaying = false, recordingRole = null;
   function syncRecording() {
     if (!recording) return;
     recording.muted = settings.muted;
@@ -175,11 +172,12 @@
   }
   function stopRecording() {
     if (!recording) return;
-    recording.pause(); recording.removeAttribute('src'); recording.load(); recording = null;
+    recording.pause(); recording.removeAttribute('src'); recording.load(); recording = null; recordingRole = null; recordingWasPlaying = false;
   }
   function prepareRecording() {
     stopMusic();
     recording = new Audio('/assets/vr/cinematics/ren-v1/marnie-remix.mp3');
+    recordingRole = 'escalation';
     recording.preload = 'auto';
     syncRecording();
     return recording;
@@ -201,10 +199,37 @@
   }
   let wanted = null; // the role the game wants playing (kept when muted, resumed when unmuted)
   function startMusic(name, at) {
-    if (name === 'finale' && recording) { wanted = 'recording'; return; }
+    if (name === 'finale' && recordingRole === 'escalation' && recording) { wanted = 'recording'; return; }
+    if (recording && recordingRole === name) return;
     stopRecording();
     wanted = name;
     stopSong();
+    const asset = AUDIO_MANIFEST[name];
+    if (asset && asset.src && ['menu', 'battle'].includes(name)) {
+      recording = new Audio(asset.src);
+      recordingRole = name;
+      recording.loop = true;
+      recording.preload = 'auto';
+      const media = recording;
+      syncRecording();
+      media.addEventListener('error', () => {
+        if (recording !== media) return;
+        stopRecording();
+        startSynth(name, at);
+      }, { once: true });
+      if (!document.hidden) media.play().catch(() => {});
+      return;
+    }
+    startSynth(name, at);
+  }
+  // Retry browser gesture gating without restarting a track that is already playing.
+  document.addEventListener('pointerdown', () => {
+    if (recording && recordingRole !== 'escalation' && recording.paused && !document.hidden) recording.play().catch(() => {});
+  });
+  document.addEventListener('keydown', () => {
+    if (recording && recordingRole !== 'escalation' && recording.paused && !document.hidden) recording.play().catch(() => {});
+  });
+  function startSynth(name, at) {
     if (settings.muted || !settings.music) return;
     const a = ensure();
     if (!a || !SONGS[name]) return;

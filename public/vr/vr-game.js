@@ -193,7 +193,7 @@
       h('div', { class: 'tvb-row' }, mute),
       slider('Music', 'music'), slider('Effects', 'sfx'), slider('Crowd', 'crowd'),
       h('label', { class: 'tvb-setting' }, h('span', { text: 'Motion' }), motionSel),
-      h('p', { class: 'tvb-modal-text tvb-dim', text: 'Battle music and effects are synthesised. The championship cutscene and final round share the supplied Marnie remix. Music volume and master mute control the track. Settings are remembered in this browser.' }),
+      h('p', { class: 'tvb-modal-text tvb-dim', text: 'Pallet Town lofi plays before battle; Video Game Battle Music plays in phase one. The championship cutscene and final round share the Marnie remix. Music volume and master mute control the track. Settings are remembered in this browser.' }),
       h('div', { class: 'tvb-row' }, reset, btn('Done', () => closeModal(), { class: 'tvb-btn tvb-btn--go' }))));
   }
   function openCredits() {
@@ -202,7 +202,11 @@
       p('The Very Best — a game by Milind Parwani for PARWANI-DOS. Unofficial fan project, not affiliated with or endorsed by Nintendo, Game Freak, Creatures or The Pokémon Company. Pokémon names and sprites © The Pokémon Company; sprites from the PokeAPI sprites project.'),
       p('Champion team: Takuma Yamazaki’s official 2026 Pokémon VGC Masters World Championship team sheet (species, items, abilities, natures, moves). Stat points: a community reconstruction (ChampionsDex). Ren Kestrel is an original fictional character; Ren’s dialogue, strategy and move variations are this game’s fiction, not statements or strategies of Takuma Yamazaki.'),
       p('Battle engine: Pokémon Showdown simulator (MIT licence, © Guangcong Luo and contributors), commit c046106c. The AI is a heuristic written for this game.'),
-      p('Battle music and effects, Ren’s pixel sprite, court, stadium and interface are original. The championship cinematic uses AI-generated pixel art and Pokémon sprites. Championship music: Marnie Battle Theme remix by GlitchxCity featuring Scottay, supplied by Milind. Source and rights notes are in /vr/NOTICE.md.'),
+      p('Sound effects, Ren’s pixel sprite, court, stadium and interface are original. The championship cinematic uses AI-generated pixel art and Pokémon sprites. Championship music: Marnie Battle Theme remix by GlitchxCity featuring Scottay, supplied by Milind. Source and rights notes are in /vr/NOTICE.md.'),
+      p('Menu and team selection: Pallet Town - Pokemon Red & Blue (Lofi) by 51383504 (Pixabay). First battle phase: Video Game Battle Music by NunuSev (Pixabay). Cutscene and final battle phase: Marnie Battle Theme remix by GlitchxCity featuring Scottay. Tracks supplied by Milind.'),
+      h('a', { href: 'https://pixabay.com/music/beats-pallet-town-pokemon-red-amp-blue-lofi-410591/', target: '_blank', rel: 'noopener noreferrer', text: 'Pallet Town lofi — 51383504' }),
+      h('br'),
+      h('a', { href: 'https://pixabay.com/music/video-games-video-game-battle-music-535133/', target: '_blank', rel: 'noopener noreferrer', text: 'Video Game Battle Music — NunuSev' }),
       h('div', { class: 'tvb-row' }, btn('Done', () => closeModal(), { class: 'tvb-btn tvb-btn--go' }))));
   }
 
@@ -214,6 +218,7 @@
     return fetch(url, { signal, credentials: 'same-origin' }).then((r) => { if (!r.ok) throw new Error(`${r.status}`); return r.json(); });
   }
   function boot(progress) {
+    A.music.start('menu');
     G.state = 'boot';
     G.root.dataset.state = 'boot';
     const bootEl = G.root.querySelector('.tvb-boot');

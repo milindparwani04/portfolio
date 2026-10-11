@@ -31,3 +31,14 @@ The video audio is always muted in the game. A separate persistent music element
 Track: Pokémon Sword and Shield — Marnie Battle Theme ft. Scottay (Remix), GlitchxCity. Local MP3 supplied by Milind on 2026-10-10 with explicit instructions to use and deploy it. This records user direction, not an independently verified recording/composition licence.
 
 The muted original WebMs contain CC0 crowd recordings by kyles (Freesound 629884) and benfree (Freesound 130568); these are inaudible in the shipped player.
+
+
+## Menu and phase-one soundtrack (2026-10-11)
+
+Both local files were supplied by Milind and copied without modification. Source pages identify the creators and list the Pixabay Content License; no separate composition-rights verification is claimed.
+
+- Menu, builder, modifiers and team preview: **Pallet Town - Pokemon Red & Blue (Lofi)** by **51383504**, [Pixabay 410591](https://pixabay.com/music/beats-pallet-town-pokemon-red-amp-blue-lofi-410591/), `public/assets/vr/music/pallet-town-lofi.mp3`.
+- First battle phase: **Video Game Battle Music** by **NunuSev**, [Pixabay 535133](https://pixabay.com/music/video-games-video-game-battle-music-535133/), `public/assets/vr/music/video-game-battle.mp3`.
+- Cutscene/final phase remain **Marnie Battle Theme remix** by **GlitchxCity featuring Scottay**, credited above.
+
+Menu and first-phase tracks loop; navigation does not restart menu music. Master mute and Music volume apply. Missing menu/battle recordings use original synth fallbacks.

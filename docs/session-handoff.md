@@ -884,3 +884,15 @@ Release coordination: the concurrent item-UI commit `90a2469` included the field
 
 
 Weather/terrain release verification: `6ab7614` pushed; dedicated live browser checks passed rendered ground styles for all four terrains, sand particles, coexistence, replacements and expiry. Local full browser suite passed. The full production suite timed out in the pre-existing soundtrack Skip seek-to-38 check before terrain tests; do not report a complete production regression pass. Recorded for follow-up; no conclusion about cause.
+
+
+### 2026-10-10 — Codex weather/terrain session closed
+
+Milind ended the assignment. Engine-driven weather and terrain visuals are live (`6ab7614`; verification docs `7341a40`, VR v23 / UI v53). Local browser suite and dedicated live field-effect checks passed. Separate production soundtrack Skip-seek check timed out; cause unconfirmed, recorded for a future explicitly assigned follow-up. No further Codex work authorized. Closing handoff updates remain local; other agents’ changes and worktrees preserved.
+
+
+### 2026-10-11 — User-supplied menu and phase-one music
+
+Milind supplied two MP3s. Pallet Town - Pokemon Red & Blue (Lofi) by 51383504 plays continuously across boot/title/name/builder/editor/modifiers and lead selection. Video Game Battle Music by NunuSev begins on the engine `|start` event, after team selection, and loops until escalation. The Marnie remix by GlitchxCity featuring Scottay continues to serve the cutscene/final round. One shared recording lifecycle respects master mute/Music volume, tab visibility, close and role changes; menu navigation does not restart its element. Menu/battle asset errors use existing synth fallback; gesture-blocked playback retries on player interaction. All artists and source links are in Credits/NOTICE. Source artist names verified against Pixabay 410591 and 535133. Copies of the supplied MP3s are in `public/assets/vr/music/`. Loader v24 / UI v54.
+
+Browser validation passed: actual MP3 playback, menu element continuity, mute/volume, engine-start track switch, phase-one replacement at escalation, finale continuity, return-to-menu and rendered Credits for all four artist names, alongside existing cinematic/HUD/terrain tests. No battle mechanics or Worker changes.
