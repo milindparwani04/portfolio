@@ -363,7 +363,7 @@ body.locked { overflow: auto !important; height: auto !important; }
 .pdos-journal-kicker { margin: 0; font-size: .75rem; letter-spacing: .1em; text-transform: uppercase; }
 .pdos-journal-count, .pdos-journal-foot { flex: 0 0 auto; padding: 8px 18px; border-top: 1px solid var(--v2-soft-line); color: var(--v2-dim); font-size: .69rem; letter-spacing: .05em; text-transform: uppercase; }
 .pdos-journal-foot { padding: 10px 18px; font-size: .62rem; line-height: 1.6; }
-.pdos-journal-list { flex: 1 1 auto; min-height: 0; overflow: auto; overscroll-behavior: contain; }
+.pdos-journal-list { flex: 1 1 auto; min-height: 0; overflow: auto; }
 .pdos-journal-row {
   width: 100%; display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 12px; align-items: start;
   padding: 12px 18px; border: 0; border-top: 1px solid var(--v2-soft-line); background: transparent; color: var(--v2-fg);
@@ -392,7 +392,7 @@ body.locked { overflow: auto !important; height: auto !important; }
 .pdos-journal-entry-head { flex: 0 0 auto; display: flex; flex-direction: column; gap: 8px; padding: 14px 22px 12px; border-bottom: 1px solid var(--v2-soft-line); }
 .pdos-journal-entry-head h3 { margin: 0; font-family: var(--display); font-weight: 700; font-size: clamp(1.8rem, min(3.4vw, 6vh), 3rem); line-height: .95; text-transform: uppercase; }
 .pdos-journal-meta { display: flex; flex-wrap: wrap; gap: 4px 16px; color: var(--v2-dim); font-size: .69rem; letter-spacing: .05em; text-transform: uppercase; }
-.pdos-journal-article { flex: 1 1 auto; min-height: 0; overflow: auto; overscroll-behavior: contain; padding: 18px 22px 40px; }
+.pdos-journal-article { flex: 1 1 auto; min-height: 0; overflow: auto; padding: 18px 22px 40px; }
 .pdos-journal-article:focus-visible { outline: 2px solid var(--bar); outline-offset: -2px; }
 .pdos-journal-lead { margin: 0 0 16px; max-width: 68ch; font-size: 1rem; line-height: 1.6; text-wrap: pretty; }
 .pdos-journal-note { margin: 0; color: var(--v2-dim); font-size: .69rem; letter-spacing: .06em; text-transform: uppercase; line-height: 1.6; }

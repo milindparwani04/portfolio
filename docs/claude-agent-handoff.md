@@ -88,6 +88,14 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 
 ## Work log (newest first)
 
+### 2026-10-11 — Journal wheel scroll fix; production verification
+
+- **Bug (Milind):** wheel over the Journal entry list didn't scroll the page; the window bar, head and footnote did. Reproduced in Edge; the open article (`.pdos-journal-article`) did the same.
+- **Cause:** `overscroll-behavior: contain` on `.pdos-journal-list` and `.pdos-journal-article`. Chromium honours it on a scroll container even when it doesn't overflow (list 597/597 px, article 340/340 px at 1440×900), so the wheel was swallowed. The Toolbox panel body keeps `contain`, as the page is locked while it is open.
+- **Fix:** removed `contain` from both (`ui-v2.css`); CSS v47. An overflowing box still scrolls first; Chrome latches a gesture to it, so the page only moves on the next gesture at the end.
+- **Tested** (Playwright + Edge, full-height wheel, section position measured): the page moves over the bar, head, rows, footnote, the open article and rows with the reader open (1440×900); at 1440×620 the first wheel scrolls the list to its end (23 px) and the second moves the page. `tests/journal-browser.cjs` passes at 1280/390.
+- **Production (`b889de9`):** live ~90 s after push. Journal regression passed at 1280/390 against milindparwani.com; Crimson checks passed; slide sampling matched local (0→962 px and back, list 440 px); no page errors.
+
 ### 2026-10-11 — Journal reader motion matched to Toolbox
 
 - **Brief:** Codex's inline Journal reader (`f1ab14a`) slid less smoothly than the Toolbox panel; fix it.

@@ -121,6 +121,12 @@ Settled removals (do not re-propose without flagging): YouTube to MP3/MP4/WAV co
 
 ## Session log
 
+### 2026-10-11 — Journal scroll fix; Crimson and Journal slide verified live
+
+Milind found the page wouldn't scroll while the mouse was over the Journal entry list (the header and footnote scrolled fine); the open article had the same problem. Both boxes had `overscroll-behavior: contain`, which Chromium applies even when the box has nothing to scroll, so the wheel never reached the page. Removed it from `.pdos-journal-list` and `.pdos-journal-article`; a box that does overflow still scrolls first, and the page moves on the next gesture. Edge wheel check passed over the bar, head, rows, footnote and open article (1440×900) and on an overflowing list (1440×620). CSS v47.
+
+Production check of `b889de9` (CSS v46 / UI v60, live ~90 s after push): `tests/journal-browser.cjs` passed at 1280/390 px against milindparwani.com; Crimson select/label/`#780606` background/reload persistence/switch back passed with no page errors; frame sampling showed the Journal reader easing 0→962 px and back over ~0.55 s with a fixed-width article and the list settling at 440 px.
+
 ### 2026-10-11 — Journal reader slides as smoothly as Toolbox
 
 Milind found the Journal reader's slide rougher than Toolbox's. Claude rebuilt the motion the Toolbox way: the reader is a flex item whose width eases open (the old animated grid tracks mixed types, so they snapped), its article column is fixed at the open width so text never re-wraps mid-slide, the list rows ease between wide and compact sizes on the same curve, and the article stays drawn while the reader closes. Layout when open is unchanged. Frame sampling in headless Edge confirmed a continuous ease both ways; `tests/journal-browser.cjs` passes at 1280/390 px (it now waits for the close slide). CSS v46 / UI v60. No Worker changes.
