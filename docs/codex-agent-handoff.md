@@ -36,6 +36,11 @@ Validation:
 
 ## Work log
 
+### 2026-10-11 — Floating-island title screen
+
+Implemented Milind’s latest attached pastel floating-island artwork as the title screen. Real Play/Settings/Credits/Quit buttons retain pointer and keyboard navigation; portrait layout reframes art above the menu. No battle/button UI or soundtrack changes. Loader v25 / UI v55. Local browser regression passed including desktop/mobile menu bounds, Settings return, keyboard selection and artist Credits. User explicitly requested live deployment.
+
+
 ### 2026-10-11 — User-supplied menu and phase-one music
 
 Milind supplied two MP3s. Pallet Town - Pokemon Red & Blue (Lofi) by 51383504 plays continuously across boot/title/name/builder/editor/modifiers and lead selection. Video Game Battle Music by NunuSev begins on the engine `|start` event, after team selection, and loops until escalation. The Marnie remix by GlitchxCity featuring Scottay continues to serve the cutscene/final round. One shared recording lifecycle respects master mute/Music volume, tab visibility, close and role changes; menu navigation does not restart its element. Menu/battle asset errors use existing synth fallback; gesture-blocked playback retries on player interaction. All artists and source links are in Credits/NOTICE. Source artist names verified against Pixabay 410591 and 535133. Copies of the supplied MP3s are in `public/assets/vr/music/`. Loader v24 / UI v54.

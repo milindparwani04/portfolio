@@ -42,3 +42,7 @@ Both local files were supplied by Milind and copied without modification. Source
 - Cutscene/final phase remain **Marnie Battle Theme remix** by **GlitchxCity featuring Scottay**, credited above.
 
 Menu and first-phase tracks loop; navigation does not restart menu music. Master mute and Music volume apply. Missing menu/battle recordings use original synth fallbacks.
+
+## Title artwork
+
+`assets/vr/title/cloudbound.png`: user-supplied generated floating-island title concept, selected by Milind for this game on 2026-10-11. Menu controls are accessible HTML overlays.

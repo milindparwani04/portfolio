@@ -121,6 +121,10 @@ Settled removals (do not re-propose without flagging): YouTube to MP3/MP4/WAV co
 
 ## Session log
 
+### 2026-10-11 — Floating-island title screen
+
+Codex replaced The Very Best title artwork with Milind’s attached pastel floating islands and trainer scene. Four real menu actions and keyboard navigation remain; portrait view places the menu below the artwork. Local desktop/mobile browser checks passed. Loader v25 / UI v55; deploying at Milind’s explicit request. No Worker or battle changes.
+
 ### 2026-10-10 — Ren cutscene soundtrack and live integration
 
 Milind explicitly authorized wiring the six 38-second species-specific cinematics into the game and pushing live, then supplied the Marnie Battle Theme remix (GlitchxCity ft. Scottay). The player always mutes embedded crowd audio and starts the MP3 at zero. Music is the cutscene clock; at 38 seconds the engine resumes and the same media element continues without restarting. Skip seeks to 38 seconds. Master mute/Music volume, background pause/resume, cancellation and asset failure handling are supported. Actual first-fainted engine payload selects the Pokémon. No Worker/secrets changes.

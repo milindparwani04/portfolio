@@ -285,19 +285,12 @@
   G.screens.title = (screen) => {
     G.onBack = null;
     let sel = 0;
-    let tick = 0;
-    const trainer = h('div', { class: 'tvb-tm-trainer' }, ART.trainer('tvb-tm-sprite'));
     const items = TITLE_ITEMS.map(([label], i) => h('button', { type: 'button', class: 'tvb-tm-item', 'data-i': i },
       h('span', { class: 'tvb-tm-cursor', 'aria-hidden': 'true', text: '▶' }), h('span', { text: label.toUpperCase() })));
-    const arrow = h('span', { class: 'tvb-tm-next', 'aria-hidden': 'true', text: '▼' });
-    const board = h('div', { class: 'tvb-tm-board' },
-      ['sky1', 'sky2', 'haze', 'grass', 'grass-hi', 'grass-lo', 'platform'].map((k) => h('div', { class: `tvb-tm-${k}`, 'aria-hidden': 'true' })),
-      trainer,
-      h('div', { class: 'tvb-tm-title' },
-        h('p', { class: 'tvb-tm-eyebrow', text: 'CARTRIDGE 07 · DOUBLES' }),
-        h('h3', { class: 'tvb-tm-name' }, h('span', { class: 'tvb-tm-the', text: 'THE VERY' }), h('span', { class: 'tvb-tm-best', text: 'BEST' }))),
-      h('div', { class: 'tvb-tm-menu', role: 'group', 'aria-label': 'Main menu' }, items),
-      h('div', { class: 'tvb-tm-desc' }, h('p', { text: 'Build a party from every generation, then take on Ren Kestrel, the reigning champion.' }), arrow));
+    const board = h('div', { class: 'tvb-tm-board tvb-tm-board--cloud' },
+      h('div', { class: 'tvb-cloud-art', 'aria-hidden': 'true' }),
+      h('h3', { class: 'tvb-cloud-name', text: 'THE VERY BEST' }),
+      h('div', { class: 'tvb-tm-menu', role: 'group', 'aria-label': 'Main menu' }, items));
     const frame = h('div', { class: 'tvb-tm-frame' }, board);
     const legal = h('p', { class: 'tvb-tm-legal', text: 'Unofficial fan project. Pokémon © The Pokémon Company.' });
     screen.append(h('div', { class: 'tvb-tm' }, frame, legal));
@@ -322,12 +315,7 @@
       if (e.key === 'Enter' || e.key === ' ' || e.key === 'z' || e.key === 'Z') { e.preventDefault(); activate(sel); }
     };
     document.addEventListener('keydown', onKey);
-    const timer = window.setInterval(() => {
-      tick += 1;
-      trainer.classList.toggle('is-up', tick % 2 === 1);
-      arrow.classList.toggle('is-off', tick % 2 === 1);
-    }, 450);
-    // Fit the board: whole-number scale at or above full size, otherwise the largest that fits.
+    // Scale the art and working menu together; portrait gets a readable menu below the scene.
     const fit = () => {
       const w = frame.clientWidth;
       const hgt = frame.clientHeight;
@@ -339,14 +327,13 @@
       // Within 4% of full size, draw at 1x and let the frame crop a few pixels of sky and grass
       // margin (no content sits that close to the edges): crisp pixel fonts beat a 0.99 blur.
       if (s >= 0.96 && s < 1) s = 1;
-      if (s >= 1) s = Math.floor(s);
+
       board.style.transform = `translate(-50%, -50%) scale(${s})`;
     };
     const ro = typeof ResizeObserver === 'function' ? new ResizeObserver(fit) : null;
     if (ro) ro.observe(frame); else window.addEventListener('resize', fit);
     fit();
     G.unmount = () => {
-      window.clearInterval(timer);
       document.removeEventListener('keydown', onKey);
       if (ro) ro.disconnect(); else window.removeEventListener('resize', fit);
     };

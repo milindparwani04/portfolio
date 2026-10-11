@@ -570,3 +570,20 @@
 @keyframes tvb-rain { from { transform: translate(30px, -90px) rotate(15deg); } to { transform: translate(-30px, 150px) rotate(15deg); } }
 @keyframes tvb-snow { from { transform: translate(-15px, -70px); } to { transform: translate(30px, 140px); } }
 @media (prefers-reduced-motion: reduce) { .tvb-field-ground::after, .tvb-field-weather i { animation: none !important; } }
+
+/* Cloudbound title artwork with real keyboard/touch-accessible controls. */
+.tvb-screen--title { background: #dce8fb; }
+.tvb-screen--title .tvb-tm-legal { color: #403866; }
+.tvb-tm-board--cloud { --ink: #282063; --cream: #fbf4e4; background: #e4e5fa; }
+.tvb-cloud-art { inset: 0; background: url('/assets/vr/title/cloudbound.png') center / 100% 100% no-repeat; }
+.tvb-cloud-name { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.tvb-tm-board--cloud .tvb-tm-menu { left: 80%; top: 56.5%; right: auto; bottom: auto; width: 13.5%; height: 25.4%; padding: 0; gap: 0; border: 0; box-shadow: none; background: #fbf4e4; }
+.tvb-tm-board--cloud .tvb-tm-item { position: relative; flex: 1; min-height: 0; align-items: center; gap: 9px; padding: 0 9px; font-family: 'Pixelify Sans', monospace; font-size: 18px; line-height: 1; background: #fbf4e4; color: #282063; white-space: nowrap; }
+.tvb-tm-board--cloud .tvb-tm-item + .tvb-tm-item { border-top: 1px solid #c5a174; }
+.tvb-tm-board--cloud .tvb-tm-item.is-selected { background: #dac9fa; }
+.tvb-tm-board--cloud .tvb-tm-item:focus-visible { outline: 2px solid #6651a6; outline-offset: -2px; }
+.tvb-tm-board--cloud .tvb-tm-cursor { font-size: 12px; width: 12px; flex: 0 0 12px; }
+.tvb-tm-board--cloud.is-portrait .tvb-cloud-art { bottom: auto; height: 400px; background-size: auto 400px; background-position: left top; }
+.tvb-tm-board--cloud.is-portrait .tvb-cloud-name { clip-path: none; overflow: visible; width: 100%; height: 150px; margin: 0; padding: 35px 24px; left: 0; top: 0; background: linear-gradient(#dceaff 70%, #dceaff00); font-size: 32px; line-height: 1.5; text-align: center; text-shadow: 2px 2px #fff7de; }
+.tvb-tm-board--cloud.is-portrait .tvb-tm-menu { left: 40px; top: 425px; width: 325px; height: 240px; padding: 12px; border: 3px solid #6651a6; box-shadow: 0 0 0 4px #fff3d7, 0 0 0 6px #ba9c76; }
+.tvb-tm-board--cloud.is-portrait .tvb-tm-item { font-size: 19px; gap: 18px; padding: 0 20px; }
