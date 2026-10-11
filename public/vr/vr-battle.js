@@ -51,6 +51,8 @@
     const battleId = `b${seed.toString(36)}${Date.now().toString(36)}`.slice(0, 40);
     const mods = { ...G.draft.mods };
     const mult = C.multiplier(mods);
+    let certificateTeam = [];
+    let battleSets = [];
     const rules = C.engineRules(mods);
     const reduced = T.reduced();
     // Every wait resolves when the battle is disposed (close, quit, rematch), so no playback promise
@@ -606,7 +608,7 @@
             (picks.length === need ? menu.querySelector('.tvb-cmd--go') : menu.querySelectorAll('.tvb-pickmon')[i])?.focus();
           }, { class: 'tvb-cmd tvb-pickmon', 'aria-pressed': String(n >= 0), 'aria-label': `${label}, ${types.join(' and ')} type${n >= 0 ? `, picked ${n + 1}${n < 2 ? ', leads' : ''}` : ''}` });
         });
-        const confirm = menuButton(picks.length === need ? 'Start battle ▸' : `Pick ${need - picks.length} more`, () => { A.play('confirm'); send(`team ${picks.join('')}`); }, { class: 'tvb-cmd tvb-cmd--go' });
+        const confirm = menuButton(picks.length === need ? 'Start battle ▸' : `Pick ${need - picks.length} more`, () => { A.play('confirm'); certificateTeam = picks.map(n => battleSets[n - 1].species); send(`team ${picks.join('')}`); }, { class: 'tvb-cmd tvb-cmd--go' });
         confirm.disabled = picks.length !== need;
         clearMenu();
         backAction = null;
@@ -823,6 +825,10 @@
           ...insights.map((t) => h('p', { class: 'tvb-dim', text: t })),
           sets.length ? h('details', { class: 'tvb-reveal' }, h('summary', { text: 'Ren’s sets this battle' }), h('ul', {}, sets)) : null,
           h('div', { class: 'tvb-cmd-grid tvb-cmd-grid--3', 'data-grid': '' },
+            won ? menuButton('Download certificate', () => {
+              const opened = window.TVBCertificate.open({ name: G.name, team: certificateTeam.slice(), difficulty: C.difficultyLabel(C.difficulty(mods)), tier: C.tier(mult), multiplier: mult.toFixed(2), modifiers: C.MODS.filter(m => mods[m.k] && !m.cosmetic).map(m => m.label), date: new Date().toLocaleDateString(undefined, {year:'numeric',month:'long',day:'numeric'}) });
+              if (!opened) textEl.textContent = 'Allow pop-ups for this site, then try Download certificate again.';
+            }) : null,
             menuButton('Rematch', () => { dispose(); go('battle', { seed: C.newSeed() }); }, { class: 'tvb-cmd tvb-cmd--go' }),
             menuButton('Edit party', () => leave('builder')),
             menuButton('Title', () => leave('title'), { 'data-back': 'title' }))));
@@ -873,6 +879,8 @@
       let loadout = null;
       try {
         loadout = C.battleLoadout(G.cat, G.draft, seed, { movepools: pools });
+        battleSets = loadout.sets;
+        certificateTeam = battleSets.map(s => s.species);
         loadout.sets.forEach((s) => { heldItems[s.name] = s.item || ''; });
       } catch (_) {
         await say('The random team couldn’t be built from this catalog.');

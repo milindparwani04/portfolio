@@ -36,6 +36,10 @@ Validation:
 
 ## Work log
 
+### 2026-10-11 — Victory certificates
+
+Added win-only Download certificate action. Opens a separate tab with trainer name, the actual selected battle team (including random loadout), difficulty label/tier/multiplier, enabled gameplay modifiers and date. Self-contained SVG download plus browser Save as PDF/Print; no server storage. User text escaped; blocked popups get a retry message. Loader v26 / UI v61. Local full browser regression passed including actual victory handler, certificate popup contents/download link and existing cinematic/music/field tests. No Worker changes.
+
 ### 2026-10-11 — Journal inline reader correction
 
 User clarified Toolbox means an in-section side panel, not a modal. Removed Journal overlay/scrim and lock lifecycle. Article reader now slides in beside the list, keeps existing article/photo presentation, and closes via selected-row toggle, X or Escape. Mobile stacks reader under list. Reduced motion disables transitions. Local and production Edge regression passed at 1280px and 390px: list-only default, keyboard opening, article switching, selected-row toggle, X/Escape close, focus restoration, no page lock and no horizontal overflow. Released in `f1ab14a`; CSS v45 / UI v59. This supersedes the modal implementation below. Handoffs updated at Milind’s closing request; unrelated concurrent Crimson/theme work and `.claude/worktrees/` preserved.

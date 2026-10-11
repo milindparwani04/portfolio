@@ -121,6 +121,10 @@ Settled removals (do not re-propose without flagging): YouTube to MP3/MP4/WAV co
 
 ## Session log
 
+### 2026-10-11 — Victory certificates
+
+Added win-only Download certificate action. Opens a separate tab with trainer name, the actual selected battle team (including random loadout), difficulty label/tier/multiplier, enabled gameplay modifiers and date. Self-contained SVG download plus browser Save as PDF/Print; no server storage. User text escaped; blocked popups get a retry message. Loader v26 / UI v61. Local full browser regression passed including actual victory handler, certificate popup contents/download link and existing cinematic/music/field tests. No Worker changes.
+
 ### 2026-10-11 — Journal scroll fix; Crimson and Journal slide verified live
 
 Milind found the page wouldn't scroll while the mouse was over the Journal entry list (the header and footnote scrolled fine); the open article had the same problem. Both boxes had `overscroll-behavior: contain`, which Chromium applies even when the box has nothing to scroll, so the wheel never reached the page. Removed it from `.pdos-journal-list` and `.pdos-journal-article`; a box that does overflow still scrolls first, and the page moves on the next gesture. Edge wheel check passed over the bar, head, rows, footnote and open article (1440×900) and on an overflowing list (1440×620). CSS v47.
