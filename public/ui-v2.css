@@ -935,3 +935,77 @@ html { scrollbar-gutter: stable; }
   .v2-section.is-active .pdos-crt-slide { opacity: 1; }
   .pdos-crt-line { display: none !important; }
 }
+
+/* Crack: its own overlay, drawn in the original site's theme (the pre-DOS crack.html look:
+   Anton titles, IBM Plex Mono readouts, Inter copy, amber locks). Tokens are --ck-* because the
+   overlay sits inside .portfolio-v2, which redefines --display/--mono/--bg for the DOS theme.
+   Fonts load when the window first opens (openCrack in ui-v2.js). */
+.pdos-dialog--crack {
+  --ck-bg: #0A0A0A; --ck-panel: #141414; --ck-fg: #F2F2F0; --ck-dim: #8A8A85; --ck-dimmer: #4A4A46;
+  --ck-line: rgba(242, 242, 240, .14); --ck-amber: #EDC001;
+  --ck-display: 'Anton', sans-serif; --ck-mono: 'IBM Plex Mono', monospace; --ck-sans: 'Inter', sans-serif;
+  width: min(1160px, 100%); background: var(--ck-bg); color: var(--ck-fg); font-family: var(--ck-sans);
+  box-shadow: 0 0 0 1px var(--ck-line), 0 30px 80px rgba(0, 0, 0, .6); -webkit-font-smoothing: antialiased;
+}
+.pdos-dialog--crack *, .pdos-dialog--crack *::before, .pdos-dialog--crack *::after { box-sizing: border-box; }
+.pdos-dialog--crack .ck-topbar { flex: 0 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .95rem clamp(1rem, 2.6vw, 2rem); border-bottom: 1px solid var(--ck-line); }
+.pdos-dialog--crack .ck-file { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--ck-mono); font-size: .7rem; color: var(--ck-dimmer); letter-spacing: .1em; text-transform: uppercase; }
+.pdos-dialog--crack .ck-close { flex: 0 0 auto; padding: .35rem 0; border: 0; background: none; cursor: pointer; font-family: var(--ck-mono); font-size: .78rem; letter-spacing: .06em; text-transform: uppercase; color: var(--ck-dim); transition: color .2s; }
+.pdos-dialog--crack .ck-close:hover, .pdos-dialog--crack .ck-close:focus-visible { color: var(--ck-fg); outline: 0; text-decoration: underline; text-underline-offset: .3em; }
+.pdos-dialog--crack .ck-body { min-height: 0; overflow: auto; display: grid; grid-template-columns: minmax(280px, 380px) minmax(0, 1fr); gap: clamp(1.2rem, 3vw, 2.6rem); padding: clamp(1.2rem, 3vw, 2.4rem) clamp(1rem, 2.6vw, 2rem); }
+.pdos-dialog--crack .ck-side { min-width: 0; display: flex; flex-direction: column; }
+.pdos-dialog--crack .ck-label { font-family: var(--ck-mono); font-size: .7rem; color: var(--ck-dimmer); letter-spacing: .1em; text-transform: uppercase; }
+.pdos-dialog--crack .ck-title { margin: .5rem 0 .9rem; font-family: var(--ck-display); font-weight: 400; text-transform: uppercase; font-size: clamp(2.2rem, min(5vw, 8vh), 3.6rem); line-height: .95; letter-spacing: 0; }
+.pdos-dialog--crack .ck-intro { margin: 0 0 1.6rem; color: var(--ck-dim); font-size: .92rem; line-height: 1.6; }
+.pdos-dialog--crack .ck-intro b { color: var(--ck-fg); font-weight: 600; }
+
+/* HUD: hairline grid, 2x2 beside the machine */
+.pdos-dialog--crack .ck-hud { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: var(--ck-line); border: 1px solid var(--ck-line); }
+.pdos-dialog--crack .ck-stat { background: var(--ck-bg); padding: .85rem 1rem; }
+.pdos-dialog--crack .ck-stat .v { font-family: var(--ck-mono); font-size: 1.3rem; font-weight: 600; margin-top: .3rem; letter-spacing: .02em; }
+/* lives read as redaction bars: solid = held, struck out = spent */
+.pdos-dialog--crack .lives { display: flex; gap: .4rem; align-items: center; height: 1.35rem; }
+.pdos-dialog--crack .life { width: 28px; height: 13px; border: 1px solid var(--ck-fg); background: var(--ck-fg); position: relative; }
+.pdos-dialog--crack .life.last { background: var(--ck-amber); border-color: var(--ck-amber); }
+.pdos-dialog--crack .life.spent { background: none; border-color: var(--ck-dimmer); }
+.pdos-dialog--crack .life.spent::before, .pdos-dialog--crack .life.spent::after { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: var(--ck-dimmer); }
+.pdos-dialog--crack .life.spent::before { transform: rotate(24deg); }
+.pdos-dialog--crack .life.spent::after { transform: rotate(-24deg); }
+
+.pdos-dialog--crack .ck-log { flex: 1 1 auto; min-height: 96px; max-height: 220px; margin-top: 1.2rem; overflow-y: auto; border: 1px solid var(--ck-line); background: var(--ck-panel); font-family: var(--ck-mono); font-size: .74rem; color: var(--ck-dim); line-height: 1.9; padding: .8rem 1rem; }
+.pdos-dialog--crack .ck-log div span { color: var(--ck-dimmer); }
+
+/* the machine: target, readout, status, lock */
+.pdos-dialog--crack .ck-machine { min-width: 0; display: flex; flex-direction: column; justify-content: center; border: 1px solid var(--ck-line); padding: clamp(1.4rem, 3.4vw, 3rem) clamp(1rem, 2.4vw, 2rem); }
+.pdos-dialog--crack .ck-target { text-align: center; margin-bottom: 1.6rem; }
+.pdos-dialog--crack .ck-target .digits { font-family: var(--ck-mono); font-size: clamp(1rem, 2.2vw, 1.35rem); font-weight: 500; letter-spacing: .72em; padding-left: .72em; color: var(--ck-dim); margin-top: .7rem; }
+.pdos-dialog--crack .ck-readout { display: flex; justify-content: center; gap: clamp(.4rem, 1.4vw, 1rem); padding: clamp(1rem, 2.6vw, 2.2rem) 0; }
+.pdos-dialog--crack .slot { width: clamp(52px, 8vw, 104px); height: clamp(72px, min(11vw, 17vh), 140px); border: 1px solid var(--ck-line); background: var(--ck-panel); display: flex; align-items: center; justify-content: center; font-family: var(--ck-mono); font-weight: 600; font-size: clamp(2rem, min(5vw, 8vh), 4rem); color: var(--ck-dimmer); position: relative; transition: border-color .18s, color .18s, background .18s; }
+.pdos-dialog--crack .slot.active { color: var(--ck-fg); border-color: var(--ck-fg); background: var(--ck-bg); }
+.pdos-dialog--crack .slot.active::after { content: ""; position: absolute; left: 12%; right: 12%; bottom: 10px; height: 2px; background: var(--ck-amber); }
+.pdos-dialog--crack .slot.locked { color: var(--ck-amber); border-color: var(--ck-amber); background: var(--ck-bg); }
+.pdos-dialog--crack .slot.miss { color: var(--ck-fg); border-color: var(--ck-fg); background: #241a1a; }
+.pdos-dialog--crack .ck-status { text-align: center; font-family: var(--ck-mono); font-size: .78rem; letter-spacing: .08em; text-transform: uppercase; color: var(--ck-dim); min-height: 1.2em; margin-bottom: 1.6rem; }
+.pdos-dialog--crack .ck-status.good { color: var(--ck-amber); }
+.pdos-dialog--crack .ck-controls { display: flex; justify-content: center; gap: .8rem; flex-wrap: wrap; }
+.pdos-dialog--crack .ck-btn { font-family: var(--ck-mono); font-size: .78rem; text-transform: uppercase; letter-spacing: .08em; padding: .9rem 2.4rem; border: 1px solid var(--ck-line); color: var(--ck-dim); background: none; cursor: pointer; transition: border-color .2s, color .2s, background .2s; }
+.pdos-dialog--crack .ck-btn:hover { border-color: var(--ck-fg); color: var(--ck-fg); }
+.pdos-dialog--crack .ck-btn.solid { background: var(--ck-fg); color: var(--ck-bg); border-color: var(--ck-fg); }
+.pdos-dialog--crack .ck-btn.solid:hover { background: var(--ck-dim); border-color: var(--ck-dim); }
+.pdos-dialog--crack .ck-btn:focus-visible { outline: 2px solid var(--ck-amber); outline-offset: 3px; }
+.pdos-dialog--crack .ck-hint { text-align: center; font-family: var(--ck-mono); font-size: .7rem; color: var(--ck-dimmer); letter-spacing: .06em; margin-top: 1.2rem; text-transform: uppercase; }
+
+@media (max-width: 900px) {
+  .pdos-dialog--crack .ck-body { grid-template-columns: 1fr; }
+  .pdos-dialog--crack .ck-machine { order: -1; }
+  .pdos-dialog--crack .ck-hud { grid-template-columns: repeat(4, 1fr); }
+  .pdos-dialog--crack .ck-log { max-height: 150px; }
+}
+@media (max-width: 720px) {
+  .pdos-dialog--crack { width: 100%; height: 100%; }
+  .pdos-dialog--crack .ck-hud { grid-template-columns: repeat(2, 1fr); }
+  .pdos-dialog--crack .ck-btn { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pdos-dialog--crack .slot, .pdos-dialog--crack .ck-btn, .pdos-dialog--crack .ck-close { transition: none; }
+}

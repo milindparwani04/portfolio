@@ -976,7 +976,7 @@
     .tools{ grid-template-columns:1fr; }
   }
 </style>
-<link rel="stylesheet" href="/ui-v2.css?v=41">
+<link rel="stylesheet" href="/ui-v2.css?v=42">
 </head>
 <body class="locked">
 
@@ -1323,6 +1323,39 @@
         <div class="pdos-dialog pdos-dialog--champ" role="dialog" aria-modal="true" aria-labelledby="pdosChampTitle" tabindex="-1">
           <div class="pdos-window-bar"><span id="pdosChampTitle">the_very_best.cart &mdash; project 07 / game</span><button class="pdos-close" type="button" data-close-window aria-label="Close window">&#10005;</button></div>
           <div class="tvb" id="tvbRoot"><p class="tvb-live tvb-sr" aria-live="polite"></p></div>
+        </div>
+      </div>
+
+      <!-- Crack window: its own overlay in the original site's theme (Anton / IBM Plex Mono / amber).
+           ui-v2.js loads /crack-game.js on first open and mounts it here (the same script runs /crack). -->
+      <div class="pdos-overlay" id="pdosCrackOverlay" hidden>
+        <div class="pdos-overlay-scrim" data-close-window></div>
+        <div class="pdos-dialog pdos-dialog--crack" role="dialog" aria-modal="true" aria-labelledby="ckTitle" tabindex="-1">
+          <div class="ck-topbar"><span class="ck-file">crack.exe &mdash; ref. 02.07 / project 06</span><button class="ck-close" type="button" data-close-window aria-label="Close Crack">Close &#10005;</button></div>
+          <div class="ck-body">
+            <div class="ck-side">
+              <span class="ck-label">Game prototype</span>
+              <h3 class="ck-title" id="ckTitle">[Crack]</h3>
+              <p class="ck-intro">A five-digit code sits behind the readout. Each position cycles through <b>0&ndash;9</b> in turn &mdash; hit <b>lock</b> the instant the cycling digit matches the target. Every digit you land speeds the next one up. Miss, and the dial spins on without you.</p>
+              <div class="ck-hud">
+                <div class="ck-stat"><span class="ck-label">Level</span><div class="v" data-ck="level">1</div></div>
+                <div class="ck-stat"><span class="ck-label">Cycle speed</span><div class="v" data-ck="speed">260ms</div></div>
+                <div class="ck-stat"><span class="ck-label">Lives</span><div class="v lives" data-ck="lives"></div></div>
+                <div class="ck-stat"><span class="ck-label">Best level</span><div class="v" data-ck="best">&mdash;</div></div>
+              </div>
+              <div class="ck-log" data-ck="log" aria-label="Game log"></div>
+            </div>
+            <div class="ck-machine">
+              <div class="ck-target">
+                <span class="ck-label">Target code</span>
+                <div class="digits" data-ck="target">&#183; &#183; &#183; &#183; &#183;</div>
+              </div>
+              <div class="ck-readout" data-ck="readout"></div>
+              <div class="ck-status" data-ck="status" aria-live="polite">Press lock to begin</div>
+              <div class="ck-controls"><button class="ck-btn solid" type="button" data-ck="lock">Lock</button></div>
+              <div class="ck-hint">Space or Enter to lock &middot; Esc to close</div>
+            </div>
+          </div>
         </div>
       </div>
     </div></div><div class="pdos-crt-line" aria-hidden="true"></div></section>
@@ -5251,7 +5284,7 @@
 
 </script>
 
-<script src="/ui-v2.js?v=55"></script>
+<script src="/ui-v2.js?v=56"></script>
 <script src="/pdos-icons.js?v=5" defer></script>
 
 </body>

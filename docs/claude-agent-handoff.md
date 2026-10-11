@@ -76,7 +76,7 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 - Journal: no article text is written yet. When one is, it goes inline in that entry's `.pdos-journal-article` panel (replacing the "in progress" note) and the status changes; there are no separate article pages any more.
 - **Victory Road:** live since 2026-10-07; follow-ups (smarter AI, Potion targeting the bench) are listed under "Known limitations" in [`victory-road-build.md`](victory-road-build.md).
 - The playlists "now playing" strip from the mockup was dropped at Milind's request (2026-10-07) — don't re-propose it.
-- Planned projects (Today Somewhere, Where Next, Speed Round, Terminal Adventure) open a window that says they're planned; Sounds Like and Crack run inside theirs.
+- Planned projects (Today Somewhere, Where Next, Speed Round, Terminal Adventure) open a window that says they're planned; Sounds Like runs inside its window; Crack has its own overlay (original theme, `crack-game.js`).
 - Reminders: `worker/reminders.json` holds Milind's general daily phone reminders (added 2026-10-05); `sendDailyReminders` in the cron pushes each active one to the `REMINDERS_TOPIC` secret (`shawshankreminder`) once per Dubai day from 12:00. Add entries there when he asks for a reminder; prune expired ones occasionally.
 - PlayStation: the PSN refresh token lasts 10 days, so Milind re-submits `/api/psn/authorize` with a fresh NPSSO about every 10 days; since 2026-10-04 the cron pushes an ntfy reminder from 2 days before expiry (`checkPsnExpiry`). Open question: whether the refresh token's lifetime actually resets on each refresh. If Milind gets a reminder and the card still works days after the recorded expiry, the token slides and the reminder can be dropped. If that becomes a chore, the alternative he turned down was storing the NPSSO in KV (~60-day life, but it is effectively his Sony login).
 
@@ -87,6 +87,13 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 - Lighthouse `valid-source-maps` flags a third-party library map; it doesn't affect the score categories that matter (production: 90 / 100 / 100).
 
 ## Work log (newest first)
+
+### 2026-10-11 — Crack overlay (original theme)
+
+- **Brief:** rebuild Crack so it is an overlay of its own, keeping the old site theme; game unchanged.
+- **Built:** `#pdosCrackOverlay` in `index.html` (after the TVB overlay); styles at the end of `ui-v2.css`, all scoped under `.pdos-dialog--crack` with `--ck-*` tokens (the overlay sits inside `.portfolio-v2`, which redefines `--display/--mono/--bg`). Two columns ≥901 px (title/intro/2×2 HUD/log left, machine right), one column below with the machine first. `initCrack()` in `ui-v2.js` lazy-loads Anton/IBM Plex Mono/Inter and `/crack-game.js?v=${CRACK_VERSION}`, mounts on open, disposes on close (`hideOverlay`). `crack` in `PDOS_PROJECTS` no longer has `src`; `openProject('crack')` short-circuits to the overlay.
+- **Shared logic:** `public/crack-game.js` holds the original game verbatim, scoped to a root via `data-ck` attributes. Its Space/Enter handler ignores keys aimed at other buttons/links so ✕ keeps Enter. `crack.html` now loads the same script.
+- **Tested** (Playwright + headless Edge vs `wrangler dev`): script not loaded with the page; overlay opens (not the project window); level 1 played to "Vault open", level 2 starts, best = 1; a miss spends a life; Esc / Enter on ✕ / scrim close; nothing changes after close (timers + keys gone); reopen is a fresh run with best kept; fits without overflow at 1440×900, 1366×768 (no inner scroll), 1024×700, 390×844; standalone `/crack` plays; no page errors.
 
 ### 2026-10-10 — Random held items folded into Random team; held item in the player's HP boxes
 

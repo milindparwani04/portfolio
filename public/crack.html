@@ -146,236 +146,33 @@
   <p class="ck-intro">A five-digit code sits behind the readout. Each position cycles through <b>0&ndash;9</b> in turn &mdash; hit <b>lock</b> the instant the cycling digit matches the target. Every digit you land speeds the next one up. Miss, and the dial spins on without you.</p>
 
   <div class="ck-hud">
-    <div class="ck-stat"><span class="ck-label">Level</span><div class="v" id="s-level">1</div></div>
-    <div class="ck-stat"><span class="ck-label">Cycle speed</span><div class="v" id="s-speed">260ms</div></div>
-    <div class="ck-stat"><span class="ck-label">Lives</span><div class="v lives" id="s-lives"></div></div>
-    <div class="ck-stat"><span class="ck-label">Best level</span><div class="v" id="s-best">&mdash;</div></div>
+    <div class="ck-stat"><span class="ck-label">Level</span><div class="v" id="s-level" data-ck="level">1</div></div>
+    <div class="ck-stat"><span class="ck-label">Cycle speed</span><div class="v" id="s-speed" data-ck="speed">260ms</div></div>
+    <div class="ck-stat"><span class="ck-label">Lives</span><div class="v lives" id="s-lives" data-ck="lives"></div></div>
+    <div class="ck-stat"><span class="ck-label">Best level</span><div class="v" id="s-best" data-ck="best">&mdash;</div></div>
   </div>
 
   <div class="ck-machine">
     <div class="ck-target">
       <span class="ck-label">Target code</span>
-      <div class="digits" id="target">&#183; &#183; &#183; &#183; &#183;</div>
+      <div class="digits" id="target" data-ck="target">&#183; &#183; &#183; &#183; &#183;</div>
     </div>
 
-    <div class="ck-readout" id="readout"></div>
+    <div class="ck-readout" id="readout" data-ck="readout"></div>
 
-    <div class="ck-status" id="status">Press start to begin</div>
+    <div class="ck-status" id="status" data-ck="status">Press start to begin</div>
 
     <div class="ck-controls">
-      <button class="ck-btn solid" id="lock">Lock</button>
+      <button class="ck-btn solid" id="lock" data-ck="lock">Lock</button>
     </div>
     <div class="ck-hint">Space or Enter to lock</div>
   </div>
 
-  <div class="ck-log" id="log"><div><span>&gt;</span> awaiting input&#8230;</div></div>
+  <div class="ck-log" id="log" data-ck="log"><div><span>&gt;</span> awaiting input&#8230;</div></div>
 </div>
 
-<script>
-(function(){
-  /* LEVEL_RATE is solved, not guessed: it places the final digit of the final
-     level at exactly MIN, so the curve peaks at FINAL rather than clipping early. */
-  var SLOTS = 5, BASE = 260, MIN = 70, DECAY = 0.87, LEVEL_RATE = 0.961, FINAL = 20, MAX_LIVES = 3;
-
-  var readout = document.getElementById('readout');
-  var targetEl = document.getElementById('target');
-  var statusEl = document.getElementById('status');
-  var lockBtn = document.getElementById('lock');
-  var logEl = document.getElementById('log');
-  var sLevel = document.getElementById('s-level');
-  var sSpeed = document.getElementById('s-speed');
-  var sLives = document.getElementById('s-lives');
-  var sBest = document.getElementById('s-best');
-
-  var slots = [], state = {}, runStart = 0;
-  var cycleTimer = null, pendingTimer = null, gen = 0;
-  for (var i=0;i<SLOTS;i++){
-    var d = document.createElement('div');
-    d.className = 'slot';
-    d.textContent = '·';
-    readout.appendChild(d);
-    slots.push(d);
-  }
-
-  var best = 0;
-  try { best = parseInt(localStorage.getItem('crack_best'),10) || 0; } catch(e){}
-  sBest.textContent = best ? best : '—';
-
-  function log(msg){
-    var d = document.createElement('div');
-    d.innerHTML = '<span>&gt;</span> ' + msg;
-    logEl.insertBefore(d, logEl.firstChild);
-    while (logEl.children.length > 30) logEl.removeChild(logEl.lastChild);
-  }
-
-  function fresh(level){
-    var code = [];
-    for (var i=0;i<SLOTS;i++) code.push(Math.floor(Math.random()*10));
-    return {
-      running: true, paused: false, level: level, code: code, pos: 0, digit: 0,
-      speed: Math.max(MIN, Math.round(BASE * Math.pow(LEVEL_RATE, level-1))),
-      lives: state.lives === undefined ? MAX_LIVES : state.lives
-    };
-  }
-
-  function render(){
-    for (var i=0;i<SLOTS;i++){
-      var s = slots[i];
-      s.className = 'slot';
-      if (i < state.pos){ s.className = 'slot locked'; s.textContent = state.code[i]; }
-      else if (i === state.pos && state.running){ s.className = 'slot active'; s.textContent = state.digit; }
-      else { s.textContent = '·'; }
-    }
-    sLevel.textContent = state.level + ' / ' + FINAL;
-    sSpeed.textContent = state.speed + 'ms';
-    sLives.innerHTML = '';
-    for (var L=0; L<MAX_LIVES; L++){
-      var b = document.createElement('span');
-      var held = L < state.lives;
-      b.className = 'life' + (held ? (state.lives === 1 ? ' last' : '') : ' spent');
-      sLives.appendChild(b);
-    }
-    targetEl.textContent = state.code.join(' ');
-  }
-
-  /* Every cycle chain carries the generation it was born in. stopTimer() bumps the
-     generation, so any chain still in flight — including one whose timer handle was
-     overwritten by a second chain — sees the mismatch on its next hop and dies.
-     Without this, two overlapping chains step the same digit and it appears to
-     count 1,3,5,7,9 at double speed while the interval is unchanged. */
-  function tick(myGen){
-    if (myGen !== gen) return;
-    state.digit = (state.digit + 1) % 10;
-    render();
-    cycleTimer = setTimeout(function(){ tick(myGen); }, state.speed);
-  }
-
-  function run(){
-    stopTimer();
-    var g = gen;
-    cycleTimer = setTimeout(function(){ tick(g); }, state.speed);
-  }
-
-  function stopTimer(){
-    if (cycleTimer){ clearTimeout(cycleTimer); cycleTimer = null; }
-    if (pendingTimer){ clearTimeout(pendingTimer); pendingTimer = null; }
-    gen++;
-  }
-
-  function start(level){
-    stopTimer();
-    level = level || 1;
-    /* a run always begins with a full set of lives — otherwise "try again"
-       after a lockout inherits the 0 lives that caused it */
-    if (level === 1){ runStart = Date.now(); state.lives = MAX_LIVES; }
-    state = fresh(level);
-    statusEl.className = 'ck-status';
-    statusEl.textContent = 'Cracking… lock on ' + state.code[0];
-    lockBtn.textContent = 'Lock';
-    log('LEVEL ' + state.level + ' — code ' + state.code.join('') + ' — ' + state.speed + 'ms');
-    render();
-    run();
-  }
-
-  function attempt(){
-    if (!state.running){ start(1); return; }
-    /* the dial is frozen between a miss and its restart — input here would both
-       double-decrement lives and spawn a second cycle chain */
-    if (state.paused) return;
-    if (state.digit === state.code[state.pos]){
-      stopTimer();
-      state.pos++;
-      state.speed = Math.max(MIN, Math.round(state.speed * DECAY));
-      log('position ' + state.pos + ' locked — ' + state.speed + 'ms');
-      if (state.pos === SLOTS){ win(); return; }
-      statusEl.className = 'ck-status good';
-      statusEl.textContent = 'Locked. Next target ' + state.code[state.pos];
-      state.digit = Math.floor(Math.random()*10);
-      render();
-      run();
-      return;
-    }
-    miss();
-  }
-
-  function miss(){
-    stopTimer();
-    state.lives--;
-    var s = slots[state.pos];
-    s.className = 'slot miss';
-    log('miss at position ' + (state.pos+1) + ' — wanted ' + state.code[state.pos] + ', got ' + state.digit);
-    if (state.lives <= 0){
-      state.running = false;
-      statusEl.className = 'ck-status';
-      statusEl.textContent = 'Lockout — reached level ' + state.level;
-      lockBtn.textContent = 'Try again';
-      log('LOCKOUT at level ' + state.level);
-      render();
-      return;
-    }
-    state.paused = true;
-    render();
-    statusEl.className = 'ck-status';
-    statusEl.textContent = 'Miss — ' + state.lives + ' ' + (state.lives===1?'life':'lives') + ' left';
-    pendingTimer = setTimeout(function(){
-      pendingTimer = null;
-      if (!state.running) return;
-      state.paused = false;
-      state.digit = Math.floor(Math.random()*10);
-      statusEl.textContent = 'Lock on ' + state.code[state.pos];
-      render(); run();
-    }, 700);
-  }
-
-  function fmt(ms){
-    var t = Math.round(ms/1000);
-    return Math.floor(t/60) + 'm ' + ('0' + (t%60)).slice(-2) + 's';
-  }
-
-  function win(){
-    var lvl = state.level;
-    if (lvl > best){ best = lvl; sBest.textContent = best; try{ localStorage.setItem('crack_best', best); }catch(e){} }
-    render();
-
-    if (lvl === FINAL){ complete(); return; }
-
-    state.paused = true;
-    statusEl.className = 'ck-status good';
-    statusEl.textContent = 'Vault open — level ' + lvl + ' cleared';
-    log('VAULT OPEN — level ' + lvl + ' cleared');
-    var carry = state.lives;
-    pendingTimer = setTimeout(function(){
-      pendingTimer = null;
-      state.lives = carry;
-      start(lvl + 1);
-    }, 1200);
-  }
-
-  function complete(){
-    stopTimer();
-    state.running = false;
-    var elapsed = Date.now() - runStart;
-    var bt = 0;
-    try { bt = parseInt(localStorage.getItem('crack_best_time'),10) || 0; } catch(e){}
-    var record = !bt || elapsed < bt;
-    if (record){ try{ localStorage.setItem('crack_best_time', elapsed); }catch(e){} }
-    statusEl.className = 'ck-status good';
-    statusEl.textContent = 'Vault open — all ' + FINAL + ' cracked · ' + fmt(elapsed) + (record ? ' · new record' : '');
-    lockBtn.textContent = 'Play again';
-    log('ALL ' + FINAL + ' LEVELS CRACKED — ' + fmt(elapsed) + (record ? ' (record)' : ''));
-  }
-
-  lockBtn.addEventListener('click', attempt);
-  document.addEventListener('keydown', function(e){
-    if (e.code === 'Space' || e.key === 'Enter'){ e.preventDefault(); attempt(); }
-  });
-
-  state = { lives:3, level:1, speed:BASE, code:[0,0,0,0,0], pos:0, digit:0, running:false };
-  render();
-  targetEl.innerHTML = '&#183; &#183; &#183; &#183; &#183;';
-  statusEl.textContent = 'Press lock to begin';
-})();
-</script>
+<script src="/crack-game.js?v=1"></script>
+<script>CrackGame.mount(document.body);</script>
 
 </body>
 </html>

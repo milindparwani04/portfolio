@@ -864,18 +864,20 @@
     where: { n: '03', tag: 'Tool', title: 'Where Next', desc: 'A simple tool for exploring new destinations.', status: 'Planned · In development', color: 'oklch(0.88 0.07 85)', file: 'where_next.vol' },
     speed: { n: '04', tag: 'Game', title: 'Speed Round', desc: 'A fast-paced trivia game for curious minds.', status: 'Planned · In development', color: 'oklch(0.74 0.16 0)', file: 'speed_round.exe' },
     terminal: { n: '05', tag: 'Game', title: 'Untitled Terminal Adventure', desc: 'A text-based experiment in choice and consequence.', status: 'Planned · In development', color: 'oklch(0.75 0.16 40)', file: 'terminal_adventure.exe' },
-    crack: { n: '06', tag: 'Game', title: 'Crack', desc: 'Visual experiments with fracture, distortion and decay.', status: 'Playable', color: '#f4f3ef', file: 'crack.exe', src: '/crack.html' }
+    crack: { n: '06', tag: 'Game', title: 'Crack', desc: 'Visual experiments with fracture, distortion and decay.', status: 'Playable', color: '#f4f3ef', file: 'crack.exe' }
   };
 
   function initWindows() {
     const root = document.querySelector('.portfolio-v2');
     const projectOverlay = byId('pdosProjectOverlay');
     const champOverlay = byId('pdosChampOverlay');
-    if (!root || !projectOverlay || !champOverlay) return;
+    const crackOverlay = byId('pdosCrackOverlay');
+    if (!root || !projectOverlay || !champOverlay || !crackOverlay) return;
     // Sections clip and transform their content for the CRT effect, which would trap a fixed
     // overlay inside them, so the overlays live at the end of the page root instead.
     root.appendChild(projectOverlay);
     root.appendChild(champOverlay);
+    root.appendChild(crackOverlay);
 
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     const locks = { window: false, tool: false };
@@ -890,6 +892,7 @@
       .filter((node) => node.offsetParent !== null || node === document.activeElement);
 
     const openVictoryRoad = initChampionRun(champOverlay);
+    const crack = initCrack(crackOverlay, () => openOverlay === crackOverlay);
 
     function showOverlay(overlay) {
       if (openOverlay) hideOverlay({ restoreFocus: false });
@@ -905,7 +908,9 @@
       openOverlay.hidden = true;
       // The Very Best lives only while its window is open: closing ends the battle, audio and timers.
       if (openOverlay === champOverlay && window.VictoryRoad && window.VictoryRoad.dispose) window.VictoryRoad.dispose();
-      // Stop anything running inside the window (Crack, Sounds Like) by unloading its frame.
+      // Crack likewise: closing stops the dial and its key listener; reopening starts fresh.
+      if (openOverlay === crackOverlay) crack.close();
+      // Stop anything running inside a project window (Sounds Like) by unloading its frame.
       openOverlay.querySelectorAll('iframe').forEach((frame) => frame.remove());
       openOverlay = null;
       setLock('window', false);
@@ -923,6 +928,7 @@
 
     function openProject(key) {
       if (key === 'champion') { showOverlay(champOverlay); openVictoryRoad(); return; }
+      if (key === 'crack') { showOverlay(crackOverlay); crack.open(); return; }
       const p = PDOS_PROJECTS[key];
       if (!p) return;
       projectOverlay.querySelector('.pdos-dialog').style.setProperty('--dialog-bar', p.color);
@@ -990,6 +996,43 @@
     });
 
     initToolbox((on) => setLock('tool', on), () => Boolean(openOverlay));
+  }
+
+  // Crack (project 06): its own overlay in the original site's theme. Nothing loads with the page;
+  // the first open fetches the old theme's fonts and /crack-game.js (the same script /crack runs),
+  // then mounts the game into the overlay. Each open is a fresh mount, each close disposes it.
+  const CRACK_VERSION = '1';
+  function initCrack(overlay, isOpen) {
+    const status = overlay.querySelector('[data-ck="status"]');
+    let loading = null;
+    let game = null;
+    const load = () => {
+      if (window.CrackGame) return Promise.resolve();
+      if (loading) return loading;
+      const fonts = document.createElement('link');
+      fonts.rel = 'stylesheet';
+      fonts.href = 'https://fonts.googleapis.com/css2?family=Anton&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;600&display=swap';
+      document.head.appendChild(fonts);
+      loading = new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = `/crack-game.js?v=${CRACK_VERSION}`;
+        script.onload = resolve;
+        script.onerror = () => { script.remove(); loading = null; reject(new Error('crack-game.js failed to load')); };
+        document.head.appendChild(script);
+      });
+      return loading;
+    };
+    const close = () => { if (game) { game.dispose(); game = null; } };
+    return {
+      open() {
+        close();
+        load().then(() => {
+          // Closed again before the script arrived: nothing to mount.
+          if (isOpen() && !game) game = window.CrackGame.mount(overlay);
+        }, () => { if (status) status.textContent = 'Could not load the game — close and try again'; });
+      },
+      close
+    };
   }
 
   // The Very Best (project 07, formerly Victory Road). Nothing loads with the page. Insert

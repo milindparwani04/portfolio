@@ -121,6 +121,10 @@ Settled removals (do not re-propose without flagging): YouTube to MP3/MP4/WAV co
 
 ## Session log
 
+### 2026-10-11 — Crack gets its own overlay in the original site theme
+
+Claude rebuilt Crack's UI at Milind's request: it no longer opens in the generic project window (iframe) but in its own overlay, `#pdosCrackOverlay`, drawn in the pre-DOS theme (Anton / IBM Plex Mono / Inter, amber locks). Game rules unchanged — the logic moved verbatim into `public/crack-game.js` (`CrackGame.mount(root)` → `{ dispose }`), shared by the overlay and the standalone `/crack` page. Script and fonts load on first open; closing stops all timers and the key listener. UI v56 / CSS v42; `crack-game.js?v=1` (`CRACK_VERSION` in `ui-v2.js`). No Worker changes.
+
 ### 2026-10-11 — Floating-island title screen
 
 Codex replaced The Very Best title artwork with Milind’s attached pastel floating islands and trainer scene. Four real menu actions and keyboard navigation remain; portrait view places the menu below the artwork. Local desktop/mobile browser checks passed. Loader v25 / UI v55; released in `de0f596` at Milind’s explicit request. Production asset/version checks and Edge desktop/mobile title plus Settings return passed. No Worker or battle changes.
