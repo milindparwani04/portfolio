@@ -38,6 +38,8 @@ Validation:
 
 ### 2026-10-11 — Victory certificates
 
+Released in `64f9d58`; production certificate module, victory button, loader and page cache version verified. Certificate rendered and visually checked locally.
+
 Added win-only Download certificate action. Opens a separate tab with trainer name, the actual selected battle team (including random loadout), difficulty label/tier/multiplier, enabled gameplay modifiers and date. Self-contained SVG download plus browser Save as PDF/Print; no server storage. User text escaped; blocked popups get a retry message. Loader v26 / UI v61. Local full browser regression passed including actual victory handler, certificate popup contents/download link and existing cinematic/music/field tests. No Worker changes.
 
 ### 2026-10-11 — Journal inline reader correction
