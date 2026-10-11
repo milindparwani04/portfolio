@@ -819,19 +819,54 @@
     });
   }
 
-  // Journal rows are normal buttons; the shared window manager owns reading and closing.
+  // Journal uses an in-section reader, like the Toolbox side panel.
   function initJournal() {
-    document.querySelectorAll('.pdos-journal-row').forEach(tab => {
-      tab.removeAttribute('role');
-      tab.removeAttribute('aria-selected');
-      tab.tabIndex = 0;
-      tab.setAttribute('aria-haspopup', 'dialog');
+    const journal = document.querySelector('.pdos-journal');
+    if (!journal) return;
+    const rows = [...journal.querySelectorAll('.pdos-journal-row')];
+    const entries = [...journal.querySelectorAll('.pdos-journal-entry')];
+    const reader = document.createElement('aside');
+    reader.className = 'pdos-journal-reader';
+    reader.id = 'pdosJournalReader';
+    reader.setAttribute('aria-label', 'Article reader');
+    reader.innerHTML = '<div class="pdos-journal-reader-inner"><div class="pdos-tool-panel-bar"><span>Journal.log — Article</span><button type="button" aria-label="Close article">&#10005;</button></div></div>';
+    const inner = reader.firstElementChild;
+    entries.forEach(entry => { entry.hidden = true; entry.removeAttribute('role'); inner.appendChild(entry); });
+    journal.appendChild(reader);
+    reader.inert = true;
+    reader.setAttribute('aria-hidden', 'true');
+    let selected = null;
+    function close() {
+      const previous = selected;
+      selected = null;
+      journal.classList.remove('is-reading');
+      reader.inert = true;
+      reader.setAttribute('aria-hidden', 'true');
+      entries.forEach(entry => { entry.hidden = true; });
+      rows.forEach(row => { row.setAttribute('aria-expanded', 'false'); row.removeAttribute('aria-current'); row.removeAttribute('data-reading'); });
+      if (previous) previous.focus({ preventScroll: true });
+    }
+    rows.forEach(row => {
+      row.removeAttribute('role');
+      row.removeAttribute('aria-selected');
+      row.removeAttribute('aria-haspopup');
+      row.tabIndex = 0;
+      const entry = byId(row.getAttribute('aria-controls'));
+      row.setAttribute('aria-expanded', 'false');
+      row.addEventListener('click', () => {
+        if (selected === row) { close(); return; }
+        selected = row;
+        entries.forEach(panel => { panel.hidden = panel !== entry; });
+        rows.forEach(button => { button.setAttribute('aria-expanded', String(button === row)); button.toggleAttribute('data-reading', button === row); });
+        journal.classList.add('is-reading');
+        reader.inert = false;
+        reader.setAttribute('aria-hidden', 'false');
+        entry.querySelector('.pdos-journal-article').scrollTop = 0;
+      });
     });
-    document.querySelector('.pdos-journal-list')?.removeAttribute('role');
-    document.querySelectorAll('.pdos-journal-entry').forEach(panel => {
-      panel.hidden = true;
-      panel.removeAttribute('role');
-    });
+    inner.querySelector('button').addEventListener('click', close);
+    journal.addEventListener('keydown', event => { if (event.key === 'Escape' && selected) { event.preventDefault(); close(); } });
+    journal.querySelector('.pdos-journal-list').removeAttribute('role');
   }
 
   // Windows over the page (Parwani-DOS Phases 4-6): project windows, the Champion Run setup window
@@ -857,28 +892,6 @@
     root.appendChild(projectOverlay);
     root.appendChild(champOverlay);
     root.appendChild(crackOverlay);
-    const journal = document.querySelector('.pdos-journal');
-    const journalHome = journal.parentNode;
-    const journalAnchor = document.createComment('journal home');
-    journalHome.insertBefore(journalAnchor, journal);
-    const journalOverlay = document.createElement('div');
-    journalOverlay.className = 'pdos-overlay';
-    journalOverlay.hidden = true;
-    journalOverlay.innerHTML = '<div class="pdos-overlay-scrim" data-close-window></div><div class="pdos-dialog pdos-dialog--journal" role="dialog" aria-modal="true" aria-label="Journal article" tabindex="-1"><div class="pdos-window-bar"><span>Journal.log — Article</span><button type="button" data-close-window aria-label="Close article">&#10005;</button></div></div>';
-    root.appendChild(journalOverlay);
-
-    function openArticle(tab) {
-      const panel = byId(tab.getAttribute('aria-controls'));
-      if (!panel) return;
-      if (openOverlay !== journalOverlay) showOverlay(journalOverlay);
-      journalOverlay.querySelector('.pdos-dialog').appendChild(journal);
-      journal.classList.add('is-reading');
-      journal.querySelectorAll('.pdos-journal-entry').forEach(entry => { entry.hidden = entry !== panel; });
-      journal.querySelectorAll('.pdos-journal-row').forEach(row => row.setAttribute('aria-current', String(row === tab)));
-      panel.querySelector('.pdos-journal-article').scrollTop = 0;
-    }
-
-
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     const locks = { window: false, tool: false };
     const setLock = (key, on) => {
@@ -906,13 +919,6 @@
     function hideOverlay({ restoreFocus = true } = {}) {
       if (!openOverlay) return;
       openOverlay.hidden = true;
-      if (openOverlay === journalOverlay) {
-        journal.classList.remove('is-reading');
-        journal.querySelectorAll('.pdos-journal-entry').forEach(panel => { panel.hidden = true; });
-        journal.querySelectorAll('.pdos-journal-row').forEach(row => row.removeAttribute('aria-current'));
-        journalAnchor.after(journal);
-      }
-
       // The Very Best lives only while its window is open: closing ends the battle, audio and timers.
       if (openOverlay === champOverlay && window.VictoryRoad && window.VictoryRoad.dispose) window.VictoryRoad.dispose();
       // Crack likewise: closing stops the dial and its key listener; reopening starts fresh.
@@ -970,8 +976,6 @@
     document.addEventListener('click', (event) => {
       const target = event.target instanceof Element ? event.target : null;
       if (!target) return;
-      const articleRow = target.closest('.pdos-journal-row');
-      if (articleRow && (!openOverlay || openOverlay === journalOverlay)) { openArticle(articleRow); return; }
       if (target.closest('[data-close-window]') && openOverlay) { requestClose(); return; }
       const opener = target.closest('[data-open-project]');
       if (opener && !document.documentElement.classList.contains('pdos-locked')) {

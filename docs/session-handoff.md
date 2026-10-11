@@ -121,6 +121,10 @@ Settled removals (do not re-propose without flagging): YouTube to MP3/MP4/WAV co
 
 ## Session log
 
+### 2026-10-11 — Journal uses inline Toolbox-style reader
+
+Supersedes Journal modal implementation: article now slides into the Journal section beside the list, without overlay/scrim or page lock. Clicking the same row, X or Escape restores list-only view. Local Edge desktop/mobile open/switch/toggle/close and focus checks passed. CSS v45 / UI v59.
+
 ### 2026-10-11 — Journal index and article windows
 
 Released in `3854cba`; the same desktop/mobile regression passed against production.

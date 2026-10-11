@@ -36,6 +36,11 @@ Validation:
 
 ## Work log
 
+### 2026-10-11 — Journal inline reader correction
+
+User clarified Toolbox means an in-section side panel, not a modal. Removed Journal overlay/scrim and lock lifecycle. Article reader now slides in beside the list, keeps existing article/photo presentation, and closes via selected-row toggle, X or Escape. Mobile stacks reader under list. Reduced motion disables transitions. Local desktop/mobile regression passed; CSS v45 / UI v59.
+
+
 ### 2026-10-11 — Journal list and article windows
 
 Released in `3854cba`; the same desktop/mobile regression passed against production.
