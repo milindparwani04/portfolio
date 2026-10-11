@@ -1009,3 +1009,21 @@ html { scrollbar-gutter: stable; }
 @media (prefers-reduced-motion: reduce) {
   .pdos-dialog--crack .slot, .pdos-dialog--crack .ck-btn, .pdos-dialog--crack .ck-close { transition: none; }
 }
+
+/* Journal index stays closed until an article is requested. */
+.pdos-journal:not(.is-reading) { grid-template-columns: minmax(0, 1fr); }
+.pdos-journal:not(.is-reading) .pdos-journal-side { border-right: 0; }
+.pdos-journal:not(.is-reading) .pdos-journal-row { grid-template-columns: 120px minmax(0, 1fr); gap: 22px; padding: 18px; align-items: center; }
+.pdos-journal:not(.is-reading) .pdos-journal-thumb { width: 120px; height: 90px; }
+.pdos-journal:not(.is-reading) .pdos-journal-row-title { font-size: clamp(1.5rem, 2.4vw, 2.3rem); }
+.pdos-journal:not(.is-reading) .pdos-journal-row-text { gap: 10px; }
+.pdos-dialog--journal { --dialog-bar: #ff8b60; width: min(1800px, 100%); height: 100%; }
+.pdos-dialog--journal .pdos-journal-row[aria-current="true"] { background: var(--v2-panel-raised); box-shadow: inset 3px 0 #ff8b60; }
+.pdos-dialog--journal .pdos-window-bar button { background: transparent; border: 0; color: inherit; cursor: pointer; min-width: 32px; min-height: 28px; }
+@media (max-width: 720px) {
+  .pdos-journal:not(.is-reading) .pdos-journal-row { grid-template-columns: 80px minmax(0, 1fr); gap: 12px; }
+  .pdos-journal:not(.is-reading) .pdos-journal-thumb { width: 80px; height: 80px; }
+  .pdos-dialog--journal .pdos-journal { display: flex; flex-direction: column; overflow: auto; }
+  .pdos-dialog--journal .pdos-journal-side { flex: 0 0 auto; }
+  .pdos-dialog--journal .pdos-journal-entry { flex: 0 0 auto; min-height: 400px; }
+}

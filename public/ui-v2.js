@@ -819,39 +819,18 @@
     });
   }
 
-  // Journal (Phase 3): each list row is a tab for one entry panel. Selecting a row shows its
-  // panel and resets that panel's article to the top; arrow keys / Home / End move along the list
-  // (roving tabindex). On phones, where the list sits above the entry, the entry scrolls into view.
+  // Journal rows are normal buttons; the shared window manager owns reading and closing.
   function initJournal() {
-    const tabs = [...document.querySelectorAll('.pdos-journal-row[role="tab"]')];
-    if (!tabs.length) return;
-    const phone = window.matchMedia('(max-width: 720px)');
-    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-
-    function select(index, { focus = false, reveal = false } = {}) {
-      tabs.forEach((tab, i) => {
-        const on = i === index;
-        tab.setAttribute('aria-selected', String(on));
-        tab.tabIndex = on ? 0 : -1;
-        const panel = byId(tab.getAttribute('aria-controls'));
-        if (!panel) return;
-        panel.hidden = !on;
-        const article = panel.querySelector('.pdos-journal-article');
-        if (on && article) article.scrollTop = 0;
-        if (on && reveal && phone.matches) panel.scrollIntoView({ behavior: reduceMotion.matches ? 'auto' : 'smooth', block: 'start' });
-      });
-      if (focus) tabs[index].focus();
-    }
-
-    tabs.forEach((tab, i) => {
-      tab.addEventListener('click', () => select(i, { reveal: true }));
-      tab.addEventListener('keydown', (event) => {
-        const last = tabs.length - 1;
-        const next = { ArrowDown: i + 1, ArrowRight: i + 1, ArrowUp: i - 1, ArrowLeft: i - 1, Home: 0, End: last }[event.key];
-        if (next === undefined) return;
-        event.preventDefault();
-        select(Math.max(0, Math.min(last, next)), { focus: true });
-      });
+    document.querySelectorAll('.pdos-journal-row').forEach(tab => {
+      tab.removeAttribute('role');
+      tab.removeAttribute('aria-selected');
+      tab.tabIndex = 0;
+      tab.setAttribute('aria-haspopup', 'dialog');
+    });
+    document.querySelector('.pdos-journal-list')?.removeAttribute('role');
+    document.querySelectorAll('.pdos-journal-entry').forEach(panel => {
+      panel.hidden = true;
+      panel.removeAttribute('role');
     });
   }
 
@@ -878,6 +857,27 @@
     root.appendChild(projectOverlay);
     root.appendChild(champOverlay);
     root.appendChild(crackOverlay);
+    const journal = document.querySelector('.pdos-journal');
+    const journalHome = journal.parentNode;
+    const journalAnchor = document.createComment('journal home');
+    journalHome.insertBefore(journalAnchor, journal);
+    const journalOverlay = document.createElement('div');
+    journalOverlay.className = 'pdos-overlay';
+    journalOverlay.hidden = true;
+    journalOverlay.innerHTML = '<div class="pdos-overlay-scrim" data-close-window></div><div class="pdos-dialog pdos-dialog--journal" role="dialog" aria-modal="true" aria-label="Journal article" tabindex="-1"><div class="pdos-window-bar"><span>Journal.log — Article</span><button type="button" data-close-window aria-label="Close article">&#10005;</button></div></div>';
+    root.appendChild(journalOverlay);
+
+    function openArticle(tab) {
+      const panel = byId(tab.getAttribute('aria-controls'));
+      if (!panel) return;
+      if (openOverlay !== journalOverlay) showOverlay(journalOverlay);
+      journalOverlay.querySelector('.pdos-dialog').appendChild(journal);
+      journal.classList.add('is-reading');
+      journal.querySelectorAll('.pdos-journal-entry').forEach(entry => { entry.hidden = entry !== panel; });
+      journal.querySelectorAll('.pdos-journal-row').forEach(row => row.setAttribute('aria-current', String(row === tab)));
+      panel.querySelector('.pdos-journal-article').scrollTop = 0;
+    }
+
 
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     const locks = { window: false, tool: false };
@@ -906,6 +906,13 @@
     function hideOverlay({ restoreFocus = true } = {}) {
       if (!openOverlay) return;
       openOverlay.hidden = true;
+      if (openOverlay === journalOverlay) {
+        journal.classList.remove('is-reading');
+        journal.querySelectorAll('.pdos-journal-entry').forEach(panel => { panel.hidden = true; });
+        journal.querySelectorAll('.pdos-journal-row').forEach(row => row.removeAttribute('aria-current'));
+        journalAnchor.after(journal);
+      }
+
       // The Very Best lives only while its window is open: closing ends the battle, audio and timers.
       if (openOverlay === champOverlay && window.VictoryRoad && window.VictoryRoad.dispose) window.VictoryRoad.dispose();
       // Crack likewise: closing stops the dial and its key listener; reopening starts fresh.
@@ -963,6 +970,8 @@
     document.addEventListener('click', (event) => {
       const target = event.target instanceof Element ? event.target : null;
       if (!target) return;
+      const articleRow = target.closest('.pdos-journal-row');
+      if (articleRow && (!openOverlay || openOverlay === journalOverlay)) { openArticle(articleRow); return; }
       if (target.closest('[data-close-window]') && openOverlay) { requestClose(); return; }
       const opener = target.closest('[data-open-project]');
       if (opener && !document.documentElement.classList.contains('pdos-locked')) {

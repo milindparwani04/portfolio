@@ -13,7 +13,7 @@
 
 ## Current assignment
 
-Status: Floating-island title screen released in `de0f596` (2026-10-11); deployed artwork, loader versions, desktop/mobile menu and Settings return verified in production.
+Status: Journal index/window redesign implemented and desktop/mobile tested (2026-10-11).
 
 Scope completed: Six first-fainted-species Ren cinematics; supplied Marnie remix begins at cutscene start and continues into battle at 38 seconds; embedded crowd muted; only bottom video subtitles visible. Court/stadium Pokémon grounded on the field with full scenery. Final HUD: Ren top-left and player bottom-right, matching 8px corner insets, 4px gaps between bars, vertical party dots right of Ren and left of player. Button UI unchanged. Weather/terrain visuals subsequently added in `vr-field.js`: four independent terrain presentations and nine weather IDs, driven by engine log events with replacement/expiry and reduced-motion support. Current loader v23 / UI v53.
 
@@ -35,6 +35,11 @@ Validation:
 - Preserved the pre-existing uncommitted 2026-10-02 Codex handoff entries; no unrelated work was overwritten.
 
 ## Work log
+
+### 2026-10-11 — Journal list and article windows
+
+Journal opens with full-width photo/title/tag/status rows, no selected article. Clicking or keyboard-activating a row moves the existing sidebar/article layout into the shared window system. Article switching, Escape/close/scrim, focus trap/return and page scroll locking reuse existing lifecycle. Portrait window stacks sidebar and article with scrolling. Edge regression passed at 1280px and 390px: no default preview, open/switch/close, focus return, page locking and no horizontal overflow. CSS v43 / UI v57. No Worker changes.
+
 
 ### 2026-10-11 — Floating-island title screen
 
