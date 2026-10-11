@@ -690,7 +690,7 @@
   // site-wide `html{scroll-behavior:smooth}`. This just drives the chrome that sits on top:
   // an IntersectionObserver toggles .is-active per section (CSS does the CRT power-on/off),
   // keeps the top bar's typed command line, section counter and clock current, handles the
-  // 1-7 jump keys and Esc, and runs the Mono/Paper/Night theme switcher. Phones fall outside
+  // 1-7 jump keys and Esc, and runs the Mono/Paper/Night/Crimson theme switcher. Phones fall outside
   // the paging media query, so the CRT wrappers stay inert there (see .pdos-crt-* in the CSS)
   // and this still safely updates the (hidden) top bar state as the user scrolls past.
   function initShell() {
@@ -701,7 +701,7 @@
       ['home', 'Home'], ['journal', 'Journal'], ['projects', 'Projects'], ['toolbox', 'Toolbox'],
       ['media', 'Media'], ['playlists', 'Playlists'], ['gigs', 'Gigs']
     ];
-    const THEMES = { mono: 'Mono', paper: 'Paper', night: 'Night' };
+    const THEMES = { mono: 'Mono', paper: 'Paper', night: 'Night', crimson: 'Crimson' };
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     const cmdEl = byId('pdosCmd');
     const secLabelEl = byId('pdosSecLabel');
@@ -836,13 +836,17 @@
     reader.inert = true;
     reader.setAttribute('aria-hidden', 'true');
     let selected = null;
+    const hideEntries = () => { if (!selected) entries.forEach(entry => { entry.hidden = true; }); };
+    // The article stays drawn while the reader slides shut, then is hidden once the width settles.
+    reader.addEventListener('transitionend', event => { if (event.target === reader && event.propertyName === 'width') hideEntries(); });
     function close() {
       const previous = selected;
       selected = null;
       journal.classList.remove('is-reading');
       reader.inert = true;
       reader.setAttribute('aria-hidden', 'true');
-      entries.forEach(entry => { entry.hidden = true; });
+      const style = getComputedStyle(reader);
+      if (style.display === 'none' || parseFloat(style.transitionDuration) === 0) hideEntries();
       rows.forEach(row => { row.setAttribute('aria-expanded', 'false'); row.removeAttribute('aria-current'); row.removeAttribute('data-reading'); });
       if (previous) previous.focus({ preventScroll: true });
     }

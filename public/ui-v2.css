@@ -12,7 +12,7 @@
 }
 
 /* Parwani-DOS redesign (docs/agent-rulebook.md §3, 2026-10-07): Pixelify Sans + a PixC override
-   for its C/c (Pixelify's own C reads as an O), and three colour themes. Themes are scoped to
+   for its C/c (Pixelify's own C reads as an O), and four colour themes. Themes are scoped to
    .portfolio-v2 and alias the existing --v2-* tokens to the new --bg/--fg/--p1.../--ok/--warn
    set, so every component already wired to --v2-bg, --v2-panel etc. recolours with no changes
    of its own. "Mono" reproduces the old locked greyscale palette exactly. */
@@ -47,6 +47,10 @@
      they fall to 1.4-1.7:1, so status text uses darker variants (>= 4.9:1 on --p2). --dim is a
      shade darker than the mockup's #5c5a53 for the same reason (4.37:1 on --p2 before). */
   --v2-green: #1d5e33; --v2-yellow: #6b4700;
+}
+.portfolio-v2[data-theme="crimson"] {
+  --bg: #780606; --fg: #fbeee6; --p0: #820a0a; --p1: #8c1010; --p2: #9a1818; --p3: #a62020;
+  --dim: #f0c4bc; --line: rgba(251, 238, 230, .22); --ok: #7ef0b0; --warn: #ffc65c; --on: #780606;
 }
 
 #boot { display: none !important; }
@@ -1010,19 +1014,25 @@ html { scrollbar-gutter: stable; }
   .pdos-dialog--crack .slot, .pdos-dialog--crack .ck-btn, .pdos-dialog--crack .ck-close { transition: none; }
 }
 
-/* Journal index stays closed until an article is requested. */
-.pdos-journal:not(.is-reading) { grid-template-columns: minmax(0, 1fr); }
-.pdos-journal:not(.is-reading) .pdos-journal-side { border-right: 0; }
-.pdos-journal:not(.is-reading) .pdos-journal-row { grid-template-columns: 120px minmax(0, 1fr); gap: 22px; padding: 18px; align-items: center; }
+/* Journal index stays closed until an article is requested. The reader opens like the Toolbox
+   panel: a flex item whose width animates (grid tracks of mixed types snap instead of easing),
+   with an inner column fixed at its open width so the article never re-wraps mid-slide. The rows
+   ease between their wide and compact sizes on the same curve. */
+.pdos-journal { --journal-side: clamp(290px, 31vw, 440px); display: flex; container-type: inline-size; }
+.pdos-journal-side { flex: 1 1 auto; transition: border-color .55s; }
+.pdos-journal:not(.is-reading) .pdos-journal-side { border-right-color: transparent; }
+.pdos-journal-row { align-items: center; transition: grid-template-columns .55s cubic-bezier(.7, 0, .2, 1), gap .55s cubic-bezier(.7, 0, .2, 1), padding .55s cubic-bezier(.7, 0, .2, 1), background .15s; }
+.pdos-journal-thumb { transition: width .55s cubic-bezier(.7, 0, .2, 1), height .55s cubic-bezier(.7, 0, .2, 1); }
+.pdos-journal-row-title { transition: font-size .55s cubic-bezier(.7, 0, .2, 1); }
+.pdos-journal-row-text { transition: gap .55s cubic-bezier(.7, 0, .2, 1); }
+.pdos-journal:not(.is-reading) .pdos-journal-row { grid-template-columns: 120px minmax(0, 1fr); gap: 22px; padding: 18px; }
 .pdos-journal:not(.is-reading) .pdos-journal-thumb { width: 120px; height: 90px; }
 .pdos-journal:not(.is-reading) .pdos-journal-row-title { font-size: clamp(1.5rem, 2.4vw, 2.3rem); }
 .pdos-journal:not(.is-reading) .pdos-journal-row-text { gap: 10px; }
 /* Article reader shares the page layout: no scrim, modal or scroll lock. */
-.pdos-journal { grid-template-columns: minmax(0, 1fr) 0; transition: grid-template-columns .55s cubic-bezier(.7, 0, .2, 1); }
-.pdos-journal:not(.is-reading) { grid-template-columns: minmax(0, 1fr) 0; }
-.pdos-journal.is-reading { grid-template-columns: clamp(290px, 31vw, 440px) minmax(0, 1fr); }
-.pdos-journal-reader { min-width: 0; min-height: 0; overflow: hidden; }
-.pdos-journal-reader-inner { height: 100%; display: flex; flex-direction: column; transform: translateX(80px); opacity: 0; transition: transform .55s cubic-bezier(.7, 0, .2, 1), opacity .3s ease .12s; }
+.pdos-journal-reader { flex: 0 0 auto; width: 0; min-height: 0; overflow: hidden; transition: width .55s cubic-bezier(.7, 0, .2, 1); }
+.pdos-journal.is-reading .pdos-journal-reader { width: calc(100% - var(--journal-side)); }
+.pdos-journal-reader-inner { width: calc(100cqw - var(--journal-side)); height: 100%; display: flex; flex-direction: column; transform: translateX(80px); opacity: 0; transition: transform .55s cubic-bezier(.7, 0, .2, 1), opacity .3s ease .12s; }
 .is-reading .pdos-journal-reader-inner { transform: none; opacity: 1; }
 .pdos-journal-reader .pdos-tool-panel-bar { background: #ff8b60; color: #070707; }
 .pdos-journal-reader button { background: transparent; border: 0; color: inherit; cursor: pointer; min-width: 32px; min-height: 30px; }
@@ -1033,9 +1043,11 @@ html { scrollbar-gutter: stable; }
   .pdos-journal:not(.is-reading) .pdos-journal-thumb { width: 80px; height: 80px; }
   .pdos-journal, .pdos-journal.is-reading { display: flex; flex-direction: column; }
   .pdos-journal-reader { display: none; }
-  .is-reading .pdos-journal-reader { display: block; border-top: 1px solid var(--v2-soft-line); }
+  .is-reading .pdos-journal-reader { display: block; width: auto; border-top: 1px solid var(--v2-soft-line); }
+  .pdos-journal-reader-inner { width: auto; }
   .pdos-journal-reader .pdos-journal-entry { min-height: 400px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .pdos-journal, .pdos-journal-reader-inner { transition: none; }
+  .pdos-journal-side, .pdos-journal-row, .pdos-journal-thumb, .pdos-journal-row-title, .pdos-journal-row-text,
+  .pdos-journal-reader, .pdos-journal-reader-inner { transition: none; }
 }

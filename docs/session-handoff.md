@@ -121,9 +121,17 @@ Settled removals (do not re-propose without flagging): YouTube to MP3/MP4/WAV co
 
 ## Session log
 
+### 2026-10-11 — Journal reader slides as smoothly as Toolbox
+
+Milind found the Journal reader's slide rougher than Toolbox's. Claude rebuilt the motion the Toolbox way: the reader is a flex item whose width eases open (the old animated grid tracks mixed types, so they snapped), its article column is fixed at the open width so text never re-wraps mid-slide, the list rows ease between wide and compact sizes on the same curve, and the article stays drawn while the reader closes. Layout when open is unchanged. Frame sampling in headless Edge confirmed a continuous ease both ways; `tests/journal-browser.cjs` passes at 1280/390 px (it now waits for the close slide). CSS v46 / UI v60. No Worker changes.
+
 ### 2026-10-11 — Journal uses inline Toolbox-style reader
 
-Supersedes Journal modal implementation: article now slides into the Journal section beside the list, without overlay/scrim or page lock. Clicking the same row, X or Escape restores list-only view. Local Edge desktop/mobile open/switch/toggle/close and focus checks passed. CSS v45 / UI v59.
+Supersedes Journal modal implementation: article now slides into the Journal section beside the list, without overlay/scrim or page lock. Clicking the same row, X or Escape restores list-only view. Released in `f1ab14a`. Local and production Edge checks at 1280px and 390px passed: list-only default, keyboard opening, switching, selected-row toggle, X/Escape close, focus restoration, no page lock and no horizontal overflow. CSS v45 / UI v59. Assignment complete; closing handoffs updated at Milind’s request.
+
+### 2026-10-11 — Crimson theme
+
+Claude added a fourth theme, Crimson, at Milind's request (background `#780606`, cream text, lighter red panels, Night's green/amber status colours). Picked from the same theme menu and saved in `localStorage` like the others; Night stays the default. CSS v46 / UI v60. Headless Edge check passed: selecting it sets the label and background, it persists across reload, switching back works, no page errors. No Worker changes.
 
 ### 2026-10-11 — Journal index and article windows
 

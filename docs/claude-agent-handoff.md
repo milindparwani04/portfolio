@@ -88,6 +88,20 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 
 ## Work log (newest first)
 
+### 2026-10-11 — Journal reader motion matched to Toolbox
+
+- **Brief:** Codex's inline Journal reader (`f1ab14a`) slid less smoothly than the Toolbox panel; fix it.
+- **Causes:** (1) `.pdos-journal` animated `grid-template-columns` between `minmax(0,1fr) 0` and `clamp(…) minmax(0,1fr)` — mismatched track types don't interpolate, so it snapped; (2) the reader content had no fixed width, so the photo/article re-wrapped every frame; (3) row thumb/title/gap/padding jumped instantly; (4) close hid the article at once, so an empty panel slid out.
+- **Fix (`ui-v2.css` Journal block, `initJournal()`):** `.pdos-journal` is flex + `container-type: inline-size` with `--journal-side: clamp(290px, 31vw, 440px)`; `.pdos-journal-reader` animates `width` 0 → `calc(100% - var(--journal-side))` on Toolbox's `.55s cubic-bezier(.7,0,.2,1)`; `.pdos-journal-reader-inner` is fixed at `calc(100cqw - var(--journal-side))` with the same translate/opacity as `.pdos-tool-panel-inner`; rows transition `grid-template-columns`, gap, padding, thumb size and title size on the same curve (rows now `align-items: center` in both states). Close hides entries on the reader's `width` `transitionend` (immediately if no transition or `display: none` on phones). Reduced motion disables every transition. CSS v46 / UI v60.
+- **Tested:** rAF sampling at 1440×900 — reader width eases 0→962 and back, inner width constant at 962, list ends at 440 px as before, no page errors; screenshot of the open state; `tests/journal-browser.cjs` passes at 1280 and 390 (added 650 ms waits after close/toggle for the slide).
+
+### 2026-10-11 — Crimson theme
+
+- **Brief:** add a theme called Crimson using `#780606`.
+- **Built:** `.portfolio-v2[data-theme="crimson"]` token block in `ui-v2.css` (`--bg #780606`, `--fg #fbeee6`, panels `#820a0a`→`#a62020`, `--dim #f0c4bc`, `--ok`/`--warn` reused from Night, `--on #780606`); `crimson: 'Crimson'` in `THEMES` (`ui-v2.js`); a fourth `.pdos-theme-opt` in `index.html`. CSS v46 / UI v60.
+- **Contrast:** `--dim` on `--p2` ≈ 5.3:1, `--ok` on `--bg` ≈ 8:1; `--fg` well above AA.
+- **Tested** (Playwright + headless Edge, static server, 1440×900): select via menu → `data-theme="crimson"`, label "Crimson", computed background `rgb(120, 6, 6)`, option `aria-selected`, menu closes; persists after reload; switching back to Night works; no page errors. Home screenshot checked.
+
 ### 2026-10-11 — Crack overlay (original theme)
 
 - **Brief:** rebuild Crack so it is an overlay of its own, keeping the old site theme; game unchanged.

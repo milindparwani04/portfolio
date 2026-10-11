@@ -13,9 +13,9 @@
 
 ## Current assignment
 
-Status: Journal index/window redesign implemented and desktop/mobile tested (2026-10-11).
+Status: Complete — Journal inline reader live in `f1ab14a` (2026-10-11). Local and production Edge checks passed at 1280px and 390px. No further work assigned.
 
-Scope completed: Six first-fainted-species Ren cinematics; supplied Marnie remix begins at cutscene start and continues into battle at 38 seconds; embedded crowd muted; only bottom video subtitles visible. Court/stadium Pokémon grounded on the field with full scenery. Final HUD: Ren top-left and player bottom-right, matching 8px corner insets, 4px gaps between bars, vertical party dots right of Ren and left of player. Button UI unchanged. Weather/terrain visuals subsequently added in `vr-field.js`: four independent terrain presentations and nine weather IDs, driven by engine log events with replacement/expiry and reduced-motion support. Current loader v23 / UI v53.
+Scope completed: Six first-fainted-species Ren cinematics; supplied Marnie remix begins at cutscene start and continues into battle at 38 seconds; embedded crowd muted; only bottom video subtitles visible. Court/stadium Pokémon grounded on the field with full scenery. Final HUD: Ren top-left and player bottom-right, matching 8px corner insets, 4px gaps between bars, vertical party dots right of Ren and left of player. Button UI unchanged. Weather/terrain visuals subsequently added in `vr-field.js`: four independent terrain presentations and nine weather IDs, driven by engine log events with replacement/expiry and reduced-motion support. Game loader v25; site CSS v45 / UI v59 after the Journal correction.
 
 Current files: `public/vr/vr-cinematic.js`, `vr-field.js`, `vr-audio.js`, `vr-battle.js`, `vr-game.js`, `vr.css`, six cinematic videos and supplied MP3 under `public/assets/vr/cinematics/ren-v1/`, loader/cache versions, NOTICE, browser regression and living handoffs/tracker.
 
@@ -38,7 +38,7 @@ Validation:
 
 ### 2026-10-11 — Journal inline reader correction
 
-User clarified Toolbox means an in-section side panel, not a modal. Removed Journal overlay/scrim and lock lifecycle. Article reader now slides in beside the list, keeps existing article/photo presentation, and closes via selected-row toggle, X or Escape. Mobile stacks reader under list. Reduced motion disables transitions. Local desktop/mobile regression passed; CSS v45 / UI v59.
+User clarified Toolbox means an in-section side panel, not a modal. Removed Journal overlay/scrim and lock lifecycle. Article reader now slides in beside the list, keeps existing article/photo presentation, and closes via selected-row toggle, X or Escape. Mobile stacks reader under list. Reduced motion disables transitions. Local and production Edge regression passed at 1280px and 390px: list-only default, keyboard opening, article switching, selected-row toggle, X/Escape close, focus restoration, no page lock and no horizontal overflow. Released in `f1ab14a`; CSS v45 / UI v59. This supersedes the modal implementation below. Handoffs updated at Milind’s closing request; unrelated concurrent Crimson/theme work and `.claude/worktrees/` preserved.
 
 
 ### 2026-10-11 — Journal list and article windows
