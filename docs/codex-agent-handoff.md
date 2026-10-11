@@ -13,7 +13,7 @@
 
 ## Current assignment
 
-Status: Menu/phase-one soundtrack implemented and browser-tested (2026-10-11); released in `5645bec`; live menu/battle MP3 playback, Marnie continuity and deployed artist credits verified.
+Status: Floating-island title screen released in `de0f596` (2026-10-11); deployed artwork, loader versions, desktop/mobile menu and Settings return verified in production.
 
 Scope completed: Six first-fainted-species Ren cinematics; supplied Marnie remix begins at cutscene start and continues into battle at 38 seconds; embedded crowd muted; only bottom video subtitles visible. Court/stadium Pokémon grounded on the field with full scenery. Final HUD: Ren top-left and player bottom-right, matching 8px corner insets, 4px gaps between bars, vertical party dots right of Ren and left of player. Button UI unchanged. Weather/terrain visuals subsequently added in `vr-field.js`: four independent terrain presentations and nine weather IDs, driven by engine log events with replacement/expiry and reduced-motion support. Current loader v23 / UI v53.
 
@@ -38,7 +38,7 @@ Validation:
 
 ### 2026-10-11 — Floating-island title screen
 
-Implemented Milind’s latest attached pastel floating-island artwork as the title screen. Real Play/Settings/Credits/Quit buttons retain pointer and keyboard navigation; portrait layout reframes art above the menu. No battle/button UI or soundtrack changes. Loader v25 / UI v55. Local browser regression passed including desktop/mobile menu bounds, Settings return, keyboard selection and artist Credits. User explicitly requested live deployment.
+Implemented Milind’s latest attached pastel floating-island artwork as the title screen. Real Play/Settings/Credits/Quit buttons retain pointer and keyboard navigation; portrait layout reframes art above the menu. No battle/button UI or soundtrack changes. Loader v25 / UI v55. Local browser regression passed including desktop/mobile menu bounds, Settings return, keyboard selection and artist Credits. User explicitly requested live deployment. Released in `de0f596`; production artwork/code/version checks and Edge desktop/mobile title plus Settings return passed.
 
 
 ### 2026-10-11 — User-supplied menu and phase-one music

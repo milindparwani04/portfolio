@@ -123,7 +123,7 @@ Settled removals (do not re-propose without flagging): YouTube to MP3/MP4/WAV co
 
 ### 2026-10-11 — Floating-island title screen
 
-Codex replaced The Very Best title artwork with Milind’s attached pastel floating islands and trainer scene. Four real menu actions and keyboard navigation remain; portrait view places the menu below the artwork. Local desktop/mobile browser checks passed. Loader v25 / UI v55; deploying at Milind’s explicit request. No Worker or battle changes.
+Codex replaced The Very Best title artwork with Milind’s attached pastel floating islands and trainer scene. Four real menu actions and keyboard navigation remain; portrait view places the menu below the artwork. Local desktop/mobile browser checks passed. Loader v25 / UI v55; released in `de0f596` at Milind’s explicit request. Production asset/version checks and Edge desktop/mobile title plus Settings return passed. No Worker or battle changes.
 
 ### 2026-10-10 — Ren cutscene soundtrack and live integration
 
