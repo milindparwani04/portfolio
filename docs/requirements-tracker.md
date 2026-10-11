@@ -118,4 +118,4 @@ The visible Toolbox shows all nine tools. Image Converter, Tempo Tap, Key/BPM Lo
 Weather/terrain presentation (2026-10-10): engine-driven terrain ground effects and independent weather atmosphere live (6ab7614), local suite and dedicated production visuals verified; replacements/expiry and ability starts supported. Mechanics remain in Showdown.
 
 
-Soundtrack update (2026-10-11): supplied Pallet Town lofi (51383504) for every pre-battle screen, including lead selection; supplied NunuSev Video Game Battle Music for phase one; existing Marnie remix for cutscene/finale. Credits include all artists/source links. Browser-tested; release in progress.
+Soundtrack update (2026-10-11): supplied Pallet Town lofi (51383504) for every pre-battle screen, including lead selection; supplied NunuSev Video Game Battle Music for phase one; existing Marnie remix for cutscene/finale. Credits include all artists/source links. Browser-tested; released in `5645bec`; live menu/battle MP3 playback, Marnie continuity and deployed artist credits verified.

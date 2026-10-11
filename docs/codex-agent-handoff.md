@@ -13,7 +13,7 @@
 
 ## Current assignment
 
-Status: Menu/phase-one soundtrack implemented and browser-tested (2026-10-11); release in progress.
+Status: Menu/phase-one soundtrack implemented and browser-tested (2026-10-11); released in `5645bec`; live menu/battle MP3 playback, Marnie continuity and deployed artist credits verified.
 
 Scope completed: Six first-fainted-species Ren cinematics; supplied Marnie remix begins at cutscene start and continues into battle at 38 seconds; embedded crowd muted; only bottom video subtitles visible. Court/stadium Pokémon grounded on the field with full scenery. Final HUD: Ren top-left and player bottom-right, matching 8px corner insets, 4px gaps between bars, vertical party dots right of Ren and left of player. Button UI unchanged. Weather/terrain visuals subsequently added in `vr-field.js`: four independent terrain presentations and nine weather IDs, driven by engine log events with replacement/expiry and reduced-motion support. Current loader v23 / UI v53.
 
@@ -250,3 +250,6 @@ Release coordination: the concurrent item-UI commit `90a2469` included the field
 
 
 Weather/terrain release verification: `6ab7614` pushed; dedicated live browser checks passed rendered ground styles for all four terrains, sand particles, coexistence, replacements and expiry. Local full browser suite passed. The full production suite timed out in the pre-existing soundtrack Skip seek-to-38 check before terrain tests; do not report a complete production regression pass. Recorded for follow-up; no conclusion about cause.
+
+
+2026-10-11 soundtrack production check: both new MP3s played successfully from milindparwani.com in Edge; loop flags confirmed; the Marnie element continued into finale; deployed Credits source contains 51383504, NunuSev, GlitchxCity and Scottay. Local full browser regression also passed, including missing-menu-file fallback. Prior separate music Skip-seek timeout is not claimed resolved by these checks.
