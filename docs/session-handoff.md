@@ -131,6 +131,10 @@ Settled removals (do not re-propose without flagging): Today Somewhere project (
 
 ## Session log
 
+### 2026-10-12 — Released `126ecb7` and verified live
+
+Claude pushed Claude's and Codex's The Very Best work together (battle UI, fair Random team, Knock Off/Sash, cutscene restyle, title credit fix; Codex's pixel-Ren dialogue). Cloudflare deployed in about 50 s; `ui-v2.js?v=67`, the VR v30 files and `vr-engine.js?v=6` are served byte-identical to the commit. On production: the battle UI test passed against the live engine worker (Skip animations, effectiveness chips and target labels, tooltips, a turn in 35 ms), the dialogue cutscene renders with the new controls, the title credit clears the menu at seven sizes, and both certificates open and download. Engine rules (Knock Off, Sash) and Random team balance are covered by the engine/core tests on the same bytes.
+
 ### 2026-10-12 — The Very Best: cutscene buttons, fair Random team, Knock Off and Focus Sash
 
 At Milind's request (Claude): the championship dialogue cutscene's controls are restyled pixel buttons (Sound toggle, highlighted Skip with Esc hint, Ren nameplate, segmented progress), behaviour unchanged. Random team now matches Ren's team in total Lv 50 stats (within 2%, no member under 300 BST). Engine rule: Knock Off removes Mega Stones (the Pokémon stays Mega). Focus Sash vs multi-hit moves was already right in the engine; the battle screen now plays each hit separately and shows the Sash after the hit it survived. Engine rebuilt (`vr-engine.js?v=6`). Tests pass (62 unit/engine, battle UI and dialogue browser tests). No Worker changes. Detail in the Claude handoff and `victory-road-build.md`.
