@@ -131,6 +131,10 @@ Settled removals (do not re-propose without flagging): Today Somewhere project (
 
 ## Session log
 
+### 2026-10-12 — Cutscene: Ren centred
+
+At Milind's request (Claude): pixel Ren now stands in the middle of the championship dialogue scene (was at the left), desktop and phone. `VR_VERSION` 33, `ui-v2.js?v=70`.
+
 ### 2026-10-12 — Unused pages and assets deleted
 
 At Milind's request (Claude): deleted `buyer-risk-grade.html` (still showing in Google) and the unlinked RELAY prototype `relay.html` (both now 404, so search engines drop them on recrawl; Search Console's Removals tool is faster), the six retired championship WebMs and the old Cloudbound title art (about 46 MB), the hidden legacy hero's "Launch demo" link, the old video cutscene's CSS (`.tvb-esc*`, video/caption rules, four keyframes) and the unused `TVBArt.crowd()`. NOTICE.md's cinematic section now describes the dialogue. `VR_VERSION` 32, `ui-v2.js?v=69`.

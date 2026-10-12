@@ -459,7 +459,7 @@
 .tvb-dialogue-sequence { background: #101522; }
 .tvb-dialogue-scene { position: absolute; inset: 0; filter: brightness(.62) saturate(.85); }
 .tvb-dialogue-scene svg { width: 100%; height: 100%; }
-.tvb-dialogue-ren { position: absolute; left: 12%; bottom: 32%; width: 132px; height: 204px; image-rendering: pixelated; filter: drop-shadow(6px 8px 0 #101522); }
+.tvb-dialogue-ren { position: absolute; left: calc(50% - 66px); bottom: 32%; width: 132px; height: 204px; image-rendering: pixelated; filter: drop-shadow(6px 8px 0 #101522); }
 .tvb-dialogue-box { position: absolute; left: 5%; right: 5%; bottom: 5%; padding: 24px 18px 16px; border: 3px solid #f2d8a0; background: #182330; color: #fff0d6; box-shadow: 0 0 0 3px #080c12, 6px 6px 0 3px #080c12; }
 /* Ren's nameplate sits on the box's top edge. */
 .tvb-dialogue-box strong { position: absolute; left: 14px; top: -17px; padding: 5px 12px 4px; background: #ffcf78; color: #182330; border: 3px solid #080c12; font-family: 'Press Start 2P', var(--t-font); font-size: 10px; line-height: 1; letter-spacing: .08em; }
@@ -481,7 +481,7 @@
 .tvb-cine-btn--sound[aria-pressed="false"] { color: #9aa3b5; border-color: #6b7487; }
 .tvb-cine-key { padding: 3px 4px 2px; border: 2px solid currentColor; font: inherit; font-size: 8px; opacity: .75; }
 @media (hover: none) { .tvb-cine-key { display: none; } }
-@media (max-width: 600px) { .tvb-dialogue-ren { left: 12%; bottom: 43%; width: 88px; height: 136px; } .tvb-dialogue-box { padding: 22px 12px 12px; } .tvb-dialogue-text { min-height: 6em; } .tvb-dialogue-sequence .tvb-cinematic-controls { flex-wrap: wrap; right: 10px; top: 10px; } .tvb-cine-key { display: none; } }
+@media (max-width: 600px) { .tvb-dialogue-ren { left: calc(50% - 44px); bottom: 43%; width: 88px; height: 136px; } .tvb-dialogue-box { padding: 22px 12px 12px; } .tvb-dialogue-text { min-height: 6em; } .tvb-dialogue-sequence .tvb-cinematic-controls { flex-wrap: wrap; right: 10px; top: 10px; } .tvb-cine-key { display: none; } }
 
 /* ---------- Small screens ---------- */
 @media (max-width: 860px) {

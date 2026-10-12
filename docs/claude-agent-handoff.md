@@ -18,7 +18,7 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 
 | Area | Files | Notes |
 |---|---|---|
-| Visible portfolio UI | `public/index.html` (the `.portfolio-v2` block only), `public/ui-v2.css`, `public/ui-v2.js`, `public/pdos-icons.js` | Parwani-DOS redesign (see `design_handoff_parwani_dos/`), every section migrated. Cache-bust versions: `ui-v2.css?v=50`, `ui-v2.js?v=69`, `pdos-icons.js?v=7` — bump on every change. The legacy tool modals further down `index.html` are still live: the Toolbox panel borrows them. |
+| Visible portfolio UI | `public/index.html` (the `.portfolio-v2` block only), `public/ui-v2.css`, `public/ui-v2.js`, `public/pdos-icons.js` | Parwani-DOS redesign (see `design_handoff_parwani_dos/`), every section migrated. Cache-bust versions: `ui-v2.css?v=50`, `ui-v2.js?v=70`, `pdos-icons.js?v=7` — bump on every change. The legacy tool modals further down `index.html` are still live: the Toolbox panel borrows them. |
 | Worker routes and data | `worker/index.js`, `worker/gig-picks.json`, `migrations/` | Spotify listening data, heart rate, steps, gigs, Game card (PlayStation + Steam). Gig Finder rebuilt 2026-10-02. Untouched by the Parwani-DOS redesign so far (Phase 1 is frontend-only). |
 
 ## Media tracker (how it works, for the next session and the weekly routine)
@@ -87,6 +87,10 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 - Lighthouse `valid-source-maps` flags a third-party library map; it doesn't affect the score categories that matter (production: 90 / 100 / 100).
 
 ## Work log (newest first)
+
+### 2026-10-12 — Cutscene: Ren centred
+
+- **Brief (Milind, after watching it live in Chrome):** Ren stood on the left of the championship dialogue scene; put him in the middle. `.tvb-dialogue-ren` `left: 12%` → `left: calc(50% - 66px)` (half his 132px width; phone rule `calc(50% - 44px)` for 88px). `calc` rather than `translateX(-50%)` so no transform is involved. Checked in Chrome on local `wrangler dev`: his centre is exactly the scene's centre (660 of 1320px). `VR_VERSION` 33, `ui-v2.js?v=70`.
 
 ### 2026-10-12 — Cleanup: unused pages, assets and code removed
 
