@@ -121,6 +121,10 @@ Settled removals (do not re-propose without flagging): Today Somewhere project (
 
 ## Session log
 
+### 2026-10-12 — The Very Best: Random team items suit the holder; thieves hold nothing
+
+At Milind's request (Claude): a Random team's held items are now chosen from each Pokémon's final moves, stats, types and ability (no type item without an attack of that type, no Choice item or Assault Vest beside status moves, Light Clay only with screens, etc.), still distinct per team. A Pokémon whose randomised moves include Thief or Covet holds no item (Random team, and for that battle under Random moves). `VR_VERSION` 27, `ui-v2.js?v=65`. VR tests 55 pass; checked in Chrome locally. No Worker changes. Detail in the Claude handoff.
+
 ### 2026-10-12 — Standalone project pages deleted
 
 At Milind's request: `sounds-like.html` and `crack.html` are deleted; there are no standalone project pages. Projects exist only as overlays on the home page (Crack's overlay still runs `crack-game.js`). `sounds-like-corpus.json` is kept as Sounds Like's data. No Worker changes.

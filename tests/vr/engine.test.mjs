@@ -220,10 +220,12 @@ test('Level Cap 45: the player is Lv 45, the champion Lv 50', () => {
 });
 
 test('random-team items and random moves are real and legal in the engine', () => {
-  for (let seed = 1; seed <= 30; seed += 1) {
+  for (let seed = 1; seed <= 100; seed += 1) {
     const sets = C.battleLoadout(cat, draftOf([], { random: true, moves: true }), seed, { movepools }).sets;
-    assert.equal(new Set(sets.map((s) => s.item)).size, 6);
-    sets.forEach((s) => assert.ok(D.items.get(s.item).exists, s.item));
+    const held = sets.filter((s) => !C.stealsItems(s.moves));
+    sets.filter((s) => C.stealsItems(s.moves)).forEach((s) => assert.equal(s.item, '', `${s.species} rolled a stealing move`));
+    assert.equal(new Set(held.map((s) => s.item)).size, held.length);
+    held.forEach((s) => assert.ok(D.items.get(s.item).exists, s.item));
     E.validateTeam(sets, D, raw.learnsets, { randomTeam: true });
   }
 });

@@ -18,7 +18,7 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 
 | Area | Files | Notes |
 |---|---|---|
-| Visible portfolio UI | `public/index.html` (the `.portfolio-v2` block only), `public/ui-v2.css`, `public/ui-v2.js`, `public/pdos-icons.js` | Parwani-DOS redesign (see `design_handoff_parwani_dos/`), every section migrated. Cache-bust versions: `ui-v2.css?v=50`, `ui-v2.js?v=64`, `pdos-icons.js?v=7` — bump on every change. The legacy tool modals further down `index.html` are still live: the Toolbox panel borrows them. |
+| Visible portfolio UI | `public/index.html` (the `.portfolio-v2` block only), `public/ui-v2.css`, `public/ui-v2.js`, `public/pdos-icons.js` | Parwani-DOS redesign (see `design_handoff_parwani_dos/`), every section migrated. Cache-bust versions: `ui-v2.css?v=50`, `ui-v2.js?v=65`, `pdos-icons.js?v=7` — bump on every change. The legacy tool modals further down `index.html` are still live: the Toolbox panel borrows them. |
 | Worker routes and data | `worker/index.js`, `worker/gig-picks.json`, `migrations/` | Spotify listening data, heart rate, steps, gigs, Game card (PlayStation + Steam). Gig Finder rebuilt 2026-10-02. Untouched by the Parwani-DOS redesign so far (Phase 1 is frontend-only). |
 
 ## Media tracker (how it works, for the next session and the weekly routine)
@@ -87,6 +87,12 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 - Lighthouse `valid-source-maps` flags a third-party library map; it doesn't affect the score categories that matter (production: 90 / 100 / 100).
 
 ## Work log (newest first)
+
+### 2026-10-12 — The Very Best: Random team items suit the holder; thieves go empty-handed
+
+- **Brief (Milind):** Random team items must be relevant to the Pokémon (no Never-Melt Ice without Ice moves). A Pokémon whose randomised moveset has Thief should hold no item, so it can steal.
+- **Done (`vr-core.js`):** `RANDOM_ITEMS` is now the keys of `RANDOM_ITEM_RULES`, one weight function per item over `itemProfile()` (final moves after Random moves, base stats, types, ability). 0 = never: type items need an attack of that type (STAB and extra moves weigh more); Choice items need ≥3 attacks and no status moves except Trick/Switcheroo (Trick raises their weight); Assault Vest needs no status moves; Light Clay needs a screen; Throat Spray a special sound move; Punching Glove a punch; Loaded Dice/King's Rock a multi-hit move; Eject Pack/White Herb a self-dropping move (White Herb also Shell Smash); Air Balloon never on Flying/Levitate; Focus Sash frail, Weakness Policy bulky; Sitrus, Lum, Goggles etc. always fit. `randomItems()` assigns weighted-random, most-constrained set first, Item Clause by construction, on its own seed stream (`seed ^ 0x0badf00d`) after moves are final, so a seed's moves didn't change. `stealsItems()` (Thief, Covet): a thief gets '' under Random team, and Random moves blanks the saved item for that battle only. Fixed the old list's "Kings Rock" (not a real item; now "King's Rock"). Modifier notes for Random team and Random moves updated. `VR_VERSION` 27, `ui-v2.js?v=65`.
+- **Tested:** `node --test tests/vr/core.test.mjs tests/vr/engine.test.mjs`: 55 pass. New: every rule item is real; 600 random teams (with and without Random moves) never break the type/Choice/Vest/Light Clay/Air Balloon/thief rules or `itemProblem`, ≥35 different items seen, deterministic per seed; weight unit checks; Random moves thieves over 400 seeds hold nothing while the draft stays byte-identical. Engine test updated: a thief's empty item is allowed, every held item exists in the engine (100 seeds). Browser (Claude in Chrome, `http-server` on `public/`): new Random team / Random moves notes shown; a Random team + Random moves battle starts with no console errors; HP boxes show suited items (Groudon @ Red Card, Ninetales @ Air Balloon).
 
 ### 2026-10-12 — Standalone project pages deleted
 

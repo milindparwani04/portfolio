@@ -25,8 +25,8 @@
     { k: 'chaos', label: 'Chaotic replacement', note: 'When one of yours faints, its replacement is picked at random.', m: 1.15 },
     { k: 'noswitch', label: 'No switching', note: 'You can’t switch out. Replacing a fainted Pokémon still works.', m: 1.2 },
     { k: 'nopotions', label: 'No potions', note: 'Your bag’s two Potions are gone.', m: 1.25 },
-    { k: 'random', label: 'Random team', note: 'Six random Pokémon from every generation, hidden until the battle: five fully evolved Pokémon and one legendary or mythical, each holding a random item. Your own party is kept.', m: 1.35 },
-    { k: 'moves', label: 'Random moves', note: 'For this battle each Pokémon gets four random moves it can learn. Your chosen moves are kept for next time.', m: 1.5 },
+    { k: 'random', label: 'Random team', note: 'Six random Pokémon from every generation, hidden until the battle: five fully evolved Pokémon and one legendary or mythical, each holding an item that suits its moves. Your own party is kept.', m: 1.35 },
+    { k: 'moves', label: 'Random moves', note: 'For this battle each Pokémon gets four random moves it can learn; one that rolls Thief or Covet goes in empty-handed, ready to steal. Your chosen moves are kept for next time.', m: 1.5 },
     { k: 'cap', label: 'Level cap 45', note: 'Your team is Lv 45; the champion stays at Lv 50. (At Worlds everyone is Lv 50.)', m: 1.75 }
   ];
   const TIERS = [['Master', 4], ['Gold', 2.5], ['Silver', 1.75], ['Bronze', 1]];
@@ -418,14 +418,116 @@
     return '';
   }
 
-  // A Random Team's held items are drawn from these, never repeating within a team (Item Clause). Ordinary held
-  // items that work for any Pokémon in doubles; no Mega Stones, Z-Crystals or species items.
-  const RANDOM_ITEMS = ['Sitrus Berry', 'Lum Berry', 'Leftovers', 'Life Orb', 'Choice Band', 'Choice Specs', 'Choice Scarf', 'Focus Sash',
-    'Assault Vest', 'Rocky Helmet', 'Expert Belt', 'Muscle Band', 'Wise Glasses', 'Shell Bell', 'Mental Herb', 'White Herb', 'Safety Goggles',
-    'Covert Cloak', 'Clear Amulet', 'Bright Powder', 'Scope Lens', 'Light Clay', 'Throat Spray', 'Weakness Policy', 'Air Balloon', 'Red Card',
-    'Eject Button', 'Eject Pack', 'Mirror Herb', 'Loaded Dice', 'Punching Glove', 'Quick Claw', 'Kings Rock', 'Black Glasses', 'Charcoal',
-    'Mystic Water', 'Miracle Seed', 'Magnet', 'Never-Melt Ice', 'Black Belt', 'Poison Barb', 'Soft Sand', 'Sharp Beak', 'Twisted Spoon',
-    'Silver Powder', 'Hard Stone', 'Spell Tag', 'Dragon Fang', 'Metal Coat', 'Silk Scarf', 'Fairy Feather'];
+  // A Random Team's held items suit the Pokémon holding them (Milind, 2026-10-12). Each rule weighs
+  // one item for a profile of the holder's final moves (after Random moves), base stats, types and
+  // ability; 0 means never, so nothing holds Never-Melt Ice without an Ice attack, a Choice item
+  // beside support moves, or an Assault Vest it can't use. Ordinary held items only: no Mega
+  // Stones, Z-Crystals or species items. Item Clause: no repeats within a team.
+  const STEAL_MOVES = new Set(['Thief', 'Covet']);
+  const TRICK_MOVES = new Set(['Trick', 'Switcheroo']);
+  const SOUND_MOVES = new Set(['Hyper Voice', 'Bug Buzz', 'Boomburst', 'Snarl', 'Overdrive', 'Disarming Voice', 'Clanging Scales', 'Torch Song',
+    'Alluring Voice', 'Psychic Noise', 'Sparkling Aria', 'Echoed Voice', 'Round', 'Uproar', 'Relic Song', 'Eerie Spell']);
+  const PUNCH_MOVES = new Set(['Mach Punch', 'Drain Punch', 'Ice Punch', 'Fire Punch', 'Thunder Punch', 'Shadow Punch', 'Bullet Punch', 'Mega Punch',
+    'Comet Punch', 'Dizzy Punch', 'Dynamic Punch', 'Focus Punch', 'Hammer Arm', 'Meteor Mash', 'Power-Up Punch', 'Sky Uppercut', 'Plasma Fists',
+    'Surging Strikes', 'Wicked Blow', 'Double Iron Bash', 'Headlong Rush', 'Ice Hammer', 'Jet Punch', 'Rage Fist']);
+  const MULTI_HIT_MOVES = new Set(['Bullet Seed', 'Rock Blast', 'Icicle Spear', 'Pin Missile', 'Tail Slap', 'Scale Shot', 'Bone Rush', 'Arm Thrust',
+    'Population Bomb', 'Triple Axel', 'Triple Kick', 'Water Shuriken', 'Double Slap', 'Fury Attack', 'Fury Swipes', 'Spike Cannon', 'Barrage', 'Comet Punch']);
+  const SELF_DROP_MOVES = new Set(['Overheat', 'Draco Meteor', 'Leaf Storm', 'Psycho Boost', 'Fleur Cannon', 'Make It Rain', 'Close Combat', 'Superpower',
+    'V-create', 'Hammer Arm', 'Ice Hammer', 'Clanging Scales', 'Headlong Rush', 'Armor Cannon', 'Spin Out', 'Dragon Ascent', 'Hyperspace Fury']);
+  const HIGH_CRIT_MOVES = new Set(['Stone Edge', 'Leaf Blade', 'Night Slash', 'Shadow Claw', 'Psycho Cut', 'Cross Chop', 'Crabhammer', 'Slash', 'Air Cutter',
+    'Attack Order', 'Cross Poison', 'Drill Run', 'Karate Chop', 'Razor Leaf', 'Spacial Rend', 'Aeroblast', 'Blaze Kick', 'Poison Tail', 'Sky Attack',
+    'Snipe Shot', 'Esper Wing', 'Aqua Cutter']);
+  const SCREEN_MOVES = new Set(['Reflect', 'Light Screen', 'Aurora Veil']);
+  const TYPE_ITEMS = { Normal: 'Silk Scarf', Fire: 'Charcoal', Water: 'Mystic Water', Electric: 'Magnet', Grass: 'Miracle Seed', Ice: 'Never-Melt Ice',
+    Fighting: 'Black Belt', Poison: 'Poison Barb', Ground: 'Soft Sand', Flying: 'Sharp Beak', Psychic: 'Twisted Spoon', Bug: 'Silver Powder',
+    Rock: 'Hard Stone', Ghost: 'Spell Tag', Dragon: 'Dragon Fang', Dark: 'Black Glasses', Steel: 'Metal Coat', Fairy: 'Fairy Feather' };
+  // Ground is super effective on these and resisted by Grass and Bug: Air Balloon's best case.
+  const groundWeak = (types) => types.filter((t) => ['Fire', 'Electric', 'Poison', 'Rock', 'Steel'].includes(t)).length > types.filter((t) => ['Grass', 'Bug'].includes(t)).length;
+  // Everything the item rules read about one set. Unknown move names count as neither attacks nor
+  // status, so a catalog without learnsets only narrows the choice to general items.
+  function itemProfile(cat, id, moves, ability) {
+    const entry = cat.byId[id];
+    const sp = cat.species && cat.species[id];
+    const base = sp ? sp.base : { hp: 80, atk: 80, def: 80, spa: 80, spd: 80, spe: 80 };
+    const known = moves.map((n) => cat.moveByName && cat.moveByName[n]).filter(Boolean);
+    const attacks = known.filter((m) => m.category !== 'Status');
+    const typeCount = {};
+    attacks.forEach((m) => { typeCount[m.type] = (typeCount[m.type] || 0) + 1; });
+    const has = (set) => moves.some((n) => set.has(n));
+    return {
+      types: entry ? entry.types : [], ability: ability || '', base, attacks: attacks.length,
+      physical: attacks.filter((m) => m.category === 'Physical').length, special: attacks.filter((m) => m.category === 'Special').length,
+      // Trick and Switcheroo pass a Choice item on, so they don't count against one.
+      status: known.filter((m) => m.category === 'Status' && !TRICK_MOVES.has(m.name)).length,
+      typeCount, trick: has(TRICK_MOVES), sound: attacks.some((m) => SOUND_MOVES.has(m.name) && m.category === 'Special'), punch: has(PUNCH_MOVES),
+      multiHit: has(MULTI_HIT_MOVES), selfDrop: has(SELF_DROP_MOVES), shellSmash: moves.includes('Shell Smash'), screens: has(SCREEN_MOVES),
+      crit: has(HIGH_CRIT_MOVES) || ['Super Luck', 'Sniper'].includes(ability), bulk: base.hp + base.def + base.spd
+    };
+  }
+  const choiceOk = (p) => p.attacks >= 3 && p.status === 0;
+  const RANDOM_ITEM_RULES = {
+    'Choice Band': (p) => (choiceOk(p) && p.physical >= 2 && p.special <= 1 && p.base.atk >= p.base.spa ? (p.trick ? 6 : 4) : 0),
+    'Choice Specs': (p) => (choiceOk(p) && p.special >= 2 && p.physical <= 1 && p.base.spa >= p.base.atk ? (p.trick ? 6 : 4) : 0),
+    'Choice Scarf': (p) => (choiceOk(p) && p.base.spe >= 60 && p.base.spe <= 110 ? (p.trick ? 6 : 3) : 0),
+    'Assault Vest': (p) => (p.attacks >= 3 && p.status === 0 && !p.trick ? 4 : 0),
+    'Life Orb': (p) => (p.attacks >= 2 ? (['Sheer Force', 'Magic Guard'].includes(p.ability) ? 6 : 3) : 0),
+    'Expert Belt': (p) => (Object.keys(p.typeCount).length >= 3 ? 3 : 0),
+    'Muscle Band': (p) => (p.physical >= 2 ? 2 : 0),
+    'Wise Glasses': (p) => (p.special >= 2 ? 2 : 0),
+    'Shell Bell': (p) => (p.attacks >= 2 ? 1 : 0),
+    'Throat Spray': (p) => (p.sound ? 5 : 0),
+    'Punching Glove': (p) => (p.punch ? (p.ability === 'Iron Fist' ? 6 : 4) : 0),
+    'Loaded Dice': (p) => (p.multiHit ? 5 : 0),
+    "King's Rock": (p) => (p.multiHit ? 2 : 0),
+    'Scope Lens': (p) => (p.crit && p.attacks ? 3 : 0),
+    'Light Clay': (p) => (p.screens ? 6 : 0),
+    'Eject Pack': (p) => (p.selfDrop ? 3 : 0),
+    'White Herb': (p) => (p.shellSmash ? 6 : p.selfDrop ? 3 : 0),
+    'Mental Herb': (p) => (p.status ? 2 : 0),
+    'Clear Amulet': (p) => (p.physical ? 1 : 0),
+    'Quick Claw': (p) => (p.base.spe <= 60 && p.attacks ? 2 : 0),
+    'Weakness Policy': (p) => (p.bulk >= 270 && p.attacks >= 2 ? 3 : 0),
+    'Focus Sash': (p) => (p.bulk <= 230 ? 3 : 0),
+    'Rocky Helmet': (p) => (p.base.def >= 100 ? 3 : 1),
+    'Air Balloon': (p) => (!p.types.includes('Flying') && p.ability !== 'Levitate' ? (groundWeak(p.types) ? 3 : 1) : 0),
+    'Red Card': (p) => (p.bulk >= 250 ? 1 : 0),
+    'Eject Button': (p) => (p.bulk >= 250 ? 1 : 0),
+    'Leftovers': (p) => (p.bulk >= 250 ? 2 : 1),
+    'Sitrus Berry': () => 2,
+    'Lum Berry': () => 1,
+    'Safety Goggles': () => 1,
+    'Covert Cloak': () => 1,
+    'Mirror Herb': () => 1,
+    'Bright Powder': () => 1,
+    // A type-boosting item needs an attack of its type: 2, plus 2 for STAB, plus 1 per extra move.
+    ...Object.fromEntries(Object.entries(TYPE_ITEMS).map(([type, item]) => [item, (p) => {
+      const n = p.typeCount[type] || 0;
+      return n ? 2 + (p.types.includes(type) ? 2 : 0) + (n - 1) : 0;
+    }]))
+  };
+  const RANDOM_ITEMS = Object.keys(RANDOM_ITEM_RULES);
+  // How well `item` suits a profile (0: never).
+  const itemWeight = (item, profile) => (RANDOM_ITEM_RULES[item] ? RANDOM_ITEM_RULES[item](profile) : 0);
+  // Thief and Covet steal only when the user holds nothing, so a randomised set with either goes
+  // into battle empty-handed (Milind, 2026-10-12).
+  const stealsItems = (moves) => moves.some((n) => STEAL_MOVES.has(n));
+  // One suited item per set, weighted at random and never repeating (Item Clause); a thief gets ''.
+  // The sets with the fewest fits choose first, so a Pokémon with one good item isn't left with
+  // only general ones. sets: [{ id, moves, ability }]. Returns item names in set order. Seeded.
+  function randomItems(cat, sets, rand) {
+    const out = sets.map(() => '');
+    const taken = new Set();
+    sets.map((s, i) => {
+      const p = itemProfile(cat, s.id, s.moves, s.ability);
+      return { i, tie: rand(), fits: stealsItems(s.moves) ? [] : RANDOM_ITEMS.map((it) => [it, itemWeight(it, p)]).filter(([, w]) => w > 0) };
+    }).filter((o) => o.fits.length).sort((a, b) => a.fits.length - b.fits.length || a.tie - b.tie).forEach((o) => {
+      const free = o.fits.filter(([it]) => !taken.has(it));
+      let r = rand() * free.reduce((sum, [, w]) => sum + w, 0);
+      const hit = free.find(([, w]) => (r -= w) < 0) || free[free.length - 1];
+      if (hit) { out[o.i] = hit[0]; taken.add(hit[0]); }
+    });
+    return out;
+  }
 
   // Random Moves: four distinct moves from the Pokémon's usable learnable list (movepools.json),
   // with at least two attacks whenever it knows two, so no team is left unable to deal damage.
@@ -440,8 +542,9 @@
   // ---------- Battle snapshot ----------
   // Enter Battle copies the validated draft into a separate battle loadout, then applies the
   // modifiers to the copy only: the draft (and storage) never sees random moves or a random team
-  // (whose held items are random too). data: { movepools } for Random Moves. Seeded, so the same seed rebuilds the same
-  // team. Returns { members: [{ uid, id }], sets: [engine sets] }.
+  // (whose held items are chosen to suit its final moves). A Pokémon whose moves were randomised into
+  // Thief or Covet holds nothing. data: { movepools } for Random Moves. Seeded, so the same seed
+  // rebuilds the same team. Returns { members: [{ uid, id }], sets: [engine sets] }.
   function battleLoadout(cat, draft, seed, data) {
     const mods = draft.mods;
     const rand = rng(seed ^ 0x13579bdf);
@@ -452,18 +555,21 @@
       if (problem) throw new Error(problem);
       members = ids.reduce((list, id, n) => [...list, freeItem(list, defaultMember(cat, id, `r${n + 1}`))], []);
     } else members = draft.party.map((m) => ({ ...m, moves: m.moves.slice() }));
-    const items = mods.random ? shuffle(RANDOM_ITEMS, rand) : null;
     const pools = data && data.movepools;
     const attacks = pools ? new Set(pools.attacks) : null;
-    const sets = members.map((m, n) => {
+    const sets = members.map((m) => {
       const entry = cat.byId[m.id];
       const { nature, points } = spreadOf(cat, m.id);
       const set = { species: entry.name, name: entry.name.split('-')[0], ability: m.ability, item: m.item, nature, moves: m.moves.slice(), evs: { ...points } };
       if (mods.shiny) set.shiny = true;
-      if (items) set.item = items[n];
-      if (mods.moves && pools && pools.pools[m.id] && pools.pools[m.id].length) set.moves = randomMoves(pools.pools[m.id], pools.moves, (x) => attacks.has(x), rand);
+      if (mods.moves && pools && pools.pools[m.id] && pools.pools[m.id].length) {
+        set.moves = randomMoves(pools.pools[m.id], pools.moves, (x) => attacks.has(x), rand);
+        if (stealsItems(set.moves)) set.item = '';
+      }
       return set;
     });
+    // Items come last, from the final moves, on their own stream so the moves a seed rolls don't move.
+    if (mods.random) randomItems(cat, members.map((m, n) => ({ id: m.id, moves: sets[n].moves, ability: sets[n].ability })), rng(seed ^ 0x0badf00d)).forEach((it, n) => { sets[n].item = it; });
     return { members: members.map((m) => ({ uid: m.uid, id: m.id })), sets, hidden: !!mods.random };
   }
 
@@ -535,6 +641,6 @@
     multiplier, tier, difficulty, difficultyLabel, rng, newSeed, shuffle, moveSlot, toId,
     catalog, decodeLearnset, legalMoves, classOf, isSpecial, isFinal, typeQuery, matches, defaultMember, nextUid, joinError, addMember, removeMember, updateMember,
     itemProblem, memberProblems, partyProblems, calcStats, spreadOf, memberStats,
-    blankDraft, serialize, restore, cleanName, beats, steps, randomPools, rollTeam, randomTeamProblem, randomMoves, battleLoadout, engineRules, modNotes, overrides
+    blankDraft, serialize, restore, cleanName, beats, steps, randomPools, rollTeam, randomTeamProblem, randomMoves, itemProfile, itemWeight, stealsItems, randomItems, battleLoadout, engineRules, modNotes, overrides
   };
 }));

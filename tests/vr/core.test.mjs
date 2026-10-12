@@ -174,7 +174,7 @@ test('the draft is byte-for-byte unchanged through Random moves and team on and 
   draft.mods = { ...all(false), moves: true };
   const random = C.battleLoadout(cat, draft, 78, { movepools });
   assert.notDeepEqual(random.sets.map((s) => s.moves), plain.sets.map((s) => s.moves));
-  assert.equal(random.sets[1].item, 'Light Ball', 'random moves never touch a chosen item');
+  assert.equal(random.sets[1].item, C.stealsItems(random.sets[1].moves) ? '' : 'Light Ball', 'random moves keep a chosen item unless they roll Thief or Covet');
 });
 
 test('members keep their moves and items by identity through reordering and removal', () => {
@@ -230,9 +230,72 @@ test('six default sets never clash under Item Clause (a taken default item is sw
     assert.deepEqual(C.partyProblems(cat, party), [], ids.join());
     const bl = C.battleLoadout(cat, { filterGen: 0, party: [], mods: { ...all(false), random: true } }, seed, {});
     const items = bl.sets.map((s) => s.item).filter(Boolean);
-    assert.equal(new Set(items).size, 6, 'six distinct held items');
+    assert.equal(new Set(items).size, items.length, 'distinct held items');
+    assert.equal(items.length, bl.sets.filter((s) => !C.stealsItems(s.moves)).length, 'everyone but a thief holds something');
     items.forEach((it) => assert.ok(C.RANDOM_ITEMS.includes(it), it));
   }
+});
+
+test('random team items suit the holder: real items, never a type item without that type, no Choice/Vest beside status moves', () => {
+  C.RANDOM_ITEMS.forEach((it) => assert.ok(cat.itemByName[it], `${it} is a real held item`));
+  const TYPE_ITEMS = { Charcoal: 'Fire', 'Mystic Water': 'Water', Magnet: 'Electric', 'Miracle Seed': 'Grass', 'Never-Melt Ice': 'Ice', 'Black Belt': 'Fighting',
+    'Poison Barb': 'Poison', 'Soft Sand': 'Ground', 'Sharp Beak': 'Flying', 'Twisted Spoon': 'Psychic', 'Silver Powder': 'Bug', 'Hard Stone': 'Rock',
+    'Spell Tag': 'Ghost', 'Dragon Fang': 'Dragon', 'Black Glasses': 'Dark', 'Metal Coat': 'Steel', 'Silk Scarf': 'Normal', 'Fairy Feather': 'Fairy' };
+  const seen = new Set();
+  for (const mods of [{ random: true }, { random: true, moves: true }]) {
+    for (let seed = 1; seed <= 300; seed += 1) {
+      const bl = C.battleLoadout(cat, draftOf([], mods), seed, { movepools });
+      bl.sets.forEach((s, n) => {
+        const moves = s.moves.map((x) => cat.moveByName[x]).filter(Boolean);
+        const attacks = moves.filter((m) => m.category !== 'Status');
+        const status = moves.filter((m) => m.category === 'Status' && !['Trick', 'Switcheroo'].includes(m.name));
+        const why = `${bl.members[n].id} @ ${s.item}: ${s.moves.join(', ')}`;
+        if (s.item) seen.add(s.item);
+        if (TYPE_ITEMS[s.item]) assert.ok(attacks.some((m) => m.type === TYPE_ITEMS[s.item]), why);
+        if (/^Choice /.test(s.item) || s.item === 'Assault Vest') assert.equal(status.length, 0, why);
+        if (s.item === 'Light Clay') assert.ok(s.moves.some((x) => ['Reflect', 'Light Screen', 'Aurora Veil'].includes(x)), why);
+        if (s.item === 'Air Balloon') assert.ok(!byId[bl.members[n].id].types.includes('Flying') && s.ability !== 'Levitate', why);
+        if (C.stealsItems(s.moves)) assert.equal(s.item, '', why);
+        assert.equal(C.itemProblem(cat, bl.members[n].id, s.item, s.moves), '', why);
+      });
+    }
+  }
+  assert.ok(seen.size >= 35, `variety: ${seen.size} different items over 600 teams`);
+  // Same seed, same team and items.
+  const a = C.battleLoadout(cat, draftOf([], { random: true, moves: true }), 42, { movepools });
+  assert.deepEqual(C.battleLoadout(cat, draftOf([], { random: true, moves: true }), 42, { movepools }).sets, a.sets);
+});
+
+test('item rules: weights follow the moves', () => {
+  const w = (id, moves, item, ability = '') => C.itemWeight(item, C.itemProfile(cat, id, moves, ability));
+  assert.equal(w('garchomp', ['Earthquake', 'Dragon Claw', 'Rock Slide', 'Protect'], 'Never-Melt Ice'), 0);
+  assert.ok(w('garchomp', ['Earthquake', 'Dragon Claw', 'Fire Fang', 'Protect'], 'Soft Sand') > w('garchomp', ['Earthquake', 'Dragon Claw', 'Fire Fang', 'Protect'], 'Charcoal'), 'STAB weighs more');
+  assert.equal(w('garchomp', ['Earthquake', 'Dragon Claw', 'Rock Slide', 'Protect'], 'Choice Band'), 0, 'Protect rules out Choice');
+  assert.ok(w('garchomp', ['Earthquake', 'Dragon Claw', 'Rock Slide', 'Fire Fang'], 'Choice Band') > 0);
+  assert.equal(w('garchomp', ['Earthquake', 'Dragon Claw', 'Rock Slide', 'Fire Fang'], 'Choice Specs'), 0, 'physical attacker');
+  assert.equal(w('garchomp', ['Earthquake', 'Dragon Claw', 'Swords Dance', 'Protect'], 'Assault Vest'), 0);
+  assert.ok(w('alakazam', ['Psychic', 'Shadow Ball', 'Focus Blast', 'Trick'], 'Choice Specs') > w('alakazam', ['Psychic', 'Shadow Ball', 'Focus Blast', 'Energy Ball'], 'Choice Specs'), 'Trick favours a Choice item');
+  assert.equal(w('gengar', ['Shadow Ball', 'Sludge Bomb'], 'Air Balloon', 'Levitate'), 0);
+  assert.equal(w('garchomp', ['Earthquake'], 'Light Clay'), 0);
+  assert.ok(w('alakazam', ['Reflect', 'Light Screen'], 'Light Clay') > 0);
+  assert.ok(C.stealsItems(['Thief', 'Protect']) && C.stealsItems(['Covet']) && !C.stealsItems(['Knock Off']));
+  // A thief always goes empty-handed; nobody else is left without an item.
+  const items = C.randomItems(cat, [{ id: 'weavile', moves: ['Thief', 'Ice Shard'], ability: 'Pressure' }, { id: 'garchomp', moves: ['Earthquake'], ability: 'Rough Skin' }], C.rng(1));
+  assert.equal(items[0], '');
+  assert.ok(items[1]);
+});
+
+test('Random moves: a Pokémon that rolls Thief or Covet battles with no item, the saved item is untouched', () => {
+  const draft = draftOf(['garchomp', 'pikachu', 'snorlax', 'gengar', 'weavile', 'lucario'], { moves: true });
+  const before = C.serialize(draft);
+  let thieves = 0;
+  for (let seed = 1; seed <= 400; seed += 1) {
+    C.battleLoadout(cat, draft, seed, { movepools }).sets.forEach((s, n) => {
+      if (C.stealsItems(s.moves)) { thieves += 1; assert.equal(s.item, '', `${s.species}: ${s.moves.join(', ')}`); } else assert.equal(s.item, draft.party[n].item);
+    });
+  }
+  assert.ok(thieves > 0, 'some seed rolls Thief or Covet');
+  assert.equal(C.serialize(draft), before);
 });
 
 test('every default set is legal under the editor rules', () => {
