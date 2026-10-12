@@ -95,7 +95,7 @@ Priorities, in order:
 
 **Phase 3 (2026-10-07): Journal rebuilt, plus Phase 2 fixes.** Journal is now one window (orange `journal.log — ref. 01` title bar with `↑ Home` / `Projects ↓`): on the left a big JOURNAL title, kicker and a scrollable list of every entry (64 px thumbnail, kind, tag, title, coloured status: Researching yellow, Planned dim, Writing green); on the right the selected entry — photo with caption, credit and either a status chip or the review score badge, then title, meta row and a scrollable article body that resets to the top on every switch. Rows are ARIA tabs (arrow keys / Home / End). Phones stack the list above the entry, and tapping a row scrolls the entry into view. Bodies show the summary and an "in progress" note until the articles are written — no placeholder text. The generic window chrome (`.pdos-window`, `.pdos-window-bar`, per-section `--bar` colour) is shared for the later phases. Phase 2 fixes found in a real browser: the steps count overflowed its window (`/10,0` cut off), heart BPM did too, and the weather window had collapsed to 0 px height (`container-type: size` in an auto-height grid row), so it was invisible; the headline now fits its panel as the spec says.
 
-**Phases 4–9 (2026-10-07): redesign complete.** Every section is now a Parwani-DOS window. Projects opens each project in a window over the page (page locked until closed; Crack and Sounds Like run inside); Champion Run has its setup window (pool, team of 6, modifiers, reward tier; the battle is a later spec); Toolbox opens tools in a sliding side panel that borrows the legacy tool modals, so every tool's logic is unchanged; Media/Playlists/Gigs are windows around the same carousels; pixel icons (`public/pdos-icons.js`, ported from the mockup) animate on every tile, extra and project card; Paper's status and dim text were darkened for WCAG AA. The Home title fills the space beside about.txt.
+**Phases 4–9 (2026-10-07): redesign complete.** Every section is now a Parwani-DOS window. Projects opens each project in a window over the page (page locked until closed; Crack runs inside; since 2026-10-12 projects open only as overlays, never full screen or in a new tab); Champion Run has its setup window (pool, team of 6, modifiers, reward tier; the battle is a later spec); Toolbox opens tools in a sliding side panel that borrows the legacy tool modals, so every tool's logic is unchanged; Media/Playlists/Gigs are windows around the same carousels; pixel icons (`public/pdos-icons.js`, ported from the mockup) animate on every tile, extra and project card; Paper's status and dim text were darkened for WCAG AA. The Home title fills the space beside about.txt.
 
 Shell: opens directly onto a clean `C:\PARWANI>` navigation bar and the `MY DIGITAL PORTFOLIO.` dashboard. The former ENTER/CRT boot gate, floating navigation and bottom status bar are no longer visible.
 
@@ -120,6 +120,10 @@ External accounts connected (owner-only): Spotify (re-authorize at `/api/spotify
 Settled removals (do not re-propose without flagging): Today Somewhere project (replaced by YouShant 2026-10-12), Crimson theme (removed 2026-10-12), YouTube to MP3/MP4/WAV converters (ToS and backend complexity), Seamless Set project, standalone Liveliness Index (merged into Where Next), public location card (built and dropped 2026-10-04: Milind judged showing his whereabouts not responsible).
 
 ## Session log
+
+### 2026-10-12 — Project windows are overlay-only
+
+At Milind's request: Sounds Like's window no longer embeds the app or offers "Open full screen ↗"; it shows the same placeholder as the in-development projects. Standing rule: every project opens only as an overlay, with no full-screen / new-tab option. CSS v50 / UI v64. Checked in Chrome on a local static server. No Worker changes.
 
 ### 2026-10-12 — Sounds Like card: DJ decks icon, one name
 
