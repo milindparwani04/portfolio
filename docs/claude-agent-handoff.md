@@ -18,7 +18,7 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 
 | Area | Files | Notes |
 |---|---|---|
-| Visible portfolio UI | `public/index.html` (the `.portfolio-v2` block only), `public/ui-v2.css`, `public/ui-v2.js`, `public/pdos-icons.js` | Parwani-DOS redesign (see `design_handoff_parwani_dos/`), every section migrated. Cache-bust versions: `ui-v2.css?v=50`, `ui-v2.js?v=70`, `pdos-icons.js?v=7` — bump on every change. The legacy tool modals further down `index.html` are still live: the Toolbox panel borrows them. |
+| Visible portfolio UI | `public/index.html` (the `.portfolio-v2` block only), `public/ui-v2.css`, `public/ui-v2.js`, `public/pdos-icons.js` | Parwani-DOS redesign (see `design_handoff_parwani_dos/`), every section migrated. Cache-bust versions: `ui-v2.css?v=50`, `ui-v2.js?v=71`, `pdos-icons.js?v=7` — bump on every change. The legacy tool modals further down `index.html` are still live: the Toolbox panel borrows them. |
 | Worker routes and data | `worker/index.js`, `worker/gig-picks.json`, `migrations/` | Spotify listening data, heart rate, steps, gigs, Game card (PlayStation + Steam). Gig Finder rebuilt 2026-10-02. Untouched by the Parwani-DOS redesign so far (Phase 1 is frontend-only). |
 
 ## Media tracker (how it works, for the next session and the weekly routine)
@@ -87,6 +87,14 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 - Lighthouse `valid-source-maps` flags a third-party library map; it doesn't affect the score categories that matter (production: 90 / 100 / 100).
 
 ## Work log (newest first)
+
+### 2026-10-12 — Party slot chips, drag ghost X, battle preview sprites
+
+- **Brief (Milind):** in the party's 2×3 grid Iron Hands' type chips stacked over its name; dragging a member showed a huge X; on the battle preview some sprites crossed their row borders and names sat too close to the sprites.
+- **Chips:** Fighting + Electric need 109px and `.tvb-slot-open` left exactly 109px (`padding: 4px 20px 6px` in a 153px slot), so rounding wrapped the second chip and pushed the stack over the name. Side padding is now 12px.
+- **Drag ghost X:** `startDrag()` cloned the slot and unwrapped every button into its children, so the remove button's SVG lost `.tvb-remove svg` (20px) and filled the card. Buttons in the ghost now become `div`s with the same classes, so the ghost matches the slot.
+- **Battle preview:** sprites were drawn at 144% (offset -22%) with the row clipped only horizontally, so tall sprites spilled over the borders. Now `inset: 0; 100%; object-fit: contain` inside the row (`overflow: hidden`, padding 4px 8px 4px 6px), and the sprite–name gap is 20px (was 10px).
+- **Tested** in Chrome on local `wrangler dev` at 1568×745: every preview sprite sits 4px inside its row with a 20px gap to the name; Iron Hands' chips share one line in the slot and in the team picker; a pointer drag shows the ghost with a 20px X and cancelling leaves the order unchanged. `dialogue-browser.cjs` and `battle-ui-browser.cjs` pass. Not checked at phone width. `VR_VERSION` 34, `ui-v2.js?v=71`.
 
 ### 2026-10-12 — Cutscene: Ren centred
 

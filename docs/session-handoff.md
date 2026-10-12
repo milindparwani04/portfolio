@@ -131,6 +131,10 @@ Settled removals (do not re-propose without flagging): Today Somewhere project (
 
 ## Session log
 
+### 2026-10-12 — Party grid and battle preview fixes
+
+At Milind's request (Claude): in the party grid, two type chips no longer stack over the name (Iron Hands), and dragging a member no longer shows a giant X. On the battle preview, sprites fit inside their rows, and names sit further from the sprites. `VR_VERSION` 34, `ui-v2.js?v=71`.
+
 ### 2026-10-12 — Cutscene: Ren centred
 
 At Milind's request (Claude): pixel Ren now stands in the middle of the championship dialogue scene (was at the left), desktop and phone. `VR_VERSION` 33, `ui-v2.js?v=70`.

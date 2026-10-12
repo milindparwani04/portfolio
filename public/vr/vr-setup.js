@@ -260,7 +260,9 @@
       const rect = slot.getBoundingClientRect();
       const ghost = slot.cloneNode(true);
       ghost.classList.add('tvb-ghost');
-      ghost.querySelectorAll('button').forEach((b) => b.replaceWith(...b.childNodes));
+      // Buttons become plain divs with the same classes, so every part keeps its size and place
+      // (unwrapped, the remove button's SVG lost its 20px size and filled the card).
+      ghost.querySelectorAll('button').forEach((b) => { const d = document.createElement('div'); d.className = b.className; d.append(...b.childNodes); b.replaceWith(d); });
       ghost.setAttribute('aria-hidden', 'true');
       Object.assign(ghost.style, { width: `${rect.width}px`, height: `${rect.height}px` });
       G.root.append(ghost);
