@@ -1,5 +1,10 @@
 # Victory Road → The Very Best — build record
 
+## 2026-10-12 — Rayquaza menu release
+
+2026-10-12 Rayquaza menu (Codex): approved supplied art replaces generated Cloudbound presentation; original pixels preserved, title in upper sky, green controls, linked u/Fintaman credit. Portrait shows full scene above controls. Existing actions/keyboard retained; loader v29, Credits/NOTICE updated. Old art retained unused. Combined push with Claude certificate/battle/export work authorized. 55 core/engine tests, full cinematic-browser suite (including certificate PNG export) and 1280/360/390 Edge menu checks passed. No page errors, Worker/secrets edits or production verification claimed.
+
+
 Living record of the game build. Owner: Claude. Update this file with every phase. Current spec: [`the-very-best-master-prompt.md`](the-very-best-master-prompt.md) (2026-10-10, supersedes conflicting parts of [`victory-road-master-prompt.md`](victory-road-master-prompt.md)), refined by [`the-very-best-refinement-master-prompt.md`](the-very-best-refinement-master-prompt.md) (second 2026-10-10 brief; supersedes the illustrated trainer, the capsule and the old random-team rule). The 2026-10-07 Victory Road record follows the overhaul section below.
 
 ## Refinements (2026-10-10, second brief) — released

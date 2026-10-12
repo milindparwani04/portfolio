@@ -571,19 +571,69 @@
 @keyframes tvb-snow { from { transform: translate(-15px, -70px); } to { transform: translate(30px, 140px); } }
 @media (prefers-reduced-motion: reduce) { .tvb-field-ground::after, .tvb-field-weather i { animation: none !important; } }
 
-/* Cloudbound title artwork with real keyboard/touch-accessible controls. */
-.tvb-screen--title { background: #dce8fb; }
-.tvb-screen--title .tvb-tm-legal { color: #403866; }
-.tvb-tm-board--cloud { --ink: #282063; --cream: #fbf4e4; background: #e4e5fa; }
-.tvb-cloud-art { inset: 0; background: url('/assets/vr/title/cloudbound.png') center / 100% 100% no-repeat; }
-.tvb-cloud-name { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
-.tvb-tm-board--cloud .tvb-tm-menu { left: 80%; top: 56.5%; right: auto; bottom: auto; width: 13.5%; height: 25.4%; padding: 0; gap: 0; border: 0; box-shadow: none; background: #fbf4e4; }
-.tvb-tm-board--cloud .tvb-tm-item { position: relative; flex: 1; min-height: 0; align-items: center; gap: 9px; padding: 0 9px; font-family: 'Pixelify Sans', monospace; font-size: 18px; line-height: 1; background: #fbf4e4; color: #282063; white-space: nowrap; }
-.tvb-tm-board--cloud .tvb-tm-item + .tvb-tm-item { border-top: 1px solid #c5a174; }
-.tvb-tm-board--cloud .tvb-tm-item.is-selected { background: #dac9fa; }
-.tvb-tm-board--cloud .tvb-tm-item:focus-visible { outline: 2px solid #6651a6; outline-offset: -2px; }
-.tvb-tm-board--cloud .tvb-tm-cursor { font-size: 12px; width: 12px; flex: 0 0 12px; }
-.tvb-tm-board--cloud.is-portrait .tvb-cloud-art { bottom: auto; height: 400px; background-size: auto 400px; background-position: left top; }
-.tvb-tm-board--cloud.is-portrait .tvb-cloud-name { clip-path: none; overflow: visible; width: 100%; height: 150px; margin: 0; padding: 35px 24px; left: 0; top: 0; background: linear-gradient(#dceaff 70%, #dceaff00); font-size: 32px; line-height: 1.5; text-align: center; text-shadow: 2px 2px #fff7de; }
-.tvb-tm-board--cloud.is-portrait .tvb-tm-menu { left: 40px; top: 425px; width: 325px; height: 240px; padding: 12px; border: 3px solid #6651a6; box-shadow: 0 0 0 4px #fff3d7, 0 0 0 6px #ba9c76; }
-.tvb-tm-board--cloud.is-portrait .tvb-tm-item { font-size: 19px; gap: 18px; padding: 0 20px; }
+/* User-approved Rayquaza menu: supplied art preserved, HTML controls over the forest. */
+.tvb-screen--title { background: #171b2b; }
+.tvb-screen--title .tvb-tm-legal { color: #e4d9c8; }
+.tvb-tm-board--rayquaza { width: 960px; height: 600px; background: #19332b; }
+.tvb-rayquaza-art { position: absolute; inset: 0; background: url('/assets/vr/title/rayquaza-fintaman.png') center / 100% 100% no-repeat; image-rendering: pixelated; }
+.tvb-rayquaza-name { position: absolute; top: 3.5%; left: 0; width: 100%; margin: 0; text-align: center; color: #fff0d4; font-family: 'Pixelify Sans', monospace; font-size: 58px; line-height: .95; font-weight: 700; letter-spacing: .035em; text-shadow: 3px 0 #30384e, -3px 0 #30384e, 0 3px #30384e, 0 -3px #30384e, 4px 5px #30384e; }
+.tvb-rayquaza-name strong { color: #ffd19d; }
+.tvb-tm-board--rayquaza .tvb-tm-menu { left: 50%; top: auto; right: auto; bottom: 4.5%; transform: translateX(-50%); width: auto; display: flex; flex-direction: row; gap: 5px; padding: 6px; background: #263c3cf5; border: 3px solid #ead7b3; box-shadow: 4px 4px #182b2d; }
+.tvb-tm-board--rayquaza .tvb-tm-item { min-height: 40px; gap: 6px; padding: 7px 12px; color: #f6e7ce; font-family: 'Pixelify Sans', monospace; font-size: 18px; line-height: 1; white-space: nowrap; }
+.tvb-tm-board--rayquaza .tvb-tm-item.is-selected { background: #f3c8a3; color: #233c37; }
+.tvb-tm-board--rayquaza .tvb-tm-item:focus-visible { outline: 2px solid #fff0d4; outline-offset: 2px; }
+.tvb-tm-board--rayquaza .tvb-tm-cursor { width: 12px; font-size: 12px; }
+.tvb-rayquaza-credit { position: absolute; left: 1.6%; bottom: 1.8%; margin: 0; padding: 4px 7px; color: #f7e7cd; background: #19332bf5; font-size: 11px; letter-spacing: .025em; }
+.tvb-rayquaza-credit a { color: inherit; text-decoration: none; }
+.tvb-rayquaza-credit a:hover { text-decoration: underline; }
+.tvb-rayquaza-credit a:focus-visible { outline: 2px solid #fff0d4; outline-offset: 2px; }
+/* Portrait preserves the complete artwork above a readable control panel, never crops Rayquaza. */
+.tvb-tm-board--rayquaza.is-portrait { width: 405px; height: 540px; }
+.tvb-tm-board--rayquaza.is-portrait .tvb-rayquaza-art { bottom: auto; height: 253px; }
+.tvb-tm-board--rayquaza.is-portrait .tvb-rayquaza-name { top: 12px; font-size: 28px; }
+.tvb-tm-board--rayquaza.is-portrait .tvb-tm-menu { left: 24px; right: 24px; top: 282px; bottom: auto; width: auto; transform: none; flex-direction: column; gap: 4px; padding: 10px; }
+.tvb-tm-board--rayquaza.is-portrait .tvb-tm-item { min-height: 44px; font-size: 20px; padding: 8px 16px; }
+.tvb-tm-board--rayquaza.is-portrait .tvb-rayquaza-credit { left: 8px; bottom: auto; top: 230px; font-size: 11px; }
+/* Victory certificate (design handoff "Victory Certificates", 2026-10-12): a 960 x 640 artboard,
+   scaled to fit the modal. Standard = 1b Pixel Relic; Master = 3a (Void Crest, glow, sweep, motes).
+   Colours come from --c-* set by vr-certificate.js. No border radius anywhere. */
+.tvb-modal--cert .tvb-modal-card { width: min(100%, 1000px); height: 100%; overflow: hidden; }
+.tvb-cert-view { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 10px; }
+.tvb-cert-fit { position: relative; flex: 1; min-height: 120px; overflow: hidden; }
+.tvb-cert-actions { flex-wrap: wrap; }
+.tvb-cert-note:empty { display: none; }
+.tvb-cert { position: absolute; left: 0; top: 0; width: 960px; height: 640px; overflow: hidden; transform-origin: 0 0; background: var(--c-bg); display: flex; align-items: center; justify-content: center; font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 400; color: var(--c-value); -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+.tvb-cert-scan { position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(0deg, rgba(255, 255, 255, .025) 0 2px, transparent 2px 4px); }
+.tvb-cert-frame { position: relative; width: 860px; height: 540px; box-sizing: border-box; border: 8px solid var(--c-frame); box-shadow: 0 0 0 8px var(--c-bg), 0 0 0 16px var(--c-outer); display: grid; grid-template-columns: 290px 1fr; }
+.tvb-cert-badge { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px; border-right: 4px dashed var(--c-divider); }
+.tvb-cert-crest, .tvb-cert-crest svg { display: block; image-rendering: pixelated; }
+.tvb-cert-unlock, .tvb-cert-sub, .tvb-cert-status, .tvb-cert-player, .tvb-cert-team, .tvb-cert-stats { font-family: Silkscreen, monospace; font-weight: 400; }
+.tvb-cert-unlock { font-size: 14px; letter-spacing: .1em; color: var(--c-accent); }
+.tvb-cert-sub { font-size: 12px; color: var(--c-muted); }
+.tvb-cert-body { padding: 0 52px; display: flex; flex-direction: column; justify-content: center; gap: 16px; min-width: 0; }
+.tvb-cert-status { font-size: 15px; letter-spacing: .15em; color: var(--c-status); }
+.tvb-cert-title { font-family: Cinzel, serif; font-weight: 900; font-size: 50px; line-height: 1; color: var(--c-title); }
+.tvb-cert-title > span { display: block; }
+.tvb-cert-certified { font-size: 22px; color: var(--c-body); }
+.tvb-cert-player { font-size: 20px; color: var(--c-title); }
+.tvb-cert-team { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 13px; color: var(--c-accent); }
+.tvb-cert-team > span { white-space: nowrap; }
+.tvb-cert-stats { display: flex; flex-direction: column; gap: 8px; font-size: 16px; color: var(--c-value); }
+.tvb-cert-row { display: flex; justify-content: space-between; gap: 16px; border-bottom: 2px solid var(--c-rule); padding-bottom: 6px; white-space: nowrap; }
+.tvb-cert-row--last { border-bottom: 0; padding-bottom: 0; }
+.tvb-cert-label, .tvb-cert-row--last .tvb-cert-label { color: var(--c-muted); }
+.tvb-cert--master .tvb-cert-frame { overflow: hidden; box-shadow: 0 0 0 8px var(--c-bg), 0 0 0 16px var(--c-outer), 0 0 60px rgba(196, 168, 255, .2); }
+.tvb-cert--master .tvb-cert-badge { background: radial-gradient(circle at 50% 42%, rgba(196, 168, 255, .14) 0%, transparent 60%); }
+.tvb-cert--master .tvb-cert-crest { animation: tvb-cert-breathe 3.2s ease-in-out infinite; }
+.tvb-cert-motes { position: absolute; inset: 0; pointer-events: none; }
+.tvb-cert-motes i { position: absolute; border-radius: 50%; background: #c4a8ff; opacity: 0; animation-name: tvb-cert-drift; animation-timing-function: linear; animation-iteration-count: infinite; }
+.tvb-cert-sweep { position: absolute; inset: 0; overflow: hidden; mix-blend-mode: screen; pointer-events: none; }
+.tvb-cert-sweep i { position: absolute; top: -20%; bottom: -20%; left: 0; width: 160px; background: linear-gradient(90deg, transparent, rgba(255, 240, 200, .28), transparent); transform: translateX(-150%) skewX(-20deg); animation: tvb-cert-sweep 5s ease-in-out .5s infinite; }
+@keyframes tvb-cert-breathe { 0%, 100% { filter: drop-shadow(0 0 6px rgba(196, 168, 255, .35)); } 50% { filter: drop-shadow(0 0 24px rgba(196, 168, 255, .95)); } }
+@keyframes tvb-cert-sweep { 0% { transform: translateX(-150%) skewX(-20deg); } 55%, 100% { transform: translateX(450%) skewX(-20deg); } }
+@keyframes tvb-cert-drift { 0% { transform: translateY(0); opacity: 0; } 20% { opacity: .9; } 100% { transform: translateY(-200px); opacity: 0; } }
+/* Reduced motion (system, unless the in-game Motion setting overrides it): no pulse, sweep or
+   drift; the crest keeps a static soft glow. */
+.tvb.is-reduced .tvb-cert--master .tvb-cert-crest { filter: drop-shadow(0 0 12px rgba(196, 168, 255, .6)); }
+.tvb.is-reduced .tvb-cert-sweep { display: none; }
+.tvb.is-reduced .tvb-cert-motes i { opacity: .5; }

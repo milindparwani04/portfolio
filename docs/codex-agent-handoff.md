@@ -1,5 +1,10 @@
 # PARWANI — Codex Agent Handoff
 
+## 2026-10-12 — Rayquaza menu release
+
+2026-10-12 current assignment complete: approved Rayquaza menu implemented with unchanged supplied art, cream/peach sky title, green bottom controls, bottom-left u/Fintaman Reddit credit. Portrait preserves full image above controls. Credits/NOTICE and loader v29 updated. Milind authorized combined commit/push including Claude certificate work; nested .claude/worktrees checkout excluded. Validation: 55 core/engine tests passed with --test-isolation=none; full cinematic-browser regression passed including certificate PNG export; isolated Edge menu checks at 1280x800, 360x740, 390x844 passed with no page errors. Browser tests used approved sandbox escalation. No Worker/secrets edits; no production verification claimed. Artist attribution is not independently verified reuse permission.
+
+
 > **Codex-only working record.** This document separates Codex's explicitly assigned work from the communal project stream. Read [`session-handoff.md`](session-handoff.md) for shared project state. Do not treat this file as authority to pick up work assigned to another agent.
 
 ## Operating boundary

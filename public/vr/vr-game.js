@@ -199,6 +199,7 @@
   function openCredits() {
     const p = (text) => h('p', { class: 'tvb-modal-text', text });
     openModal('Credits', h('div', { class: 'tvb-credits' },
+      p('Main-menu Rayquaza artwork: u/Fintaman on Reddit. Supplied and selected by Milind; displayed unchanged beneath HTML title and menu controls.'),
       p('The Very Best — a game by Milind Parwani for PARWANI-DOS. Unofficial fan project, not affiliated with or endorsed by Nintendo, Game Freak, Creatures or The Pokémon Company. Pokémon names and sprites © The Pokémon Company; sprites from the PokeAPI sprites project.'),
       p('Champion team: Takuma Yamazaki’s official 2026 Pokémon VGC Masters World Championship team sheet (species, items, abilities, natures, moves). Stat points: a community reconstruction (ChampionsDex). Ren Kestrel is an original fictional character; Ren’s dialogue, strategy and move variations are this game’s fiction, not statements or strategies of Takuma Yamazaki.'),
       p('Battle engine: Pokémon Showdown simulator (MIT licence, © Guangcong Luo and contributors), commit c046106c. The AI is a heuristic written for this game.'),
@@ -287,10 +288,11 @@
     let sel = 0;
     const items = TITLE_ITEMS.map(([label], i) => h('button', { type: 'button', class: 'tvb-tm-item', 'data-i': i },
       h('span', { class: 'tvb-tm-cursor', 'aria-hidden': 'true', text: '▶' }), h('span', { text: label.toUpperCase() })));
-    const board = h('div', { class: 'tvb-tm-board tvb-tm-board--cloud' },
-      h('div', { class: 'tvb-cloud-art', 'aria-hidden': 'true' }),
-      h('h3', { class: 'tvb-cloud-name', text: 'THE VERY BEST' }),
-      h('div', { class: 'tvb-tm-menu', role: 'group', 'aria-label': 'Main menu' }, items));
+    const board = h('div', { class: 'tvb-tm-board tvb-tm-board--rayquaza' },
+      h('div', { class: 'tvb-rayquaza-art', 'aria-hidden': 'true' }),
+      h('h3', { class: 'tvb-rayquaza-name' }, 'THE VERY ', h('strong', { text: 'BEST' })),
+      h('div', { class: 'tvb-tm-menu', role: 'group', 'aria-label': 'Main menu' }, items),
+      h('p', { class: 'tvb-rayquaza-credit' }, 'ART BY ', h('a', { href: 'https://www.reddit.com/user/Fintaman/', target: '_blank', rel: 'noopener noreferrer', text: 'u/Fintaman on Reddit' })));
     const frame = h('div', { class: 'tvb-tm-frame' }, board);
     const legal = h('p', { class: 'tvb-tm-legal', text: 'Unofficial fan project. Pokémon © The Pokémon Company.' });
     screen.append(h('div', { class: 'tvb-tm' }, frame, legal));
@@ -322,7 +324,7 @@
       if (!w || !hgt) return;
       const portrait = w < 640 && hgt > w;
       board.classList.toggle('is-portrait', portrait);
-      const [bw, bh] = portrait ? [405, 720] : [960, 540];
+      const [bw, bh] = portrait ? [405, 540] : [960, 600];
       let s = Math.min(w / bw, hgt / bh);
       // Within 4% of full size, draw at 1x and let the frame crop a few pixels of sky and grass
       // margin (no content sits that close to the edges): crisp pixel fonts beat a 0.99 blur.

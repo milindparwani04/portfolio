@@ -45,4 +45,4 @@ Menu and first-phase tracks loop; navigation does not restart menu music. Master
 
 ## Title artwork
 
-`assets/vr/title/cloudbound.png`: user-supplied generated floating-island title concept, selected by Milind for this game on 2026-10-11. Menu controls are accessible HTML overlays.
+`assets/vr/title/rayquaza-fintaman.png`: user-supplied Rayquaza pixel artwork, credited at Milind's direction to [u/Fintaman on Reddit](https://www.reddit.com/user/Fintaman/), selected for implementation on 2026-10-12. The supplied pixels are unchanged; title and accessible menu controls are HTML overlays. Artist attribution is not a claim of independently verified reuse permission or clearance of underlying Pokémon rights. The earlier generated `cloudbound.png` is retained as an unused historical asset.

@@ -1,5 +1,10 @@
 # PARWANI — Session Handoff
 
+## 2026-10-12 — Rayquaza menu release
+
+2026-10-12 Codex menu integration: approved Rayquaza menu implemented using unchanged supplied artwork, title clear of Rayquaza, green controls and bottom-left u/Fintaman Reddit credit. Portrait keeps the entire scene above controls. Credits/NOTICE and loader v29 updated. Milind explicitly authorized combined commit/push including Claude certificate/battle/test/docs changes; nested .claude/worktrees checkout excluded. 55 core/engine tests and complete cinematic-browser regression passed, including certificate PNG export; desktop/360/390 Edge menu checks passed without page errors. No Worker/secrets changes; production not inferred from push. Artwork attribution is not independently verified reuse permission.
+
+
 > **Living document.** Update this file as part of every push that changes the project — not just at a session's end. The next device to pull needs this current to pick up where you left off. (Unlike [`docs/agent-rulebook.md`](agent-rulebook.md), which is static.)
 
 ## How to use this doc
@@ -120,6 +125,10 @@ External accounts connected (owner-only): Spotify (re-authorize at `/api/spotify
 Settled removals (do not re-propose without flagging): Today Somewhere project (replaced by YouShant 2026-10-12), Crimson theme (removed 2026-10-12), YouTube to MP3/MP4/WAV converters (ToS and backend complexity), Seamless Set project, standalone Liveliness Index (merged into Where Next), public location card (built and dropped 2026-10-04: Milind judged showing his whereabouts not responsible).
 
 ## Session log
+
+### 2026-10-12 — The Very Best: new victory certificates
+
+At Milind's request (Claude), from the "Victory Certificates" design handoff: a win now opens an in-game certificate instead of a pop-up tab. Standard wins get the ivory "Pixel Relic" certificate with a pixel Champion Crest in the tier colour; a win with every gameplay modifier on gets the purple Master certificate (winged Void Crest, glow, light sweep, drifting particles; still under reduced motion). Rows: turns, KOs, battle time, difficulty, date and a serial (`TVB-nnnn`, Master `MTR-nnnn`, counted per browser). Download PNG (1920 × 1280) and Print. `VR_VERSION` 28, `ui-v2.js?v=66`. Browser regression passes. No Worker changes. Detail in the Claude handoff.
 
 ### 2026-10-12 — The Very Best: Random team items suit the holder; thieves hold nothing
 

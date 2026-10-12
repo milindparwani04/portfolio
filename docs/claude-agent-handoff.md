@@ -18,7 +18,7 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 
 | Area | Files | Notes |
 |---|---|---|
-| Visible portfolio UI | `public/index.html` (the `.portfolio-v2` block only), `public/ui-v2.css`, `public/ui-v2.js`, `public/pdos-icons.js` | Parwani-DOS redesign (see `design_handoff_parwani_dos/`), every section migrated. Cache-bust versions: `ui-v2.css?v=50`, `ui-v2.js?v=65`, `pdos-icons.js?v=7` — bump on every change. The legacy tool modals further down `index.html` are still live: the Toolbox panel borrows them. |
+| Visible portfolio UI | `public/index.html` (the `.portfolio-v2` block only), `public/ui-v2.css`, `public/ui-v2.js`, `public/pdos-icons.js` | Parwani-DOS redesign (see `design_handoff_parwani_dos/`), every section migrated. Cache-bust versions: `ui-v2.css?v=50`, `ui-v2.js?v=66`, `pdos-icons.js?v=7` — bump on every change. The legacy tool modals further down `index.html` are still live: the Toolbox panel borrows them. |
 | Worker routes and data | `worker/index.js`, `worker/gig-picks.json`, `migrations/` | Spotify listening data, heart rate, steps, gigs, Game card (PlayStation + Steam). Gig Finder rebuilt 2026-10-02. Untouched by the Parwani-DOS redesign so far (Phase 1 is frontend-only). |
 
 ## Media tracker (how it works, for the next session and the weekly routine)
@@ -87,6 +87,13 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 - Lighthouse `valid-source-maps` flags a third-party library map; it doesn't affect the score categories that matter (production: 90 / 100 / 100).
 
 ## Work log (newest first)
+
+### 2026-10-12 — The Very Best: victory certificates redesigned (handoff 1b + 3a)
+
+- **Brief (Milind):** implement the design handoff `design_handoff_victory_certificates` (Downloads, not in repo): only 1b "Pixel Relic" (standard) and 3a "Pixel Relic · Master". Decisions agreed: the game has no score, so SCORE becomes `TURNS` + `KOs` ("You 4 · Ren 2"); the Master certificate shows only when every gameplay modifier is on (`C.difficulty(mods) === 1`, label "The Very Best"; cosmetic mods don't count); in-game modal with PNG + print instead of the pop-up tab.
+- **Done (`vr-certificate.js`, rewritten):** `stage(record)` builds the 960 × 640 artboard (colours as `--c-*` vars from `THEMES`, crests as crisp SVG rects from the handoff grids at 11 px). Standard crest `G` is the tier colour (Bronze/Silver/Gold; a ×4+ "Master" tier without all modifiers keeps the standard certificate with the Gold colour and `MASTER · ×n.nn`). Master: Void Crest, `tvb-cert-breathe` glow, frame sweep, 26 motes from the handoff LCG seeded by the serial. `open(record)` uses `TVB.openModal` (`.tvb-modal--cert`), scales the artboard to fit with a ResizeObserver, buttons Download PNG / Print / Close. `paint(el, record)` repaints the mounted artboard on a 1920 × 1280 canvas from its measured layout (zero-size inline-block probes give each text run's baseline), glow at peak, sweep hidden, motes at t = 0; Print loads that PNG in a hidden srcdoc iframe (`@page landscape`, `print-color-adjust: exact`). Fonts (Cinzel 900, Cormorant Garamond, Silkscreen 400) load from Google Fonts on first open. `serial(master)` is a per-browser win counter in localStorage (`pdosTvbSerialTVB` / `pdosTvbSerialMTR`). Styles at the end of `vr.css`; reduced motion uses `.tvb.is-reduced` (system or the in-game Motion setting): no animation, static soft crest glow, sweep hidden.
+- **`vr-battle.js`:** `startedAt` set on the log's `|start` (TIME = battle duration); the certificate record (team, turns, KOs, time, difficulty, tier, multiplier, rules, date, serial) is fixed at the win, so reopening shows the same serial. Button renamed **View certificate**. `VR_VERSION` 28, `ui-v2.js?v=66`.
+- **Tested:** `node tests/vr/cinematic-browser.cjs` (Edge): all 7 PASS. The certificate step now checks a real win opens the modal with trainer, team, difficulty, `CREST UNLOCKED`, a `TVB-nnnn` serial and alt text, that it fits the frame, Download PNG fires a `the-very-best-certificate-TVB-nnnn.png` download, a Master paint is 1920 × 1280 and Close removes it (`REN_CERT_SCREENSHOTS=<dir>` saves modal screenshots at 1280 and 360). DOM and exported PNGs for both variants compared against screenshots of the handoff reference: match, except the export's dashed divider spacing differs slightly from the browser's dash pattern.
 
 ### 2026-10-12 — The Very Best: Random team items suit the holder; thieves go empty-handed
 

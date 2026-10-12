@@ -52,6 +52,7 @@
     const mods = { ...G.draft.mods };
     const mult = C.multiplier(mods);
     let certificateTeam = [];
+    let startedAt = 0; // the log's |start, for the certificate's TIME
     let battleSets = [];
     const rules = C.engineRules(mods);
     const reduced = T.reduced();
@@ -369,7 +370,7 @@
       noteLine(parts);
       fieldVisuals.update(line);
       switch (cmd) {
-        case 'start': A.music.start('battle'); break;
+        case 'start': A.music.start('battle'); if (!startedAt) startedAt = Date.now(); break;
         case 'poke': {
           const side = parts[2];
           roster[side][`${Object.keys(roster[side]).length}`] = true;
@@ -819,16 +820,21 @@
         won ? '' : 'Tips: protect a Pokémon Ren is focusing, use spread moves while Ren’s Pokémon are healthy, and save a knockout until you can take the second one quickly — the revival only happens once.'
       ].filter(Boolean);
       const sets = (champion || []).map((s) => h('li', {}, h('strong', { text: s.species }), ` @ ${s.item} · ${s.ability} · ${s.moves.join(', ')}`));
+      // The certificate's facts are fixed at the win, so reopening it shows the same serial.
+      const allMods = C.difficulty(mods) >= 1 - 1e-9;
+      const certificate = won ? {
+        name: G.name, rival: CHAMP.name, team: certificateTeam.slice(), turns: stats.turns, kos: [stats.yourKOs, stats.renKOs],
+        timeMs: Date.now() - (startedAt || Date.now()), difficulty: C.difficultyLabel(C.difficulty(mods)), master: allMods,
+        tier: C.tier(mult), multiplier: mult, rules: C.MODS.filter((m) => mods[m.k] && !m.cosmetic).map((m) => m.label),
+        date: new Date(), serial: window.TVBCertificate.serial(allMods)
+      } : null;
       menu.replaceChildren(
         h('div', { class: 'tvb-result' },
           h('p', { class: 'tvb-cmd-title', text: won ? `Victory! Reward ×${mult.toFixed(2)} · ${C.tier(mult)} tier` : 'Defeat. Your party is saved.' }),
           ...insights.map((t) => h('p', { class: 'tvb-dim', text: t })),
           sets.length ? h('details', { class: 'tvb-reveal' }, h('summary', { text: 'Ren’s sets this battle' }), h('ul', {}, sets)) : null,
           h('div', { class: 'tvb-cmd-grid tvb-cmd-grid--3', 'data-grid': '' },
-            won ? menuButton('Download certificate', () => {
-              const opened = window.TVBCertificate.open({ name: G.name, team: certificateTeam.slice(), difficulty: C.difficultyLabel(C.difficulty(mods)), tier: C.tier(mult), multiplier: mult.toFixed(2), modifiers: C.MODS.filter(m => mods[m.k] && !m.cosmetic).map(m => m.label), date: new Date().toLocaleDateString(undefined, {year:'numeric',month:'long',day:'numeric'}) });
-              if (!opened) textEl.textContent = 'Allow pop-ups for this site, then try Download certificate again.';
-            }) : null,
+            won ? menuButton('View certificate', () => window.TVBCertificate.open(certificate)) : null,
             menuButton('Rematch', () => { dispose(); go('battle', { seed: C.newSeed() }); }, { class: 'tvb-cmd tvb-cmd--go' }),
             menuButton('Edit party', () => leave('builder')),
             menuButton('Title', () => leave('title'), { 'data-back': 'title' }))));
