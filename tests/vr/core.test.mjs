@@ -353,8 +353,8 @@ test('a hidden random team and the trainer name are never written to storage', (
 
 test('trainer names: trimmed, 1-20 graphemes, no control characters, default when empty', () => {
   assert.deepEqual(C.cleanName('  Ash  Ketchum '), { name: 'Ash Ketchum', error: '' });
-  assert.equal(C.cleanName('').name, C.DEFAULT_NAME);
-  assert.equal(C.cleanName('   ').name, C.DEFAULT_NAME);
+  assert.deepEqual(C.cleanName(''), { name: '', error: 'Enter a trainer name to continue.' }, 'a name is required');
+  assert.ok(C.cleanName('   ').error, 'spaces only counts as empty');
   assert.ok(C.cleanName('a\u0007b').error);
   assert.ok(C.cleanName('evil‮eman').error, 'bidi override');
   assert.ok(C.cleanName('x'.repeat(21)).error);

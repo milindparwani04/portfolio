@@ -18,7 +18,7 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 
 | Area | Files | Notes |
 |---|---|---|
-| Visible portfolio UI | `public/index.html` (the `.portfolio-v2` block only), `public/ui-v2.css`, `public/ui-v2.js`, `public/pdos-icons.js` | Parwani-DOS redesign (see `design_handoff_parwani_dos/`), every section migrated. Cache-bust versions: `ui-v2.css?v=50`, `ui-v2.js?v=67`, `pdos-icons.js?v=7` — bump on every change. The legacy tool modals further down `index.html` are still live: the Toolbox panel borrows them. |
+| Visible portfolio UI | `public/index.html` (the `.portfolio-v2` block only), `public/ui-v2.css`, `public/ui-v2.js`, `public/pdos-icons.js` | Parwani-DOS redesign (see `design_handoff_parwani_dos/`), every section migrated. Cache-bust versions: `ui-v2.css?v=50`, `ui-v2.js?v=68`, `pdos-icons.js?v=7` — bump on every change. The legacy tool modals further down `index.html` are still live: the Toolbox panel borrows them. |
 | Worker routes and data | `worker/index.js`, `worker/gig-picks.json`, `migrations/` | Spotify listening data, heart rate, steps, gigs, Game card (PlayStation + Steam). Gig Finder rebuilt 2026-10-02. Untouched by the Parwani-DOS redesign so far (Phase 1 is frontend-only). |
 
 ## Media tracker (how it works, for the next session and the weekly routine)
@@ -87,6 +87,13 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 - Lighthouse `valid-source-maps` flags a third-party library map; it doesn't affect the score categories that matter (production: 90 / 100 / 100).
 
 ## Work log (newest first)
+
+### 2026-10-12 — Trainer name required; cutscene: battle no longer shows through
+
+- **Name required (Milind):** the player must enter a name to move on. `VRCore.cleanName('')` now returns the error "Enter a trainer name to continue." (was the default "Challenger"; `DEFAULT_NAME` removed). Name screen: placeholder "Trainer name", `aria-required`, hint "Required: 1 to 20 characters…", Continue disabled until the field has non-space text, and Enter on an empty field shows the error (a disabled submit blocks implicit submit, so a keydown handler calls `submit()`). Tested: core tests updated (62 pass); a headless Edge check of the name screen (disabled when empty or spaces only, Enter shows the error and stays on the screen, a name goes on to the builder, no page errors).
+
+- **Brief (Milind, after watching it live in Chrome):** a translucent Pokémon showed in the cutscene. Cause: Codex's `.tvb-dialogue-scene` was `opacity: .55` over a `#101522e8` (91%) layer, so Ren's Pokémon and HP boxes from the battle underneath bled through. Now the layer is solid `#101522` and the backdrop is dimmed with `filter: brightness(.62) saturate(.85)` instead of opacity. Checked with a bright striped layer behind the cutscene (none visible, court and stadium); `dialogue-browser.cjs` passes. `VR_VERSION` 31, `ui-v2.js?v=68`.
+- **Seen live while getting there (production, Claude in Chrome):** party Calyrex-Shadow / Flutter Mane / Gholdengo / Dragapult with Skip animations on reached the cutscene on turn 2. The cutscene clock pauses while the tab is hidden (by design), so it waits if its window isn't in front.
 
 ### 2026-10-12 — Cutscene UI; balanced Random team; Knock Off on Mega Stones; Focus Sash multi-hit playback
 

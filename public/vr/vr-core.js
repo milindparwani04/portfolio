@@ -14,7 +14,6 @@
   const MIN_BATTLE = 2;
   const BRING = 4;
   const ROMAN = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX'];
-  const DEFAULT_NAME = 'Challenger';
 
   // Least reward contribution first, the hardest last. Level Cap 45: the player's team is Lv 45
   // against the champion's Lv 50 (at Worlds everyone is Lv 50) — a game rule, not a Worlds rule.
@@ -438,15 +437,15 @@
   }
 
   // ---------- Trainer name ----------
-  // 1-20 grapheme clusters after trimming; no control or formatting characters. Empty input gets
-  // the default name. Returns { name, error }.
+  // 1-20 grapheme clusters after trimming; no control or formatting characters. A name is required
+  // to continue (Milind, 2026-10-12): empty input is an error. Returns { name, error }.
   function graphemes(text) {
     if (typeof Intl !== 'undefined' && Intl.Segmenter) return [...new Intl.Segmenter(undefined, { granularity: 'grapheme' }).segment(text)].length;
     return [...text].length;
   }
   function cleanName(input) {
     const text = String(input == null ? '' : input).normalize('NFC').replace(/\s+/g, ' ').trim();
-    if (!text) return { name: DEFAULT_NAME, error: '' };
+    if (!text) return { name: '', error: 'Enter a trainer name to continue.' };
     // Zero-width joiners stay (emoji sequences and many scripts need them); bidi controls don't.
     if (/[\u0000-\u001f\u007f-\u009f​‎‏‪-‮⁠-⁤⁦-⁩﻿]/.test(text)) return { name: '', error: 'Names can’t contain control characters.' };
     if (graphemes(text) > 20) return { name: '', error: 'Keep it to 20 characters or fewer.' };
@@ -754,7 +753,7 @@
   }
 
   return {
-    TEAM_SIZE, MIN_BATTLE, BRING, ROMAN, DEFAULT_NAME, MODS, TIERS, RANDOM_ITEMS, NATURES, STATS, STORE, LEGACY_STORES, CLASS_NAME, TYPES, RANDOM_FINALS,
+    TEAM_SIZE, MIN_BATTLE, BRING, ROMAN, MODS, TIERS, RANDOM_ITEMS, NATURES, STATS, STORE, LEGACY_STORES, CLASS_NAME, TYPES, RANDOM_FINALS,
     multiplier, tier, difficulty, difficultyLabel, rng, newSeed, shuffle, moveSlot, toId, CHAMPION_SPREADS, RANDOM_STRENGTH, RANDOM_MIN_BST, championStrength, teamStrength,
     catalog, decodeLearnset, legalMoves, classOf, isSpecial, isFinal, typeQuery, matches, defaultMember, nextUid, joinError, addMember, removeMember, updateMember,
     itemProblem, memberProblems, partyProblems, calcStats, spreadOf, memberStats, speedRange, TYPE_CHART, typeMult, moveType, effectiveness,

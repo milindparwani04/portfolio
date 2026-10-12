@@ -131,6 +131,10 @@ Settled removals (do not re-propose without flagging): Today Somewhere project (
 
 ## Session log
 
+### 2026-10-12 — Trainer name required; cutscene backdrop made solid
+
+At Milind's request (Claude): the player must enter a trainer name to continue (no default name; Continue disabled until there is one). The battle (Ren's Pokémon, HP boxes) no longer shows through the championship cutscene; the backdrop is solid and dimmed. `VR_VERSION` 31, `ui-v2.js?v=68`.
+
 ### 2026-10-12 — Released `126ecb7` and verified live
 
 Claude pushed Claude's and Codex's The Very Best work together (battle UI, fair Random team, Knock Off/Sash, cutscene restyle, title credit fix; Codex's pixel-Ren dialogue). Cloudflare deployed in about 50 s; `ui-v2.js?v=67`, the VR v30 files and `vr-engine.js?v=6` are served byte-identical to the commit. On production: the battle UI test passed against the live engine worker (Skip animations, effectiveness chips and target labels, tooltips, a turn in 35 ms), the dialogue cutscene renders with the new controls, the title credit clears the menu at seven sizes, and both certificates open and download. Engine rules (Knock Off, Sash) and Random team balance are covered by the engine/core tests on the same bytes.

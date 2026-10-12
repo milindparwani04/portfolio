@@ -345,8 +345,15 @@
 
   // ---------- Name entry ----------
   G.screens.name = (screen) => {
-    const input = h('input', { class: 'tvb-input', type: 'text', id: 'tvbName', maxlength: '60', autocomplete: 'off', spellcheck: 'false', value: G.name || '', placeholder: C.DEFAULT_NAME, 'aria-describedby': 'tvbNameHint tvbNameError' });
+    const input = h('input', { class: 'tvb-input', type: 'text', id: 'tvbName', maxlength: '60', autocomplete: 'off', spellcheck: 'false', value: G.name || '', placeholder: 'Trainer name', 'aria-required': 'true', 'aria-describedby': 'tvbNameHint tvbNameError' });
     const error = h('p', { class: 'tvb-error', id: 'tvbNameError', role: 'alert' });
+    // A name is required (Milind, 2026-10-12): Continue stays disabled until there is one, and
+    // Enter on an empty field says why.
+    const cont = h('button', { type: 'submit', class: 'tvb-btn tvb-btn--go' }, 'Continue ▸');
+    const sync = () => { cont.disabled = !input.value.trim(); if (input.value.trim()) error.textContent = ''; };
+    input.addEventListener('input', sync);
+    // A disabled submit button blocks Enter's implicit submit, so explain it here instead.
+    input.addEventListener('keydown', (e) => { if (e.key === 'Enter' && cont.disabled) { e.preventDefault(); submit(); } });
     const submit = () => {
       const { name, error: problem } = C.cleanName(input.value);
       if (problem) { error.textContent = problem; A.play('error'); input.focus(); return; }
@@ -357,10 +364,11 @@
     const form = h('form', { class: 'tvb-name', onsubmit: (e) => { e.preventDefault(); submit(); } },
       h('label', { for: 'tvbName', class: 'tvb-label', text: 'Your trainer name' }),
       input,
-      h('p', { class: 'tvb-dim', id: 'tvbNameHint', text: `Up to 20 characters. Leave it empty to battle as ${C.DEFAULT_NAME}. Kept only while this window is open.` }),
+      h('p', { class: 'tvb-dim', id: 'tvbNameHint', text: 'Required: 1 to 20 characters. Kept only while this window is open.' }),
       error,
-      h('div', { class: 'tvb-row' }, h('button', { type: 'submit', class: 'tvb-btn tvb-btn--go' }, 'Continue ▸')));
+      h('div', { class: 'tvb-row' }, cont));
     screen.append(header('New challenger', () => go('title')), h('div', { class: 'tvb-center' }, form));
+    sync();
     input.focus();
     input.select();
   };
