@@ -935,7 +935,7 @@ html { scrollbar-gutter: stable; }
   .pdos-crt-line { display: none !important; }
 }
 
-/* Crack: its own overlay, drawn in the original site's theme (the pre-DOS crack.html look:
+/* Crack: its own overlay, drawn in the original site's theme (the pre-DOS look:
    Anton titles, IBM Plex Mono readouts, Inter copy, amber locks). Tokens are --ck-* because the
    overlay sits inside .portfolio-v2, which redefines --display/--mono/--bg for the DOS theme.
    Fonts load when the window first opens (openCrack in ui-v2.js). */

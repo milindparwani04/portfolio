@@ -996,7 +996,7 @@
   }
 
   // Crack (project 06): its own overlay in the original site's theme. Nothing loads with the page;
-  // the first open fetches the old theme's fonts and /crack-game.js (the same script /crack runs),
+  // the first open fetches the old theme's fonts and /crack-game.js,
   // then mounts the game into the overlay. Each open is a fresh mount, each close disposes it.
   const CRACK_VERSION = '1';
   function initCrack(overlay, isOpen) {

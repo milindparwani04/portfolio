@@ -1,7 +1,7 @@
-/* [CRACK] game logic, shared by the standalone /crack page and the Crack overlay on the home page.
+/* [CRACK] game logic for the Crack overlay on the home page.
    CrackGame.mount(root) wires up the markup inside root (found by data-ck attributes) and returns
    { dispose } — dispose stops every timer and removes the key listener, so closing the overlay
-   leaves nothing running. The rules are unchanged from the original crack.html. */
+   leaves nothing running. The rules are unchanged from the original game. */
 (function(){
   /* LEVEL_RATE is solved, not guessed: it places the final digit of the final
      level at exactly MIN, so the curve peaks at FINAL rather than clipping early. */
