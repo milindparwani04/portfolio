@@ -916,7 +916,7 @@ html { scrollbar-gutter: stable; }
 @keyframes pxscroll { from { transform: translateY(0); } to { transform: translateY(-50%); } }
 @keyframes pxblink { 50% { opacity: 0; } }
 @keyframes pxspin { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-@keyframes pxeq { 0% { transform: scaleY(.25); } 50% { transform: scaleY(1); } 100% { transform: scaleY(.45); } }
+@keyframes pxvu { 0% { clip-path: inset(62.5% 0 0 0); } 20% { clip-path: inset(25% 0 0 0); } 40% { clip-path: inset(50% 0 0 0); } 60% { clip-path: inset(0 0 0 0); } 80% { clip-path: inset(37.5% 0 0 0); } }
 @keyframes pxrot { to { transform: rotate(360deg); } }
 @keyframes pxflame { 0% { opacity: .95; transform: translateY(0); } 50% { opacity: .35; transform: translateY(-100%); } 100% { opacity: .95; transform: translateY(0); } }
 @keyframes pxglow { 0%, 100% { filter: drop-shadow(0 0 3px #1ed760) drop-shadow(0 0 0 #1ed760); } 50% { filter: drop-shadow(0 0 10px #1ed760) drop-shadow(0 0 22px rgba(30, 215, 96, .6)); } }

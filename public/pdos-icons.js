@@ -138,10 +138,58 @@
     return frame(22 * P, 20 * P, {}, glow, ...cells);
   }
 
-  function iconEq(P, on) {
-    const idle = [2, 3, 2, 4, 3, 5, 3, 2, 3];
-    const bars = idle.map((h, i) => E('div', { key: i, style: { width: P, height: 8 * P, transformOrigin: 'bottom', background: `repeating-linear-gradient(to top, currentColor 0 ${P - 1}px, transparent ${P - 1}px ${P}px)`, transform: on ? undefined : `scaleY(${h / 8})`, animation: on ? `pxeq ${0.6 + (i % 3) * 0.18}s steps(4) ${i * 0.07}s infinite alternate` : 'none' } }));
-    return frame(9 * P + 8 * P, 8 * P, { display: 'flex', alignItems: 'flex-end', gap: P }, ...bars);
+  // Sounds Like (project 01): a Pioneer DDJ-FLX4 seen from above. Two vinyls on the jog wheels, a
+  // mixer between them, cue / play and eight pads under each deck. On hover the vinyls spin, the pads,
+  // cue and play light up and the level meters bounce.
+  const PAD_COL = ['#ff3b5c', '#ff9a1f', '#ffd43b', '#36e05a', '#2fb8ff', '#7b5cff', '#ff5cd6', '#f4f3ef'];
+  function iconDecks(P, on) {
+    const W = 34, H = 17, cells = [];
+    const put = (c, r, col, extra) => cells.push(E('div', { style: { position: 'absolute', left: c * P, top: r * P, width: P, height: P, background: col, ...extra } }));
+    for (let r = 0; r < H; r++) for (let c = 0; c < W; c++) {
+      if ((r === 0 || r === H - 1) && (c === 0 || c === W - 1)) continue;
+      const edge = r === 0 || r === H - 1 || c === 0 || c === W - 1;
+      put(c, r, edge ? '#1c1c1c' : (c >= 13 && c <= 20 ? '#232327' : '#2b2b30'));
+    }
+    // Mixer: trim / EQ / filter knobs, channel faders and the crossfader.
+    [14, 19].forEach((c) => [2, 4, 6, 8].forEach((r) => put(c, r, '#c9ccd1')));
+    [14, 19].forEach((c) => { for (let r = 10; r <= 13; r++) put(c, r, r === 11 ? '#e8e8e8' : '#111114'); });
+    for (let c = 14; c <= 19; c++) put(c, 15, c === 16 || c === 17 ? '#e8e8e8' : '#111114');
+    // Level meters: dim LEDs underneath, a lit copy on top that bounces on hover.
+    const vuCol = (r) => (r <= 3 ? ['#5a1d16', '#ff3b1f'] : r <= 5 ? ['#5a4a16', '#ffd43b'] : ['#1d4a26', '#36e05a']);
+    const meters = [16, 17].map((c, i) => {
+      for (let r = 2; r <= 9; r++) put(c, r, vuCol(r)[0]);
+      const lit = [];
+      for (let r = 0; r < 8; r++) lit.push(E('div', { style: { position: 'absolute', left: 0, top: r * P, width: P, height: P, background: vuCol(r + 2)[1] } }));
+      return E('div', { style: { position: 'absolute', left: c * P, top: 2 * P, width: P, height: 8 * P, opacity: on ? 1 : 0, animation: on ? `pxvu ${0.9 + i * 0.23}s steps(1) ${-i * 0.31}s infinite` : 'none' } }, ...lit);
+    });
+    // Each deck: cue and play on the left, two rows of four pads beside them.
+    [1, 21].forEach((x0, d) => {
+      [[13, '#ff9a1f'], [15, '#36e05a']].forEach(([r, lit]) => [0, 1].forEach((k) => put(x0 + k, r, on ? lit : '#4a4a50', { transition: 'background .15s steps(2)' })));
+      [13, 15].forEach((r, row) => [3, 5, 7, 9].forEach((k, i) => {
+        const n = row * 4 + i;
+        put(x0 + k, r, on ? PAD_COL[(n + d * 3) % 8] : '#3a3a40', { transition: `background 0s linear ${on ? (n * 60 + d * 30) : 0}ms` });
+      }));
+    });
+    // Jog wheels: a static silver ring around a spinning vinyl (grooves, a sheen and a marked label).
+    const jog = (x0, label) => {
+      const ring = [], disc = [];
+      for (let r = 0; r < 12; r++) for (let c = 0; c < 12; c++) {
+        const dist = Math.hypot(c + 0.5 - 6, r + 0.5 - 6);
+        if (dist > 6) continue;
+        const at = { position: 'absolute', left: c * P, top: r * P, width: P, height: P };
+        if (dist > 5.1) { ring.push(E('div', { style: { ...at, background: dist > 5.6 ? '#6b7078' : '#9aa0a8' } })); continue; }
+        const ang = Math.atan2(r + 0.5 - 6, c + 0.5 - 6);
+        let col = '#141416';
+        if (dist < 0.8) col = '#d9dde2';
+        else if (dist <= 1.9) col = r === 4 && c === 5 ? '#f4f3ef' : label;
+        else if (ang > -2.4 && ang < -1.9) col = '#5a5a66';
+        else if ((dist > 3 && dist < 3.5) || (dist > 4.2 && dist < 4.6)) col = '#2c2c32';
+        disc.push(E('div', { style: { ...at, background: col } }));
+      }
+      const spin = E('div', { style: { position: 'absolute', left: 0, top: 0, width: 12 * P, height: 12 * P, animation: 'pxrot 1.4s steps(12) infinite', animationPlayState: on ? 'running' : 'paused' } }, ...disc);
+      return E('div', { style: { position: 'absolute', left: x0 * P, top: P, width: 12 * P, height: 12 * P } }, spin, ...ring);
+    };
+    return frame(W * P, H * P, {}, ...cells, ...meters, jog(1, '#e3350d'), jog(21, '#2f6fd6'));
   }
   
   
@@ -317,12 +365,12 @@
   const ICONS = {
     book: [iconBook, 5], board: [iconBoard, 4], toolbox: [iconToolbox, 4], projector: [iconProjector, 4],
     spotify: [iconSpotifySym, 4], guitar: [iconGuitar3, 3], safe: [iconSafe, 5], ball: [makeBall, 6],
-    eq: [iconEq, 6], skyline: [iconSkyline, 4], portal: [iconPortal, 5], globe: [iconGlobe, 5], bulb: [iconBulb, 5], terminal: [iconTerminal, 5]
+    decks: [iconDecks, 5], skyline: [iconSkyline, 4], portal: [iconPortal, 5], globe: [iconGlobe, 5], bulb: [iconBulb, 5], terminal: [iconTerminal, 5]
   };
   // Each sprite's size in grid cells (its frame at P = 1), so fitting never has to build a copy.
   const UNITS = {
     book: [24, 12], board: [28, 13], toolbox: [16, 14], projector: [31, 14], spotify: [16, 16], guitar: [24, 25],
-    safe: [16, 14], ball: [14, 19.6], eq: [17, 8], skyline: [24, 14], portal: [22, 20], globe: [16, 18], bulb: [12, 16], terminal: [16, 14]
+    safe: [16, 14], ball: [14, 19.6], decks: [34, 17], skyline: [24, 14], portal: [22, 20], globe: [16, 18], bulb: [12, 16], terminal: [16, 14]
   };
   const unitSize = (name) => UNITS[name];
 

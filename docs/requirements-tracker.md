@@ -80,9 +80,9 @@ Each project needs before `Live`: working happy path, error/empty states, mobile
 
 | ID | Project | What it must do | Dependencies | Priority | Status |
 |---|---|---|---|---|---|
-| PR-01 | Sounds Like | Enter a track, get its audio profile (energy, valence, danceability, tempo, key) and similar-feeling tracks | `/api/audio-features` (live); similarity source to choose | 1 | Built (partial) |
+| PR-01 | Sounds Like | Enter a track, get its audio profile (energy, valence, danceability, tempo, key) and similar-feeling tracks. Since 2026-10-12 one project with Prompt Playlist (PR-03): card titled "Sounds Like", DDJ-FLX4 decks icon | `/api/audio-features` (live); similarity source to choose | 1 | Built (partial) |
 | PR-02 | Where Next | Suggest a place to go, with the Liveliness Index scoring how busy/lively it is now | Places API (Google Places or Foursquare) + new Worker route | 2 | Planned |
-| PR-03 | Prompt Playlist | Text prompt → playlist | Spotify search; LLM or rules for mapping | 3 | Planned |
+| PR-03 | Prompt Playlist | Text prompt → playlist. Part of Sounds Like (PR-01) since 2026-10-12, not a separate project; works the same way inside it | Spotify search; LLM or rules for mapping | 3 | Planned |
 | PR-04 | YouShant | Chrome extension (MV3, [repo](https://github.com/milindparwani04/youshant)): YouTube opens only for a video clicked from Google Search. Project card 02 links to its [Chrome Web Store page](https://chromewebstore.google.com/detail/youshant/gldhpaeejnamjbhahbmgjannkckehfmh) | None on this site | 4 | Live 2026-10-12 (replaced Today Somewhere, dropped: Where Next and the Gig Finder already cover it) |
 | PR-05 | Speed Round | Timed trivia game, local high score | None (client-side) | 5 | Planned |
 | PR-06 | Untitled Terminal Adventure | Text adventure played in the terminal aesthetic | None (client-side) | 6 | Planned |

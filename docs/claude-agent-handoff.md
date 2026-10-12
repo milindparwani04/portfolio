@@ -18,7 +18,7 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 
 | Area | Files | Notes |
 |---|---|---|
-| Visible portfolio UI | `public/index.html` (the `.portfolio-v2` block only), `public/ui-v2.css`, `public/ui-v2.js`, `public/pdos-icons.js` | Parwani-DOS redesign (see `design_handoff_parwani_dos/`), every section migrated. Cache-bust versions: `ui-v2.css?v=48`, `ui-v2.js?v=62`, `pdos-icons.js?v=6` — bump on every change. The legacy tool modals further down `index.html` are still live: the Toolbox panel borrows them. |
+| Visible portfolio UI | `public/index.html` (the `.portfolio-v2` block only), `public/ui-v2.css`, `public/ui-v2.js`, `public/pdos-icons.js` | Parwani-DOS redesign (see `design_handoff_parwani_dos/`), every section migrated. Cache-bust versions: `ui-v2.css?v=49`, `ui-v2.js?v=63`, `pdos-icons.js?v=7` — bump on every change. The legacy tool modals further down `index.html` are still live: the Toolbox panel borrows them. |
 | Worker routes and data | `worker/index.js`, `worker/gig-picks.json`, `migrations/` | Spotify listening data, heart rate, steps, gigs, Game card (PlayStation + Steam). Gig Finder rebuilt 2026-10-02. Untouched by the Parwani-DOS redesign so far (Phase 1 is frontend-only). |
 
 ## Media tracker (how it works, for the next session and the weekly routine)
@@ -87,6 +87,12 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 - Lighthouse `valid-source-maps` flags a third-party library map; it doesn't affect the score categories that matter (production: 90 / 100 / 100).
 
 ## Work log (newest first)
+
+### 2026-10-12 — Sounds Like: DDJ-FLX4 icon and single title
+
+- **Brief (Milind):** swap the Sounds Like / Prompt Playlist card's icon for a Pioneer DDJ-FLX4; on hover the vinyls spin and the deck lights come on. Rename the card to just "Sounds Like". The two are one project now, working the same way under one name, so the description ("…Turn text into personalised playlists.") stays.
+- **Built:** `pdos-icons.js`: `iconDecks` (34×17 grid, cap P=5) replaces `iconEq`. Body and centre mixer (knobs, two channel faders, crossfader); each deck has cue/play and two rows of four pads; each jog is a static silver ring over a 12×12 vinyl (grooves, a sheen streak, coloured label with a white mark) rotating with `pxrot 1.4s steps(12)`, paused when idle. On hover the pads take colours from `PAD_COL` with a staggered delay, cue goes orange, play green, and a lit copy of each level meter fades in and bounces with the new `pxvu` keyframe (clip-path, `steps(1)`). `ui-v2.css`: `pxvu` replaces the now-unused `pxeq`. `index.html` / `ui-v2.js`: `data-icon="decks"`, title "Sounds Like". CSS v49 / UI v63 / icons v7.
+- **Tested** (Claude in Chrome, `python -m http.server` on `public/`, 1389×868): card shows the decks idle (vinyls still, pads dim, meters dim); hover spins both vinyls and lights the pads, cue, play and meters; no console errors.
 
 ### 2026-10-12 — YouShant card; Crimson removed
 

@@ -877,7 +877,7 @@
   // and the Toolbox panel. While any of them is open the page is locked (html.pdos-locked: no
   // scrolling, no 1-7 keys, no in-page jump links) until it is closed with ✕, the scrim or Esc.
   const PDOS_PROJECTS = {
-    music: { n: '01', tag: 'Music', title: 'Sounds Like + Prompt Playlist', desc: 'A similarity engine for music discovery. Turn text into personalised playlists.', status: 'Phase 02 / Similarity engine', color: '#1ed760', file: 'sounds_like.vol', src: '/sounds-like.html' },
+    music: { n: '01', tag: 'Music', title: 'Sounds Like', desc: 'A similarity engine for music discovery. Turn text into personalised playlists.', status: 'Phase 02 / Similarity engine', color: '#1ed760', file: 'sounds_like.vol', src: '/sounds-like.html' },
     where: { n: '03', tag: 'Tool', title: 'Where Next', desc: 'A simple tool for exploring new destinations.', status: 'Planned · In development', color: 'oklch(0.88 0.07 85)', file: 'where_next.vol' },
     speed: { n: '04', tag: 'Game', title: 'Speed Round', desc: 'A fast-paced trivia game for curious minds.', status: 'Planned · In development', color: 'oklch(0.74 0.16 0)', file: 'speed_round.exe' },
     terminal: { n: '05', tag: 'Game', title: 'Untitled Terminal Adventure', desc: 'A text-based experiment in choice and consequence.', status: 'Planned · In development', color: 'oklch(0.75 0.16 40)', file: 'terminal_adventure.exe' },

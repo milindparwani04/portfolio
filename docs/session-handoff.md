@@ -121,6 +121,10 @@ Settled removals (do not re-propose without flagging): Today Somewhere project (
 
 ## Session log
 
+### 2026-10-12 — Sounds Like card: DJ decks icon, one name
+
+At Milind's request: project card 01 is now titled just "Sounds Like" (card and window). Sounds Like and Prompt Playlist are one project and work the same way under it, so the description keeps the playlist line. Its pixel icon is now a Pioneer DDJ-FLX4 (`decks` in `pdos-icons.js`, replacing the equaliser): on hover the vinyls spin, the pads, cue and play light up and the level meters bounce. CSS v49 / UI v63 / icons v7. Checked in Chrome on a local static server. No Worker changes.
+
 ### 2026-10-12 — YouShant replaces Today Somewhere; Crimson theme removed
 
 At Milind's request: project card 02 is now YouShant, his Chrome extension. The card is a link to its Chrome Web Store page (new tab), not a project window, and has a new pixel icon (`portal` in `pdos-icons.js`: the extension's stone arch, wizard and play button; the portal lights up from the centre on hover). Today Somewhere is dropped, as Where Next and the Gig Finder already cover it. The Crimson theme is gone; anyone who had it saved gets Night. CSS v48 / UI v62 / icons v6. Checked in Chrome on a local static server. No Worker changes.
