@@ -415,6 +415,28 @@
 .tvb-cmd--fight { border-left-color: #d92f2c; }
 .tvb-cmd--back, .tvb-cmd[data-back] { color: #4a4a52; }
 .tvb-cmd--mega[aria-pressed="true"] { background: #7a3cc4; color: #fff; }
+/* Skip animations (battle bar): pressed = yellow; playback is instant, so no HP bar tween either. */
+.tvb-btn--skip[aria-pressed="true"] { background: var(--t-yellow); border-color: var(--t-yellow); color: #111; }
+.tvb-frame.is-fast .tvb-hp-fill { transition: none; }
+/* Effectiveness under a move and on a target button: green super, red not very, grey none. */
+.tvb-move-eff { display: flex; flex-wrap: wrap; gap: 3px 5px; margin-top: 2px; }
+.tvb-eff { padding: 0 4px; border: 1px solid currentColor; font-size: .64rem; line-height: 1.5; letter-spacing: 0; text-transform: none; white-space: nowrap; color: #4a4a52; }
+.tvb-eff[data-eff="super"] { color: #1e7a3f; }
+.tvb-eff[data-eff="weak"] { color: #b03a22; }
+.tvb-eff[data-eff="none"] { color: #6b6b74; text-decoration: line-through; }
+.tvb-cmd:hover .tvb-eff, .tvb-cmd:focus-visible .tvb-eff { color: #f4f3ef; }
+.tvb-cmd:hover .tvb-eff[data-eff="super"], .tvb-cmd:focus-visible .tvb-eff[data-eff="super"] { color: #6fe08f; }
+.tvb-cmd:hover .tvb-eff[data-eff="weak"], .tvb-cmd:focus-visible .tvb-eff[data-eff="weak"] { color: #ff9a7a; }
+/* Showdown-style Pokémon tooltip over the arena (hover a sprite; tap on touch screens). */
+.tvb-tip { position: absolute; z-index: 20; width: max-content; max-width: min(270px, 62cqw); max-height: calc(100% - 8px); overflow: hidden; display: flex; flex-direction: column; gap: 3px; padding: 8px 10px; background: rgba(22, 18, 31, .95); color: #f4f3ef; border: 2px solid #f4f3ef; box-shadow: 4px 4px 0 rgba(0, 0, 0, .45); font-size: .7rem; line-height: 1.4; pointer-events: none; }
+.tvb-tip[hidden] { display: none; }
+.tvb-tip p { margin: 0; }
+.tvb-tip ul { margin: 0; padding-left: 14px; }
+.tvb-tip-head { display: flex; flex-wrap: wrap; gap: 0 6px; align-items: baseline; font-size: .8rem; }
+.tvb-tip-label { color: var(--t-yellow); }
+.tvb-tip-dim { color: #b9b9c2; }
+.tvb-tip .is-up { color: #6fe08f; }
+.tvb-tip .is-down { color: #ff9a7a; }
 .tvb-cmd .tvb-move-meta { color: #4a4a52; text-transform: none; }
 .tvb-cmd:hover .tvb-move-meta, .tvb-cmd:focus-visible .tvb-move-meta { color: inherit; }
 /* Pinned to the bottom of the scrolling panel: six team-preview cards overflow it, and the
@@ -471,6 +493,32 @@
 /* The video already has bottom subtitles; retain live dialogue only for screen readers. */
 .tvb-cinematic-caption { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
 .tvb-cinematic [hidden] { display: none; }
+.tvb-dialogue-sequence { background: #101522e8; }
+.tvb-dialogue-scene { position: absolute; inset: 0; opacity: .55; }
+.tvb-dialogue-scene svg { width: 100%; height: 100%; }
+.tvb-dialogue-ren { position: absolute; left: 12%; bottom: 32%; width: 132px; height: 204px; image-rendering: pixelated; filter: drop-shadow(6px 8px 0 #101522); }
+.tvb-dialogue-box { position: absolute; left: 5%; right: 5%; bottom: 5%; padding: 24px 18px 16px; border: 3px solid #f2d8a0; background: #182330; color: #fff0d6; box-shadow: 0 0 0 3px #080c12, 6px 6px 0 3px #080c12; }
+/* Ren's nameplate sits on the box's top edge. */
+.tvb-dialogue-box strong { position: absolute; left: 14px; top: -17px; padding: 5px 12px 4px; background: #ffcf78; color: #182330; border: 3px solid #080c12; font-family: 'Press Start 2P', var(--t-font); font-size: 10px; line-height: 1; letter-spacing: .08em; }
+.tvb-dialogue-text { min-height: 3em; margin: 0 0 12px; font-size: clamp(14px, 1.8vw, 22px); line-height: 1.5; }
+/* A segmented pixel bar for the 38 seconds. */
+.tvb-dialogue-box progress { -webkit-appearance: none; appearance: none; display: block; width: 100%; height: 10px; padding: 1px; border: 2px solid #f2d8a0; background: #0d141d; color: #ffcf78; }
+.tvb-dialogue-box progress::-webkit-progress-bar { background: #0d141d; }
+.tvb-dialogue-box progress::-webkit-progress-value { background: repeating-linear-gradient(90deg, #ffcf78 0 10px, transparent 10px 12px); }
+.tvb-dialogue-box progress::-moz-progress-bar { background: repeating-linear-gradient(90deg, #ffcf78 0 10px, transparent 10px 12px); }
+/* Controls: pixel buttons in the box's colours; Skip is the highlighted one and shows its key. */
+.tvb-dialogue-sequence .tvb-cinematic-controls { right: 14px; top: 14px; z-index: 2; gap: 10px; }
+.tvb-cine-btn { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 6px 12px; background: #182330; color: #fff0d6; border: 3px solid #f2d8a0; box-shadow: 4px 4px 0 #080c12; font-family: 'Press Start 2P', var(--t-font); font-size: 10px; line-height: 1; letter-spacing: .06em; text-transform: uppercase; cursor: pointer; }
+.tvb-cine-btn:hover, .tvb-cine-btn:focus-visible { background: #f2d8a0; color: #182330; outline: none; }
+.tvb-cine-btn:focus-visible { box-shadow: 0 0 0 3px #080c12, 0 0 0 6px #ffcf78; }
+.tvb-cine-btn:active { transform: translate(3px, 3px); box-shadow: 1px 1px 0 #080c12; }
+.tvb-cine-btn--skip { background: #ffcf78; border-color: #ffcf78; color: #182330; }
+.tvb-cine-btn--skip:hover, .tvb-cine-btn--skip:focus-visible { background: #fff0d6; border-color: #fff0d6; }
+.tvb-cine-icon { font-size: 14px; line-height: 1; }
+.tvb-cine-btn--sound[aria-pressed="false"] { color: #9aa3b5; border-color: #6b7487; }
+.tvb-cine-key { padding: 3px 4px 2px; border: 2px solid currentColor; font: inherit; font-size: 8px; opacity: .75; }
+@media (hover: none) { .tvb-cine-key { display: none; } }
+@media (max-width: 600px) { .tvb-dialogue-ren { left: 12%; bottom: 43%; width: 88px; height: 136px; } .tvb-dialogue-box { padding: 22px 12px 12px; } .tvb-dialogue-text { min-height: 6em; } .tvb-dialogue-sequence .tvb-cinematic-controls { flex-wrap: wrap; right: 10px; top: 10px; } .tvb-cine-key { display: none; } }
 .tvb-esc-progress { position: absolute; left: 0; right: 0; top: 0; height: 4px; background: rgba(255, 255, 255, .15); }
 .tvb-esc-progress span { display: block; height: 100%; width: 0; background: #f7c947; }
 .tvb-esc-skip { position: absolute; right: 10px; top: 12px; z-index: 2; }
@@ -583,8 +631,9 @@
 .tvb-tm-board--rayquaza .tvb-tm-item.is-selected { background: #f3c8a3; color: #233c37; }
 .tvb-tm-board--rayquaza .tvb-tm-item:focus-visible { outline: 2px solid #fff0d4; outline-offset: 2px; }
 .tvb-tm-board--rayquaza .tvb-tm-cursor { width: 12px; font-size: 12px; }
-.tvb-rayquaza-credit { position: absolute; left: 1.6%; bottom: 1.8%; margin: 0; padding: 4px 7px; color: #f7e7cd; background: #19332bf5; font-size: 11px; letter-spacing: .025em; }
-.tvb-rayquaza-credit a { color: inherit; text-decoration: none; }
+/* Two short lines, so the tag stays clear of the centred menu bar beside it (one line ran under it). */
+.tvb-rayquaza-credit { position: absolute; left: 1.6%; bottom: 1.8%; margin: 0; padding: 4px 7px; color: #f7e7cd; background: #19332bf5; font-size: 10px; line-height: 1.35; letter-spacing: .025em; }
+.tvb-rayquaza-credit a { display: block; color: inherit; text-decoration: none; }
 .tvb-rayquaza-credit a:hover { text-decoration: underline; }
 .tvb-rayquaza-credit a:focus-visible { outline: 2px solid #fff0d4; outline-offset: 2px; }
 /* Portrait preserves the complete artwork above a readable control panel, never crops Rayquaza. */

@@ -1,5 +1,10 @@
 # PARWANI — Session Handoff
 
+## 2026-10-12 — Pixel Ren dialogue sequence
+
+Codex replaced the video championship sequence with a timed 38-second pixel-Ren dialogue overlay, retaining music, crowd/stadium reveal and engine-owned revival. Skip dialogue jumps to the drop/resume cue; sequence cancellation and phone controls covered by passing new tests/vr/dialogue-browser.cjs. Loader v30. Original video assets retained unused; no video element is created. The old cinematic-browser.cjs has video-specific expectations and must be migrated; new focused suite does not claim a full production check. Concurrent Claude changes preserved. Local implementation only; no push in this session.
+
+
 ## 2026-10-12 — Rayquaza menu release
 
 2026-10-12 Codex menu integration: approved Rayquaza menu implemented using unchanged supplied artwork, title clear of Rayquaza, green controls and bottom-left u/Fintaman Reddit credit. Portrait keeps the entire scene above controls. Credits/NOTICE and loader v29 updated. Milind explicitly authorized combined commit/push including Claude certificate/battle/test/docs changes; nested .claude/worktrees checkout excluded. 55 core/engine tests and complete cinematic-browser regression passed, including certificate PNG export; desktop/360/390 Edge menu checks passed without page errors. No Worker/secrets changes; production not inferred from push. Artwork attribution is not independently verified reuse permission.
@@ -125,6 +130,14 @@ External accounts connected (owner-only): Spotify (re-authorize at `/api/spotify
 Settled removals (do not re-propose without flagging): Today Somewhere project (replaced by YouShant 2026-10-12), Crimson theme (removed 2026-10-12), YouTube to MP3/MP4/WAV converters (ToS and backend complexity), Seamless Set project, standalone Liveliness Index (merged into Where Next), public location card (built and dropped 2026-10-04: Milind judged showing his whereabouts not responsible).
 
 ## Session log
+
+### 2026-10-12 — The Very Best: cutscene buttons, fair Random team, Knock Off and Focus Sash
+
+At Milind's request (Claude): the championship dialogue cutscene's controls are restyled pixel buttons (Sound toggle, highlighted Skip with Esc hint, Ren nameplate, segmented progress), behaviour unchanged. Random team now matches Ren's team in total Lv 50 stats (within 2%, no member under 300 BST). Engine rule: Knock Off removes Mega Stones (the Pokémon stays Mega). Focus Sash vs multi-hit moves was already right in the engine; the battle screen now plays each hit separately and shows the Sash after the hit it survived. Engine rebuilt (`vr-engine.js?v=6`). Tests pass (62 unit/engine, battle UI and dialogue browser tests). No Worker changes. Detail in the Claude handoff and `victory-road-build.md`.
+
+### 2026-10-12 — The Very Best: Skip animations, move effectiveness, Pokémon tooltips
+
+At Milind's request (Claude). Victory certificates verified on production (`c4555a3`). Battle: a **Skip animations** toggle in the battle bar makes playback instant (remembered per browser); damaging moves show how effective they are on each opponent (and on the partner for moves that hit everyone), and the target picker shows it per target, from what the player can know (shown types, own abilities, revealed abilities/items, weather); hovering a Pokémon (tap on touch) shows a Showdown-style tooltip: yours with stats (boosts applied), ability, item and moves with PP; Ren's with possible/revealed ability, revealed item, speed range and moves seen. Title screen: the "ART BY u/Fintaman" tag no longer overlaps the menu bar (two short lines). `VR_VERSION` 30, `ui-v2.js?v=67`. Tests pass (see Claude handoff). No Worker changes.
 
 ### 2026-10-12 — The Very Best: new victory certificates
 

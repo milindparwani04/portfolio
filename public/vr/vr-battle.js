@@ -16,7 +16,7 @@
 
   const T = window.TVB;
   const { G, C, A, ART, h, go, announce, typeRow, TYPE_COLOURS } = T;
-  const ENGINE_URL = '/vr/vr-engine.js?v=5';
+  const ENGINE_URL = '/vr/vr-engine.js?v=6';
   const CHAMP = { name: 'Ren Kestrel', short: 'Ren', label: 'Ren Kestrel · Reigning Champion' };
   const toId = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
   // Pacing (ms). Starting values for playtesting, from the 2026-10-10 refinement brief.
@@ -56,11 +56,16 @@
     let battleSets = [];
     const rules = C.engineRules(mods);
     const reduced = T.reduced();
+    // Skip animations (battle bar toggle, saved per browser): lines, pauses, lunges and HP tweens
+    // become instant. Reading pace is otherwise PACE + readMs().
+    const FAST_KEY = 'pdosTvbFast';
+    let fast = false;
+    try { fast = window.localStorage.getItem(FAST_KEY) === '1'; } catch (_) { /* private mode */ }
     // Every wait resolves when the battle is disposed (close, quit, rematch), so no playback promise
     // is left hanging and no stale callback runs afterwards.
     const waits = new Set();
     const sleep = (ms) => new Promise((resolve) => {
-      if (disposed) { resolve(); return; }
+      if (disposed || fast) { resolve(); return; }
       const w = { resolve, t: 0 };
       w.t = window.setTimeout(() => { waits.delete(w); resolve(); }, ms);
       waits.add(w);
@@ -74,6 +79,12 @@
     // The player's held items by nickname, shown beside the name in their HP boxes. Filled from the
     // battle loadout, then kept current from the log (-enditem, -item). The champion's stay hidden.
     const heldItems = {};
+    // What the player has seen of each Pokémon (abilities, items and moves revealed in the log), by
+    // side ident ('p2: Name'), and stat boosts by slot. Feeds the tooltips and effectiveness labels.
+    const seen = {};
+    const sideIdent = (ident) => String(ident || '').replace(/^(p\d)[ab]:/, '$1:');
+    const seenOf = (ident) => (seen[sideIdent(ident)] || (seen[sideIdent(ident)] = { ability: '', item: '', itemGone: false, moves: new Set() }));
+    const boosts = { p1a: {}, p1b: {}, p2a: {}, p2b: {} };
 
     G.battleActive = () => !ended && !disposed;
 
@@ -81,9 +92,11 @@
     const liveEl = h('p', { class: 'tvb-sr', 'aria-live': 'polite' });
     const tauntLive = h('p', { class: 'tvb-sr', 'aria-live': 'polite' });
     const turnEl = h('span', { class: 'tvb-turn' });
+    const fastBtn = h('button', { type: 'button', class: 'tvb-btn tvb-btn--skip', 'aria-pressed': String(fast), title: 'Play the battle without animations or pauses', onclick: () => { A.play('select'); setFast(!fast); } }, '▸▸ Skip animations');
     const bar = h('div', { class: 'tvb-battle-bar' },
       h('span', { class: 'tvb-battle-mult', text: `×${mult.toFixed(2)} · ${C.tier(mult)}` }), turnEl,
       h('span', { class: 'tvb-head-tools' },
+        fastBtn,
         h('button', { type: 'button', class: 'tvb-btn tvb-btn--icon', 'aria-label': 'Settings', onclick: () => { A.play('select'); T.openSettings(); } }, h('span', { 'aria-hidden': 'true', text: '⚙' })),
         h('button', { type: 'button', class: 'tvb-btn', onclick: () => quit() }, 'Quit')));
     const stage = h('div', { class: 'tvb-stage' });
@@ -92,7 +105,7 @@
     const textbox = h('div', { class: 'tvb-textbox' }, textEl, subEl, h('span', { class: 'tvb-next', 'aria-hidden': 'true', text: '▼' }));
     const menu = h('div', { class: 'tvb-cmds' });
     const dock = h('div', { class: 'tvb-dock' }, textbox, menu);
-    const frame = h('div', { class: 'tvb-frame' }, stage, dock);
+    const frame = h('div', { class: `tvb-frame${fast ? ' is-fast' : ''}` }, stage, dock);
     screen.append(h('div', { class: 'tvb-battle', role: 'region', 'aria-label': 'Battle' }, bar, frame, liveEl, tauntLive));
     // One encounter phase drives the backdrop, platforms, crowd and lighting: 'court' until the
     // championship escalation turns the arena into the stadium for the rest of this battle.
@@ -130,8 +143,9 @@
       const total = readMs(text, kind);
       const started = performance.now();
       liveEl.textContent = text;
-      textEl.textContent = '';
       subEl.textContent = '';
+      if (fast) { textEl.textContent = text; return; }
+      textEl.textContent = '';
       let done = false;
       await new Promise((resolve) => {
         skip = () => { done = true; textEl.textContent = text; };
@@ -158,6 +172,17 @@
       });
       skip = null;
       textbox.classList.remove('is-waiting');
+    }
+    // Turning Skip animations on mid-turn also finishes whatever is playing now.
+    function setFast(on) {
+      fast = on;
+      try { window.localStorage.setItem(FAST_KEY, on ? '1' : '0'); } catch (_) { /* private mode */ }
+      fastBtn.setAttribute('aria-pressed', String(on));
+      frame.classList.toggle('is-fast', on);
+      if (!on) return;
+      if (skip) skip();
+      waits.forEach((w) => { window.clearTimeout(w.t); w.resolve(); });
+      waits.clear();
     }
 
     // ----- arena -----
@@ -245,13 +270,14 @@
       if (hp.max) s.max = hp.max;
       const pct = Math.max(0, Math.min(100, hp.pct));
       s.pct = pct;
-      s.fill.style.transition = animate && !reduced ? '' : 'none';
+      const moving = animate && !reduced && !fast;
+      s.fill.style.transition = moving ? '' : 'none';
       s.fill.style.width = `${pct}%`;
       s.fill.dataset.level = pct > 50 ? 'high' : pct > 20 ? 'mid' : 'low';
       const own = pos.startsWith('p1') && hp.max;
       const text = (k) => (own ? `${Math.round(fromCur + (hp.cur - fromCur) * k)}/${hp.max}` : `${Math.round(fromPct + (pct - fromPct) * k)}%`);
       window.clearInterval(s.tween);
-      if (animate && !reduced) {
+      if (moving) {
         let n = 0;
         s.tween = window.setInterval(() => { n += 1; s.nums.textContent = text(n / 11); if (n >= 11) window.clearInterval(s.tween); }, PACE.impact / 11);
         timers.add(s.tween);
@@ -320,7 +346,7 @@
     const posOf = (ident) => parseIdent(ident).pos;
     async function anim(pos, cls, ms) {
       const el = slots[pos] && slots[pos].spot;
-      if (!el || reduced) return;
+      if (!el || reduced || fast) return;
       el.classList.remove(cls);
       void el.offsetWidth;
       el.classList.add(cls);
@@ -331,6 +357,144 @@
     const STAT = { atk: 'Attack', def: 'Defense', spa: 'Sp. Atk', spd: 'Sp. Def', spe: 'Speed', accuracy: 'accuracy', evasion: 'evasiveness' };
     const STATUS = { brn: 'was burned', par: 'is paralyzed! It may be unable to move', slp: 'fell asleep', psn: 'was poisoned', tox: 'was badly poisoned', frz: 'was frozen solid' };
     const from = (parts) => { const f = parts.find((x) => x && x.startsWith('[from]')); return f ? f.replace('[from] ', '').replace(/^(item|ability|move): /, '') : ''; };
+
+    // What a log line reveals: abilities ("[from] ability: X" belongs to the "[of]" Pokémon when
+    // given, else to the line's subject), items, Ren's moves, and stat boosts.
+    function learn(parts) {
+      const cmd = parts[1];
+      const tag = parts.find((x) => x && x.startsWith('[from] '));
+      const of = parts.find((x) => x && x.startsWith('[of] '));
+      const owner = of ? of.slice(5) : parts[2];
+      if (tag && tag.startsWith('[from] ability: ')) seenOf(owner).ability = tag.slice(16);
+      if (tag && tag.startsWith('[from] item: ') && cmd !== '-enditem') seenOf(owner).item = tag.slice(13);
+      const pos = posOf(parts[2]);
+      const b = boosts[pos];
+      const bump = (stat, n) => { b[stat] = Math.max(-6, Math.min(6, (b[stat] || 0) + n)); };
+      switch (cmd) {
+        case '-ability': seenOf(parts[2]).ability = parts[3]; break;
+        case '-item': Object.assign(seenOf(parts[2]), { item: parts[3], itemGone: false }); break;
+        case '-enditem': Object.assign(seenOf(parts[2]), { item: parts[3], itemGone: true }); break;
+        case 'move': if (parts[2].startsWith('p2') && parts[3] !== 'Struggle' && !tag) seenOf(parts[2]).moves.add(parts[3]); break;
+        case 'switch': case 'drag': case 'replace': case 'faint': if (b) boosts[pos] = {}; if (tipPos === pos) hideTip(); break;
+        case '-boost': if (b) bump(parts[3], Number(parts[4])); break;
+        case '-unboost': if (b) bump(parts[3], -Number(parts[4])); break;
+        case '-setboost': if (b) b[parts[3]] = Number(parts[4]); break;
+        case '-clearboost': if (b) boosts[pos] = {}; break;
+        case '-clearallboost': Object.keys(boosts).forEach((k) => { boosts[k] = {}; }); break;
+        case '-clearnegativeboost': if (b) Object.keys(b).forEach((k) => { if (b[k] < 0) b[k] = 0; }); break;
+        case '-invertboost': if (b) Object.keys(b).forEach((k) => { b[k] = -b[k]; }); break;
+        case '-copyboost': { const src = boosts[posOf(parts[3])]; if (b && src) boosts[pos] = { ...src }; break; } // Psych Up: user, target
+        default: break;
+      }
+    }
+
+    // ----- Effectiveness: what the player can know (shown types, own abilities, revealed ones) -----
+    const nameOf = (list, id) => { const x = (list || []).find((e) => toId(e.name) === toId(id)); return x ? x.name : id || ''; };
+    const reqMon = (pos) => {
+      const req = lastRequest;
+      return req && req.side && slots[pos].ident ? req.side.pokemon.find((p) => p.ident === slots[pos].ident) || null : null;
+    };
+    function known(pos) {
+      const s = slots[pos];
+      if (pos.startsWith('p1')) {
+        const mon = reqMon(pos);
+        return { types: s.typeList, ability: mon ? nameOf(G.cat.abilities, mon.ability || mon.baseAbility) : '', item: heldItems[s.nick] || '' };
+      }
+      const k = seen[s.ident] || {};
+      return { types: s.typeList, ability: k.ability || '', item: k.item && !k.itemGone ? k.item : '' };
+    }
+    const moveInfo = (name, id) => {
+      const fromReq = lastRequest && lastRequest.vr && lastRequest.vr.moves && lastRequest.vr.moves[id || toId(name)];
+      const m = fromReq || (G.cat.moveByName && G.cat.moveByName[name]) || {};
+      return { name, type: m.type, category: m.category };
+    };
+    const effOn = (moveName, moveId, userPos, targetPos) => {
+      const user = known(userPos);
+      return C.effectiveness(moveInfo(moveName, moveId), known(targetPos), { ability: user.ability, types: user.types, weather: stage.dataset.weather || '' });
+    };
+    // [label, short label, kind] for a multiplier; null for status moves.
+    const effLabel = (x) => (x === null ? null
+      : x === 0 ? ['No effect', '×0', 'none']
+        : x >= 4 ? ['×4 Super effective', '×4', 'super']
+          : x >= 2 ? ['×2 Super effective', '×2', 'super']
+            : x <= 0.25 ? ['×¼ Not very effective', '×¼', 'weak']
+              : x < 1 ? ['×½ Not very effective', '×½', 'weak'] : ['×1 Effective', '×1', 'normal']);
+    const effChip = (x, who) => {
+      const l = effLabel(x);
+      return l ? h('span', { class: 'tvb-eff', 'data-eff': l[2], text: who ? `${l[1]} ${who}` : l[0], title: who ? `${l[0]} on ${who}` : l[0] }) : null;
+    };
+
+    // ----- Showdown-style tooltip over a Pokémon (hover; tap on touch screens) -----
+    const tip = h('div', { class: 'tvb-tip', role: 'tooltip', hidden: true });
+    stage.append(tip);
+    let tipPos = '';
+    const STAT_SHORT = { atk: 'Atk', def: 'Def', spa: 'SpA', spd: 'SpD', spe: 'Spe', accuracy: 'Acc', evasion: 'Eva' };
+    const boostMult = (n) => (n >= 0 ? (2 + n) / 2 : 2 / (2 - n));
+    function tipRows(pos) {
+      const s = slots[pos];
+      const own = pos.startsWith('p1');
+      const entry = entryOf(s.species);
+      const spec = entry && G.cat.species ? G.cat.species[entry.id] || null : null;
+      const row = (label, ...value) => h('p', {}, h('span', { class: 'tvb-tip-label', text: `${label}: ` }), ...value);
+      const status = s.status.textContent ? ` · ${s.status.textContent}` : '';
+      const b = boosts[pos];
+      const rows = [
+        h('p', { class: 'tvb-tip-head' }, h('strong', { text: s.name.textContent }), s.nick !== s.species ? h('span', { class: 'tvb-tip-dim', text: `(${s.species})` }) : null, h('span', { class: 'tvb-tip-dim', text: s.lvl.textContent })),
+        typeRow(s.typeList, 'tvb-types--hp'),
+        row('HP', `${Math.round(s.pct)}%${own && s.max ? ` (${s.hp}/${s.max})` : ''}${status}`)
+      ];
+      const k = known(pos);
+      if (own) {
+        const mon = reqMon(pos);
+        rows.push(row('Ability', k.ability || '—'), row('Item', k.item || 'None'));
+        if (mon && mon.stats) {
+          rows.push(row('Stats', ...['atk', 'def', 'spa', 'spd', 'spe'].map((st, i) => {
+            const n = b[st] || 0;
+            const v = n ? Math.floor(mon.stats[st] * boostMult(n)) : mon.stats[st];
+            return h('span', { class: n > 0 ? 'is-up' : n < 0 ? 'is-down' : '', text: `${i ? ' / ' : ''}${v} ${STAT_SHORT[st]}` });
+          })));
+        }
+        const act = lastRequest && lastRequest.active && lastRequest.side.pokemon.filter((p) => p.active).findIndex((p) => p.ident === s.ident);
+        const slotMoves = act >= 0 && lastRequest.active[act] ? lastRequest.active[act].moves.filter((m) => m.id !== 'potion') : null;
+        const list = slotMoves ? slotMoves.map((m) => `${m.move}${m.pp != null ? ` (${m.pp}/${m.maxpp})` : ''}`) : mon ? mon.moves.filter((id) => id !== 'potion').map((id) => nameOf(G.cat.moves, id)) : [];
+        if (list.length) rows.push(h('ul', {}, list.map((t) => h('li', { text: t }))));
+      } else {
+        const info = seen[s.ident] || { moves: new Set() };
+        rows.push(row('Ability', k.ability || (spec ? `possibly ${spec.abilities.join(', ')}` : 'unknown')));
+        rows.push(row('Item', info.item ? (info.itemGone ? `none (${info.item} is gone)` : info.item) : 'not revealed'));
+        if (spec) {
+          const [lo, hi] = C.speedRange(spec.base.spe, Number(s.lvl.textContent.replace(/\D/g, '')) || 50);
+          rows.push(row('Speed', `${lo} to ${hi}`, h('span', { class: 'tvb-tip-dim', text: ' (before items, abilities and boosts)' })));
+        }
+        rows.push(info.moves.size ? h('ul', {}, [...info.moves].map((t) => h('li', { text: t }))) : h('p', { class: 'tvb-tip-dim', text: 'No moves seen yet' }));
+      }
+      const shown = Object.entries(b).filter(([, n]) => n);
+      if (shown.length) rows.push(row('Boosts', ...shown.map(([st, n], i) => h('span', { class: n > 0 ? 'is-up' : 'is-down', text: `${i ? ', ' : ''}${n > 0 ? '+' : ''}${n} ${STAT_SHORT[st] || st}` }))));
+      return rows;
+    }
+    function showTip(pos) {
+      const s = slots[pos];
+      if (!s.ident || s.box.hidden || disposed) return;
+      tip.replaceChildren(...tipRows(pos));
+      tip.hidden = false;
+      tipPos = pos;
+      const st = stage.getBoundingClientRect();
+      const r = s.spot.getBoundingClientRect();
+      const w = tip.offsetWidth;
+      const ht = tip.offsetHeight;
+      const left = pos.startsWith('p1') ? r.right - st.left + 4 : r.left - st.left - w - 4;
+      const top = r.top - st.top + (r.height - ht) / 2;
+      tip.style.left = `${Math.max(4, Math.min(st.width - w - 4, left))}px`;
+      tip.style.top = `${Math.max(4, Math.min(st.height - ht - 4, top))}px`;
+    }
+    const hideTip = () => { tip.hidden = true; tipPos = ''; };
+    Object.keys(slots).forEach((pos) => {
+      const spot = slots[pos].spot;
+      spot.addEventListener('pointerenter', (e) => { if (e.pointerType !== 'touch') showTip(pos); });
+      spot.addEventListener('pointerleave', (e) => { if (e.pointerType !== 'touch') hideTip(); });
+      spot.addEventListener('pointerup', (e) => { if (e.pointerType === 'touch') { if (tipPos === pos) hideTip(); else showTip(pos); } });
+    });
+    stage.addEventListener('pointerdown', (e) => { if (e.pointerType === 'touch' && !e.target.closest('.tvb-spot')) hideTip(); });
 
     // Trainer Taunts: remembers the most notable thing in the player's latest action.
     function noteLine(parts) {
@@ -368,6 +532,7 @@
       const parts = line.split('|');
       const cmd = parts[1];
       noteLine(parts);
+      learn(parts);
       fieldVisuals.update(line);
       switch (cmd) {
         case 'start': A.music.start('battle'); if (!startedAt) startedAt = Date.now(); break;
@@ -520,7 +685,9 @@
         case '-item': setItem(parts[2], parts[3]); break;
         case '-enditem': {
           setItem(parts[2], '');
-          if (parts[3] === 'Focus Sash') await say(`${Display(parts[2])} hung on using its Focus Sash!`);
+          const knocker = line.includes('[from] move: Knock Off') && parts.find((x) => x && x.startsWith('[of] '));
+          if (knocker) await say(`${Display(knocker.slice(5))} knocked off ${display(parts[2])}’s ${parts[3]}!`);
+          else if (parts[3] === 'Focus Sash') await say(`${Display(parts[2])} hung on using its Focus Sash!`);
           else if (line.includes('[eat]')) await say(`${Display(parts[2])} ate its ${parts[3]}!`);
           break;
         }
@@ -664,10 +831,14 @@
           const note = req.vr && req.vr.noSwitch ? 'No switching is on.' : '';
           showMenu(`What will ${name} do?${tag}`, buttons, { back: prevSlot, sub: note });
         };
-        const pickTarget = (label, list, done) => {
+        // `move` ({ move, id }) adds how effective it is on each target.
+        const pickTarget = (label, list, done, move) => {
           if (!list) return done('');
           if (list.length === 1) return done(` ${list[0].loc}`);
-          showMenu(`${label}: choose a target`, list.map((x) => menuButton(`${slots[x.pos].name.textContent}${x.pos.startsWith('p1') ? (x.loc === -(slot + 1) ? ' (itself)' : ' (partner)') : ` (${CHAMP.short}, ${x.pos === 'p2a' ? 'left' : 'right'})`}`, () => done(` ${x.loc}`))), { back: () => top() });
+          showMenu(`${label}: choose a target`, list.map((x) => menuButton([
+            h('span', { class: 'tvb-move-name', text: `${slots[x.pos].name.textContent}${x.pos.startsWith('p1') ? (x.loc === -(slot + 1) ? ' (itself)' : ' (partner)') : ` (${CHAMP.short}, ${x.pos === 'p2a' ? 'left' : 'right'})`}` }),
+            move ? effChip(effOn(move.move, move.id, pos, x.pos)) : null
+          ], () => done(` ${x.loc}`))), { back: () => top() });
           return null;
         };
         const fight = () => {
@@ -682,15 +853,24 @@
               reach, cat ? cat.desc : ''
             ].filter(Boolean).join('. ');
           };
+          // Under each damaging move: how effective it is on each opponent it can hit (and on the
+          // partner for moves that hit everyone next to the user).
+          const foes = targetsFor({ target: 'adjacentFoe' }, slot) || [];
+          const effRow = (m) => {
+            const reach = ['self', 'allySide', 'foeSide', 'all', 'allies', 'adjacentAlly', 'adjacentAllyOrSelf'].includes(m.target) ? []
+              : [...foes, ...(m.target === 'allAdjacent' ? targetsFor({ target: 'adjacentAlly' }, slot) || [] : [])];
+            const chips = reach.map((x) => effChip(effOn(m.move, m.id, pos, x.pos), reach.length > 1 ? (x.pos.startsWith('p1') ? 'partner' : slots[x.pos].nick) : '')).filter(Boolean);
+            return chips.length ? h('span', { class: 'tvb-move-eff' }, chips) : null;
+          };
           const render = () => {
             const buttons = moves.map((m) => {
               const info = (req.vr && req.vr.moves && req.vr.moves[m.id]) || {};
-              const b = menuButton([h('span', { class: 'tvb-move-name', text: m.move }), h('span', { class: 'tvb-move-meta', text: `${info.type || ''}${m.pp != null ? ` · PP ${m.pp}/${m.maxpp}` : ''}` })], () => {
+              const b = menuButton([h('span', { class: 'tvb-move-name', text: m.move }), h('span', { class: 'tvb-move-meta', text: `${info.type || ''}${m.pp != null ? ` · PP ${m.pp}/${m.maxpp}` : ''}` }), effRow(m)], () => {
                 pickTarget(m.move, targetsFor(m, slot), (tgt) => {
                   choices[slot] = `move ${m.n}${tgt}${mega ? ' mega' : ''}`;
                   if (mega) megaTaken = true;
                   next(slot + 1);
-                });
+                }, m);
               }, { disabled: m.disabled || m.pp === 0, class: 'tvb-cmd tvb-move', style: `--type:${TYPE_COLOURS[info.type] || '#777'}`, 'aria-describedby': 'tvbSub' });
               b.addEventListener('focus', () => describe(m));
               b.addEventListener('pointerenter', () => describe(m));
@@ -786,7 +966,7 @@
             textEl.textContent = 'The cinematic could not play. Ren’s first fainted Pokémon returns for the final round.';
             liveEl.textContent = textEl.textContent;
           }
-          G.lastSync = { clock: 'video', skipped: reason === 'skipped', fallback: reason === 'unavailable' };
+          G.lastSync = { clock: 'dialogue-audio', skipped: reason === 'skipped', fallback: reason === 'unavailable' };
           A.music.start('finale');
           if (worker) worker.postMessage({ t: 'resume', battleId, id: event.id });
           resolve();

@@ -25,7 +25,7 @@
     { k: 'chaos', label: 'Chaotic replacement', note: 'When one of yours faints, its replacement is picked at random.', m: 1.15 },
     { k: 'noswitch', label: 'No switching', note: 'You can’t switch out. Replacing a fainted Pokémon still works.', m: 1.2 },
     { k: 'nopotions', label: 'No potions', note: 'Your bag’s two Potions are gone.', m: 1.25 },
-    { k: 'random', label: 'Random team', note: 'Six random Pokémon from every generation, hidden until the battle: five fully evolved Pokémon and one legendary or mythical, each holding an item that suits its moves. Your own party is kept.', m: 1.35 },
+    { k: 'random', label: 'Random team', note: 'Six random Pokémon from every generation, hidden until the battle: five fully evolved Pokémon and one legendary or mythical, each holding an item that suits its moves. Together they match Ren’s team in total stats at Lv 50. Your own party is kept.', m: 1.35 },
     { k: 'moves', label: 'Random moves', note: 'For this battle each Pokémon gets four random moves it can learn; one that rolls Thief or Covet goes in empty-handed, ready to steal. Your chosen moves are kept for next time.', m: 1.5 },
     { k: 'cap', label: 'Level cap 45', note: 'Your team is Lv 45; the champion stays at Lv 50. (At Worlds everyone is Lv 50.)', m: 1.75 }
   ];
@@ -287,6 +287,78 @@
     });
     return out;
   }
+  // The speed an opponent can have at `level`, as Showdown's tooltip shows it: 0 stat points and a
+  // hindering nature up to 32 points and a boosting one (before items, abilities and boosts).
+  function speedRange(base, level) {
+    const at = (points, k) => Math.floor((Math.floor((2 * base + 31 + Math.max(2 * points - 1, 0)) * level / 100) + 5) * k / 100);
+    return [at(0, 90), at(32, 110)];
+  }
+
+  // ---------- Type matchups (the battle's Fight menu, target picker and tooltips) ----------
+  // Gen 9 chart: attacking type -> [super effective on, not very effective on, no effect on].
+  // tests/vr/engine.test.mjs checks every pairing against the engine's own type chart.
+  const TYPE_CHART = {
+    Normal: [[], ['Rock', 'Steel'], ['Ghost']],
+    Fire: [['Grass', 'Ice', 'Bug', 'Steel'], ['Fire', 'Water', 'Rock', 'Dragon'], []],
+    Water: [['Fire', 'Ground', 'Rock'], ['Water', 'Grass', 'Dragon'], []],
+    Electric: [['Water', 'Flying'], ['Electric', 'Grass', 'Dragon'], ['Ground']],
+    Grass: [['Water', 'Ground', 'Rock'], ['Fire', 'Grass', 'Poison', 'Flying', 'Bug', 'Dragon', 'Steel'], []],
+    Ice: [['Grass', 'Ground', 'Flying', 'Dragon'], ['Fire', 'Water', 'Ice', 'Steel'], []],
+    Fighting: [['Normal', 'Ice', 'Rock', 'Dark', 'Steel'], ['Poison', 'Flying', 'Psychic', 'Bug', 'Fairy'], ['Ghost']],
+    Poison: [['Grass', 'Fairy'], ['Poison', 'Ground', 'Rock', 'Ghost'], ['Steel']],
+    Ground: [['Fire', 'Electric', 'Poison', 'Rock', 'Steel'], ['Grass', 'Bug'], ['Flying']],
+    Flying: [['Grass', 'Fighting', 'Bug'], ['Electric', 'Rock', 'Steel'], []],
+    Psychic: [['Fighting', 'Poison'], ['Psychic', 'Steel'], ['Dark']],
+    Bug: [['Grass', 'Psychic', 'Dark'], ['Fire', 'Fighting', 'Poison', 'Flying', 'Ghost', 'Steel', 'Fairy'], []],
+    Rock: [['Fire', 'Ice', 'Flying', 'Bug'], ['Fighting', 'Ground', 'Steel'], []],
+    Ghost: [['Psychic', 'Ghost'], ['Dark'], ['Normal']],
+    Dragon: [['Dragon'], ['Steel'], ['Fairy']],
+    Dark: [['Psychic', 'Ghost'], ['Fighting', 'Dark', 'Fairy'], []],
+    Steel: [['Ice', 'Rock', 'Fairy'], ['Fire', 'Water', 'Electric', 'Steel'], []],
+    Fairy: [['Fighting', 'Dragon', 'Dark'], ['Fire', 'Poison', 'Steel'], []]
+  };
+  const typeMult = (atk, def) => {
+    const row = TYPE_CHART[atk];
+    if (!row) return 1;
+    return row[2].includes(def) ? 0 : row[0].includes(def) ? 2 : row[1].includes(def) ? 0.5 : 1;
+  };
+  const ATE = { Pixilate: 'Fairy', Refrigerate: 'Ice', Aerilate: 'Flying', Galvanize: 'Electric' };
+  const WEATHER_BALL = { sunnyday: 'Fire', desolateland: 'Fire', raindance: 'Water', primordialsea: 'Water', sandstorm: 'Rock', snowscape: 'Ice', hail: 'Ice' };
+  // Abilities and items that make a Pokémon immune to a type (only counted once the player knows them).
+  const IMMUNE_ABILITY = { Levitate: 'Ground', 'Earth Eater': 'Ground', 'Flash Fire': 'Fire', 'Well-Baked Body': 'Fire', 'Water Absorb': 'Water', 'Storm Drain': 'Water', 'Dry Skin': 'Water', 'Volt Absorb': 'Electric', 'Lightning Rod': 'Electric', 'Motor Drive': 'Electric', 'Sap Sipper': 'Grass' };
+  const MOLD_BREAKERS = ['Mold Breaker', 'Teravolt', 'Turboblaze'];
+  // The move's type as used: the user's -ate ability or Normalize, Weather Ball, Revelation Dance.
+  function moveType(move, user = {}) {
+    if (move.name === 'Weather Ball' && WEATHER_BALL[user.weather]) return WEATHER_BALL[user.weather];
+    if (move.name === 'Revelation Dance' && user.types && user.types[0]) return user.types[0];
+    if (user.ability === 'Normalize') return 'Normal';
+    if (move.type === 'Normal' && ATE[user.ability]) return ATE[user.ability];
+    return move.type;
+  }
+  // How effective `move` ({ name, type, category }) is on `target` ({ types, ability, item }) from
+  // `user` ({ ability, types, weather }), using only what the player can know. 0, 0.25, 0.5, 1, 2 or
+  // 4; null for status moves.
+  function effectiveness(move, target, user = {}) {
+    if (!move || !move.type || move.category === 'Status' || !target) return null;
+    const type = moveType(move, user);
+    const types = target.types || [];
+    const ignoresGhost = (type === 'Normal' || type === 'Fighting') && ['Scrappy', "Mind's Eye"].includes(user.ability);
+    let mult = 1;
+    types.forEach((def) => {
+      let k = typeMult(type, def);
+      if (move.name === 'Freeze-Dry' && def === 'Water') k = 2;
+      if (move.name === 'Thousand Arrows' && def === 'Flying') k = 1;
+      if (k === 0 && def === 'Ghost' && ignoresGhost) k = 1;
+      if (move.name === 'Flying Press') k *= typeMult('Flying', def);
+      mult *= k;
+    });
+    const breaks = MOLD_BREAKERS.includes(user.ability);
+    if (!breaks && IMMUNE_ABILITY[target.ability] === type && !(type === 'Ground' && move.name === 'Thousand Arrows')) return 0;
+    if (type === 'Ground' && target.item === 'Air Balloon' && move.name !== 'Thousand Arrows') return 0;
+    if (!breaks && target.ability === 'Wonder Guard' && mult < 2) return 0;
+    return mult;
+  }
+
   // A member's spread (nature + stat points) comes from its default set.
   function spreadOf(cat, id) {
     const row = cat.sets && cat.sets[id];
@@ -398,13 +470,49 @@
     };
     return { finals: group((id) => isFinal(cat, id) && !isSpecial(cat, id)), specials: group((id) => isFinal(cat, id) && isSpecial(cat, id)) };
   }
+  // Strength (Milind, 2026-10-12): a Random team's total Lv 50 stats (each member with its default
+  // nature and stat points) are within RANDOM_STRENGTH of Ren's team's, so neither side starts
+  // stronger; members may still range widely (a 650 beside a 300), but none is below
+  // RANDOM_MIN_BST base stat total. Rolls are retried (seeded) until one fits; failing that, the
+  // closest. The Lv 45 cap still lowers the player's stats in battle.
+  // Ren's team as in scripts/vr/engine/champion.js (species, nature, stat points hp..spe), un-Mega'd;
+  // tests/vr/engine.test.mjs checks it against the engine's CHAMPION.
+  const CHAMPION_SPREADS = [
+    ['floetteeternal', 'Timid', [4, 0, 8, 32, 0, 22]], ['basculegion', 'Adamant', [4, 18, 4, 0, 15, 25]],
+    ['kingambit', 'Adamant', [32, 15, 0, 0, 19, 0]], ['dragonite', 'Modest', [2, 0, 0, 32, 0, 32]],
+    ['garchomp', 'Adamant', [10, 20, 9, 0, 0, 27]], ['sneasler', 'Jolly', [2, 32, 0, 0, 0, 32]]
+  ];
+  const RANDOM_STRENGTH = 0.02;
+  const RANDOM_MIN_BST = 300;
+  const RANDOM_ATTEMPTS = 400;
+  const bst = (cat, id) => STATS.reduce((sum, s) => sum + cat.species[id].base[s], 0);
+  const lv50Total = (cat, id, nature, points) => { const st = calcStats(cat.species[id].base, points, nature, 50, id); return STATS.reduce((sum, s) => sum + st[s], 0); };
+  const championStrength = (cat) => CHAMPION_SPREADS.reduce((sum, [id, nature, p]) => sum + lv50Total(cat, id, nature, Object.fromEntries(STATS.map((s, i) => [s, p[i]]))), 0);
+  const teamStrength = (cat, ids) => ids.reduce((sum, id) => { const { nature, points } = spreadOf(cat, id); return sum + lv50Total(cat, id, nature, points); }, 0);
   function rollTeam(cat, rand) {
-    const { finals, specials } = randomPools(cat);
+    let { finals, specials } = randomPools(cat);
+    if (cat.species) {
+      const strongEnough = (forms) => forms.filter((id) => bst(cat, id) >= RANDOM_MIN_BST);
+      finals = finals.map(strongEnough).filter((f) => f.length);
+      specials = specials.map(strongEnough).filter((f) => f.length);
+    }
     if (finals.length < RANDOM_FINALS || !specials.length) throw new Error('Random team: the catalog has too few eligible Pokémon.');
     const pickForm = (forms) => forms[Math.floor(rand() * forms.length)];
-    const five = shuffle(finals, rand).slice(0, RANDOM_FINALS).map(pickForm);
-    const special = pickForm(specials[Math.floor(rand() * specials.length)]);
-    return shuffle([...five, special], rand);
+    const roll = () => {
+      const five = shuffle(finals, rand).slice(0, RANDOM_FINALS).map(pickForm);
+      const special = pickForm(specials[Math.floor(rand() * specials.length)]);
+      return shuffle([...five, special], rand);
+    };
+    if (!cat.species) return roll();
+    const target = championStrength(cat);
+    let best = null;
+    for (let i = 0; i < RANDOM_ATTEMPTS; i += 1) {
+      const team = roll();
+      const off = Math.abs(teamStrength(cat, team) / target - 1);
+      if (off <= RANDOM_STRENGTH) return team;
+      if (!best || off < best.off) best = { team, off };
+    }
+    return best.team;
   }
   // Why a generated team breaks the random-team rule, or '' (checked again at Enter Battle and, by
   // the same rule on the engine's own data, at the engine boundary).
@@ -602,13 +710,22 @@
   }
   // Runs of direct hits (no [from]) inside a beat, so a spread move's targets take damage together;
   // everything else is one line per step, in order.
+  // A spread move's targets take their hit together; a multi-hit move's hits on one target play one
+  // at a time. Showdown logs Focus Sash's -enditem just before the hit it survives: that hit plays
+  // first, then the Sash line, then any later hit that knocks it out.
   function steps(beatLines) {
+    const lines = beatLines.slice();
+    for (let i = 0; i + 1 < lines.length; i += 1) {
+      const p = String(lines[i]).split('|');
+      const q = String(lines[i + 1]).split('|');
+      if (p[1] === '-enditem' && p[3] === 'Focus Sash' && q[1] === '-damage' && q[2] === p[2]) { [lines[i], lines[i + 1]] = [lines[i + 1], lines[i]]; i += 1; }
+    }
     const out = [];
-    beatLines.forEach((line) => {
+    lines.forEach((line) => {
       const p = String(line).split('|');
       const hit = p[1] === '-damage' && !p.some((x) => x.startsWith('[from]'));
       const last = out[out.length - 1];
-      if (hit && last && last.hit) last.lines.push(line);
+      if (hit && last && last.hit && !last.lines.some((l) => String(l).split('|')[2] === p[2])) last.lines.push(line);
       else out.push({ hit, lines: [line] });
     });
     return out;
@@ -638,9 +755,9 @@
 
   return {
     TEAM_SIZE, MIN_BATTLE, BRING, ROMAN, DEFAULT_NAME, MODS, TIERS, RANDOM_ITEMS, NATURES, STATS, STORE, LEGACY_STORES, CLASS_NAME, TYPES, RANDOM_FINALS,
-    multiplier, tier, difficulty, difficultyLabel, rng, newSeed, shuffle, moveSlot, toId,
+    multiplier, tier, difficulty, difficultyLabel, rng, newSeed, shuffle, moveSlot, toId, CHAMPION_SPREADS, RANDOM_STRENGTH, RANDOM_MIN_BST, championStrength, teamStrength,
     catalog, decodeLearnset, legalMoves, classOf, isSpecial, isFinal, typeQuery, matches, defaultMember, nextUid, joinError, addMember, removeMember, updateMember,
-    itemProblem, memberProblems, partyProblems, calcStats, spreadOf, memberStats,
+    itemProblem, memberProblems, partyProblems, calcStats, spreadOf, memberStats, speedRange, TYPE_CHART, typeMult, moveType, effectiveness,
     blankDraft, serialize, restore, cleanName, beats, steps, randomPools, rollTeam, randomTeamProblem, randomMoves, itemProfile, itemWeight, stealsItems, randomItems, battleLoadout, engineRules, modNotes, overrides
   };
 }));

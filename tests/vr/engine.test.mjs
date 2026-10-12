@@ -562,3 +562,66 @@ test('strategic play beats the champion more often than naive play (reported sam
   console.log(`# player wins over ${N} seeds vs Ren (hard): naive ${tally.naive}, strategic ${tally.strategic}`);
   assert.ok(tally.strategic > tally.naive, JSON.stringify(tally));
 });
+
+test('the battle UI type chart matches the engine for all 324 pairings', () => {
+  for (const atk of C.TYPES) {
+    for (const def of C.TYPES) {
+      const want = !D.getImmunity(atk, [def]) ? 0 : 2 ** D.getEffectiveness(atk, def);
+      assert.equal(C.typeMult(atk, def), want, `${atk} -> ${def}`);
+    }
+  }
+});
+
+test('the Random team strength budget uses Ren\'s actual team (species, nature, stat points)', () => {
+  assert.deepEqual(C.CHAMPION_SPREADS.map(([id, nature, p]) => [id, nature, p.join(',')]),
+    plain(E.CHAMPION.team).map((s) => [C.toId(s.species), s.nature, ['hp', 'atk', 'def', 'spa', 'spd', 'spe'].map((k) => s.evs[k] || 0).join(',')]));
+});
+
+// Fixed two-Pokémon-a-side battle with items and levels (game rules applied as in createEngine).
+function itemScenario(p1, p2) {
+  const b = new E.Battle({ formatid: E.FORMAT_ID, seed: 'sodium,00000000000000000000000000000001', send: () => {} });
+  E.knockOffMegaStones(b.dex);
+  const mon = ([species, ability, moves, item = '', level = 50]) => ({ species, name: species, ability, item, nature: 'Hardy', moves, evs: { hp: 0, atk: 32, def: 0, spa: 0, spd: 0, spe: 0 }, level });
+  b.setPlayer('p1', { name: 'A', team: p1.map(mon) });
+  b.setPlayer('p2', { name: 'B', team: p2.map(mon) });
+  b.choose('p1', 'team 12');
+  b.choose('p2', 'team 12');
+  const publicLog = () => { const out = []; for (let i = 0; i < b.log.length; i += 1) { if (b.log[i].startsWith('|split|')) { i += 1; continue; } if (!b.log[i].startsWith('|t:|')) out.push(b.log[i]); } return out; };
+  return { b, publicLog };
+}
+const WALL = ['Pikachu', 'Static', ['Protect', 'Growl']];
+
+test('Knock Off removes a Mega Stone; the Mega-Evolved Pokémon stays Mega (Thief still can\'t take one)', () => {
+  const { b, publicLog } = itemScenario([['Incineroar', 'Blaze', ['Knock Off', 'Thief']], WALL], [['Floette-Eternal', 'Flower Veil', ['Protect', 'Growl'], 'Floettite'], WALL]);
+  b.choose('p1', 'move 1 1, move 1');
+  b.choose('p2', 'move 2 mega, move 1');
+  const floette = b.sides[1].active[0];
+  assert.equal(floette.species.name, 'Floette-Mega');
+  assert.equal(floette.item, '');
+  assert.ok(publicLog().includes('|-enditem|p2a: Floette|Floettite|[from] move: Knock Off|[of] p1a: Incineroar'), publicLog().join('\n'));
+  b.choose('p1', 'move 1 1, move 1');
+  b.choose('p2', 'move 2, move 1');
+  assert.equal(b.sides[1].active[0].species.name, 'Floette-Mega');
+
+  const thief = itemScenario([['Incineroar', 'Blaze', ['Thief', 'Protect']], WALL], [['Floette-Eternal', 'Flower Veil', ['Protect', 'Growl'], 'Floettite'], WALL]);
+  thief.b.choose('p1', 'move 1 1, move 1');
+  thief.b.choose('p2', 'move 2 mega, move 1');
+  assert.equal(thief.b.sides[1].active[0].item, 'floettite');
+  assert.equal(thief.b.sides[0].active[0].item, '');
+});
+
+test('Focus Sash saves only the first hit of a multi-hit move; the next hit knocks out', () => {
+  for (const [user, ability, move] of [['Garchomp', 'Rough Skin', 'Scale Shot'], ['Cinccino', 'Skill Link', 'Tail Slap'], ['Dragapult', 'Clear Body', 'Dragon Darts']]) {
+    const { b, publicLog } = itemScenario([[user, ability, [move, 'Protect'], 'Life Orb'], WALL], [['Pichu', 'Static', ['Protect', 'Growl'], 'Focus Sash', 10], WALL]);
+    b.choose('p1', 'move 1 1, move 1');
+    b.choose('p2', 'move 2, move 1');
+    const pichu = b.sides[1].pokemon.find((p) => p.species.name === 'Pichu');
+    assert.equal(pichu.fainted, true, `${move}: Pichu survived`);
+    const log = publicLog().filter((l) => /p2a: Pichu/.test(l) && /-enditem|-damage|faint/.test(l));
+    assert.deepEqual(log.map((l) => l.split('|')[1]), ['-enditem', '-damage', '-damage', 'faint'], `${move}: ${log.join(' ')}`);
+    assert.ok(/\|1\/|\|[0-9]+\/100$/.test(log[1]) && !/fnt/.test(log[1]), log[1]);
+    // The page plays the surviving hit, then the Sash line, then the knockout hit.
+    const order = C.steps(log).map((s) => s.lines[0].split('|')[1]);
+    assert.deepEqual(order, ['-damage', '-enditem', '-damage', 'faint']);
+  }
+});

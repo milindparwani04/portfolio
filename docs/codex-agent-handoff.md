@@ -1,5 +1,10 @@
 # PARWANI — Codex Agent Handoff
 
+## 2026-10-12 — Pixel Ren dialogue sequence
+
+Replaced championship video playback with a 38-second in-game pixel-Ren dialogue overlay at Milind's request. Shared original trainer canvas, timed respectful lines, arena-to-stadium backdrop/crowd, music cue and engine-owned revival retained. Skip dialogue seeks the recording to 38s and completes once; cancellation stops audio/crowd; hidden tabs pause active-time progress. Failed/blocked music uses a silent active-time fallback. Loader v30. Focused tests/vr/dialogue-browser.cjs passed in Edge: no video, pixel Ren, timeline cue/stadium, keyboard skip, duplicate completion, cancellation and phone controls; syntax/diff checks passed. Existing cinematic-browser.cjs still targets the retired video behavior and needs migration before being treated as a current whole-flow suite. Concurrent Claude battle/core/test/docs changes preserved; no commit/push in this dialogue session.
+
+
 ## 2026-10-12 — Rayquaza menu release
 
 2026-10-12 current assignment complete: approved Rayquaza menu implemented with unchanged supplied art, cream/peach sky title, green bottom controls, bottom-left u/Fintaman Reddit credit. Portrait preserves full image above controls. Credits/NOTICE and loader v29 updated. Milind authorized combined commit/push including Claude certificate work; nested .claude/worktrees checkout excluded. Validation: 55 core/engine tests passed with --test-isolation=none; full cinematic-browser regression passed including certificate PNG export; isolated Edge menu checks at 1280x800, 360x740, 390x844 passed with no page errors. Browser tests used approved sandbox escalation. No Worker/secrets edits; no production verification claimed. Artist attribution is not independently verified reuse permission.

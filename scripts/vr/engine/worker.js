@@ -7,14 +7,14 @@
 //   { t: 'resume', battleId, id }              the championship cinematic finished (once)
 // Messages out carry the battleId, so the page can drop anything from an earlier battle:
 //   { t: 'ready' }, { t: 'invalid', message }, { t: 'fatal', message }, and the engine's events.
-import { createEngine, validateTeam, isFinal, TeamError, CHAMPION, VARIANTS, championTeam, Dex, FORMAT_ID, createView, createAI, Battle } from './engine.js';
+import { createEngine, validateTeam, isFinal, TeamError, CHAMPION, VARIANTS, championTeam, Dex, FORMAT_ID, createView, createAI, Battle, knockOffMegaStones } from './engine.js';
 
 const LEARNSETS_URL = '/vr/learnsets.json?v=1';
 // A doubles choice is at most two short commands ("move 4 -2 mega, switch 6"), or a team order.
 const CHOICE = /^(team [1-6]{1,6}|(move [1-5]( -?[12])?( mega)?|switch [1-6]|pass|default)(, (move [1-5]( -?[12])?( mega)?|switch [1-6]|pass|default))?)$/;
 const ID = /^[a-z0-9-]{1,40}$/;
 
-self.VREngine = { createEngine, validateTeam, isFinal, TeamError, CHAMPION, VARIANTS, championTeam, Dex, FORMAT_ID, createView, createAI, Battle, CHOICE };
+self.VREngine = { createEngine, validateTeam, isFinal, TeamError, CHAMPION, VARIANTS, championTeam, Dex, FORMAT_ID, createView, createAI, Battle, knockOffMegaStones, CHOICE };
 
 if (typeof self.importScripts === 'function') {
   let engine = null;

@@ -52,6 +52,26 @@ const POTION = {
   },
 };
 
+// Game rule (Milind, 2026-10-12): Knock Off removes a Mega Stone like any other held item (and
+// gets its 1.5x boost for it); a Pokémon that has already Mega Evolved stays Mega, one that hasn't
+// can no longer. Only Knock Off: Thief, Covet, Trick and the holder's own effects still can't take
+// one. Showdown reads item handlers from the dex's cached (deep-frozen) Item objects, so each Mega
+// Stone's cache entry is replaced, once per dex, by a frozen copy with the wrapped handler.
+function knockOffMegaStones(dex) {
+  if (dex.vrKnockOffMegaStones) return;
+  dex.vrKnockOffMegaStones = true;
+  for (const item of dex.items.all()) {
+    if (!item.megaStone) continue;
+    const original = item.onTakeItem;
+    function onTakeItem(it, pokemon, source) {
+      if (this.activeMove && this.activeMove.id === 'knockoff' && this.activePokemon && this.activePokemon !== pokemon) return true;
+      return original ? original.call(this, it, pokemon, source) : true;
+    }
+    const copy = Object.create(Object.getPrototypeOf(item), { ...Object.getOwnPropertyDescriptors(item), onTakeItem: { value: onTakeItem, enumerable: true } });
+    dex.items.itemCache.set(item.id, Object.freeze(copy));
+  }
+}
+
 // mulberry32, matching public/vr/vr-core.js. Separate streams (from the battle seed) for the
 // champion's team configuration, its strategy, chaos replacements and the simulator itself.
 function rng(seed) {
@@ -179,6 +199,7 @@ export function createEngine(config, emit) {
       }
     },
   });
+  knockOffMegaStones(battle.dex);
   battle.dex.data.Moves.potion = POTION;
   battle.dex.data.Conditions.potion = { name: 'Potion' };
   battle.vrBag = { potions: potionsStart };
@@ -356,4 +377,4 @@ export function createEngine(config, emit) {
 }
 
 // Battle is exported for the tests' fixed scenarios (no AI); the page never uses it.
-export { CHAMPION, VARIANTS, championTeam, Dex, createView, createAI, Battle };
+export { CHAMPION, VARIANTS, championTeam, Dex, createView, createAI, Battle, knockOffMegaStones };

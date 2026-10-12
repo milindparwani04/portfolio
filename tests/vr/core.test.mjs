@@ -377,3 +377,53 @@ test('notes and overrides explain modifier interactions', () => {
   assert.ok(C.modNotes({ random: true }, 3).some((t) => /party of 3/.test(t)));
   assert.ok(C.overrides({ moves: true }).some((t) => /this battle only/.test(t)));
 });
+
+test('effectiveness: type chart, special moves, user abilities and revealed target abilities/items', () => {
+  const eq = (move, target, user, want) => assert.equal(C.effectiveness(move, target, user), want, `${move.name} on ${target.types}`);
+  const mv = (name, type, category = 'Physical') => ({ name, type, category });
+  eq(mv('Earthquake', 'Ground'), { types: ['Fire', 'Steel'] }, {}, 4);
+  eq(mv('Earthquake', 'Ground'), { types: ['Flying'] }, {}, 0);
+  eq(mv('Earthquake', 'Ground'), { types: ['Steel'], ability: 'Levitate' }, {}, 0);
+  eq(mv('Earthquake', 'Ground'), { types: ['Steel'], ability: 'Levitate' }, { ability: 'Mold Breaker' }, 2);
+  eq(mv('Earthquake', 'Ground'), { types: ['Steel'], item: 'Air Balloon' }, {}, 0);
+  eq(mv('Thousand Arrows', 'Ground'), { types: ['Flying', 'Steel'] }, {}, 2);
+  eq(mv('Flamethrower', 'Fire', 'Special'), { types: ['Water', 'Dragon'] }, {}, 0.25);
+  eq(mv('Freeze-Dry', 'Ice', 'Special'), { types: ['Water', 'Ground'] }, {}, 4);
+  eq(mv('Flying Press', 'Fighting'), { types: ['Grass'] }, {}, 2);
+  eq(mv('Return', 'Normal'), { types: ['Ghost'] }, {}, 0);
+  eq(mv('Return', 'Normal'), { types: ['Ghost'] }, { ability: 'Scrappy' }, 1);
+  eq(mv('Hyper Voice', 'Normal', 'Special'), { types: ['Dragon'] }, { ability: 'Pixilate' }, 2);
+  eq(mv('Weather Ball', 'Normal', 'Special'), { types: ['Grass'] }, { weather: 'sunnyday' }, 2);
+  eq(mv('Shadow Ball', 'Ghost', 'Special'), { types: ['Normal'], ability: 'Wonder Guard' }, {}, 0);
+  eq(mv('Fire Fang', 'Fire'), { types: ['Bug'], ability: 'Wonder Guard' }, {}, 2);
+  eq(mv('Shadow Ball', 'Ghost', 'Special'), { types: ['Bug'], ability: 'Wonder Guard' }, {}, 0);
+  eq(mv('Protect', 'Normal', 'Status'), { types: ['Ghost'] }, {}, null);
+  assert.deepEqual(C.speedRange(100, 50), [108, 167]);
+});
+
+test('playback steps: spread hits land together, multi-hits one by one, Focus Sash after the hit it survives', () => {
+  const st = C.steps(['|move|p1a: A|Rock Slide|p2a: X|[spread] p2a,p2b', '|-damage|p2a: X|50/100', '|-damage|p2b: Y|60/100']);
+  assert.deepEqual(st.map((s) => [s.hit, s.lines.length]), [[false, 1], [true, 2]]);
+  const multi = C.steps(['|move|p1a: A|Scale Shot|p2a: X', '|-enditem|p2a: X|Focus Sash', '|-damage|p2a: X|1/100', '|-damage|p2a: X|0 fnt', '|faint|p2a: X']);
+  assert.deepEqual(multi.map((s) => s.lines[0].split('|')[1] + (s.hit ? ':hit' : '')), ['move', '-damage:hit', '-enditem', '-damage:hit', 'faint']);
+  assert.equal(multi[1].lines[0], '|-damage|p2a: X|1/100');
+});
+
+test('random team: total Lv 50 stats within 2% of Ren\'s team, no member under 300 BST, seeded', () => {
+  const target = C.championStrength(cat);
+  assert.ok(target > 4000, String(target));
+  const bstOf = (id) => C.STATS.reduce((s, k) => s + cat.species[id].base[k], 0);
+  const offs = [];
+  for (let seed = 1; seed <= 150; seed += 1) {
+    const ids = C.rollTeam(cat, C.rng(seed));
+    assert.equal(C.randomTeamProblem(cat, ids), '', `seed ${seed}`);
+    assert.ok(ids.every((id) => bstOf(id) >= C.RANDOM_MIN_BST), `seed ${seed}: ${ids}`);
+    const off = C.teamStrength(cat, ids) / target - 1;
+    assert.ok(Math.abs(off) <= C.RANDOM_STRENGTH, `seed ${seed}: ${(off * 100).toFixed(1)}%`);
+    offs.push(off);
+    assert.deepEqual(C.rollTeam(cat, C.rng(seed)), ids);
+  }
+  // Still varied: different teams, and individual strengths spread out.
+  const spread = C.rollTeam(cat, C.rng(7)).map(bstOf);
+  assert.ok(Math.max(...spread) - Math.min(...spread) >= 60, String(spread));
+});
