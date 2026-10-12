@@ -57,7 +57,7 @@ Full spec and interactive reference: `design_handoff_parwani_dos/` (`README.md`,
 
 | ID | Item | Status |
 |---|---|---|
-| R-DOS-1 | Theme tokens (Mono / Paper / Night / Crimson) + top bar + theme switcher (persisted) | Live 2026-10-07 — Crimson (`#780606`) added 2026-10-11, production-verified (`b889de9`) |
+| R-DOS-1 | Theme tokens (Mono / Paper / Night) + top bar + theme switcher (persisted) | Live 2026-10-07 — Crimson (`#780606`) added 2026-10-11, removed 2026-10-12 at Milind's request (a saved Crimson choice falls back to Night) |
 | R-DOS-2 | Scroll-snap shell, CRT transition, 1–7 / Esc keys, reduced-motion fallback | Live 2026-10-07 |
 | R-DOS-3 | Home tiles, extras, headline auto-fit | Live 2026-10-07 — tile/extras icons are reserved empty space pending R-DOS-9 (Phase 8). Fixed 2026-10-07 with Phase 3: steps/heart numbers overflowed their windows, the weather window had collapsed to 0 px, and the headline now fits per spec (72→14 px against the whole panel, summary 0.36×, summary dropped only if even 14 px overflows) |
 | R-DOS-4 | Journal list/detail with scroll-to-top on switch | Live 2026-10-07 — article bodies show the summary plus an "in progress" note until the posts are written (no placeholder text) |
@@ -83,7 +83,7 @@ Each project needs before `Live`: working happy path, error/empty states, mobile
 | PR-01 | Sounds Like | Enter a track, get its audio profile (energy, valence, danceability, tempo, key) and similar-feeling tracks | `/api/audio-features` (live); similarity source to choose | 1 | Built (partial) |
 | PR-02 | Where Next | Suggest a place to go, with the Liveliness Index scoring how busy/lively it is now | Places API (Google Places or Foursquare) + new Worker route | 2 | Planned |
 | PR-03 | Prompt Playlist | Text prompt → playlist | Spotify search; LLM or rules for mapping | 3 | Planned |
-| PR-04 | Today Somewhere | A daily "what's happening somewhere in the world" card | News/time-zone data | 4 | Planned |
+| PR-04 | YouShant | Chrome extension (MV3, [repo](https://github.com/milindparwani04/youshant)): YouTube opens only for a video clicked from Google Search. Project card 02 links to its [Chrome Web Store page](https://chromewebstore.google.com/detail/youshant/gldhpaeejnamjbhahbmgjannkckehfmh) | None on this site | 4 | Live 2026-10-12 (replaced Today Somewhere, dropped: Where Next and the Gig Finder already cover it) |
 | PR-05 | Speed Round | Timed trivia game, local high score | None (client-side) | 5 | Planned |
 | PR-06 | Untitled Terminal Adventure | Text adventure played in the terminal aesthetic | None (client-side) | 6 | Planned |
 | PR-07 | Victory Road | Build a six-Pokémon Gen I–IX team, configure challenge modifiers, then play a classic-pixel browser battle against 2026 VGC Masters champion Takuma Yamazaki; complete master spec in [`victory-road-master-prompt.md`](victory-road-master-prompt.md) | Phase 0 must select/licence sprites and battle simulator architecture before dependencies or assets are added | Done | Live 2026-10-07 |

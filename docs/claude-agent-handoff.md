@@ -18,7 +18,7 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 
 | Area | Files | Notes |
 |---|---|---|
-| Visible portfolio UI | `public/index.html` (the `.portfolio-v2` block only), `public/ui-v2.css`, `public/ui-v2.js`, `public/pdos-icons.js` | Parwani-DOS redesign (see `design_handoff_parwani_dos/`), every section migrated. Cache-bust versions: `ui-v2.css?v=38`, `ui-v2.js?v=30`, `pdos-icons.js?v=5` — bump on every change. The legacy tool modals further down `index.html` are still live: the Toolbox panel borrows them. |
+| Visible portfolio UI | `public/index.html` (the `.portfolio-v2` block only), `public/ui-v2.css`, `public/ui-v2.js`, `public/pdos-icons.js` | Parwani-DOS redesign (see `design_handoff_parwani_dos/`), every section migrated. Cache-bust versions: `ui-v2.css?v=48`, `ui-v2.js?v=62`, `pdos-icons.js?v=6` — bump on every change. The legacy tool modals further down `index.html` are still live: the Toolbox panel borrows them. |
 | Worker routes and data | `worker/index.js`, `worker/gig-picks.json`, `migrations/` | Spotify listening data, heart rate, steps, gigs, Game card (PlayStation + Steam). Gig Finder rebuilt 2026-10-02. Untouched by the Parwani-DOS redesign so far (Phase 1 is frontend-only). |
 
 ## Media tracker (how it works, for the next session and the weekly routine)
@@ -76,7 +76,7 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 - Journal: no article text is written yet. When one is, it goes inline in that entry's `.pdos-journal-article` panel (replacing the "in progress" note) and the status changes; there are no separate article pages any more.
 - **Victory Road:** live since 2026-10-07; follow-ups (smarter AI, Potion targeting the bench) are listed under "Known limitations" in [`victory-road-build.md`](victory-road-build.md).
 - The playlists "now playing" strip from the mockup was dropped at Milind's request (2026-10-07) — don't re-propose it.
-- Planned projects (Today Somewhere, Where Next, Speed Round, Terminal Adventure) open a window that says they're planned; Sounds Like runs inside its window; Crack has its own overlay (original theme, `crack-game.js`).
+- Planned projects (Where Next, Speed Round, Terminal Adventure) open a window that says they're planned; YouShant (02) is a plain link to the Chrome Web Store; Sounds Like runs inside its window; Crack has its own overlay (original theme, `crack-game.js`).
 - Reminders: `worker/reminders.json` holds Milind's general daily phone reminders (added 2026-10-05); `sendDailyReminders` in the cron pushes each active one to the `REMINDERS_TOPIC` secret (`shawshankreminder`) once per Dubai day from 12:00. Add entries there when he asks for a reminder; prune expired ones occasionally.
 - PlayStation: the PSN refresh token lasts 10 days, so Milind re-submits `/api/psn/authorize` with a fresh NPSSO about every 10 days; since 2026-10-04 the cron pushes an ntfy reminder from 2 days before expiry (`checkPsnExpiry`). Open question: whether the refresh token's lifetime actually resets on each refresh. If Milind gets a reminder and the card still works days after the recorded expiry, the token slides and the reminder can be dropped. If that becomes a chore, the alternative he turned down was storing the NPSSO in KV (~60-day life, but it is effectively his Sony login).
 
@@ -87,6 +87,12 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 - Lighthouse `valid-source-maps` flags a third-party library map; it doesn't affect the score categories that matter (production: 90 / 100 / 100).
 
 ## Work log (newest first)
+
+### 2026-10-12 — YouShant card; Crimson removed
+
+- **Brief (Milind):** replace Today Somewhere with his Chrome extension YouShant (repo `milindparwani04/youshant`), with an animated icon based on its icon where the portal lights up on hover; clicking opens the Chrome Web Store listing. Remove the Crimson theme.
+- **Built:** `index.html`: card 02 is `<a class="pdos-project pdos-project--youshant" target="_blank" rel="noopener">` (no `data-open-project`, so the window handler ignores it), tag `[ Extension ]`, footer `Live / Chrome Web Store` + `Install ↗`; the hidden legacy project list swapped too; the Crimson theme option removed. `ui-v2.css`: `text-decoration: none` on `.pdos-project`, the `--today` hover replaced by `--youshant` (`#1a0606` / `#fbeee6`), the Crimson token block removed. `ui-v2.js`: `today` dropped from `PDOS_PROJECTS`, `crimson` from `THEMES`. `pdos-icons.js`: `iconPortal` (22×20 grid `PORTAL`, cap P=5). The arch, wizard and staff stay the same; on hover the rim, interior, embers, play triangle and staff orb change colour with a per-cell delay by distance from the portal centre (the light spreads outwards), and a red radial glow fades in with `pxflick`. CSS v48 / UI v62 / icons v6.
+- **Tested** (Claude in Chrome, `http-server` on `public/`, 1456×819): card renders in slot 02, idle portal dark, hover lights it and leaving restores it; `href` is the store URL; theme menu lists Mono/Paper/Night only; a saved `pdosTheme=crimson` loads as Night and is rewritten; `node --check` on both scripts; no console errors. Not checked on production yet.
 
 ### 2026-10-11 — Journal wheel scroll fix; production verification
 

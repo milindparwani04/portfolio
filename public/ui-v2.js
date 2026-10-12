@@ -690,7 +690,7 @@
   // site-wide `html{scroll-behavior:smooth}`. This just drives the chrome that sits on top:
   // an IntersectionObserver toggles .is-active per section (CSS does the CRT power-on/off),
   // keeps the top bar's typed command line, section counter and clock current, handles the
-  // 1-7 jump keys and Esc, and runs the Mono/Paper/Night/Crimson theme switcher. Phones fall outside
+  // 1-7 jump keys and Esc, and runs the Mono/Paper/Night theme switcher. Phones fall outside
   // the paging media query, so the CRT wrappers stay inert there (see .pdos-crt-* in the CSS)
   // and this still safely updates the (hidden) top bar state as the user scrolls past.
   function initShell() {
@@ -701,7 +701,7 @@
       ['home', 'Home'], ['journal', 'Journal'], ['projects', 'Projects'], ['toolbox', 'Toolbox'],
       ['media', 'Media'], ['playlists', 'Playlists'], ['gigs', 'Gigs']
     ];
-    const THEMES = { mono: 'Mono', paper: 'Paper', night: 'Night', crimson: 'Crimson' };
+    const THEMES = { mono: 'Mono', paper: 'Paper', night: 'Night' };
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     const cmdEl = byId('pdosCmd');
     const secLabelEl = byId('pdosSecLabel');
@@ -878,7 +878,6 @@
   // scrolling, no 1-7 keys, no in-page jump links) until it is closed with ✕, the scrim or Esc.
   const PDOS_PROJECTS = {
     music: { n: '01', tag: 'Music', title: 'Sounds Like + Prompt Playlist', desc: 'A similarity engine for music discovery. Turn text into personalised playlists.', status: 'Phase 02 / Similarity engine', color: '#1ed760', file: 'sounds_like.vol', src: '/sounds-like.html' },
-    today: { n: '02', tag: 'Experiment', title: 'Today Somewhere', desc: 'A collection of places, moments and photographs.', status: 'Planned · In development', color: 'oklch(0.78 0.1 265)', file: 'today_somewhere.vol' },
     where: { n: '03', tag: 'Tool', title: 'Where Next', desc: 'A simple tool for exploring new destinations.', status: 'Planned · In development', color: 'oklch(0.88 0.07 85)', file: 'where_next.vol' },
     speed: { n: '04', tag: 'Game', title: 'Speed Round', desc: 'A fast-paced trivia game for curious minds.', status: 'Planned · In development', color: 'oklch(0.74 0.16 0)', file: 'speed_round.exe' },
     terminal: { n: '05', tag: 'Game', title: 'Untitled Terminal Adventure', desc: 'A text-based experiment in choice and consequence.', status: 'Planned · In development', color: 'oklch(0.75 0.16 40)', file: 'terminal_adventure.exe' },

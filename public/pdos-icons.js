@@ -122,6 +122,22 @@
     return frame(16 * P, 18 * P, {}, globe, ...stand);
   }
   
+  // YouShant (project 02): the extension's stone arch, a wizard and the play button. Idle, the
+  // portal is dark; on hover it lights from the centre outwards and the wizard turns to silhouette.
+  const PORTAL = ['......KKKKKKKKKK......', '....KKssssssssssKK....', '...KsSSKKKKKKKKSSsK...', '..KsSKKRRRRRRRRKKSsK..', '..KSKRRIIIIIIiIRRKSK..', '.KsSKRIIITIIIIIIRKSsK.', '.KSSKRIiITTIIIIIRKSSK.', 'KsSSKRIIITTTIIiIRKSSsK', 'KSSSKRIIITTTTIIIRKSSSK', 'KKKKKRiIITTTIWIIRKKKKK', 'KsSSKRIIITTIIOiIRKSSsK', 'KSSSKRIiITIIIWIIRKSSSK', 'KSSSKRIIWIIIIWIiRKSSSK', 'KKKKKRiWWIIIIWIIRKKKKK', 'KsSSKRWWWWWIIWIIRKSSsK', 'KSSSKRIWWWWWWWIiRKSSSK', 'KSSSKRWWWWWWIWIIRKSSSK', 'KKKKKWWWWWWWRWRRRKKKKK', 'KsSSWWWWWWWWWWssSSSSsK', 'KKKKKKKKKKKKKKKKKKKKKK'];
+  function iconPortal(P, on) {
+    const stone = { K: '#141418', S: '#3d3d48', s: '#5a5a66', W: '#08080b' };
+    const col = on ? { ...stone, R: '#ff3b1f', I: '#f7efe9', i: '#ff6a52', T: '#ff1f1f', O: '#fff3a0' } : { ...stone, R: '#4a1410', I: '#16080a', i: '#2a0e10', T: '#5a1616', O: '#3a2a2a' };
+    const cells = [];
+    PORTAL.forEach((row, r) => row.split('').forEach((c, ci) => {
+      if (!col[c]) return;
+      const delay = on ? Math.round(Math.hypot(ci - 10.5, r - 9) * 28) : 0;
+      cells.push(E('div', { key: r + '_' + ci, style: { position: 'absolute', left: ci * P, top: r * P, width: P, height: P, background: col[c], transition: `background .2s steps(2) ${delay}ms` } }));
+    }));
+    const glow = E('div', { style: { position: 'absolute', left: -4 * P, top: -3 * P, width: 30 * P, height: 26 * P, background: 'radial-gradient(ellipse at 50% 45%, rgba(255,70,40,.6), rgba(255,40,20,.18) 42%, rgba(255,40,20,0) 62%)', opacity: on ? 1 : 0, transition: 'opacity .3s steps(3)', animation: on ? 'pxflick 1.6s steps(1) infinite' : 'none' } });
+    return frame(22 * P, 20 * P, {}, glow, ...cells);
+  }
+
   function iconEq(P, on) {
     const idle = [2, 3, 2, 4, 3, 5, 3, 2, 3];
     const bars = idle.map((h, i) => E('div', { key: i, style: { width: P, height: 8 * P, transformOrigin: 'bottom', background: `repeating-linear-gradient(to top, currentColor 0 ${P - 1}px, transparent ${P - 1}px ${P}px)`, transform: on ? undefined : `scaleY(${h / 8})`, animation: on ? `pxeq ${0.6 + (i % 3) * 0.18}s steps(4) ${i * 0.07}s infinite alternate` : 'none' } }));
@@ -301,12 +317,12 @@
   const ICONS = {
     book: [iconBook, 5], board: [iconBoard, 4], toolbox: [iconToolbox, 4], projector: [iconProjector, 4],
     spotify: [iconSpotifySym, 4], guitar: [iconGuitar3, 3], safe: [iconSafe, 5], ball: [makeBall, 6],
-    eq: [iconEq, 6], skyline: [iconSkyline, 4], globe: [iconGlobe, 5], bulb: [iconBulb, 5], terminal: [iconTerminal, 5]
+    eq: [iconEq, 6], skyline: [iconSkyline, 4], portal: [iconPortal, 5], globe: [iconGlobe, 5], bulb: [iconBulb, 5], terminal: [iconTerminal, 5]
   };
   // Each sprite's size in grid cells (its frame at P = 1), so fitting never has to build a copy.
   const UNITS = {
     book: [24, 12], board: [28, 13], toolbox: [16, 14], projector: [31, 14], spotify: [16, 16], guitar: [24, 25],
-    safe: [16, 14], ball: [14, 19.6], eq: [17, 8], skyline: [24, 14], globe: [16, 18], bulb: [12, 16], terminal: [16, 14]
+    safe: [16, 14], ball: [14, 19.6], eq: [17, 8], skyline: [24, 14], portal: [22, 20], globe: [16, 18], bulb: [12, 16], terminal: [16, 14]
   };
   const unitSize = (name) => UNITS[name];
 

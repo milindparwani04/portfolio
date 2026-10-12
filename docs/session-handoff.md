@@ -117,9 +117,13 @@ Backend endpoints live: news, last-updated, BPM/key lookup, audio features, samp
 
 External accounts connected (owner-only): Spotify (re-authorize at `/api/spotify/authorize?key=<SPOTIFY_AUTH_KEY>` if scopes change) and Google Health (Google Cloud project `golden-monolith-255513`, OAuth app **In production, unverified**, single scope `googlehealth.health_metrics_and_measurements.readonly`; re-authorize at `/api/health/authorize?key=<HEALTH_AUTH_KEY>`). PlayStation (since 2026-10-04): no OAuth app exists, so `/api/psn/authorize` takes an NPSSO token (sign in at playstation.com, then open https://ca.account.sony.com/api/v1/ssocookie) plus `PSN_AUTH_KEY`; **the refresh token lasts only 10 days**, so the form has to be re-submitted with a fresh NPSSO about every 10 days (Milind chose this over storing the NPSSO itself). While it is lapsed the Game card still shows Steam. Steam (since 2026-10-04): official Web API key from https://steamcommunity.com/dev/apikey (`STEAM_API_KEY`) plus `STEAM_ID`; the Steam profile and its Game details must be public. All three owner keys are stored only as Worker secrets — if lost, generate a new random value and store it with `wrangler secret bulk <file.json>` (then delete the file) rather than trying to read them back; secrets are write-only.
 
-Settled removals (do not re-propose without flagging): YouTube to MP3/MP4/WAV converters (ToS and backend complexity), Seamless Set project, standalone Liveliness Index (merged into Where Next), public location card (built and dropped 2026-10-04: Milind judged showing his whereabouts not responsible).
+Settled removals (do not re-propose without flagging): Today Somewhere project (replaced by YouShant 2026-10-12), Crimson theme (removed 2026-10-12), YouTube to MP3/MP4/WAV converters (ToS and backend complexity), Seamless Set project, standalone Liveliness Index (merged into Where Next), public location card (built and dropped 2026-10-04: Milind judged showing his whereabouts not responsible).
 
 ## Session log
+
+### 2026-10-12 — YouShant replaces Today Somewhere; Crimson theme removed
+
+At Milind's request: project card 02 is now YouShant, his Chrome extension. The card is a link to its Chrome Web Store page (new tab), not a project window, and has a new pixel icon (`portal` in `pdos-icons.js`: the extension's stone arch, wizard and play button; the portal lights up from the centre on hover). Today Somewhere is dropped, as Where Next and the Gig Finder already cover it. The Crimson theme is gone; anyone who had it saved gets Night. CSS v48 / UI v62 / icons v6. Checked in Chrome on a local static server. No Worker changes.
 
 ### 2026-10-11 — Victory certificates
 

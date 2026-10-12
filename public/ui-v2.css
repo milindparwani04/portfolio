@@ -48,10 +48,6 @@
      shade darker than the mockup's #5c5a53 for the same reason (4.37:1 on --p2 before). */
   --v2-green: #1d5e33; --v2-yellow: #6b4700;
 }
-.portfolio-v2[data-theme="crimson"] {
-  --bg: #780606; --fg: #fbeee6; --p0: #820a0a; --p1: #8c1010; --p2: #9a1818; --p3: #a62020;
-  --dim: #f0c4bc; --line: rgba(251, 238, 230, .22); --ok: #7ef0b0; --warn: #ffc65c; --on: #780606;
-}
 
 #boot { display: none !important; }
 body.locked { overflow: auto !important; height: auto !important; }
@@ -453,6 +449,7 @@ body.locked { overflow: auto !important; height: auto !important; }
 /* Projects (Phase 4): six cards and the Champion Run cartridge; each opens a window. */
 .pdos-projects { flex: 1 1 auto; min-height: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: minmax(0, 1fr) minmax(0, 1fr) clamp(118px, 19vh, 168px); gap: 8px; padding: 12px; background: var(--p0); }
 .pdos-project {
+  text-decoration: none;
   min-width: 0; min-height: 0; overflow: hidden; display: flex; flex-direction: column; padding: clamp(10px, 1.6vh, 14px);
   border: 0; background: var(--v2-panel); color: var(--v2-fg); font: inherit; text-align: left; cursor: pointer;
   transition: background .15s, color .15s;
@@ -465,7 +462,7 @@ body.locked { overflow: auto !important; height: auto !important; }
 .pdos-project-foot { flex: 0 0 auto; display: flex; justify-content: space-between; gap: 1rem; padding-top: 8px; border-top: 1px solid currentColor; font-size: .69rem; text-transform: uppercase; white-space: nowrap; }
 .pdos-project-foot > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .pdos-project--music:hover, .pdos-project--music:focus-visible { background: #1ed760; color: #070707; }
-.pdos-project--today:hover, .pdos-project--today:focus-visible { background: oklch(0.3 0.07 265); color: #f4f3ef; }
+.pdos-project--youshant:hover, .pdos-project--youshant:focus-visible { background: #1a0606; color: #fbeee6; }
 .pdos-project--where:hover, .pdos-project--where:focus-visible { background: oklch(0.88 0.07 85); color: #070707; }
 .pdos-project--speed:hover, .pdos-project--speed:focus-visible { background: oklch(0.74 0.16 0); color: #070707; }
 .pdos-project--terminal:hover, .pdos-project--terminal:focus-visible { background: oklch(0.75 0.16 40); color: #070707; }
