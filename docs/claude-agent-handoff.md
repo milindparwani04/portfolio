@@ -18,7 +18,7 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 
 | Area | Files | Notes |
 |---|---|---|
-| Visible portfolio UI | `public/index.html` (the `.portfolio-v2` block only), `public/ui-v2.css`, `public/ui-v2.js`, `public/pdos-icons.js` | Parwani-DOS redesign (see `design_handoff_parwani_dos/`), every section migrated. Cache-bust versions: `ui-v2.css?v=50`, `ui-v2.js?v=68`, `pdos-icons.js?v=7` — bump on every change. The legacy tool modals further down `index.html` are still live: the Toolbox panel borrows them. |
+| Visible portfolio UI | `public/index.html` (the `.portfolio-v2` block only), `public/ui-v2.css`, `public/ui-v2.js`, `public/pdos-icons.js` | Parwani-DOS redesign (see `design_handoff_parwani_dos/`), every section migrated. Cache-bust versions: `ui-v2.css?v=50`, `ui-v2.js?v=69`, `pdos-icons.js?v=7` — bump on every change. The legacy tool modals further down `index.html` are still live: the Toolbox panel borrows them. |
 | Worker routes and data | `worker/index.js`, `worker/gig-picks.json`, `migrations/` | Spotify listening data, heart rate, steps, gigs, Game card (PlayStation + Steam). Gig Finder rebuilt 2026-10-02. Untouched by the Parwani-DOS redesign so far (Phase 1 is frontend-only). |
 
 ## Media tracker (how it works, for the next session and the weekly routine)
@@ -87,6 +87,13 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 - Lighthouse `valid-source-maps` flags a third-party library map; it doesn't affect the score categories that matter (production: 90 / 100 / 100).
 
 ## Work log (newest first)
+
+### 2026-10-12 — Cleanup: unused pages, assets and code removed
+
+- **Brief (Milind):** delete anything unused, e.g. the old cinematics and the Buyer Risk Grade calculator (still in Google results); RELAY too (asked, confirmed).
+- **Found by scanning every file in `public/` (except the game's dynamically named sprites) for references in `public/`, `worker/`, `scripts/` and `wrangler.jsonc`:** six `ren-38-*.webm` (43 MB; `marnie-remix.mp3` beside them is still used), `title/cloudbound.png` (2.7 MB, replaced by the Rayquaza art), `relay.html` (unlinked prototype, `b96f8ef`), and `buyer-risk-grade.html` (linked only from the hidden legacy hero's "Launch demo" button, also removed). `privacy.html` looked unreferenced but is served at `/privacy` for the OAuth apps: kept. Missing pages return a real 404 on this Worker (checked), so Google drops them on recrawl.
+- **Dead code:** the old video cutscene's CSS (`.tvb-esc*` overlay, lights, crowd, fire, champ, flash, dialog, progress, skip; `.tvb-cinematic video`, `.tvb-cinematic-caption`; keyframes `tvb-sweep`, `tvb-cheer`, `tvb-flame`, `tvb-flash`; their small-screen and reduced-motion lines) and `TVBArt.crowd()` (never called; the stadium backdrop draws its own fans). NOTICE.md's cinematic section rewritten for the dialogue (music credit kept; the WebM crowd-sample credit went with the WebMs). `VR_VERSION` 32, `ui-v2.js?v=69`.
+- **Tested:** core/engine 62 pass; `battle-ui-browser.cjs` 6 PASS; `dialogue-browser.cjs` PASS; title credit clear at 7 sizes; cutscene screenshots unchanged. `tests/vr/cinematic-browser.cjs` (Codex's) still targets the retired videos and was already failing at its first assertion; left for Codex to retire or rewrite.
 
 ### 2026-10-12 — Trainer name required; cutscene: battle no longer shows through
 

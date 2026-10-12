@@ -125,6 +125,9 @@ The visible Toolbox shows all nine tools. Image Converter, Tempo Tap, Key/BPM Lo
 | Swipe-to-decide multiplayer (going out) | Parked | Needs WebSockets/Durable Objects or Supabase, places API, match detection. Revisit after Where Next ships. |
 | YouTube → MP3/MP4/WAV converters | Dropped | Terms of service risk and backend complexity. Do not re-propose similar converters without flagging this. |
 | Seamless Set | Dropped | Removed from Projects. |
+| Buyer Risk Grade demo (`buyer-risk-grade.html`) | Dropped | Deleted 2026-10-12 (Milind): unlinked from the visible site but still in search results. Now 404. |
+| RELAY daily mirror puzzle (`relay.html`) | Dropped | Unlinked prototype; deleted 2026-10-12 at Milind's request. Now 404. In git history (`b96f8ef`) if wanted again. |
+| Championship video cinematics (six WebMs) and Cloudbound title art | Dropped | Retired by the pixel-Ren dialogue and the Rayquaza menu; files deleted 2026-10-12 (about 46 MB). |
 | Standalone Liveliness Index | Dropped | Merged into Where Next. |
 
 

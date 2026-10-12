@@ -22,15 +22,11 @@ The Very Best (called Victory Road until 2026-10-10) is an unofficial, non-comme
 
 No extracted Pokémon game audio, ROM data or Pokémon Showdown client code is included.
 
-## Championship cinematic (2026-10-10)
+## Championship dialogue (2026-10-12)
 
-Six 38-second videos in `public/assets/vr/cinematics/ren-v1/` use original dialogue, AI-generated cinematic pixel-art environments/Ren, and the repository Pokémon sprites credited above. The visible Pokémon is selected from the engine's first-fainted payload. These retain the existing Pokémon fan-use rights limitations.
-
-The video audio is always muted in the game. A separate persistent music element plays `marnie-remix.mp3` from zero with the cinematic and continues through phase two, resuming the engine at the 38-second drop. Skip seeks the same recording to 38 seconds. Music volume and master mute apply throughout.
+The championship sequence is an in-game 38-second dialogue with the original pixel Ren sprite, court and stadium (no video; the six 2026-10-10 WebM cinematics were retired and deleted on 2026-10-12). A persistent music element plays `marnie-remix.mp3` from zero with the dialogue and continues through phase two, resuming the engine at the 38-second drop. Skip seeks the same recording to 38 seconds. Music volume and master mute apply throughout.
 
 Track: Pokémon Sword and Shield — Marnie Battle Theme ft. Scottay (Remix), GlitchxCity. Local MP3 supplied by Milind on 2026-10-10 with explicit instructions to use and deploy it. This records user direction, not an independently verified recording/composition licence.
-
-The muted original WebMs contain CC0 crowd recordings by kyles (Freesound 629884) and benfree (Freesound 130568); these are inaudible in the shipped player.
 
 
 ## Menu and phase-one soundtrack (2026-10-11)

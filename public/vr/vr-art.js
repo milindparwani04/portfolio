@@ -4,7 +4,6 @@
 //   drawTrainer(canvas) draws that sprite at 1:1
 //   arena(phase, seed)  the battle backdrop: 'court' (an outdoor battle court, the first stage) or
 //                       'stadium' (the dark championship stadium after the escalation)
-//   crowd(seed)         stadium stands with rows of silhouettes, for the championship escalation
 // Markup is fixed strings and numbers only; nothing user-supplied reaches it.
 (function () {
   'use strict';
@@ -14,28 +13,6 @@
     let a = seed >>> 0;
     return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
   };
-
-  // Seeded stands: rows of heads and shoulders in muted team colours, nearer rows larger.
-  function crowd(seed = 7) {
-    const rand = seeded(seed);
-    const cols = ['#3b3f58', '#4b3a52', '#2f4a4f', '#504438', '#3e4a3a', '#52364a', '#33405a'];
-    const rows = [];
-    for (let r = 0; r < 5; r += 1) {
-      const y = 22 + r * 18;
-      const size = 5 + r * 1.6;
-      const parts = [];
-      for (let x = -4 + (r % 2) * 6; x < 404; x += size * 2.2 + rand() * 3) {
-        const c = cols[Math.floor(rand() * cols.length)];
-        const lift = rand() * 3;
-        parts.push(`<rect x="${(x - size).toFixed(1)}" y="${(y + size * 0.6 - lift).toFixed(1)}" width="${(size * 2).toFixed(1)}" height="${(size * 2).toFixed(1)}" rx="${(size * 0.7).toFixed(1)}" fill="${c}"/>`);
-        parts.push(`<circle cx="${x.toFixed(1)}" cy="${(y - lift).toFixed(1)}" r="${(size * 0.62).toFixed(1)}" fill="${c}"/>`);
-      }
-      rows.push(`<g class="tvb-crowd-row" style="--r:${r}">${parts.join('')}</g>`);
-    }
-    return `<svg class="tvb-crowd" viewBox="0 0 400 120" preserveAspectRatio="xMidYMax slice" aria-hidden="true" focusable="false">`
-      + `<rect x="0" y="0" width="400" height="120" fill="#14151f"/>${rows.join('')}`
-      + `<rect x="0" y="108" width="400" height="12" fill="#0d0e15"/></svg>`;
-  }
 
   // Ren as a 22 x 34 pixel sprite (design handoff "Retro Main Menu", option 1b, 2026-10-10): the one
   // picture of Ren, used on the title, the battle intro and the championship escalation. One
@@ -143,5 +120,5 @@
     return `<svg class="tvb-arena-art" viewBox="0 0 320 180" preserveAspectRatio="none" shape-rendering="crispEdges" aria-hidden="true" focusable="false">${phase === 'stadium' ? stadium(rand) : court(rand)}</svg>`;
   }
 
-  window.TVBArt = { trainer, drawTrainer, arena, crowd };
+  window.TVBArt = { trainer, drawTrainer, arena };
 }());

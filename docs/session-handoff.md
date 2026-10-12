@@ -131,6 +131,10 @@ Settled removals (do not re-propose without flagging): Today Somewhere project (
 
 ## Session log
 
+### 2026-10-12 — Unused pages and assets deleted
+
+At Milind's request (Claude): deleted `buyer-risk-grade.html` (still showing in Google) and the unlinked RELAY prototype `relay.html` (both now 404, so search engines drop them on recrawl; Search Console's Removals tool is faster), the six retired championship WebMs and the old Cloudbound title art (about 46 MB), the hidden legacy hero's "Launch demo" link, the old video cutscene's CSS (`.tvb-esc*`, video/caption rules, four keyframes) and the unused `TVBArt.crowd()`. NOTICE.md's cinematic section now describes the dialogue. `VR_VERSION` 32, `ui-v2.js?v=69`.
+
 ### 2026-10-12 — Trainer name required; cutscene backdrop made solid
 
 At Milind's request (Claude): the player must enter a trainer name to continue (no default name; Continue disabled until there is one). The battle (Ren's Pokémon, HP boxes) no longer shows through the championship cutscene; the backdrop is solid and dimmed. `VR_VERSION` 31, `ui-v2.js?v=68`.
