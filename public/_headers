@@ -1,0 +1,6 @@
+# Keep everything except the homepage out of search results.
+/*
+  X-Robots-Tag: noindex
+
+/
+  ! X-Robots-Tag

@@ -88,6 +88,12 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 
 ## Work log (newest first)
 
+### 2026-10-15 — Search: homepage only
+
+- Milind wants only milindparwani.com in Google results. Added `public/_headers` (`/*` → `X-Robots-Tag: noindex`, `/` → `! X-Robots-Tag`), `public/robots.txt` (allow all, sitemap link) and `public/sitemap.xml` (`/` only).
+- Tested with `wrangler dev --local`: `/` 200 without the header; `/privacy`, `/dissertation.pdf`, `/og.png`, `/robots.txt`, `/sitemap.xml` all carry `x-robots-tag: noindex`.
+- The deleted `buyer-risk-grade.html` already 404s live; Milind to submit it in Search Console → Removals for faster drop-out.
+
 ### 2026-10-12 — Party slot chips, drag ghost X, battle preview sprites
 
 - **Brief (Milind):** in the party's 2×3 grid Iron Hands' type chips stacked over its name; dragging a member showed a huge X; on the battle preview some sprites crossed their row borders and names sat too close to the sprites.

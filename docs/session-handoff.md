@@ -131,6 +131,10 @@ Settled removals (do not re-propose without flagging): Today Somewhere project (
 
 ## Session log
 
+### 2026-10-15 — Only the homepage is indexable
+
+At Milind's request (Claude): `public/_headers` sends `X-Robots-Tag: noindex` on every static asset except `/`, so only milindparwani.com itself appears in Google (`privacy.html`, `dissertation.pdf`, images etc. still load, they just aren't indexed). Added `public/robots.txt` (points at the sitemap; Cloudflare's managed content-signals block is prepended to it) and `public/sitemap.xml` listing only `/`. `_headers` does not touch Worker-generated responses (`/api/*`, `/audio/*`). For `buyer-risk-grade.html`, still in Google from before its deletion, Milind will use Search Console's Removals tool. Any new page meant to be searchable needs a detach rule in `_headers`.
+
 ### 2026-10-12 — Party grid and battle preview fixes
 
 At Milind's request (Claude): in the party grid, two type chips no longer stack over the name (Iron Hands), and dragging a member no longer shows a giant X. On the battle preview, sprites fit inside their rows, and names sit further from the sprites. `VR_VERSION` 34, `ui-v2.js?v=71`.
