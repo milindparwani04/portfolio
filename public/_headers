@@ -1,6 +1,22 @@
-# Keep everything except the homepage out of search results.
-/*
+# Keep everything except the homepage out of search results. Explicit paths only:
+# a /* rule with a "! X-Robots-Tag" detach on / still sent noindex on / in production.
+/privacy*
   X-Robots-Tag: noindex
 
-/
-  ! X-Robots-Tag
+/dissertation.pdf
+  X-Robots-Tag: noindex
+
+/og.png
+  X-Robots-Tag: noindex
+
+/favicon.svg
+  X-Robots-Tag: noindex
+
+/assets/*
+  X-Robots-Tag: noindex
+
+/vr/*
+  X-Robots-Tag: noindex
+
+/lib/*
+  X-Robots-Tag: noindex

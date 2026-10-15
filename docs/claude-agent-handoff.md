@@ -90,8 +90,8 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 
 ### 2026-10-15 — Search: homepage only
 
-- Milind wants only milindparwani.com in Google results. Added `public/_headers` (`/*` → `X-Robots-Tag: noindex`, `/` → `! X-Robots-Tag`), `public/robots.txt` (allow all, sitemap link) and `public/sitemap.xml` (`/` only).
-- Tested with `wrangler dev --local`: `/` 200 without the header; `/privacy`, `/dissertation.pdf`, `/og.png`, `/robots.txt`, `/sitemap.xml` all carry `x-robots-tag: noindex`.
+- Milind wants only milindparwani.com in Google results. First tried `public/_headers` with `/*` → noindex and `/` → `! X-Robots-Tag`: fine in `wrangler dev`, but production still sent noindex on `/`. Replaced with explicit rules (`/privacy*`, `/dissertation.pdf`, `/og.png`, `/favicon.svg`, `/assets/*`, `/vr/*`, `/lib/*`); do not reintroduce a `/*` rule. Also added `public/robots.txt` (allow all, sitemap link) and `public/sitemap.xml` (`/` only).
+- Verified locally and in production: `/` has no `x-robots-tag`; `/privacy`, `/dissertation.pdf`, `/og.png`, `/vr/*` carry `noindex`.
 - The deleted `buyer-risk-grade.html` already 404s live; Milind to submit it in Search Console → Removals for faster drop-out.
 
 ### 2026-10-12 — Party slot chips, drag ghost X, battle preview sprites
