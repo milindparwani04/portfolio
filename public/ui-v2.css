@@ -350,46 +350,62 @@ body.locked { overflow: auto !important; height: auto !important; }
 .pdos-status--ok { color: var(--v2-green); }
 .pdos-status--dim { color: var(--v2-dim); }
 
-/* Journal (Phase 3): list of every entry on the left, the selected entry on the right. The list
-   and the article body scroll inside the window; the page itself never does here. */
-.pdos-journal { flex: 1 1 auto; min-height: 0; display: grid; grid-template-columns: clamp(290px, 31vw, 440px) minmax(0, 1fr); background: var(--v2-panel); }
-.pdos-journal-side { min-width: 0; min-height: 0; display: flex; flex-direction: column; border-right: 1px solid var(--v2-soft-line); }
-.pdos-journal-head { flex: 0 0 auto; display: flex; flex-direction: column; gap: 6px; padding: clamp(.6rem, 1.8vh, 1rem) 18px clamp(.5rem, 1.4vh, .75rem); }
-.pdos-journal-title { margin: 0; font-family: var(--display); font-weight: 700; font-size: clamp(3rem, min(6.2vw, 11vh), 5.85rem); line-height: .86; text-transform: uppercase; white-space: nowrap; }
+/* Journal (rebuilt 2026-10-18 to match the Toolbox): headline cards fill the window — three
+   columns, one row per three entries — and opening one shrinks the grid while the reader slides in
+   from the right. The reader is a .pdos-tool-panel, so it shares the Toolbox panel's width, slide
+   and phone rules (see the Toolbox block). Cards carry no icons: headline, byline, status. */
+.pdos-journal { flex: 1 1 auto; min-height: 0; display: flex; overflow: hidden; container-type: inline-size; background: var(--v2-panel); }
+.pdos-journal-main { flex: 1 1 auto; min-width: 0; container: journal-main / inline-size; display: flex; flex-direction: column; gap: 14px; padding: clamp(10px, 1.8vh, 16px); }
+.pdos-journal-head { flex: 0 0 auto; display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 6px 24px; }
+.pdos-journal-title { margin: 0; font-family: var(--display); font-weight: 700; font-size: clamp(2.4rem, min(6.2vw, 10vh), 5.85rem); line-height: .86; text-transform: uppercase; white-space: nowrap; }
 .pdos-journal-kicker { margin: 0; font-size: .75rem; letter-spacing: .1em; text-transform: uppercase; }
-.pdos-journal-count, .pdos-journal-foot { flex: 0 0 auto; padding: 8px 18px; border-top: 1px solid var(--v2-soft-line); color: var(--v2-dim); font-size: .69rem; letter-spacing: .05em; text-transform: uppercase; }
-.pdos-journal-foot { padding: 10px 18px; font-size: .62rem; line-height: 1.6; }
-.pdos-journal-list { flex: 1 1 auto; min-height: 0; overflow: auto; }
-.pdos-journal-row {
-  width: 100%; display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 12px; align-items: start;
-  padding: 12px 18px; border: 0; border-top: 1px solid var(--v2-soft-line); background: transparent; color: var(--v2-fg);
-  font: inherit; text-align: left; cursor: pointer;
+.pdos-journal-grid { flex: 1 1 auto; min-height: 0; overflow: auto; display: grid; grid-template-columns: repeat(var(--journal-cols, 3), minmax(0, 1fr)); grid-auto-rows: minmax(150px, 1fr); gap: 8px; }
+.pdos-journal-card {
+  --hover: oklch(0.75 0.16 40);
+  min-width: 0; min-height: 0; overflow: hidden; container-type: inline-size; display: flex; flex-direction: column; gap: 12px;
+  padding: clamp(10px, 1.8vh, 18px) clamp(14px, 1.4vw, 22px); border: 0; background: var(--v2-panel-raised); color: var(--v2-fg);
+  font: inherit; text-align: left; cursor: pointer; transition: background .15s, color .15s;
 }
-.pdos-journal-row:first-child { border-top: 0; }
-.pdos-journal-row:hover { background: var(--v2-panel-raised); }
-.pdos-journal-row:focus-visible { outline: 2px solid var(--bar); outline-offset: -2px; }
-.pdos-journal-row[aria-selected="true"] { background: var(--v2-panel-raised); box-shadow: inset 3px 0 0 var(--bar); }
-.pdos-journal-thumb { width: 64px; height: 64px; object-fit: cover; display: block; background: var(--v2-panel-raised); }
-.pdos-journal-row-text { min-width: 0; display: flex; flex-direction: column; gap: 4px; font-size: .62rem; text-transform: uppercase; }
-.pdos-journal-row-meta { display: flex; justify-content: space-between; gap: 8px; }
-.pdos-journal-row-meta > span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.pdos-journal-row-meta > span:last-child { color: var(--v2-dim); }
-.pdos-journal-row-title { font-family: var(--display); font-weight: 700; font-size: 1.375rem; line-height: 1; }
+.pdos-journal-card-head, .pdos-journal-card-foot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 10px; font-size: .69rem; letter-spacing: .05em; text-transform: uppercase; }
+.pdos-journal-card-head > span:last-child { color: var(--v2-dim); }
+/* Headline sized to the card (cqi), so it stays on few lines whether or not the reader is open. */
+.pdos-journal-card-title { margin-top: auto; font-family: var(--display); font-weight: 700; font-size: clamp(1.25rem, min(12cqi, 7.5vh), 4.2rem); line-height: 1; text-transform: uppercase; text-wrap: balance; }
+.pdos-journal-card-byline { max-width: 46ch; color: var(--v2-dim); font-size: clamp(.82rem, .55rem + .45vw, 1.05rem); line-height: 1.45; text-wrap: pretty; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; }
+.pdos-journal-card-foot { padding-top: 10px; border-top: 1px solid var(--v2-soft-line); }
+.pdos-journal-card-foot > span:last-child { opacity: 0; transition: opacity .15s; }
+.pdos-journal-card:hover, .pdos-journal-card:focus-visible { background: var(--hover); color: #070707; }
+.pdos-journal-card:focus-visible { outline: 2px solid var(--v2-fg); outline-offset: 2px; }
+.pdos-journal-card[aria-pressed="true"] { background: var(--v2-fg); color: var(--v2-bg); }
+.pdos-journal-card:is(:hover, :focus-visible, [aria-pressed="true"]) :is(.pdos-journal-card-head > span, .pdos-journal-card-byline, .pdos-journal-card-foot > span) { color: inherit; opacity: 1; }
+.pdos-journal-card:is(:hover, :focus-visible, [aria-pressed="true"]) .pdos-journal-card-foot { border-top-color: currentColor; }
+.pdos-journal.is-open .pdos-journal-card-byline { display: none; }
+/* When the grid gets narrow (reader open on a small window) the cards stack into rows.
+   Phones have their own stack. */
+@media (min-width: 721px) {
+  @container journal-main (max-width: 620px) {
+    .pdos-journal-grid { grid-template-columns: minmax(0, 1fr); grid-auto-rows: minmax(0, 1fr); }
+    .pdos-journal-card { gap: 6px; }
+    .pdos-journal-card-head { flex-wrap: nowrap; }
+    .pdos-journal-card-head > span:last-child { display: none; }
+    .pdos-journal-card-title { font-size: clamp(1.1rem, min(6.5cqi, 4.4vh), 2rem); }
+  }
+}
 
-.pdos-journal-entry { min-width: 0; min-height: 0; display: flex; flex-direction: column; }
+/* The open entry: photo, headline and meta, then the article; the whole body scrolls. */
+.pdos-journal-reader-body { flex: 1 1 auto; min-height: 0; overflow: auto; overscroll-behavior: contain; background: var(--p0); }
+.pdos-journal-entry { display: flex; flex-direction: column; }
 .pdos-journal-entry[hidden] { display: none; }
-.pdos-journal-photo { flex: 0 0 auto; height: clamp(150px, 31vh, 280px); margin: 0; }
+.pdos-journal-photo { flex: 0 0 auto; height: clamp(180px, 34vh, 300px); margin: 0; }
 .pdos-journal-chip { position: absolute; z-index: 1; right: 14px; top: 12px; padding: 6px 10px; background: #070707; font-size: .69rem; letter-spacing: .05em; text-transform: uppercase; }
 /* The chip is always black (it sits on a photo), so "Planned" cannot use the theme's --dim. */
 .pdos-journal-chip.pdos-status--dim { color: #aaa9a3; }
 .pdos-journal-chip.pdos-status--warn { color: #f7c947; }
 .pdos-journal-chip.pdos-status--ok { color: #1ed760; }
-.pdos-journal-score { --v2-score-size: clamp(84px, 15vh, 136px); position: absolute; z-index: 1; right: 18px; top: 14px; }
-.pdos-journal-entry-head { flex: 0 0 auto; display: flex; flex-direction: column; gap: 8px; padding: 14px 22px 12px; border-bottom: 1px solid var(--v2-soft-line); }
-.pdos-journal-entry-head h3 { margin: 0; font-family: var(--display); font-weight: 700; font-size: clamp(1.8rem, min(3.4vw, 6vh), 3rem); line-height: .95; text-transform: uppercase; }
+.pdos-journal-score { --v2-score-size: clamp(84px, 14vh, 120px); position: absolute; z-index: 1; right: 18px; top: 14px; }
+.pdos-journal-entry-head { flex: 0 0 auto; display: flex; flex-direction: column; gap: 8px; padding: 16px 20px 14px; border-bottom: 1px solid var(--v2-soft-line); }
+.pdos-journal-entry-head h3 { margin: 0; font-family: var(--display); font-weight: 700; font-size: clamp(1.8rem, 3vw, 2.6rem); line-height: .95; text-transform: uppercase; outline: 0; }
 .pdos-journal-meta { display: flex; flex-wrap: wrap; gap: 4px 16px; color: var(--v2-dim); font-size: .69rem; letter-spacing: .05em; text-transform: uppercase; }
-.pdos-journal-article { flex: 1 1 auto; min-height: 0; overflow: auto; padding: 18px 22px 40px; }
-.pdos-journal-article:focus-visible { outline: 2px solid var(--bar); outline-offset: -2px; }
+.pdos-journal-article { padding: 18px 20px 40px; }
 .pdos-journal-lead { margin: 0 0 16px; max-width: 68ch; font-size: 1rem; line-height: 1.6; text-wrap: pretty; }
 .pdos-journal-note { margin: 0; color: var(--v2-dim); font-size: .69rem; letter-spacing: .06em; text-transform: uppercase; line-height: 1.6; }
 
@@ -521,12 +537,12 @@ html.pdos-locked { overflow: hidden; }
 .tvb-boot-actions { display: flex; gap: 8px; }
 
 /* Toolbox (Phase 6): 3x3 grid; opening a tool shrinks the grid and slides in a 520px panel. */
-.pdos-toolbox { flex: 1 1 auto; min-height: 0; display: flex; overflow: hidden; background: var(--v2-panel); }
-.pdos-toolbox-main { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 14px; padding: clamp(10px, 1.8vh, 16px); }
+.pdos-toolbox { flex: 1 1 auto; min-height: 0; display: flex; overflow: hidden; container-type: inline-size; background: var(--v2-panel); }
+.pdos-toolbox-main { flex: 1 1 auto; min-width: 0; container: toolbox-main / inline-size; display: flex; flex-direction: column; gap: 14px; padding: clamp(10px, 1.8vh, 16px); }
 .pdos-toolbox-title { flex: 0 0 auto; margin: 0; overflow: hidden; font-family: var(--display); font-weight: 700; font-size: clamp(1.8rem, min(4.6vw, 7.6vh), 4.75rem); line-height: 1.02; text-transform: uppercase; white-space: nowrap; }
 .pdos-tools { flex: 1 1 auto; min-height: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: repeat(3, minmax(0, 1fr)); gap: 8px; }
 .pdos-tool {
-  min-width: 0; min-height: 0; overflow: hidden; display: flex; flex-direction: column; padding: clamp(8px, 1.4vh, 14px) 16px;
+  min-width: 0; min-height: 0; overflow: hidden; container-type: inline-size; display: flex; flex-direction: column; padding: clamp(8px, 1.4vh, 14px) 16px;
   border: 0; background: var(--v2-panel-raised); color: var(--v2-fg); font: inherit; text-align: left; cursor: pointer;
   transition: background .15s, color .15s;
 }
@@ -537,13 +553,24 @@ html.pdos-locked { overflow: hidden; }
 .pdos-tool:focus-visible { outline: 2px solid var(--v2-fg); outline-offset: 2px; }
 .pdos-tool[aria-pressed="true"] { background: var(--v2-fg); color: var(--v2-bg); opacity: 1; }
 .pdos-tool-head { display: flex; justify-content: space-between; font-size: .69rem; text-transform: uppercase; }
-.pdos-tool-name { margin-top: auto; font-family: var(--display); font-weight: 700; font-size: clamp(1rem, min(1.9vw, 3.4vh), 1.9rem); line-height: 1.2; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* Names wrap rather than cut off, sized to their card (cqi) so they fit with the panel open. */
+.pdos-tool-name { margin-top: auto; font-family: var(--display); font-weight: 700; font-size: clamp(.75rem, min(8.5cqi, 3.4vh), 1.9rem); line-height: 1.1; text-transform: uppercase; text-wrap: balance; }
+@container (max-width: 170px) { .pdos-tool-head > span:last-child { display: none; } }
+/* A tool open on a small window leaves a narrow grid: smaller heading, tighter cards. */
+@media (min-width: 721px) {
+  @container toolbox-main (max-width: 600px) {
+    .pdos-toolbox-title { font-size: clamp(1.2rem, 7cqi, 2.4rem); }
+    .pdos-tool { padding-inline: 10px; }
+  }
+}
 .pdos-tool-desc { margin-top: 6px; font-size: .75rem; line-height: 1.4; opacity: .75; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .pdos-toolbox.is-open .pdos-tool-desc { display: none; }
 .pdos-tool-panel { flex: 0 0 auto; width: 0; overflow: hidden; transition: width .55s cubic-bezier(.7, 0, .2, 1); }
-.pdos-toolbox.is-open .pdos-tool-panel { width: min(520px, 55%); }
-.pdos-tool-panel-inner { width: 520px; max-width: 100vw; height: 100%; display: flex; flex-direction: column; border-left: 1px solid var(--v2-soft-line); transform: translateX(80px); opacity: 0; transition: transform .55s cubic-bezier(.7, 0, .2, 1), opacity .3s ease .12s; }
-.pdos-toolbox.is-open .pdos-tool-panel-inner { transform: none; opacity: 1; }
+.pdos-toolbox.is-open .pdos-tool-panel, .pdos-journal.is-open .pdos-tool-panel { width: min(520px, 55%); }
+/* The inner column is fixed at the panel's open width (55% of the box, at most 520px), so the
+   content never re-wraps mid-slide and never overflows a narrow window. */
+.pdos-tool-panel-inner { width: min(520px, 55cqw); max-width: 100vw; height: 100%; display: flex; flex-direction: column; border-left: 1px solid var(--v2-soft-line); transform: translateX(80px); opacity: 0; transition: transform .55s cubic-bezier(.7, 0, .2, 1), opacity .3s ease .12s; }
+.pdos-toolbox.is-open .pdos-tool-panel-inner, .pdos-journal.is-open .pdos-tool-panel-inner { transform: none; opacity: 1; }
 .pdos-tool-panel-bar { flex: 0 0 auto; height: 30px; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; background: var(--v2-fg); color: var(--v2-bg); font-size: .75rem; font-weight: 500; letter-spacing: .04em; text-transform: uppercase; }
 .pdos-tool-panel-body { flex: 1 1 auto; min-height: 0; overflow: auto; overscroll-behavior: contain; display: flex; flex-direction: column; gap: 16px; padding: 20px; background: var(--p0); }
 .pdos-tool-panel-name { margin: 0; font-family: var(--display); font-weight: 700; font-size: clamp(1.8rem, 3.4vw, 3rem); line-height: .95; text-transform: uppercase; outline: 0; }
@@ -877,23 +904,38 @@ html.pdos-locked { overflow: hidden; }
   .pdos-toolbox-title { font-size: clamp(1.5rem, 8vw, 2.2rem); white-space: normal; }
   .pdos-tools { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: none; grid-auto-rows: minmax(120px, auto); }
   .pdos-tool-panel { position: fixed; inset: 0; z-index: 90; width: 100% !important; transform: translateX(100%); transition: transform .4s cubic-bezier(.7, 0, .2, 1); }
-  .pdos-toolbox.is-open .pdos-tool-panel { transform: none; }
+  .pdos-toolbox.is-open .pdos-tool-panel, .pdos-journal.is-open .pdos-tool-panel { transform: none; }
   .pdos-tool-panel-inner { width: 100%; }
   .pdos-sec-title { font-size: clamp(3rem, 16vw, 4.5rem); }
   .pdos-window--playlists .pdos-window-body { display: flex; }
   .pdos-window--playlists .v2-playlists { grid-template-rows: none; }
   .pdos-window--playlists .v2-playlist-cover { width: 96px; height: 96px; }
-  /* Journal on phones: the list stacks above the selected entry and nothing scrolls inside the
-     window; picking a row scrolls the entry into view instead (initJournal). */
-  .pdos-journal { grid-template-columns: 1fr; }
-  .pdos-journal-side { border-right: 0; border-bottom: 1px solid var(--v2-soft-line); }
+  /* Journal on phones: the cards stack, one per row, with their bylines; the reader covers the
+     screen like a Toolbox tool (fixed .pdos-tool-panel above) and the back gesture closes it. */
+  .pdos-journal { overflow: visible; }
+  .pdos-journal-main { padding: 12px; }
+  .pdos-journal-head { flex-direction: column; align-items: flex-start; }
   .pdos-journal-title { font-size: clamp(3rem, 18vw, 5rem); }
-  .pdos-journal-list, .pdos-journal-article { overflow: visible; }
-  .pdos-journal-entry { scroll-margin-top: 1rem; }
+  .pdos-journal-grid { grid-template-columns: minmax(0, 1fr); grid-auto-rows: auto; overflow: visible; }
+  .pdos-journal-card { min-height: 200px; padding: 14px 16px; }
+  .pdos-journal-card-title { font-size: clamp(1.5rem, 8vw, 2.1rem); }
+  .pdos-journal.is-open .pdos-journal-card-byline { display: -webkit-box; }
+  .pdos-journal-card-foot > span:last-child { opacity: 1; }
   .pdos-journal-photo { height: 220px; }
   .pdos-journal-entry-head { padding: 14px 16px 12px; }
-  .pdos-journal-article { padding: 16px 16px 24px; }
+  .pdos-journal-article { padding: 16px 16px 32px; }
   .pdos-journal-score { --v2-score-size: 92px; }
+  /* Toolbox on phones: names wrap instead of cutting off, and an odd last tool spans the row. */
+  .pdos-tool-name { margin-top: 14px; white-space: normal; overflow-wrap: anywhere; font-size: 1.15rem; line-height: 1.1; }
+  .pdos-tool:last-child:nth-child(odd) { grid-column: 1 / -1; }
+  /* Phones never cut text off with "…": captions, bars, venues and track names wrap instead. */
+  .pdos-tool-desc, .pdos-champ-desc { display: block; overflow: visible; -webkit-line-clamp: unset; }
+  .pdos-tile-foot > span:last-child, .pdos-extra > span:nth-of-type(2) { white-space: normal; overflow: visible; }
+  .pdos-tile-icon { min-height: 64px; }
+  .pdos-window-bar { height: auto; min-height: 30px; padding-block: 6px; white-space: normal; line-height: 1.35; }
+  .v2-gig .v2-gig-venue, .v2-gig-status { white-space: normal; overflow: visible; }
+  .v2-track-row { padding-block: .45rem; }
+  .v2-track-row > span { white-space: normal; overflow-wrap: anywhere; line-height: 1.3; }
   .v2-strip span + span::before { display: none; }
   .v2-track-row { grid-template-columns: minmax(0, 1fr) 4.5rem 2rem; gap: .7rem; }
   .v2-track-row > span:nth-child(2) { display: none; }
@@ -905,8 +947,8 @@ html.pdos-locked { overflow: hidden; }
   .v2-footer-rule { display: none; }
   /* Phones: no small print below 12px. */
   .v2-index-row, .v2-ref, .v2-scroll-prev, .v2-scroll-next, .v2-card-foot, .v2-metric-foot, .v2-spotify-state, .v2-spotify-status,
-  .v2-steps-label, .v2-steps-goal, .v2-about-date, .v2-bottom-card p, .v2-news-desc, .pdos-journal-row-text, .pdos-journal-meta, .pdos-journal-note,
-  .v2-journal-media figcaption, .pdos-journal-count, .pdos-journal-foot, .pdos-journal-kicker, .pdos-journal-chip, .pdos-window-bar, .v2-journal-credit, .v2-gig-credit, .v2-playlist-copy p, .v2-track-row, .v2-top-toggle button,
+  .v2-steps-label, .v2-steps-goal, .v2-about-date, .v2-bottom-card p, .v2-news-desc, .pdos-journal-meta, .pdos-journal-note,
+  .v2-journal-media figcaption, .pdos-journal-card-head, .pdos-journal-card-foot, .pdos-journal-kicker, .pdos-journal-chip, .pdos-window-bar, .v2-journal-credit, .v2-gig-credit, .v2-playlist-copy p, .v2-track-row, .v2-top-toggle button,
   .v2-gig p, .v2-gig-link, .v2-gig-controls, .v2-strip, .v2-footer,
   .pdos-widget-head, .pdos-widget-tag, .pdos-widget-foot, .pdos-tile-head, .pdos-tile-key, .pdos-tile-foot, .pdos-tile-foot > span:first-child,
   .pdos-extra, .pdos-status-bar, .pdos-boot-log, .v2-game-text p { font-size: .75rem; }
@@ -1009,42 +1051,4 @@ html.pdos-locked { overflow: hidden; }
 }
 @media (prefers-reduced-motion: reduce) {
   .pdos-dialog--crack .slot, .pdos-dialog--crack .ck-btn, .pdos-dialog--crack .ck-close { transition: none; }
-}
-
-/* Journal index stays closed until an article is requested. The reader opens like the Toolbox
-   panel: a flex item whose width animates (grid tracks of mixed types snap instead of easing),
-   with an inner column fixed at its open width so the article never re-wraps mid-slide. The rows
-   ease between their wide and compact sizes on the same curve. */
-.pdos-journal { --journal-side: clamp(290px, 31vw, 440px); display: flex; container-type: inline-size; }
-.pdos-journal-side { flex: 1 1 auto; transition: border-color .55s; }
-.pdos-journal:not(.is-reading) .pdos-journal-side { border-right-color: transparent; }
-.pdos-journal-row { align-items: center; transition: grid-template-columns .55s cubic-bezier(.7, 0, .2, 1), gap .55s cubic-bezier(.7, 0, .2, 1), padding .55s cubic-bezier(.7, 0, .2, 1), background .15s; }
-.pdos-journal-thumb { transition: width .55s cubic-bezier(.7, 0, .2, 1), height .55s cubic-bezier(.7, 0, .2, 1); }
-.pdos-journal-row-title { transition: font-size .55s cubic-bezier(.7, 0, .2, 1); }
-.pdos-journal-row-text { transition: gap .55s cubic-bezier(.7, 0, .2, 1); }
-.pdos-journal:not(.is-reading) .pdos-journal-row { grid-template-columns: 120px minmax(0, 1fr); gap: 22px; padding: 18px; }
-.pdos-journal:not(.is-reading) .pdos-journal-thumb { width: 120px; height: 90px; }
-.pdos-journal:not(.is-reading) .pdos-journal-row-title { font-size: clamp(1.5rem, 2.4vw, 2.3rem); }
-.pdos-journal:not(.is-reading) .pdos-journal-row-text { gap: 10px; }
-/* Article reader shares the page layout: no scrim, modal or scroll lock. */
-.pdos-journal-reader { flex: 0 0 auto; width: 0; min-height: 0; overflow: hidden; transition: width .55s cubic-bezier(.7, 0, .2, 1); }
-.pdos-journal.is-reading .pdos-journal-reader { width: calc(100% - var(--journal-side)); }
-.pdos-journal-reader-inner { width: calc(100cqw - var(--journal-side)); height: 100%; display: flex; flex-direction: column; transform: translateX(80px); opacity: 0; transition: transform .55s cubic-bezier(.7, 0, .2, 1), opacity .3s ease .12s; }
-.is-reading .pdos-journal-reader-inner { transform: none; opacity: 1; }
-.pdos-journal-reader .pdos-tool-panel-bar { background: #ff8b60; color: #070707; }
-.pdos-journal-reader button { background: transparent; border: 0; color: inherit; cursor: pointer; min-width: 32px; min-height: 30px; }
-.pdos-journal-row[aria-expanded="true"] { background: var(--v2-panel-raised); box-shadow: inset 3px 0 #ff8b60; }
-.pdos-journal-reader .pdos-journal-entry { flex: 1; overflow: hidden; }
-@media (max-width: 720px) {
-  .pdos-journal:not(.is-reading) .pdos-journal-row { grid-template-columns: 80px minmax(0, 1fr); gap: 12px; }
-  .pdos-journal:not(.is-reading) .pdos-journal-thumb { width: 80px; height: 80px; }
-  .pdos-journal, .pdos-journal.is-reading { display: flex; flex-direction: column; }
-  .pdos-journal-reader { display: none; }
-  .is-reading .pdos-journal-reader { display: block; width: auto; border-top: 1px solid var(--v2-soft-line); }
-  .pdos-journal-reader-inner { width: auto; }
-  .pdos-journal-reader .pdos-journal-entry { min-height: 400px; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .pdos-journal-side, .pdos-journal-row, .pdos-journal-thumb, .pdos-journal-row-title, .pdos-journal-row-text,
-  .pdos-journal-reader, .pdos-journal-reader-inner { transition: none; }
 }

@@ -819,63 +819,85 @@
     });
   }
 
-  // Journal uses an in-section reader, like the Toolbox side panel.
-  function initJournal() {
-    const journal = document.querySelector('.pdos-journal');
-    if (!journal) return;
-    const rows = [...journal.querySelectorAll('.pdos-journal-row')];
-    const entries = [...journal.querySelectorAll('.pdos-journal-entry')];
-    const reader = document.createElement('aside');
-    reader.className = 'pdos-journal-reader';
-    reader.id = 'pdosJournalReader';
-    reader.setAttribute('aria-label', 'Article reader');
-    reader.innerHTML = '<div class="pdos-journal-reader-inner"><div class="pdos-tool-panel-bar"><span>Journal.log — Article</span><button type="button" aria-label="Close article">&#10005;</button></div></div>';
-    const inner = reader.firstElementChild;
-    entries.forEach(entry => { entry.hidden = true; entry.removeAttribute('role'); inner.appendChild(entry); });
-    journal.appendChild(reader);
-    reader.inert = true;
-    reader.setAttribute('aria-hidden', 'true');
-    let selected = null;
-    const hideEntries = () => { if (!selected) entries.forEach(entry => { entry.hidden = true; }); };
-    // The article stays drawn while the reader slides shut, then is hidden once the width settles.
-    reader.addEventListener('transitionend', event => { if (event.target === reader && event.propertyName === 'width') hideEntries(); });
-    function close() {
-      const previous = selected;
-      selected = null;
-      journal.classList.remove('is-reading');
-      reader.inert = true;
-      reader.setAttribute('aria-hidden', 'true');
-      const style = getComputedStyle(reader);
-      if (style.display === 'none' || parseFloat(style.transitionDuration) === 0) hideEntries();
-      rows.forEach(row => { row.setAttribute('aria-expanded', 'false'); row.removeAttribute('aria-current'); row.removeAttribute('data-reading'); });
-      if (previous) previous.focus({ preventScroll: true });
-    }
-    rows.forEach(row => {
-      row.removeAttribute('role');
-      row.removeAttribute('aria-selected');
-      row.removeAttribute('aria-haspopup');
-      row.tabIndex = 0;
-      const entry = byId(row.getAttribute('aria-controls'));
-      row.setAttribute('aria-expanded', 'false');
-      row.addEventListener('click', () => {
-        if (selected === row) { close(); return; }
-        selected = row;
-        entries.forEach(panel => { panel.hidden = panel !== entry; });
-        rows.forEach(button => { button.setAttribute('aria-expanded', String(button === row)); button.toggleAttribute('data-reading', button === row); });
-        journal.classList.add('is-reading');
-        reader.inert = false;
-        reader.setAttribute('aria-hidden', 'false');
-        entry.querySelector('.pdos-journal-article').scrollTop = 0;
-      });
-    });
-    inner.querySelector('button').addEventListener('click', close);
-    journal.addEventListener('keydown', event => { if (event.key === 'Escape' && selected) { event.preventDefault(); close(); } });
-    journal.querySelector('.pdos-journal-list').removeAttribute('role');
+  // On phones the Journal reader and the Toolbox panel cover the screen, so the back gesture should
+  // close them rather than leave the site: opening pushes a history entry, closing pops it.
+  function backCloses(close) {
+    const phone = window.matchMedia('(max-width: 720px)');
+    let pushed = false;
+    window.addEventListener('popstate', () => { if (pushed) { pushed = false; close(); } });
+    return {
+      opened() { if (phone.matches && !pushed) { history.pushState({ pdosPanel: true }, ''); pushed = true; } },
+      closed() { if (pushed) { pushed = false; history.back(); } },
+    };
   }
 
-  // Windows over the page (Parwani-DOS Phases 4-6): project windows, the Champion Run setup window
-  // and the Toolbox panel. While any of them is open the page is locked (html.pdos-locked: no
-  // scrolling, no 1-7 keys, no in-page jump links) until it is closed with ✕, the scrim or Esc.
+  // Journal: a grid of headline cards with the same slide-in side panel as the Toolbox. Pressing
+  // the open card again, ✕ or Esc closes it; while it is open the page is locked like the Toolbox.
+  function initJournal(setLock, overlayOpen) {
+    const journal = document.querySelector('.pdos-journal');
+    const reader = byId('pdosJournalReader');
+    if (!journal || !reader) return;
+    const cards = [...journal.querySelectorAll('.pdos-journal-card')];
+    const entries = [...reader.querySelectorAll('.pdos-journal-entry')];
+    const body = reader.querySelector('.pdos-journal-reader-body');
+    const exeEl = byId('pdosJournalExe');
+    const back = backCloses(() => close());
+    let current = null;
+
+    // Fewer than three entries still fill the width: one column per entry up to three.
+    journal.style.setProperty('--journal-cols', String(Math.min(Math.max(cards.length, 1), 3)));
+    reader.inert = true;
+    reader.setAttribute('aria-hidden', 'true');
+    const hideEntries = () => { if (!current) entries.forEach((entry) => { entry.hidden = true; }); };
+    // The entry stays drawn while the panel slides shut, then is hidden once the slide ends.
+    reader.addEventListener('transitionend', (event) => {
+      if (event.target === reader && (event.propertyName === 'width' || event.propertyName === 'transform')) hideEntries();
+    });
+
+    function open(card) {
+      current = card;
+      const entry = byId(card.getAttribute('aria-controls'));
+      const title = entry.querySelector('h3');
+      entries.forEach((panel) => { panel.hidden = panel !== entry; });
+      cards.forEach((c) => c.setAttribute('aria-pressed', String(c === card)));
+      exeEl.textContent = `${card.dataset.slug}.log — ref. 01.${card.dataset.n}`;
+      reader.setAttribute('aria-label', title.textContent);
+      body.scrollTop = 0;
+      journal.classList.add('is-open');
+      reader.inert = false;
+      reader.removeAttribute('aria-hidden');
+      setLock(true);
+      back.opened();
+      title.focus({ preventScroll: true });
+    }
+
+    function close() {
+      if (!current) return;
+      const card = current;
+      current = null;
+      cards.forEach((c) => c.setAttribute('aria-pressed', 'false'));
+      journal.classList.remove('is-open');
+      reader.inert = true;
+      reader.setAttribute('aria-hidden', 'true');
+      if (parseFloat(getComputedStyle(reader).transitionDuration) === 0) hideEntries();
+      setLock(false);
+      back.closed();
+      card.focus({ preventScroll: true });
+    }
+
+    cards.forEach((card) => {
+      card.setAttribute('aria-pressed', 'false');
+      card.addEventListener('click', () => (current === card ? close() : open(card)));
+    });
+    byId('pdosJournalClose').addEventListener('click', close);
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && current && !overlayOpen()) close();
+    });
+  }
+
+  // Windows over the page (Parwani-DOS Phases 4-6): project windows, the Champion Run setup window,
+  // the Toolbox panel and the Journal reader. While any of them is open the page is locked
+  // (html.pdos-locked: no scrolling, no 1-7 keys, no in-page jump links) until it is closed with ✕, the scrim or Esc.
   const PDOS_PROJECTS = {
     music: { n: '01', tag: 'Music', title: 'Sounds Like', desc: 'A similarity engine for music discovery. Turn text into personalised playlists.', status: 'Phase 02 / Similarity engine', color: '#1ed760', file: 'sounds_like.vol' },
     where: { n: '03', tag: 'Tool', title: 'Where Next', desc: 'A simple tool for exploring new destinations.', status: 'Planned · In development', color: 'oklch(0.88 0.07 85)', file: 'where_next.vol' },
@@ -896,10 +918,10 @@
     root.appendChild(champOverlay);
     root.appendChild(crackOverlay);
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const locks = { window: false, tool: false };
+    const locks = { window: false, tool: false, journal: false };
     const setLock = (key, on) => {
       locks[key] = on;
-      document.documentElement.classList.toggle('pdos-locked', locks.window || locks.tool);
+      document.documentElement.classList.toggle('pdos-locked', locks.window || locks.tool || locks.journal);
     };
     let openOverlay = null;
     let returnFocus = null;
@@ -993,6 +1015,7 @@
     });
 
     initToolbox((on) => setLock('tool', on), () => Boolean(openOverlay));
+    initJournal((on) => setLock('journal', on), () => Boolean(openOverlay));
   }
 
   // Crack (project 06): its own overlay in the original site's theme. Nothing loads with the page;
@@ -1129,6 +1152,7 @@
     let borrowed = null;
     let home = null;
     let current = null;
+    const back = backCloses(() => close());
 
     panel.hidden = false;
     panel.inert = true;
@@ -1173,6 +1197,7 @@
       panel.inert = false;
       panel.removeAttribute('aria-hidden');
       setLock(true);
+      back.opened();
       nameEl.focus({ preventScroll: true });
     }
 
@@ -1187,13 +1212,14 @@
       panel.inert = true;
       panel.setAttribute('aria-hidden', 'true');
       setLock(false);
+      back.closed();
       btn.focus({ preventScroll: true });
     }
 
     buttons.forEach((btn) => {
       btn.setAttribute('aria-pressed', 'false');
       btn.setAttribute('aria-controls', 'pdosToolPanel');
-      btn.addEventListener('click', () => open(btn));
+      btn.addEventListener('click', () => (current === btn ? close() : open(btn)));
     });
     byId('pdosToolClose').addEventListener('click', close);
     document.addEventListener('keydown', (event) => {
@@ -1202,6 +1228,5 @@
   }
 
   initShell();
-  initJournal();
   initWindows();
 }());

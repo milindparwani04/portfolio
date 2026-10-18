@@ -131,6 +131,10 @@ Settled removals (do not re-propose without flagging): Today Somewhere project (
 
 ## Session log
 
+### 2026-10-18 — Journal grid; Toolbox toggle; phone layout; no scrollbars
+
+At Milind's request (Claude): the Journal is now a Toolbox-style grid of headline cards (title, byline from the entry's lead line, status; no icons). Three entries fill it as three tall columns; more entries add rows up to 3x3. Opening a card slides the entry (photo, title, meta, article) in from the right using the Toolbox panel; the same card, ✕ or Esc closes it, and the page locks while it is open, like Toolbox. Toolbox tools now close when pressed again. On phones both panels cover the screen and the back gesture closes them. Phone pass: no text is cut off with "…" at 390/360 px, and Home icons and Toolbox cards were resized. Earlier the same day scrollbars were hidden site-wide (`c5f07a7`). `tests/journal-browser.cjs` was rewritten for the new Journal and passes at 1280/800/390 px. CSS v52 / UI v72. No Worker changes.
+
 ### 2026-10-15 — Only the homepage is indexable
 
 At Milind's request (Claude): `public/_headers` sends `X-Robots-Tag: noindex` on `/privacy*`, `/dissertation.pdf`, `/og.png`, `/favicon.svg`, `/assets/*`, `/vr/*` and `/lib/*` (explicit paths: a `/*` rule with a `! X-Robots-Tag` detach on `/` worked locally but still sent noindex on the homepage in production, fixed within minutes), so only milindparwani.com itself appears in Google (`privacy.html`, `dissertation.pdf`, images etc. still load, they just aren't indexed). Added `public/robots.txt` (points at the sitemap; Cloudflare's managed content-signals block is prepended to it) and `public/sitemap.xml` listing only `/`. `_headers` does not touch Worker-generated responses (`/api/*`, `/audio/*`). For `buyer-risk-grade.html`, still in Google from before its deletion, Milind will use Search Console's Removals tool. Any new page or folder that should stay out of search needs its own rule in `_headers`.
