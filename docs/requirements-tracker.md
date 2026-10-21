@@ -87,19 +87,19 @@ Full spec and interactive reference: `design_handoff_parwani_dos/` (`README.md`,
 | R-DOS-8 | Media / Playlists / Gigs restyle | Live 2026-10-07 — windows with pink / green / yellow bars, same carousels. Filter chips added 2026-10-07: Media All / Films / Games (`kind`), Gigs Both / Dubai / Abu Dhabi (from the venue line). The playlists now-playing strip was dropped at Milind's request |
 | R-DOS-9 | Pixel icon sprites (Poké Ball, safe, terminal, bulb, skyline, globe, EQ, book, whiteboard, toolbox, projector, Spotify mark, guitar fire) | Live 2026-10-07 — `public/pdos-icons.js`, ported from the mockup; animate on hover and keyboard focus; still with reduced motion |
 | R-DOS-10 | Accessibility and Lighthouse pass for all three themes | Live 2026-10-07 — WCAG AA text contrast checked per theme (Paper got darker status/dim text tokens), dialogs and tabs have ARIA, focus trap in windows. Production Lighthouse (mobile): performance 90–91, accessibility 100, best practices 100 |
-| ABT-01 | About section placed second; keys 1–8; counter `/ 08`; `cd about`; Home tile badges 2–8 | Built 2026-10-22 (Claude) |
-| ABT-02 | Home about.txt `open ▸` jumps to About; Journal bar `↑ About` | Built 2026-10-22 |
-| ABT-03 | Summary: name, headline, typed statement, [Now], Experience/Education (rows jump to stops), skills, LinkedIn · Dissertation · Spotify, `Scroll ▶ Timeline` | Built 2026-10-22 — no photo, no email (Revision 2); LinkedIn is the real profile URL |
-| ABT-04 | Scroll capture: one stop per wheel gesture, 650 ms lock, 800 ms entry lock, release at both ends; desktop paging layout only | Built 2026-10-22 — swallow/release logic tested with synthetic wheel events; real-trackpad release still to confirm by hand |
-| ABT-05 | Curved 3D tape carousel + two-lane year ruler with progress line and playhead | Built 2026-10-22 |
-| ABT-06 | Rolling timecode `TC YYYY.MM` | Built 2026-10-22 |
-| ABT-07 | Rail (8 dots) + transport ◀◀ ▶ ▶▶ (▶ autoplays every 2.6 s) | Built 2026-10-22 |
-| ABT-08 | Detail window per stop (click centred tape / Enter), page lock, Esc / ✕ / scrim, ←/→ browse stops 1–7, focus to ✕ and back | Built 2026-10-22 |
-| ABT-09 | Pixel icons that play only while centred: DESS crest, Nottingham and Allianz Trade logo plates, till, torii, perfume | Built 2026-10-22 — brand-guideline check for the three logos still open |
-| ABT-10 | Phones / short windows: native horizontal snap row, flat cards, no wheel capture | Built 2026-10-22 — checked at 390×844 and 360×740 |
-| ABT-11 | Reduced motion: centred card only (cross-fade), no slide, typing, rolling, rotation or icon animation | Built 2026-10-22 |
-| ABT-12 | Mono / Paper / Night; AA on the teal fills (`--on` text) | Built 2026-10-22 — local Lighthouse accessibility 100 |
-| ABT-13 | Home About tile: "tall" option (spans both rows of a 4-column grid), DDJ-FLX4 decks icon (moved from Sounds Like) | Built 2026-10-22 — Milind chose the decks icon; the layout is the handoff's recommended default |
+| ABT-01 | About section placed second; keys 1–8; counter `/ 08`; `cd about`; Home tile badges 2–8 | Live 2026-10-22 (`95caa24`, verified on milindparwani.com) |
+| ABT-02 | Home about.txt `open ▸` jumps to About; Journal bar `↑ About` | Live 2026-10-22 (`95caa24`, verified on milindparwani.com) |
+| ABT-03 | Summary: name, headline, typed statement, [Now], Experience/Education (rows jump to stops), skills, LinkedIn · Dissertation · Spotify, `Scroll ▶ Timeline` | Live 2026-10-22 (`95caa24`, verified on milindparwani.com) — no photo, no email (Revision 2); LinkedIn is the real profile URL |
+| ABT-04 | Scroll capture: one stop per wheel gesture, 650 ms lock, 800 ms entry lock, release at both ends; desktop paging layout only | Live 2026-10-22 (`95caa24`, verified on milindparwani.com) — swallow/release logic tested with synthetic wheel events; real-trackpad release still to confirm by hand |
+| ABT-05 | Curved 3D tape carousel + two-lane year ruler with progress line and playhead | Live 2026-10-22 (`95caa24`, verified on milindparwani.com) |
+| ABT-06 | Rolling timecode `TC YYYY.MM` | Live 2026-10-22 (`95caa24`, verified on milindparwani.com) |
+| ABT-07 | Rail (8 dots) + transport ◀◀ ▶ ▶▶ (▶ autoplays every 2.6 s) | Live 2026-10-22 (`95caa24`, verified on milindparwani.com) |
+| ABT-08 | Detail window per stop (click centred tape / Enter), page lock, Esc / ✕ / scrim, ←/→ browse stops 1–7, focus to ✕ and back | Live 2026-10-22 (`95caa24`, verified on milindparwani.com) |
+| ABT-09 | Pixel icons that play only while centred: DESS crest, Nottingham and Allianz Trade logo plates, till, torii, perfume | Live 2026-10-22 (`95caa24`, verified on milindparwani.com) — brand-guideline check for the three logos still open |
+| ABT-10 | Phones / short windows: native horizontal snap row, flat cards, no wheel capture | Live 2026-10-22 (`95caa24`, verified on milindparwani.com) — checked at 390×844 and 360×740 |
+| ABT-11 | Reduced motion: centred card only (cross-fade), no slide, typing, rolling, rotation or icon animation | Live 2026-10-22 (`95caa24`, verified on milindparwani.com) |
+| ABT-12 | Mono / Paper / Night; AA on the teal fills (`--on` text) | Live 2026-10-22 (`95caa24`, verified on milindparwani.com) — local Lighthouse accessibility 100 |
+| ABT-13 | Home About tile: "tall" option (spans both rows of a 4-column grid), DDJ-FLX4 decks icon (moved from Sounds Like) | Live 2026-10-22 (`95caa24`, verified on milindparwani.com) — Milind chose the decks icon; the layout is the handoff's recommended default |
 
 ## Projects
 
