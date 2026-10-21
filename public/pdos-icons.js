@@ -7,7 +7,7 @@
 (function () {
   'use strict';
 
-  const UNITLESS = new Set(['opacity', 'zIndex', 'flex', 'flexGrow', 'flexShrink', 'lineHeight']);
+  const UNITLESS = new Set(['opacity', 'zIndex', 'flex', 'flexGrow', 'flexShrink', 'lineHeight', 'fontWeight']);
   function E(tag, props, ...kids) {
     const el = document.createElement(tag);
     const style = props && props.style;
@@ -191,6 +191,102 @@
     };
     return frame(W * P, H * P, {}, ...cells, ...meters, jog(1, '#e3350d'), jog(21, '#2f6fd6'));
   }
+
+  // Sounds Like (project 01, from 2026-10-22): a pair of speaker cabinets. On hover the woofer cones
+  // pump, the cabinets thump, the power LEDs light and bass waves ripple out of each side.
+  function iconSpeakers(P, on) {
+    const W = 34, H = 18, CW = 10, CH = 16;
+    const at = (c, r, col) => E('div', { style: { position: 'absolute', left: c * P, top: r * P, width: P, height: P, background: col } });
+    const disc = (cx, cy, rad, colour) => {
+      const out = [];
+      for (let r = Math.floor(cy - rad); r <= Math.ceil(cy + rad); r++) for (let c = Math.floor(cx - rad); c <= Math.ceil(cx + rad); c++) {
+        const col = colour(Math.hypot(c + 0.5 - cx, r + 0.5 - cy));
+        if (col) out.push(at(c, r, col));
+      }
+      return out;
+    };
+    const cabinet = (x0, d) => {
+      const cells = [];
+      for (let r = 0; r < CH; r++) for (let c = 0; c < CW; c++) {
+        if ((r === 0 || r === CH - 1) && (c === 0 || c === CW - 1)) continue;
+        cells.push(at(c, r, r === 0 || r === CH - 1 || c === 0 || c === CW - 1 ? '#1c1c1c' : '#2b2b30'));
+      }
+      cells.push(...disc(5, 3.5, 1.9, (dist) => (dist > 1.9 ? null : dist > 1.1 ? '#9aa0a8' : '#d9dde2')));
+      cells.push(...disc(5, 10, 4, (dist) => (dist > 4 ? null : dist > 3.2 ? '#9aa0a8' : null)));
+      cells.push(at(8, 14, on ? '#36e05a' : '#3a3a40'));
+      [1, 2, 7, 8].forEach((c) => cells.push(at(c, CH, '#1c1c1c')));
+      const cone = E('div', { style: { position: 'absolute', left: 0, top: 0, width: CW * P, height: CH * P, transformOrigin: `${5 * P}px ${10 * P}px`, animation: on ? 'pxbass .42s steps(2) infinite' : 'none' } },
+        ...disc(5, 10, 3.2, (dist) => (dist > 3.2 ? null : dist < 1.1 ? '#6b7078' : dist > 2 && dist < 2.6 ? '#2c2c32' : '#141416')));
+      return E('div', { style: { position: 'absolute', left: x0 * P, top: 0, width: CW * P, height: (CH + 1) * P, animation: on ? `pxthump .42s steps(2) ${-d * 0.21}s infinite` : 'none' } }, ...cells, cone);
+    };
+    // Three arcs per side around each woofer, facing outwards; inner arcs fire first.
+    const waves = (cx, dir, d) => [6.5, 8.5, 10.5].map((rad, k) => {
+      const cells = [];
+      for (let r = 0; r < H; r++) for (let c = 0; c < W; c++) {
+        const dx = c + 0.5 - cx, dy = r + 0.5 - 10;
+        if (Math.abs(Math.hypot(dx, dy) - rad) >= 0.55 || dx * dir <= 0) continue;
+        if (Math.abs(Math.atan2(dy, Math.abs(dx))) > 0.78 || (c >= 6 && c < 28)) continue;
+        cells.push(at(c, r, '#0b0b0d'));
+      }
+      return E('div', { style: { position: 'absolute', inset: 0, opacity: on ? 1 : 0, animation: on ? `pxwave .84s steps(3) ${(k * 0.14 - d * 0.07).toFixed(2)}s infinite` : 'none' } }, ...cells);
+    });
+    return frame(W * P, H * P, {}, ...waves(11, -1, 0), ...waves(23, 1, 1), cabinet(6, 0), cabinet(18, 1));
+  }
+
+  /* ---------- About timeline (2026-10-22) ---------- */
+  // Ported from design_handoff_about_section/About Section.dc.html. These play while their card is
+  // centred (or its detail window is open), driven by ui-v2.js through pdosIcons.setOn, not by hover.
+  const PXF = "'PixC','Pixelify Sans',sans-serif";
+  const anim = (on, a) => (on ? a : 'none');
+  const CASTLE = ['BB.BB.BB.BB', 'BBBBBBBBBBB', '.BBBBBBBBB.', '.BBBBBBBBB.', '.BB..BBBBB.', '.BB..BBBBB.', '.BBBBBBBBB.', '.BBBBB..BB.', '.BBBBB..BB.', '.BBBBBBBBB.', '.BBB...BBB.', '.BBB...BBB.', 'L..LLL..LLL', '.LL...LL...'];
+  const AZ = ['....BBBBB....', '..BB.....BB..', '.B.........B.', '.B....BB...B.', 'B.....BB....B', 'B..BB.BB.BB.B', 'B..BB.BB.BB.B', 'B..BB.BB.BB.B', '.B.BB.BB.BBB.', '.B.........B.', '..BB.....BB..', '....BBBBB....'];
+  const DESS = (() => {
+    const W = 21, H = 26, g = Array.from({ length: H }, () => Array(W).fill('.'));
+    const ins = (x, y) => { if (y < 0 || y >= H || x < 0 || x >= W) return false; if (y <= 15) return true; const k = Math.round(Math.pow((y - 15) / (H - 15), 1.5) * 10); return x >= k && x <= W - 1 - k; };
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (ins(x, y)) g[y][x] = (!ins(x - 1, y) || !ins(x + 1, y) || !ins(x, y - 1) || !ins(x, y + 1)) ? 'R' : 'W';
+    const L = { D: ['XX.', 'X.X', 'X.X', 'X.X', 'XX.'], E: ['XXX', 'X..', 'XX.', 'X..', 'XXX'], S: ['.XX', 'X..', '.X.', '..X', 'XX.'] };
+    'DESS'.split('').forEach((ch, i) => L[ch].forEach((row, ry) => row.split('').forEach((c, rx) => { if (c === 'X') g[2 + ry][3 + i * 4 + rx] = 'K'; })));
+    [[4, 8], [5, 8], [6, 8], [7, 8], [3, 9], [5, 9], [6, 9], [7, 9], [8, 9], [8, 10], [9, 10], [6, 11], [7, 11], [8, 11], [9, 11], [4, 12], [5, 12], [6, 12], [7, 12], [3, 13], [4, 13], [5, 13], [3, 14]].forEach(([x, y]) => { g[y][x] = 'G'; g[y][20 - x] = 'G'; });
+    for (let y = 10; y < H; y++) g[y][10] = 'K';
+    [23, 24, 25].forEach((y) => { g[y][9] = 'K'; g[y][11] = 'K'; });
+    return g.map((r) => r.join(''));
+  })();
+  const plate = (P, on, ...kids) => E('div', { style: { display: 'flex', alignItems: 'center', gap: 3 * P, padding: (3 * P) + 'px ' + (4 * P) + 'px', background: '#f4f3ef', boxShadow: '0 0 0 ' + P + 'px #d9d6cc', animation: anim(on, 'abob 1.6s steps(4) infinite') } }, ...kids);
+  const TILL = ['.....KKKKKKKK.....', '..MMMMMMMMMMMMMM..', '..MGGGGGGGGGGGGM..', '..MMMMMMMMMMMMMM..', '.MMWMWMWMMMMMMMMM.', '.MMMMMMMMMMMMMMMM.', '.MMWMWMWMMMRRRRMM.', 'MMMMMMMMMMMMMMMMMM', 'DDDDDDDDDDDDDDDDDD'];
+  const RCPT = ['.P.P.P.P', 'PPPPPPPP', 'PLLLLLPP', 'PPPPPPPP', 'PLLLPLLP', 'PPPPPPPP', 'PLLLLPPP', 'PPPPPPPP', 'PLLPLLLP', 'PPPPPPPP', 'PPLLLLLP', 'PPPPPPPP'];
+  const TORII = ['KKKKKKKKKKKKKKKKKK', '.RRRRRRRRRRRRRRRR.', '...RR...RR...RR...', '..RRRRRRRRRRRRRR..', '...RR........RR...', '...RR........RR...', '...RR........RR...', '...RR........RR...', '...RR........RR...', '...RR........RR...', '..SSSS......SSSS..'];
+  const PERF = ['...GGG....', '...GGGNNN.', '....SS....', '..WWWWWW..', '.WLLLLLLW.', '.WLPPPPLW.', '.WLPPPPLW.', '.WLPPPPLW.', '.WLPPPPLW.', '.WLLLLLLW.', '..WWWWWW..'];
+  const iconDess = (P, on) => E('div', { style: { animation: anim(on, 'abob 1.6s steps(4) infinite') } }, frame(21 * P, 26 * P, {}, ...cellsOf(DESS, { R: '#cc1720', W: '#f4f3ef', K: '#111111', G: '#5a9e3a' }, P)));
+  const iconUon = (P, on) => {
+    const B = '#1b4f8a';
+    return plate(P, on, frame(11 * P, 14 * P, {}, ...cellsOf(CASTLE, { B, L: '#5b9bd5' }, P)),
+      E('div', { style: { width: Math.max(1, Math.round(P / 2)), alignSelf: 'stretch', background: B } }),
+      E('div', { style: { display: 'flex', flexDirection: 'column', gap: Math.round(P / 2), color: B, fontFamily: PXF, fontWeight: 700, lineHeight: 1, whiteSpace: 'nowrap' } }, E('span', { style: { fontSize: Math.round(P * 3.2) } }, document.createTextNode('The University of')), E('span', { style: { fontSize: P * 6 } }, document.createTextNode('Nottingham'))));
+  };
+  const iconAllianz = (P, on) => {
+    const B = '#003781';
+    return plate(P, on, E('span', { style: { fontFamily: PXF, fontWeight: 700, fontSize: Math.round(P * 6.5), color: B, lineHeight: 1 } }, document.createTextNode('Allianz')),
+      frame(13 * P, 12 * P, {}, ...cellsOf(AZ, { B }, P)),
+      E('div', { style: { width: Math.max(1, Math.round(P / 2)), alignSelf: 'stretch', background: '#bdbdbd' } }),
+      E('div', { style: { display: 'flex', flexDirection: 'column', fontFamily: PXF, fontWeight: 500, fontSize: P * 4, color: B, lineHeight: 1.05 } }, E('span', null, document.createTextNode('Allianz')), E('span', null, document.createTextNode('Trade'))));
+  };
+  const iconTill = (P, on) => {
+    const rc = E('div', { style: { position: 'absolute', left: 5 * P, top: 0, width: 8 * P, height: 12 * P, overflow: 'hidden' } },
+      E('div', { style: { position: 'absolute', inset: 0, transform: on ? 'none' : 'translateY(66%)', animation: anim(on, 'arcpt 2.4s steps(8) infinite') } }, ...cellsOf(RCPT, { P: '#f4f3ef', L: '#8a8880' }, P)));
+    const till = E('div', { style: { position: 'absolute', left: 0, top: 12 * P, width: 18 * P, height: 9 * P } }, ...cellsOf(TILL, { K: '#1a1a1a', M: '#6b6f86', D: '#3d4157', G: '#7ef0b0', W: '#f4f3ef', R: '#ff6a4a' }, P));
+    return frame(18 * P, 21 * P, {}, rc, till);
+  };
+  const iconTorii = (P, on) => {
+    const gate = E('div', { style: { position: 'absolute', left: P, top: 4 * P, width: 18 * P, height: 11 * P } }, ...cellsOf(TORII, { K: '#a8281c', R: '#e8503a', S: '#5c5a53' }, P));
+    const petals = [2, 6, 10, 14, 17, 8].map((x, i) => E('div', { style: { position: 'absolute', left: x * P, top: -P, width: P, height: P, background: i % 2 ? '#ff8fb0' : '#ffc2d3', opacity: 0, animation: anim(on, 'apetal 2.6s steps(13) ' + (-i * 0.43).toFixed(2) + 's infinite') } }));
+    return frame(20 * P, 15 * P, { overflow: 'hidden' }, gate, ...petals);
+  };
+  const iconPerfume = (P, on) => {
+    const bottle = E('div', { style: { position: 'absolute', left: 1 * P, top: 0, width: 10 * P, height: 11 * P } }, ...cellsOf(PERF, { G: '#f7c947', N: '#8a8880', S: '#8a8880', W: '#c9d6e8', L: '#e6edf7', P: '#f0a6c8' }, P));
+    const puff = (pts, d) => E('div', { style: { position: 'absolute', left: 11 * P, top: 0, width: 9 * P, height: 4 * P, opacity: 0, animation: anim(on, 'amist .9s steps(3) ' + d + 's infinite') } },
+      ...pts.map(([x, y]) => E('div', { style: { position: 'absolute', left: x * P, top: y * P, width: P, height: P, background: '#e6edf7' } })));
+    return frame(20 * P, 11 * P, {}, bottle, puff([[0, 1], [1, 0], [1, 2]], 0), puff([[3, 1], [4, 0], [3, 3], [5, 2]], 0.15), puff([[6, 0], [7, 2], [6, 3], [8, 1]], 0.3));
+  };
   
   
   const BOOK_C = ['KKKKKKKKKKKKK.','KDRRRRRRRRRRWK','KDRRRRRRRRRRWK','KDRRYYYYYYRRWK','KDRRYYYYYYRRWK','KDRRRRRRRRRRWK','KDRRRRRRRRRRWK','KDRRRRRRRRRRWK','KDRRRRRRRRRRWK','KDRRRRRRRRRRWK','KDRRRRRRRRRRWK','.KKKKKKKKKKKKK'];
@@ -365,18 +461,22 @@
   const ICONS = {
     book: [iconBook, 5], board: [iconBoard, 4], toolbox: [iconToolbox, 4], projector: [iconProjector, 4],
     spotify: [iconSpotifySym, 4], guitar: [iconGuitar3, 3], safe: [iconSafe, 5], ball: [makeBall, 6],
-    decks: [iconDecks, 5], skyline: [iconSkyline, 4], portal: [iconPortal, 5], globe: [iconGlobe, 5], bulb: [iconBulb, 5], terminal: [iconTerminal, 5]
+    decks: [iconDecks, 5], skyline: [iconSkyline, 4], portal: [iconPortal, 5], globe: [iconGlobe, 5], bulb: [iconBulb, 5], terminal: [iconTerminal, 5],
+    speakers: [iconSpeakers, 5], dess: [iconDess, 4], uon: [iconUon, 4], torii: [iconTorii, 5], till: [iconTill, 4], perfume: [iconPerfume, 6], allianz: [iconAllianz, 4]
   };
   // Each sprite's size in grid cells (its frame at P = 1), so fitting never has to build a copy.
   const UNITS = {
     book: [24, 12], board: [28, 13], toolbox: [16, 14], projector: [31, 14], spotify: [16, 16], guitar: [24, 25],
-    safe: [16, 14], ball: [14, 19.6], decks: [34, 17], skyline: [24, 14], portal: [22, 20], globe: [16, 18], bulb: [12, 16], terminal: [16, 14]
+    safe: [16, 14], ball: [14, 19.6], decks: [34, 17], skyline: [24, 14], portal: [22, 20], globe: [16, 18], bulb: [12, 16], terminal: [16, 14],
+    speakers: [34, 18], dess: [21, 26], uon: [53, 20], torii: [20, 15], till: [18, 21], perfume: [20, 11], allianz: [62, 18]
   };
   const unitSize = (name) => UNITS[name];
 
   // Copy the target tree's inline styles onto the live tree. Same shape -> in-place (transitions
   // play); a different shape -> swap in a copy.
   function sync(live, target) {
+    // Text (the logo plates' wordmarks) never changes between states.
+    if (live.nodeType !== 1) return live;
     if (live.childNodes.length !== target.childNodes.length) {
       const copy = target.cloneNode(true);
       live.replaceWith(copy);
@@ -402,10 +502,10 @@
     if (!ICONS[name]) return;
     const P = pixelSize(el, name);
     const prev = states.get(el);
-    if (prev && prev.P === P) return;
+    if (prev && prev.P === P && prev.name === name) return;
     const fn = ICONS[name][0];
     const off = fn(P, false);
-    const st = { P, fn, off, on: null, live: off.cloneNode(true), hovered: prev ? prev.hovered : false };
+    const st = { P, name, fn, off, on: null, live: off.cloneNode(true), hovered: prev ? prev.hovered : false };
     el.setAttribute('aria-hidden', 'true');
     el.replaceChildren(st.live);
     states.set(el, st);
@@ -428,9 +528,10 @@
 
   function init() {
     const icons = [...document.querySelectorAll('.pdos-icon[data-icon]')];
-    const hosts = new Set(icons.map(hostOf));
+    // data-icon-manual icons (the About timeline) are switched on by ui-v2.js, not by hovering their host.
+    const hosts = new Set(icons.filter((el) => !el.hasAttribute('data-icon-manual')).map(hostOf));
     hosts.forEach((host) => {
-      const mine = icons.filter((el) => hostOf(el) === host);
+      const mine = icons.filter((el) => !el.hasAttribute('data-icon-manual') && hostOf(el) === host);
       const set = (on) => mine.forEach((el) => setOn(el, on));
       host.addEventListener('mouseenter', () => set(true));
       host.addEventListener('mouseleave', () => { if (!host.contains(document.activeElement)) set(false); });

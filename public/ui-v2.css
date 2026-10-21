@@ -36,6 +36,8 @@
   --bg: #0d1020; --fg: #f3ead8; --p0: #10142a; --p1: #151a33; --p2: #1d2346; --p3: #262d57;
   --dim: #9a9db8; --line: rgba(243, 234, 216, .2); --ok: #7ef0b0; --warn: #ffc65c; --on: #0d1020;
 }
+/* About section fills (same in every theme): teal for its bar and hovers, red for the REC light. */
+.portfolio-v2 { --about: oklch(0.78 0.12 190); --rec: oklch(0.68 0.2 25); }
 .portfolio-v2[data-theme="mono"] {
   --bg: #070707; --fg: #f4f3ef; --p0: #0d0d0d; --p1: #151515; --p2: #202020; --p3: #262626;
   --dim: #aaa9a3; --line: rgba(244, 243, 239, .2); --ok: #1ed760; --warn: #f7c947; --on: #070707;
@@ -209,7 +211,9 @@ body.locked { overflow: auto !important; height: auto !important; }
 .v2-about-date { flex: 0 0 auto; margin-top: .5rem; color: var(--v2-dim); font-size: clamp(.54rem, 1.25vh, .7rem); letter-spacing: .05em; text-transform: uppercase; }
 
 /* Six tiles jump straight to their section; hover fills the tile with its colour (spec table). */
-.pdos-tiles { min-height: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: repeat(2, minmax(0, 1fr)); gap: 8px; }
+/* About (2026-10-22, "tall" option from the About handoff) is a wider first column spanning both rows. */
+.pdos-tiles { min-height: 0; display: grid; grid-template-columns: minmax(0, 1.15fr) repeat(3, minmax(0, 1fr)); grid-template-rows: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.pdos-tile--about { grid-row: span 2; }
 .pdos-tile {
   min-width: 0; min-height: 0; overflow: hidden; display: flex; flex-direction: column;
   background: var(--v2-panel); color: var(--v2-fg); padding: clamp(.6rem, 1.4vh, .85rem); cursor: pointer;
@@ -236,6 +240,11 @@ body.locked { overflow: auto !important; height: auto !important; }
 .pdos-tile--media:hover, .pdos-tile--media:focus-visible { background: oklch(0.74 0.16 0); color: var(--on); }
 .pdos-tile--playlists:hover, .pdos-tile--playlists:focus-visible { background: var(--ok); color: var(--on); }
 .pdos-tile--gigs:hover, .pdos-tile--gigs:focus-visible { background: #160a06; color: #ffd43b; }
+.pdos-tile--about:hover, .pdos-tile--about:focus-visible { background: var(--about); color: var(--on); }
+.pdos-tile-glyph--pair { flex: 0 0 auto; display: flex; gap: 2px; }
+.pdos-tile-glyph--pair span { display: block; width: 6px; height: 6px; border: 2px solid currentColor; }
+.pdos-about-open { margin-right: -4px; padding: 2px 6px; color: var(--v2-fg); }
+.pdos-about-open:hover, .pdos-about-open:focus-visible { background: var(--about); color: var(--on); text-decoration: none; }
 
 /* Extras: Champion Run and Crack, both jump to Projects (the windows themselves are Phase 4/5). */
 .pdos-extras { flex: 0 0 auto; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; font-size: .72rem; text-transform: uppercase; letter-spacing: .04em; }
@@ -779,7 +788,7 @@ html.pdos-locked { overflow: hidden; }
 .pdos-stage { display: contents; }
 @media (min-width: 721px) and (min-height: 620px) {
   :root { --pdos-s: 1; }
-  #v2-home { width: auto; margin-inline: calc(-1 * var(--v2-gutter)); }
+  #v2-home, #v2-about { width: auto; margin-inline: calc(-1 * var(--v2-gutter)); }
   .pdos-stage {
     position: absolute;
     top: var(--v2-nav-h);
@@ -867,7 +876,8 @@ html.pdos-locked { overflow: hidden; }
   .pdos-title-row { grid-template-columns: 1fr; gap: 10px; }
   .pdos-title-cell { align-items: flex-start; }
   .pdos-about-body { min-height: 120px; }
-  .pdos-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(3, minmax(150px, auto)); }
+  .pdos-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: none; grid-auto-rows: minmax(150px, auto); }
+  .pdos-tile--about { grid-column: 1 / -1; grid-row: auto; }
   .pdos-tile-title { font-size: 1.5rem; }
   .pdos-extras { grid-template-columns: minmax(0, 1fr); }
   .pdos-weather-body, .pdos-spotify-body, .pdos-game-body { min-height: 72px; }
@@ -1051,4 +1061,207 @@ html.pdos-locked { overflow: hidden; }
 }
 @media (prefers-reduced-motion: reduce) {
   .pdos-dialog--crack .slot, .pdos-dialog--crack .ck-btn, .pdos-dialog--crack .ck-close { transition: none; }
+}
+
+/* About (02, 2026-10-22, design_handoff_about_section README §02 + Revision 2). Desktop sizes are the
+   mockup's px values: in paging mode the section is drawn on Home's scaled 1440-wide canvas
+   (.pdos-stage), so nothing here may use vw/vh. Phones and short windows get the stacked layout
+   at the end of this block. initAbout (ui-v2.js) sets the stop, card transforms and ruler. */
+.pdos-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.pdos-window--about { --bar: var(--about); margin: 12px; }
+:where(.pdos-window--about) button { font: inherit; letter-spacing: inherit; text-transform: inherit; color: inherit; cursor: pointer; }
+.pdos-about-head { flex: 0 0 40px; display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 12px; padding: 0 14px; background: var(--p1); border-bottom: 1px solid var(--line); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; }
+.pdos-about-crumb { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--v2-dim); }
+.pdos-about-tc { display: flex; align-items: center; gap: 8px; font-size: 18px; letter-spacing: .08em; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.pdos-about-rec { width: 9px; height: 9px; background: var(--rec); animation: pxblink 1.2s steps(1) infinite; }
+.pdos-about-stop { justify-self: end; white-space: nowrap; }
+.pdos-about-dim { color: var(--v2-dim); }
+.pdos-about-view { flex: 1 1 auto; min-height: 0; position: relative; overflow: hidden; background: var(--bg); }
+.pdos-about-track { position: absolute; top: 0; left: 0; bottom: 0; width: 200%; display: flex; transition: transform .7s cubic-bezier(.7, 0, .2, 1); }
+.pdos-window--about.is-timeline .pdos-about-track { transform: translateX(-50%); }
+.pdos-about-label { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--v2-dim); }
+
+/* Panel 1: Summary. */
+.pdos-about-summary { width: 50%; height: 100%; box-sizing: border-box; padding: 16px 16px 16px 24px; display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 40px; }
+.pdos-about-main { min-width: 0; display: flex; flex-direction: column; justify-content: space-between; gap: 18px; }
+.pdos-about-id { display: flex; flex-direction: column; gap: 8px; }
+.pdos-about-name { margin: 0; font-family: var(--display); font-weight: 700; font-size: 76px; line-height: .9; text-transform: uppercase; }
+.pdos-about-headline { margin: 0; font-size: 15px; line-height: 1.4; }
+.pdos-about-statement { margin: 0; max-width: 24em; font-family: var(--display); font-weight: 700; font-size: 46px; line-height: 1.1; text-wrap: pretty; }
+.pdos-about-caret { display: inline-block; width: .5em; height: .9em; margin-left: 4px; vertical-align: -.08em; background: var(--fg); animation: pxblink 1s steps(1) infinite; }
+.pdos-about-rest { color: transparent; }
+.pdos-about-cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; padding-top: 14px; border-top: 1px solid var(--line); }
+.pdos-about-list { display: flex; flex-direction: column; gap: 6px; }
+.pdos-about-list .pdos-about-label { margin-bottom: 2px; }
+.pdos-about-list button { display: flex; justify-content: space-between; gap: 12px; margin: 0 -6px; padding: 4px 6px; border: 0; background: none; font-size: 15px; text-align: left; text-transform: none; letter-spacing: 0; }
+.pdos-about-list button > span:last-child { opacity: .7; white-space: nowrap; }
+.pdos-about-list button:hover, .pdos-about-list button:focus-visible { background: var(--about); color: var(--on); }
+.pdos-about-side { min-width: 0; display: flex; flex-direction: column; gap: 12px; }
+.pdos-about-now .pdos-widget-head { height: 26px; padding: 0 8px; font-size: 11px; }
+.pdos-about-live { display: flex; align-items: center; gap: 6px; color: var(--v2-green); }
+.pdos-about-live > span { animation: pxblink 1s steps(1) infinite; }
+.pdos-about-now dl.pdos-widget-body, .pdos-about-now .pdos-widget-body { margin: 0; padding: 12px; gap: 8px; }
+.pdos-about-now dl > div { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 8px; font-size: 13px; line-height: 1.35; opacity: 0; transform: translateY(6px); transition: opacity .25s steps(3) calc(var(--i) * 90ms), transform .35s cubic-bezier(.2, .8, .2, 1) calc(var(--i) * 90ms); }
+.pdos-window--about.is-in .pdos-about-now dl > div, .pdos-window--about:not(.is-ready) .pdos-about-now dl > div { opacity: 1; transform: none; }
+.pdos-about-now dt { padding-top: 1px; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--v2-dim); }
+.pdos-about-now dd { margin: 0; }
+.pdos-about-skills { display: flex; flex-direction: column; gap: 8px; }
+.pdos-about-skills > div { display: flex; flex-wrap: wrap; gap: 6px; }
+.pdos-about-skills > div > span { padding: 5px 8px; border: 1px solid var(--line); font-size: 12px; letter-spacing: .04em; text-transform: uppercase; }
+.pdos-about-links { display: flex; flex-direction: column; gap: 4px; }
+.pdos-about-links .pdos-about-label { margin-bottom: 4px; }
+.pdos-about-links a { display: flex; justify-content: space-between; padding: 6px 8px; border: 1px solid var(--line); color: var(--v2-fg); font-size: 14px; letter-spacing: .04em; text-transform: uppercase; }
+.pdos-about-links a:hover, .pdos-about-links a:focus-visible { background: var(--about); color: var(--on); text-decoration: none; }
+.pdos-about-next { margin-top: auto; display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border: 0; background: var(--p2); font-size: 13px; letter-spacing: .08em; text-transform: uppercase; }
+.pdos-about-next > span:last-child { animation: pxblink 1s steps(1) infinite; }
+.pdos-about-next:hover, .pdos-about-next:focus-visible { background: var(--about); color: var(--on); }
+.pdos-about-swipe { display: none; }
+
+/* Panel 2: the tape carousel over the year ruler. */
+.pdos-about-timeline { width: 50%; height: 100%; display: flex; flex-direction: column; }
+.pdos-about-deck { flex: 1 1 auto; min-height: 0; position: relative; overflow: hidden; perspective: 1500px; perspective-origin: 50% 45%; }
+.pdos-about-card {
+  position: absolute; left: 50%; top: 50%; width: 400px; height: min(480px, calc(100% - 36px));
+  display: flex; padding: 0; border: 0; background: var(--p1); color: var(--fg); text-align: left;
+  transform: translate(-50%, -50%); box-shadow: 0 0 0 1px var(--line);
+  transition: transform .7s cubic-bezier(.2, .8, .2, 1), opacity .5s, filter .5s, background .15s, color .15s;
+}
+.pdos-about-card.is-centre { box-shadow: 0 0 0 1px var(--about), 16px 16px 0 rgba(0, 0, 0, .45); }
+.pdos-about-card:not(.is-centre) { filter: brightness(.6) grayscale(.7); }
+.pdos-window--about.is-timeline .pdos-about-card.is-centre.is-now { animation: abpulse 2.4s ease-in-out infinite; }
+.pdos-about-card:hover, .pdos-about-card:focus-visible { background: var(--about); color: var(--on); }
+.pdos-about-card:focus-visible { outline: 2px solid var(--fg); outline-offset: 3px; }
+.pdos-about-spine { flex: 0 0 34px; display: flex; align-items: center; justify-content: center; border-right: 1px solid currentColor; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; opacity: .8; }
+.pdos-about-spine > span { writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; }
+.pdos-about-card-body { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 8px; padding: 14px 16px; overflow: hidden; }
+.pdos-about-card-head { display: flex; justify-content: space-between; font-size: 11px; letter-spacing: .04em; text-transform: uppercase; }
+.pdos-about-well { flex: 1 1 auto; min-height: 116px; display: flex; align-items: center; justify-content: center; overflow: hidden; background: var(--p0); outline: 1px solid var(--line); }
+.pdos-about-dates { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; }
+.pdos-about-dates > span:first-child { opacity: .75; }
+.pdos-about-now-chip { display: flex; align-items: center; gap: 5px; padding: 1px 6px; background: var(--fg); color: var(--bg); }
+.pdos-about-now-chip > span { color: var(--rec); animation: pxblink 1s steps(1) infinite; }
+.pdos-about-card-title { font-family: var(--display); font-weight: 700; font-size: 28px; line-height: 1; text-transform: uppercase; text-wrap: balance; }
+.pdos-about-role { font-size: 14px; line-height: 1.3; }
+.pdos-about-place { font-size: 11px; letter-spacing: .04em; text-transform: uppercase; opacity: .75; }
+.pdos-about-hl { display: flex; flex-direction: column; gap: 5px; padding-top: 8px; border-top: 1px solid currentColor; font-size: 12px; line-height: 1.35; }
+.pdos-about-hl > span, .pdos-about-dhl li { display: grid; grid-template-columns: 12px minmax(0, 1fr); gap: 4px; }
+.pdos-about-hl > span::before, .pdos-about-dhl li::before { content: '\25AA'; }
+.pdos-about-card-foot { margin-top: auto; display: flex; justify-content: space-between; font-size: 10px; letter-spacing: .06em; text-transform: uppercase; opacity: .75; }
+.pdos-about-tap-hint { display: none; }
+
+.pdos-about-ruler { flex: 0 0 128px; display: grid; grid-template-columns: 96px minmax(0, 1fr); padding: 0 40px 0 16px; border-top: 1px solid var(--line); background: var(--p1); }
+.pdos-about-lanes { position: relative; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--v2-dim); }
+.pdos-about-lanes span { position: absolute; left: 0; top: 18px; }
+.pdos-about-lanes span + span { top: 76px; }
+.pdos-about-years { position: relative; }
+.pdos-about-base { position: absolute; left: 0; right: 0; top: 60px; height: 1px; background: var(--line); }
+.pdos-about-progress { position: absolute; left: 0; top: 59px; width: 0; height: 3px; background: var(--fg); transition: width .7s cubic-bezier(.2, .8, .2, 1); }
+.pdos-about-tick { position: absolute; top: 56px; width: 1px; height: 9px; background: var(--v2-dim); }
+.pdos-about-year { position: absolute; top: 104px; transform: translateX(-50%); font-size: 10px; letter-spacing: .06em; color: var(--v2-dim); }
+.pdos-about-bar { position: absolute; min-width: 8px; height: 14px; background: var(--p3); box-shadow: inset 0 0 0 1px var(--line); cursor: pointer; transition: background .2s steps(2); }
+.pdos-about-bar:hover, .pdos-about-bar.is-active { background: var(--about); }
+.pdos-about-playhead { position: absolute; left: 0; top: 4px; width: 1px; height: 94px; background: var(--about); opacity: 0; transition: left .7s cubic-bezier(.2, .8, .2, 1), opacity .3s; }
+.pdos-about-playhead > span { position: absolute; left: -4px; top: 52px; width: 9px; height: 9px; background: var(--about); }
+.pdos-window--about.is-timeline .pdos-about-playhead { opacity: 1; }
+
+.pdos-about-foot { flex: 0 0 44px; display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 12px; padding: 0 12px; border-top: 1px solid var(--line); background: var(--p1); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; }
+.pdos-about-meta { display: flex; gap: 18px; min-width: 0; overflow: hidden; white-space: nowrap; color: var(--v2-dim); }
+.pdos-about-rail { display: flex; align-items: center; gap: 6px; }
+.pdos-about-rail button { width: 10px; height: 10px; padding: 0; border: 0; background: transparent; box-shadow: inset 0 0 0 1px var(--fg); transition: width .3s steps(3); }
+.pdos-about-rail button[aria-current="step"] { width: 30px; background: var(--about); }
+.pdos-about-rail button:focus-visible { outline: 1px solid var(--fg); outline-offset: 2px; }
+.pdos-about-transport { justify-self: end; display: flex; background: var(--p2); font-size: 12px; }
+.pdos-about-transport button { width: 40px; height: 30px; display: flex; align-items: center; justify-content: center; padding: 0; border: 0; background: none; }
+.pdos-about-transport button:hover, .pdos-about-transport button:focus-visible { background: var(--fg); color: var(--bg); }
+
+/* A stop's detail window (outside the scaled canvas, so these are real px). */
+.pdos-dialog--about { --dialog-bar: var(--about); width: 860px; overflow: auto; }
+.pdos-about-detail { display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: 20px; padding: 20px; background: var(--p1); }
+.pdos-about-dwell { min-height: 200px; display: flex; align-items: center; justify-content: center; overflow: hidden; background: var(--p0); outline: 1px solid var(--line); }
+.pdos-about-dtext { min-width: 0; display: flex; flex-direction: column; gap: 12px; }
+.pdos-about-dmeta { display: flex; justify-content: space-between; font-size: 11px; text-transform: uppercase; }
+.pdos-about-dtitle { margin: 0; font-family: var(--display); font-weight: 700; font-size: 54px; line-height: .95; text-transform: uppercase; text-wrap: balance; outline: 0; }
+.pdos-about-drole { margin: 0; font-size: 16px; line-height: 1.35; }
+.pdos-about-dwhen { margin: 0; font-size: 12px; letter-spacing: .05em; text-transform: uppercase; color: var(--v2-dim); }
+.pdos-about-dhl { margin: 0; padding: 12px 0 0; list-style: none; display: flex; flex-direction: column; gap: 8px; border-top: 1px solid var(--line); font-size: 14px; line-height: 1.45; }
+.pdos-about-dhl li { grid-template-columns: 14px minmax(0, 1fr); gap: 6px; }
+.pdos-about-dlink { align-self: flex-start; padding: 8px 12px; border: 1px solid var(--fg); color: var(--fg); font-size: 12px; letter-spacing: .04em; text-transform: uppercase; }
+.pdos-about-dlink[hidden] { display: none; }
+.pdos-about-dlink:hover, .pdos-about-dlink:focus-visible { background: var(--about); color: var(--on); text-decoration: none; }
+.pdos-about-dfoot { margin-top: auto; display: flex; justify-content: space-between; gap: 12px; padding-top: 10px; border-top: 1px solid var(--line); font-size: 11px; letter-spacing: .05em; text-transform: uppercase; }
+.pdos-about-dfoot button { padding: 0; border: 0; background: none; color: var(--v2-dim); font: inherit; letter-spacing: inherit; text-transform: inherit; cursor: pointer; }
+.pdos-about-dfoot button:hover, .pdos-about-dfoot button:focus-visible { color: var(--fg); }
+
+@keyframes abob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+@keyframes arcpt { 0% { transform: translateY(100%); } 70%, 100% { transform: translateY(0); } }
+@keyframes apetal { 0% { transform: translate(0, 0); opacity: 0; } 10% { opacity: 1; } 50% { transform: translate(150%, 700%); } 90% { opacity: 1; } 100% { transform: translate(-50%, 1500%); opacity: 0; } }
+@keyframes amist { 0% { opacity: 0; transform: translateX(0); } 50% { opacity: .9; } 100% { opacity: 0; transform: translateX(60%); } }
+@keyframes abpulse { 0%, 100% { box-shadow: 0 0 0 1px var(--about), 16px 16px 0 rgba(0, 0, 0, .45); } 50% { box-shadow: 0 0 0 1px var(--about), 16px 16px 0 rgba(0, 0, 0, .45), 0 0 40px oklch(0.78 0.12 190 / .5); } }
+@keyframes pxbass { 50% { transform: scale(1.18); } }
+@keyframes pxthump { 50% { transform: translateY(-4%); } }
+@keyframes pxwave { 0% { opacity: 0; } 35% { opacity: 1; } 100% { opacity: 0; } }
+
+/* Phones and short windows (no paging): a native horizontal snap row of eight panels, the Summary
+   then one flat card per stop. Vertical swipes scroll the page as usual. */
+@media not all and (min-width: 721px) and (min-height: 620px) {
+  .pdos-window--about { margin: 0; height: max(560px, calc(100svh - 72px)); max-height: 900px; }
+  .pdos-about-head { flex-basis: 36px; grid-template-columns: auto minmax(0, 1fr); padding: 0 10px; }
+  .pdos-about-crumb { display: none; }
+  .pdos-about-tc { font-size: 15px; }
+  .pdos-about-stop { justify-self: stretch; min-width: 0; overflow: hidden; text-overflow: ellipsis; text-align: right; font-size: 12px; }
+  .pdos-about-track { position: absolute; inset: 0; width: auto; transform: none !important; transition: none; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; overscroll-behavior-x: contain; scrollbar-width: none; }
+  .pdos-about-track::-webkit-scrollbar { display: none; }
+  .pdos-about-summary { flex: 0 0 100%; width: auto; padding: 14px; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; scroll-snap-align: start; }
+  .pdos-about-main, .pdos-about-side, .pdos-about-id { display: contents; }
+  .pdos-about-id .pdos-about-label { display: none; }
+  .pdos-about-name { order: 1; font-size: 32px; line-height: .92; }
+  .pdos-about-headline { order: 2; margin-top: -8px; font-size: 12px; }
+  .pdos-about-statement { order: 3; font-size: 21px; line-height: 1.15; }
+  .pdos-about-caret { display: none; }
+  .pdos-about-now { order: 4; }
+  .pdos-about-now dl > div { grid-template-columns: 76px minmax(0, 1fr); gap: 6px; font-size: 12px; line-height: 1.3; }
+  .pdos-about-now dl.pdos-widget-body, .pdos-about-now .pdos-widget-body { padding: 10px; gap: 5px; }
+  .pdos-about-now dt, .pdos-about-now .pdos-widget-head, .pdos-about-label { font-size: 12px; }
+  .pdos-about-cols { order: 5; gap: 12px; padding-top: 0; border-top: 0; }
+  .pdos-about-list { gap: 2px; }
+  .pdos-about-list button { font-size: 12px; line-height: 1.35; padding: 2px 6px; }
+  .pdos-about-list button > span:last-child { display: none; }
+  .pdos-about-skills { order: 6; }
+  .pdos-about-skills .pdos-about-label, .pdos-about-links .pdos-about-label { display: none; }
+  .pdos-about-skills > div { gap: 5px; }
+  .pdos-about-skills > div > span { padding: 4px 6px; font-size: 12px; }
+  .pdos-about-links { order: 7; flex-direction: row; flex-wrap: wrap; gap: 8px; }
+  .pdos-about-links a { padding: 9px 10px; font-size: 12px; gap: 6px; }
+  .pdos-about-next { display: none !important; }
+  .pdos-about-swipe { order: 8; display: block; margin: auto 0 0; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--v2-dim); }
+  .pdos-about-timeline, .pdos-about-deck { display: contents; }
+  .pdos-about-ruler { display: none; }
+  .pdos-about-card { position: relative; left: auto; top: auto; flex: 0 0 calc(100% - 28px); width: auto; height: auto; margin: 14px; scroll-snap-align: center; transform: none !important; opacity: 1 !important; filter: none !important; pointer-events: auto !important; box-shadow: none !important; outline: 1px solid var(--line); outline-offset: -1px; animation: none !important; }
+  .pdos-about-card:hover { background: var(--p1); color: var(--fg); }
+  .pdos-about-card:active { background: var(--about); color: var(--on); }
+  .pdos-about-spine { display: none; }
+  .pdos-about-card-body { gap: 10px; padding: 14px; }
+  .pdos-about-card-head, .pdos-about-dates, .pdos-about-place, .pdos-about-card-foot { font-size: 12px; }
+  .pdos-about-well { min-height: 140px; }
+  .pdos-about-card-title { font-size: 30px; text-wrap: pretty; }
+  .pdos-about-hl { gap: 6px; padding-top: 10px; font-size: 13px; }
+  .pdos-about-open-hint { display: none; }
+  .pdos-about-tap-hint { display: inline; }
+  .pdos-about-foot { display: flex; justify-content: space-between; padding: 0 10px; }
+  .pdos-about-meta { display: none; }
+  .pdos-dialog--about { width: 100%; max-height: 100%; }
+  .pdos-about-detail { grid-template-columns: minmax(0, 1fr); padding: 14px; gap: 14px; }
+  .pdos-about-dwell { min-height: 160px; }
+  .pdos-about-dtitle { font-size: 32px; }
+  .pdos-about-dmeta, .pdos-about-dwhen, .pdos-about-dfoot, .pdos-about-dlink { font-size: 12px; }
+}
+
+/* Reduced motion: no track slide, rotation, typing, counting, rolling, icon animation or pulse;
+   only the centred card shows and it cross-fades. */
+@media (prefers-reduced-motion: reduce) {
+  .pdos-about-track, .pdos-about-progress, .pdos-about-playhead { transition: none !important; }
+  .pdos-about-card { transition: opacity .35s, background .15s, color .15s !important; }
+  .pdos-about-card, .pdos-window--about.is-timeline .pdos-about-card.is-centre.is-now { animation: none !important; }
+  .pdos-about-now dl > div { transition: opacity .3s !important; transform: none !important; }
+  .pdos-about-rail button { transition: none; }
 }

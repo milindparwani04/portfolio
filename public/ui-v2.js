@@ -690,7 +690,7 @@
   // site-wide `html{scroll-behavior:smooth}`. This just drives the chrome that sits on top:
   // an IntersectionObserver toggles .is-active per section (CSS does the CRT power-on/off),
   // keeps the top bar's typed command line, section counter and clock current, handles the
-  // 1-7 jump keys and Esc, and runs the Mono/Paper/Night theme switcher. Phones fall outside
+  // 1-8 jump keys and Esc, and runs the Mono/Paper/Night theme switcher. Phones fall outside
   // the paging media query, so the CRT wrappers stay inert there (see .pdos-crt-* in the CSS)
   // and this still safely updates the (hidden) top bar state as the user scrolls past.
   function initShell() {
@@ -698,7 +698,7 @@
     const sections = Array.from(document.querySelectorAll('.v2-section[data-sec]'));
     if (!root || !sections.length) return;
     const SECS = [
-      ['home', 'Home'], ['journal', 'Journal'], ['projects', 'Projects'], ['toolbox', 'Toolbox'],
+      ['home', 'Home'], ['about', 'About'], ['journal', 'Journal'], ['projects', 'Projects'], ['toolbox', 'Toolbox'],
       ['media', 'Media'], ['playlists', 'Playlists'], ['gigs', 'Gigs']
     ];
     const THEMES = { mono: 'Mono', paper: 'Paper', night: 'Night' };
@@ -713,6 +713,9 @@
 
     let activeKey = null;
     let typeTimer = null;
+    // The section a number key or in-page link is heading to, so About knows it was jumped to
+    // (it then opens on its Summary) rather than scrolled up into from Journal (its last stop).
+    let jumpKey = null;
 
     function typeCmd(key) {
       if (typeTimer) window.clearInterval(typeTimer);
@@ -733,8 +736,12 @@
       if (key === activeKey) return;
       const index = SECS.findIndex(([k]) => k === key);
       if (index < 0) return;
+      const prev = activeKey;
       activeKey = key;
-      if (secLabelEl) secLabelEl.textContent = `${String(index + 1).padStart(2, '0')} / 07 · ${SECS[index][1]}`;
+      const jumped = jumpKey === key;
+      if (jumped) jumpKey = null;
+      document.dispatchEvent(new CustomEvent('pdos:section', { detail: { key, prev, prevIndex: SECS.findIndex(([k]) => k === prev), jumped } }));
+      if (secLabelEl) secLabelEl.textContent = `${String(index + 1).padStart(2, '0')} / 08 · ${SECS[index][1]}`;
       typeCmd(key);
       // Keep the URL in sync so a direct link or the browser back/forward button still lands
       // on the right section (SH-09), now that there's no nav link to carry aria-current.
@@ -806,15 +813,22 @@
     tickClock();
     window.setInterval(tickClock, 15000);
 
+    document.addEventListener('click', (event) => {
+      const link = event.target instanceof Element ? event.target.closest('a[href^="#v2-"]') : null;
+      const target = link && document.getElementById(link.getAttribute('href').slice(1));
+      if (target && target.hasAttribute('data-sec')) jumpKey = target.getAttribute('data-sec');
+    }, true);
+
     document.addEventListener('keydown', (event) => {
       if (event.target instanceof Element && /INPUT|TEXTAREA|SELECT/.test(event.target.tagName)) return;
       if (event.target instanceof Element && event.target.closest('[contenteditable="true"]')) return;
       if (event.key === 'Escape') { openThemeMenu(false); return; }
       const n = parseInt(event.key, 10);
-      if (!(n >= 1 && n <= 7)) return;
+      if (!(n >= 1 && n <= 8)) return;
       // An open window locks the page: no section jumps until it is closed.
       if (document.documentElement.classList.contains('pdos-locked')) return;
       const target = sections[n - 1];
+      if (target) jumpKey = target.getAttribute('data-sec');
       if (target) target.scrollIntoView({ behavior: reduceMotion.matches ? 'auto' : 'smooth', block: 'start' });
     });
   }
@@ -895,9 +909,349 @@
     });
   }
 
+  // About (02, design_handoff_about_section README §02 About + Revision 2): stop 0 is the Summary,
+  // stops 1-7 the timeline tapes. On desktop (paging mode) a single wheel listener turns vertical
+  // ticks into one stop per gesture and lets the page snap on to Home / Journal only at either end;
+  // phones get a native horizontal snap row instead. The detail window is a page overlay that
+  // initWindows owns (detail.open / close / isOpen); it counts as a lock like the project windows.
+  function initAbout(detail) {
+    const win = document.querySelector('.pdos-window--about');
+    const track = byId('pdosAboutTrack');
+    if (!win || !track) return null;
+    const cards = [...win.querySelectorAll('.pdos-about-card')];
+    const LAST = cards.length;
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const rm = () => reduceMotion.matches;
+    const desk = () => pagedQuery.matches;
+    const locked = () => document.documentElement.classList.contains('pdos-locked');
+    const icons = () => window.pdosIcons;
+    const pad2 = (n) => String(n).padStart(2, '0');
+    const today = new Date();
+    const NOW_TC = `${today.getFullYear()}.${pad2(today.getMonth() + 1)}`;
+    const pos = (t) => `${((t - 2015) / 12 * 100).toFixed(2)}%`;
+    const typedEl = byId('pdosAboutTyped');
+    const restEl = byId('pdosAboutRest');
+    const sinceEl = byId('pdosAboutSince');
+    const tcEl = byId('pdosAboutTc');
+    const STATEMENT = typedEl.textContent;
+    // Logo sprites keep their size; the drawn ones grow a little on phones and in the detail window.
+    const SCALES = new Set(['dess', 'torii', 'till', 'perfume']);
+    const stops = cards.map((card, i) => ({
+      card,
+      n: pad2(i + 1),
+      tc: card.dataset.tc,
+      t0: Number(card.dataset.t0),
+      t1: Number(card.dataset.t1),
+      row: Number(card.dataset.row),
+      lane: card.dataset.lane,
+      title: card.querySelector('.pdos-about-card-title').textContent,
+      icon: card.querySelector('.pdos-icon'),
+    }));
+    stops.forEach((s) => { s.icon.dataset.iconBase = s.icon.dataset.iconP; });
+
+    // Ruler (ticks, labels, one bar per stop) and rail (one dot per stop) come from the cards.
+    const years = byId('pdosAboutYears');
+    for (let y = 2015; y <= 2026; y += 1) {
+      const tick = document.createElement('div');
+      tick.className = 'pdos-about-tick';
+      tick.style.left = pos(y);
+      const label = document.createElement('div');
+      label.className = 'pdos-about-year';
+      label.style.left = pos(y);
+      label.textContent = String(y);
+      years.insertBefore(label, byId('pdosAboutProgress'));
+      years.insertBefore(tick, label);
+    }
+    const bars = stops.map((s, i) => {
+      const bar = document.createElement('div');
+      bar.className = 'pdos-about-bar';
+      bar.title = `${s.title} · ${s.card.querySelector('.pdos-about-dates span').textContent}`;
+      bar.style.left = pos(s.t0);
+      bar.style.width = `${((s.t1 - s.t0) / 12 * 100).toFixed(2)}%`;
+      bar.style.top = s.lane === 'Education' ? (s.row ? '34px' : '14px') : '72px';
+      bar.addEventListener('click', () => go(i + 1));
+      years.insertBefore(bar, byId('pdosAboutPlayhead'));
+      return bar;
+    });
+    const rail = byId('pdosAboutRail');
+    const dots = [{ title: 'Summary' }, ...stops].map((s, i) => {
+      const dot = document.createElement('button');
+      dot.type = 'button';
+      dot.title = s.title;
+      dot.setAttribute('aria-label', `Stop ${pad2(i + 1)}: ${s.title}`);
+      dot.addEventListener('click', () => go(i));
+      rail.appendChild(dot);
+      return dot;
+    });
+
+    let stop = 0;
+    let active = false;
+    let fromScroll = false;
+    let lockUntil = 0;
+    let gestureUsed = false;
+    let lastWheel = 0;
+    let lastDy = 0;
+    let tcShown = NOW_TC;
+    const timers = { enter: 0, type: 0, since: 0, play: 0, tc: 0 };
+    const stopTimers = (...keys) => keys.forEach((k) => { window.clearTimeout(timers[k]); window.clearInterval(timers[k]); timers[k] = 0; });
+
+    function setIcon(el, on) {
+      const api = icons();
+      if (api) api.setOn(el, on);
+    }
+
+    // Phones draw the scalable sprites 15% larger; switching layout redraws them.
+    function sizeIcons() {
+      const api = icons();
+      stops.forEach((s) => {
+        const base = Number(s.icon.dataset.iconBase);
+        const p = !desk() && SCALES.has(s.icon.dataset.icon) ? Math.max(2, Math.round(base * 1.15)) : base;
+        if (String(p) !== s.icon.dataset.iconP) {
+          s.icon.dataset.iconP = String(p);
+          if (api) api.render(s.icon);
+        }
+      });
+    }
+
+    function render() {
+      const cur = stops[Math.max(0, stop - 1)];
+      const centre = Math.max(0, stop - 1);
+      const still = rm();
+      win.classList.toggle('is-timeline', stop > 0);
+      byId('pdosAboutCrumb').textContent = stop === 0 ? '[About] Milind Parwani / Profile' : `[About] Timeline / ${cur.lane}`;
+      byId('pdosAboutStopN').textContent = pad2(stop + 1);
+      byId('pdosAboutStopLabel').textContent = stop === 0 ? 'Summary' : cur.title;
+      byId('pdosAboutLane').textContent = stop === 0 ? 'Profile' : cur.lane;
+      dots.forEach((dot, i) => { if (i === stop) dot.setAttribute('aria-current', 'step'); else dot.removeAttribute('aria-current'); });
+      bars.forEach((bar, i) => bar.classList.toggle('is-active', i + 1 === stop));
+      const lineW = stop === 0 ? '0%' : pos(cur.t0);
+      byId('pdosAboutProgress').style.width = lineW;
+      byId('pdosAboutPlayhead').style.left = lineW;
+      stops.forEach((s, i) => {
+        const d = i - centre;
+        const ad = Math.abs(d);
+        const centred = d === 0;
+        const card = s.card;
+        card.classList.toggle('is-centre', centred);
+        card.style.transform = still ? 'translate(-50%, -50%)' : `translate(-50%, -50%) translateX(${d * 330}px) translateZ(${-ad * 240}px) rotateY(${d * 30}deg)`;
+        card.style.opacity = String(still ? (centred ? 1 : 0) : ([1, 0.55, 0.22][ad] ?? 0));
+        card.style.zIndex = String(10 - ad);
+        const reachable = !desk() || (still ? centred : ad <= 2);
+        card.style.pointerEvents = reachable ? '' : 'none';
+        card.tabIndex = reachable ? 0 : -1;
+        // A sprite plays only while its card is the one in view.
+        setIcon(s.icon, active && !still && (desk() ? stop >= 1 && centred : stop === i + 1));
+      });
+    }
+
+    // The timecode rolls: each changed digit shows random digits, settling left to right.
+    function rollTc(target) {
+      stopTimers('tc');
+      if (rm()) { tcShown = target; tcEl.textContent = target; return; }
+      const from = tcShown;
+      let f = 0;
+      timers.tc = window.setInterval(() => {
+        f += 1;
+        if (f >= 10) { stopTimers('tc'); tcShown = target; tcEl.textContent = target; return; }
+        tcEl.textContent = target.split('').map((ch, j) => (/\d/.test(ch) && ch !== from[j] && f < 3 + j ? String(Math.floor(Math.random() * 10)) : ch)).join('');
+      }, 40);
+    }
+
+    function scrollPhoneTo(i, smooth) {
+      if (desk()) return;
+      track.scrollTo({ left: i * track.clientWidth, behavior: smooth && !rm() ? 'smooth' : 'auto' });
+    }
+
+    function go(i) {
+      const lo = detail.isOpen() ? 1 : 0;
+      i = Math.max(lo, Math.min(LAST, i));
+      if (i === stop) return;
+      lockUntil = performance.now() + 650;
+      stop = i;
+      rollTc(i ? stops[i - 1].tc : NOW_TC);
+      render();
+      if (detail.isOpen()) fillDetail();
+      if (!fromScroll) scrollPhoneTo(i, true);
+    }
+
+    function setTyped(n) {
+      typedEl.textContent = STATEMENT.slice(0, n);
+      restEl.textContent = STATEMENT.slice(n);
+    }
+
+    function stopPlay() {
+      stopTimers('play');
+      byId('pdosAboutPlay').textContent = '▶';
+      byId('pdosAboutPlay').setAttribute('aria-label', 'Play the timeline');
+    }
+
+    function togglePlay() {
+      if (timers.play) { stopPlay(); return; }
+      if (stop >= LAST) go(1);
+      byId('pdosAboutPlay').textContent = '‖';
+      byId('pdosAboutPlay').setAttribute('aria-label', 'Pause the timeline');
+      timers.play = window.setInterval(() => { if (stop >= LAST) stopPlay(); else go(stop + 1); }, 2600);
+    }
+
+    // Entry: the statement types in, the [Now] rows step in and the start year counts up.
+    function enter(at) {
+      stopTimers('enter', 'type', 'since', 'tc');
+      stopPlay();
+      active = true;
+      lockUntil = performance.now() + 800;
+      gestureUsed = true;
+      stop = at;
+      tcShown = at ? stops[at - 1].tc : NOW_TC;
+      tcEl.textContent = tcShown;
+      win.classList.remove('is-in');
+      render();
+      window.setTimeout(() => scrollPhoneTo(at, false), 60);
+      if (rm()) { setTyped(STATEMENT.length); sinceEl.textContent = '2026'; win.classList.add('is-in'); return; }
+      setTyped(0);
+      sinceEl.textContent = '2015';
+      timers.enter = window.setTimeout(() => {
+        win.classList.add('is-in');
+        let n = 0;
+        timers.type = window.setInterval(() => { n += 2; setTyped(Math.min(n, STATEMENT.length)); if (n >= STATEMENT.length) stopTimers('type'); }, 22);
+        let y = 2015;
+        timers.since = window.setInterval(() => { y += 1; sinceEl.textContent = String(y); if (y >= 2026) stopTimers('since'); }, 60);
+      }, 650);
+    }
+
+    function leave() {
+      stopTimers('enter', 'type', 'since');
+      stopPlay();
+      active = false;
+      setTyped(STATEMENT.length);
+      sinceEl.textContent = '2026';
+      if (detail.isOpen()) detail.close();
+      render();
+    }
+
+    const dIcon = byId('pdosAboutDIcon');
+    function fillDetail() {
+      const s = stops[stop - 1];
+      const card = s.card;
+      byId('pdosAboutDFile').textContent = `${card.querySelector('.pdos-about-card-foot span').textContent} — stop ${s.n} / 07`;
+      byId('pdosAboutDTape').textContent = `Tape ${s.n} · TC ${s.tc}`;
+      byId('pdosAboutDLane').textContent = `[${s.lane}]`;
+      byId('pdosAboutDTitle').textContent = s.title;
+      byId('pdosAboutDRole').textContent = card.querySelector('.pdos-about-role').textContent;
+      byId('pdosAboutDWhen').textContent = `${card.querySelector('.pdos-about-dates span').textContent} · ${card.querySelector('.pdos-about-place').textContent}`;
+      byId('pdosAboutDHl').replaceChildren(...[...card.querySelectorAll('.pdos-about-hl > span')].map((h) => {
+        const li = document.createElement('li');
+        li.textContent = h.textContent;
+        return li;
+      }));
+      const link = byId('pdosAboutDLink');
+      link.hidden = !card.dataset.link;
+      if (card.dataset.link) { link.href = card.dataset.link; link.textContent = card.dataset.linkLabel; }
+      const name = s.icon.dataset.icon;
+      const base = Number(s.icon.dataset.iconBase);
+      dIcon.dataset.icon = name;
+      dIcon.dataset.iconP = String(SCALES.has(name) ? Math.max(2, Math.round(base * (desk() ? 1.7 : 1.2))) : base);
+      const api = icons();
+      if (api) { api.render(dIcon); api.setOn(dIcon, !rm()); }
+    }
+
+    function openDetail() {
+      if (stop < 1 || detail.isOpen()) return;
+      stopPlay();
+      fillDetail();
+      detail.open();
+      byId('pdosAboutDClose').focus();
+    }
+
+    cards.forEach((card, i) => card.addEventListener('click', () => {
+      if (!desk()) { go(i + 1); openDetail(); return; }
+      if (stop === i + 1) openDetail();
+      else go(i + 1);
+    }));
+    win.querySelectorAll('[data-goto]').forEach((btn) => btn.addEventListener('click', () => {
+      go(btn.dataset.goto === 'next' ? stop + 1 : Number(btn.dataset.goto));
+    }));
+    byId('pdosAboutPrev').addEventListener('click', () => go(stop - 1));
+    byId('pdosAboutNext').addEventListener('click', () => go(stop + 1));
+    byId('pdosAboutPlay').addEventListener('click', togglePlay);
+    byId('pdosAboutDNav').addEventListener('click', () => go(stop >= LAST ? 1 : stop + 1));
+
+    document.addEventListener('pdos:section', (event) => {
+      const { key, prev, prevIndex, jumped } = event.detail;
+      if (key === 'about') enter(!jumped && prevIndex > 1 ? LAST : 0);
+      else if (prev === 'about') leave();
+    });
+
+    // Scroll capture (README "Scroll capture"): only while About is the active section on a paging
+    // layout and nothing is open. Each move locks for 650ms (800ms on entry) and spends the gesture,
+    // so trackpad momentum never skips a stop and the flick that arrived never carries on out. At
+    // either end the event is left alone and native scroll-snap moves on to the next section.
+    window.addEventListener('wheel', (event) => {
+      const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? window.innerHeight : 1;
+      const dy = (Math.abs(event.deltaY) >= Math.abs(event.deltaX) ? event.deltaY : event.deltaX) * unit;
+      // The input's own time, so a busy main thread can't make one gesture look like two.
+      const t = event.timeStamp || performance.now();
+      // A fresh gesture: a pause, a change of direction or a sudden burst of speed (a new swipe
+      // during momentum). A steady wheel spin or a momentum tail stays one gesture. Tracked in every
+      // section, so the gesture that scrolled into About is still recognised once it is active.
+      const fresh = t - lastWheel > 200 || (Math.abs(dy) >= 4 && (Math.sign(dy) !== Math.sign(lastDy) || (Math.abs(dy) > 20 && Math.abs(dy) > Math.abs(lastDy) * 1.6)));
+      lastWheel = t;
+      if (Math.abs(dy) >= 4) lastDy = dy;
+      if (!active || !desk() || locked()) return;
+      if (fresh) gestureUsed = false;
+      if (t < lockUntil || Math.abs(dy) < 4 || gestureUsed) { event.preventDefault(); return; }
+      if (dy > 0 && stop < LAST) { event.preventDefault(); gestureUsed = true; go(stop + 1); }
+      else if (dy < 0 && stop > 0) { event.preventDefault(); gestureUsed = true; go(stop - 1); }
+    }, { passive: false });
+
+    // Tablets on the paging layout: a horizontal swipe moves one stop; vertical swipes page as usual.
+    let touch = null;
+    const body = byId('pdosAboutBody');
+    body.addEventListener('touchstart', (event) => { const p = event.touches[0]; touch = { x: p.clientX, y: p.clientY }; }, { passive: true });
+    body.addEventListener('touchend', (event) => {
+      if (!touch || !desk()) { touch = null; return; }
+      const p = event.changedTouches[0];
+      const dx = p.clientX - touch.x;
+      const dy = p.clientY - touch.y;
+      touch = null;
+      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) go(stop + (dx < 0 ? 1 : -1));
+    });
+
+    // Phones: the snap row itself is the control; the stop follows whichever panel is in view.
+    track.addEventListener('scroll', () => {
+      if (desk() || !track.clientWidth) return;
+      const i = Math.round(track.scrollLeft / track.clientWidth);
+      if (i !== stop) { fromScroll = true; go(i); fromScroll = false; }
+    }, { passive: true });
+
+    document.addEventListener('keydown', (event) => {
+      if (!active || event.altKey || event.ctrlKey || event.metaKey) return;
+      if (event.target instanceof Element && /INPUT|TEXTAREA|SELECT/.test(event.target.tagName)) return;
+      if (locked() && !detail.isOpen()) return;
+      if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
+        event.preventDefault();
+        go(stop + (event.key === 'ArrowRight' ? 1 : -1));
+      } else if (event.key === 'Enter' && !detail.isOpen() && stop > 0 && !(event.target instanceof Element && event.target.closest('button, a'))) {
+        // Otherwise the same keypress would activate the ✕ that openDetail has just focused.
+        event.preventDefault();
+        openDetail();
+      }
+    });
+
+    const relayout = () => { sizeIcons(); render(); scrollPhoneTo(stop, false); };
+    pagedQuery.addEventListener('change', relayout);
+    reduceMotion.addEventListener('change', render);
+    // pdos-icons.js is deferred, so the sprites are sized and switched on once it has run.
+    if (document.readyState === 'complete') sizeIcons();
+    else window.addEventListener('load', () => { sizeIcons(); render(); });
+    win.classList.add('is-ready', 'is-in');
+    render();
+
+    return { closed() { setIcon(dIcon, false); } };
+  }
+
   // Windows over the page (Parwani-DOS Phases 4-6): project windows, the Champion Run setup window,
   // the Toolbox panel and the Journal reader. While any of them is open the page is locked
-  // (html.pdos-locked: no scrolling, no 1-7 keys, no in-page jump links) until it is closed with ✕, the scrim or Esc.
+  // (html.pdos-locked: no scrolling, no 1-8 keys, no in-page jump links) until it is closed with ✕, the scrim or Esc.
   const PDOS_PROJECTS = {
     music: { n: '01', tag: 'Music', title: 'Sounds Like', desc: 'A similarity engine for music discovery. Turn text into personalised playlists.', status: 'Phase 02 / Similarity engine', color: '#1ed760', file: 'sounds_like.vol' },
     where: { n: '03', tag: 'Tool', title: 'Where Next', desc: 'A simple tool for exploring new destinations.', status: 'Planned · In development', color: 'oklch(0.88 0.07 85)', file: 'where_next.vol' },
@@ -911,12 +1265,14 @@
     const projectOverlay = byId('pdosProjectOverlay');
     const champOverlay = byId('pdosChampOverlay');
     const crackOverlay = byId('pdosCrackOverlay');
+    const aboutOverlay = byId('pdosAboutOverlay');
     if (!root || !projectOverlay || !champOverlay || !crackOverlay) return;
     // Sections clip and transform their content for the CRT effect, which would trap a fixed
     // overlay inside them, so the overlays live at the end of the page root instead.
     root.appendChild(projectOverlay);
     root.appendChild(champOverlay);
     root.appendChild(crackOverlay);
+    if (aboutOverlay) root.appendChild(aboutOverlay);
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     const locks = { window: false, tool: false, journal: false };
     const setLock = (key, on) => {
@@ -925,6 +1281,7 @@
     };
     let openOverlay = null;
     let returnFocus = null;
+    let about = null;
 
     const focusables = (el) => [...el.querySelectorAll('button:not(:disabled), a[href], iframe, input, select, textarea, [tabindex]:not([tabindex="-1"])')]
       .filter((node) => node.offsetParent !== null || node === document.activeElement);
@@ -948,6 +1305,7 @@
       if (openOverlay === champOverlay && window.VictoryRoad && window.VictoryRoad.dispose) window.VictoryRoad.dispose();
       // Crack likewise: closing stops the dial and its key listener; reopening starts fresh.
       if (openOverlay === crackOverlay) crack.close();
+      if (openOverlay === aboutOverlay && about) about.closed();
       openOverlay = null;
       setLock('window', false);
       if (restoreFocus && returnFocus && document.contains(returnFocus)) returnFocus.focus();
@@ -1014,6 +1372,13 @@
       else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
     });
 
+    if (aboutOverlay) {
+      about = initAbout({
+        open: () => showOverlay(aboutOverlay),
+        close: () => hideOverlay(),
+        isOpen: () => openOverlay === aboutOverlay,
+      });
+    }
     initToolbox((on) => setLock('tool', on), () => Boolean(openOverlay));
     initJournal((on) => setLock('journal', on), () => Boolean(openOverlay));
   }

@@ -976,7 +976,7 @@
     .tools{ grid-template-columns:1fr; }
   }
 </style>
-<link rel="stylesheet" href="/ui-v2.css?v=52">
+<link rel="stylesheet" href="/ui-v2.css?v=55">
 </head>
 <body class="locked">
 
@@ -1014,7 +1014,7 @@
         </div>
       </div>
       <div class="pdos-cmd" aria-hidden="true">C:\PARWANI&gt; <span id="pdosCmd"></span><span class="v2-cursor"></span></div>
-      <div class="pdos-right" aria-hidden="true"><span id="pdosSecLabel">01 / 07 &middot; Home</span><span id="pdosClock">--:--</span></div>
+      <div class="pdos-right" aria-hidden="true"><span id="pdosSecLabel">01 / 08 &middot; Home</span><span id="pdosClock">--:--</span></div>
     </header>
 
     <section class="v2-section is-active" id="v2-home" data-sec="home"><div class="pdos-crt-clip"><div class="pdos-crt-slide"><div class="pdos-stage">
@@ -1023,7 +1023,7 @@
           <div class="pdos-title-row">
             <div class="pdos-title-cell"><h1 class="v2-display">My Digital<br>Portfolio.</h1></div>
             <div class="pdos-widget pdos-about">
-              <div class="pdos-widget-head"><span>about.txt</span><span class="pdos-widget-tag">00</span></div>
+              <div class="pdos-widget-head"><span>about.txt</span><a class="pdos-about-open" href="#v2-about">open &#9656;</a></div>
               <div class="pdos-widget-body pdos-about-body">
                 <p>No fixed brief. A growing collection of things I am curious enough to build, research or test right now.</p>
                 <div class="pdos-boot-log">
@@ -1037,38 +1037,44 @@
           </div>
 
           <div class="pdos-tiles">
+            <a class="pdos-tile pdos-tile--about" href="#v2-about" data-icon-host>
+              <div class="pdos-tile-head"><span class="pdos-tile-glyph--pair" aria-hidden="true"><span></span><span></span></span><span>about.sys</span><span class="pdos-tile-key">2</span></div>
+              <div class="pdos-tile-title">About</div>
+              <div class="pdos-tile-icon" aria-hidden="true"><span class="pdos-icon pdos-icon--fit" data-icon="decks" data-icon-max="7"></span></div>
+              <div class="pdos-tile-foot"><span>Profile &middot; Timeline &middot; 7 tapes</span><span>Credit Underwriting Trainee @ Allianz Trade</span></div>
+            </a>
             <a class="pdos-tile pdos-tile--journal" href="#v2-journal" data-icon-host>
-              <div class="pdos-tile-head"><span class="pdos-tile-glyph pdos-tile-glyph--round" aria-hidden="true"></span><span>journal.log</span><span class="pdos-tile-key">1</span></div>
+              <div class="pdos-tile-head"><span class="pdos-tile-glyph pdos-tile-glyph--round" aria-hidden="true"></span><span>journal.log</span><span class="pdos-tile-key">3</span></div>
               <div class="pdos-tile-title">Journal</div>
               <div class="pdos-tile-icon" aria-hidden="true"><span class="pdos-icon pdos-icon--fit" data-icon="book"></span></div>
               <div class="pdos-tile-foot"><span>Latest &middot; Researching</span><span>Karoshi: An Enquiry Into Japan&rsquo;s Work Culture</span></div>
             </a>
             <a class="pdos-tile pdos-tile--projects" href="#v2-projects" data-icon-host>
-              <div class="pdos-tile-head"><span class="pdos-tile-glyph" aria-hidden="true"></span><span>projects.vol</span><span class="pdos-tile-key">2</span></div>
+              <div class="pdos-tile-head"><span class="pdos-tile-glyph" aria-hidden="true"></span><span>projects.vol</span><span class="pdos-tile-key">4</span></div>
               <div class="pdos-tile-title">Projects</div>
               <div class="pdos-tile-icon" aria-hidden="true"><span class="pdos-icon pdos-icon--fit" data-icon="board"></span></div>
               <div class="pdos-tile-foot"><span>Current focus &middot; Phase 02</span><span>Sounds Like &mdash; a similarity engine for music discovery</span></div>
             </a>
             <a class="pdos-tile pdos-tile--toolbox" href="#v2-tools" data-icon-host>
-              <div class="pdos-tile-head"><span class="pdos-tile-glyph pdos-tile-glyph--diamond" aria-hidden="true"></span><span>toolbox.exe</span><span class="pdos-tile-key">3</span></div>
+              <div class="pdos-tile-head"><span class="pdos-tile-glyph pdos-tile-glyph--diamond" aria-hidden="true"></span><span>toolbox.exe</span><span class="pdos-tile-key">5</span></div>
               <div class="pdos-tile-title">Toolbox</div>
               <div class="pdos-tile-icon" aria-hidden="true"><span class="pdos-icon pdos-icon--fit" data-icon="toolbox"></span></div>
               <div class="pdos-tile-foot"><span>6 ready &middot; 3 being built</span><span>Image Converter &middot; Tempo Tap &middot; QR Code &middot; Password&hellip;</span></div>
             </a>
             <a class="pdos-tile pdos-tile--media" href="#v2-media" data-icon-host>
-              <div class="pdos-tile-head"><span class="pdos-tile-glyph--bars" aria-hidden="true"><span></span><span></span><span></span></span><span>media.reel</span><span class="pdos-tile-key">4</span></div>
+              <div class="pdos-tile-head"><span class="pdos-tile-glyph--bars" aria-hidden="true"><span></span><span></span><span></span></span><span>media.reel</span><span class="pdos-tile-key">6</span></div>
               <div class="pdos-tile-title">Media</div>
               <div class="pdos-tile-icon" aria-hidden="true"><span class="pdos-icon pdos-icon--fit" data-icon="projector"></span></div>
               <div class="pdos-tile-foot"><span>Next three months</span><span>Films in Dubai cinemas and new games</span></div>
             </a>
             <a class="pdos-tile pdos-tile--playlists" href="#v2-playlists" data-icon-host>
-              <div class="pdos-tile-head"><span class="pdos-tile-glyph pdos-tile-glyph--ring" aria-hidden="true"></span><span>playlists.fm</span><span class="pdos-tile-key">5</span></div>
+              <div class="pdos-tile-head"><span class="pdos-tile-glyph pdos-tile-glyph--ring" aria-hidden="true"></span><span>playlists.fm</span><span class="pdos-tile-key">7</span></div>
               <div class="pdos-tile-title">Playlists</div>
               <div class="pdos-tile-icon" aria-hidden="true"><span class="pdos-icon pdos-icon--fit" data-icon="spotify"></span></div>
               <div class="pdos-tile-foot"><span>Three on repeat</span><span>pop &middot; Camon &middot; idk</span></div>
             </a>
             <a class="pdos-tile pdos-tile--gigs" href="#v2-gigs" data-icon-host>
-              <div class="pdos-tile-head"><span class="pdos-tile-glyph pdos-tile-glyph--frame" aria-hidden="true"></span><span>gigs.map</span><span class="pdos-tile-key">6</span></div>
+              <div class="pdos-tile-head"><span class="pdos-tile-glyph pdos-tile-glyph--frame" aria-hidden="true"></span><span>gigs.map</span><span class="pdos-tile-key">8</span></div>
               <div class="pdos-tile-title">Gigs</div>
               <div class="pdos-tile-icon" aria-hidden="true"><span class="pdos-icon pdos-icon--fit" data-icon="guitar"></span></div>
               <div class="pdos-tile-foot"><span>Six at a time</span><span>Upcoming in Dubai and Abu Dhabi</span></div>
@@ -1151,7 +1157,204 @@
           </div>
         </div>
       </div>
-      <div class="pdos-status-bar"><span class="pdos-status-cmd">C:\PARWANI&gt;<span class="v2-cursor" aria-hidden="true"></span></span><span class="pdos-status-hint">Scroll, or press 1&ndash;7 to jump &middot; Esc closes a window</span></div>
+      <div class="pdos-status-bar"><span class="pdos-status-cmd">C:\PARWANI&gt;<span class="v2-cursor" aria-hidden="true"></span></span><span class="pdos-status-hint">Scroll, or press 1&ndash;8 to jump &middot; Esc closes a window</span></div>
+    </div></div></div><div class="pdos-crt-line" aria-hidden="true"></div></section>
+
+    <section class="v2-section" id="v2-about" data-sec="about"><div class="pdos-crt-clip"><div class="pdos-crt-slide"><div class="pdos-stage">
+      <!-- About (Parwani-DOS, 2026-10-22, design_handoff_about_section): a Summary panel, then seven
+           timeline "tapes" in a curved carousel over a year ruler. On desktop, wheel ticks inside the
+           section move one stop at a time and release to Home / Journal at either end; phones get a
+           native horizontal snap row instead. initAbout in ui-v2.js drives it; the ruler bars, ticks
+           and rail dots are built from the cards' data-* (t0/t1 are decimal years, row is the
+           education lane). To add a stop, add a card in date order and bump the 07 / 08 counts. -->
+      <div class="pdos-window pdos-window--about">
+        <div class="pdos-window-bar"><span>about.sys &mdash; ref. 02 / career.tape</span><span class="pdos-window-nav"><a href="#v2-home">&#8593; Home</a><a href="#v2-journal">Journal &#8595;</a></span></div>
+        <div class="pdos-about-head">
+          <span class="pdos-about-crumb" id="pdosAboutCrumb">[About] Milind Parwani / Profile</span>
+          <span class="pdos-about-tc"><span class="pdos-about-rec" aria-hidden="true"></span>TC <span id="pdosAboutTc">2026.10</span></span>
+          <span class="pdos-about-stop">Stop <span id="pdosAboutStopN">01</span> / 08 <span class="pdos-about-dim">&middot; <span id="pdosAboutStopLabel">Summary</span></span></span>
+        </div>
+        <div class="pdos-about-view" id="pdosAboutBody">
+          <div class="pdos-about-track" id="pdosAboutTrack">
+            <div class="pdos-about-summary">
+              <div class="pdos-about-main">
+                <div class="pdos-about-id">
+                  <span class="pdos-about-label">[Profile] 01 / Summary</span>
+                  <h2 class="pdos-about-name">Milind Parwani</h2>
+                  <p class="pdos-about-headline">Credit Underwriting Trainee @ Allianz Trade &middot; BSc Economics, University of Nottingham</p>
+                </div>
+                <p class="pdos-about-statement"><span class="pdos-sr">An Economics graduate who blends analytical thinking with creativity, with hands-on experience across finance and business analysis.</span><span aria-hidden="true"><span id="pdosAboutTyped">An Economics graduate who blends analytical thinking with creativity, with hands-on experience across finance and business analysis.</span><span class="pdos-about-caret"></span><span class="pdos-about-rest" id="pdosAboutRest"></span></span></p>
+                <div class="pdos-about-cols">
+                  <div class="pdos-about-list">
+                    <span class="pdos-about-label">[Experience]</span>
+                    <button type="button" data-goto="7"><span>Allianz Trade</span><span>2026&ndash;</span></button>
+                    <button type="button" data-goto="6"><span>Signature Esscents Perfumes</span><span>2025&ndash;26</span></button>
+                    <button type="button" data-goto="4"><span>Jones the Grocer</span><span>2024</span></button>
+                  </div>
+                  <div class="pdos-about-list">
+                    <span class="pdos-about-label">[Education]</span>
+                    <button type="button" data-goto="2"><span>University of Nottingham</span><span>2022&ndash;25</span></button>
+                    <button type="button" data-goto="1"><span>DESS College</span><span>2015&ndash;22</span></button>
+                    <button type="button" data-goto="3"><span>IJLC, Osaka</span><span>2023</span></button>
+                  </div>
+                </div>
+              </div>
+              <div class="pdos-about-side">
+                <div class="pdos-widget pdos-about-now">
+                  <div class="pdos-widget-head"><span>[Now] now.sys</span><span class="pdos-about-live"><span aria-hidden="true">&#9679;</span> Live</span></div>
+                  <dl class="pdos-widget-body">
+                    <div style="--i:0"><dt>Role</dt><dd>Credit Underwriting Trainee, Allianz Trade (Middle East)</dd></div>
+                    <div style="--i:1"><dt>Since</dt><dd>Aug <span id="pdosAboutSince">2026</span></dd></div>
+                    <div style="--i:2"><dt>Based</dt><dd>Dubai, UAE</dd></div>
+                    <div style="--i:3"><dt>Building</dt><dd>This site &middot; training an LLM</dd></div>
+                    <div style="--i:4"><dt>Off-hours</dt><dd>DJ</dd></div>
+                  </dl>
+                </div>
+                <div class="pdos-about-skills">
+                  <span class="pdos-about-label">[Skills]</span>
+                  <div><span>Data Analysis</span><span>Excel</span><span>Power BI</span><span>AI</span></div>
+                </div>
+                <div class="pdos-about-links">
+                  <span class="pdos-about-label">[Links]</span>
+                  <a href="https://www.linkedin.com/in/milind-parwani-55a5b0266/" target="_blank" rel="noopener noreferrer"><span>LinkedIn</span><span aria-hidden="true">&#8599;</span></a>
+                  <a href="/dissertation.pdf" target="_blank" rel="noopener noreferrer"><span>Dissertation</span><span aria-hidden="true">&#8599;</span></a>
+                  <a href="https://open.spotify.com/user/9zbpfc2ssjpy9tjiqo7xm3at0" target="_blank" rel="noopener noreferrer"><span>Spotify</span><span aria-hidden="true">&#8599;</span></a>
+                </div>
+                <button class="pdos-about-next" type="button" data-goto="next"><span>Scroll &#9654; Timeline</span><span aria-hidden="true">&#9654;</span></button>
+                <p class="pdos-about-swipe">Swipe &#9664; &#9654; Timeline &middot; Swipe &#9650; &#9660; Sections</p>
+              </div>
+            </div>
+            <div class="pdos-about-timeline">
+              <div class="pdos-about-deck" id="pdosAboutDeck">
+                <button class="pdos-about-card" type="button" data-stop="1" data-tc="2015.09" data-t0="2015.67" data-t1="2022.42" data-row="0" data-lane="Education">
+                  <span class="pdos-about-spine" aria-hidden="true"><span>MP-01 &middot; Education &middot; 2015</span></span>
+                  <span class="pdos-about-card-body">
+                    <span class="pdos-about-card-head"><span>Tape 01 / 07</span><span>[Education]</span></span>
+                    <span class="pdos-about-well" aria-hidden="true"><span class="pdos-icon" data-icon="dess" data-icon-p="4" data-icon-manual></span></span>
+                    <span class="pdos-about-dates"><span>Sep 2015 &ndash; Jun 2022</span></span>
+                    <span class="pdos-about-card-title">DESS College</span>
+                    <span class="pdos-about-role">A Levels: A*, A, A</span>
+                    <span class="pdos-about-place">Dubai, UAE</span>
+                    <span class="pdos-about-hl"><span>A*, A, A at A Level</span><span>Economics &middot; History &middot; Mathematics</span></span>
+                    <span class="pdos-about-card-foot"><span>dess_college.tape</span><span class="pdos-about-open-hint">Enter &#9656; Open</span><span class="pdos-about-tap-hint">Tap to open</span></span>
+                  </span>
+                </button>
+                <button class="pdos-about-card" type="button" data-stop="2" data-tc="2022.09" data-t0="2022.67" data-t1="2025.5" data-row="1" data-lane="Education">
+                  <span class="pdos-about-spine" aria-hidden="true"><span>MP-02 &middot; Education &middot; 2022</span></span>
+                  <span class="pdos-about-card-body">
+                    <span class="pdos-about-card-head"><span>Tape 02 / 07</span><span>[Education]</span></span>
+                    <span class="pdos-about-well" aria-hidden="true"><span class="pdos-icon" data-icon="uon" data-icon-p="4" data-icon-manual></span></span>
+                    <span class="pdos-about-dates"><span>Sep 2022</span></span>
+                    <span class="pdos-about-card-title">University of Nottingham</span>
+                    <span class="pdos-about-role">BSc Economics</span>
+                    <span class="pdos-about-place">Nottingham, UK</span>
+                    <span class="pdos-about-hl"><span>Started university</span></span>
+                    <span class="pdos-about-card-foot"><span>nottingham_start.tape</span><span class="pdos-about-open-hint">Enter &#9656; Open</span><span class="pdos-about-tap-hint">Tap to open</span></span>
+                  </span>
+                </button>
+                <button class="pdos-about-card" type="button" data-stop="3" data-tc="2023.07" data-t0="2023.5" data-t1="2023.67" data-row="0" data-lane="Education">
+                  <span class="pdos-about-spine" aria-hidden="true"><span>MP-03 &middot; Education &middot; 2023</span></span>
+                  <span class="pdos-about-card-body">
+                    <span class="pdos-about-card-head"><span>Tape 03 / 07</span><span>[Education]</span></span>
+                    <span class="pdos-about-well" aria-hidden="true"><span class="pdos-icon" data-icon="torii" data-icon-p="5" data-icon-manual></span></span>
+                    <span class="pdos-about-dates"><span>Summer 2023</span></span>
+                    <span class="pdos-about-card-title">Intensive Japanese Language and Culture Course (IJLC)</span>
+                    <span class="pdos-about-role">Japanese language and culture</span>
+                    <span class="pdos-about-place">Osaka, Japan</span>
+                    <span class="pdos-about-hl"><span>A cultural and academic stretch</span></span>
+                    <span class="pdos-about-card-foot"><span>ijlc_osaka.tape</span><span class="pdos-about-open-hint">Enter &#9656; Open</span><span class="pdos-about-tap-hint">Tap to open</span></span>
+                  </span>
+                </button>
+                <button class="pdos-about-card" type="button" data-stop="4" data-tc="2024.09" data-t0="2024.67" data-t1="2024.83" data-row="0" data-lane="Career">
+                  <span class="pdos-about-spine" aria-hidden="true"><span>MP-04 &middot; Career &middot; 2024</span></span>
+                  <span class="pdos-about-card-body">
+                    <span class="pdos-about-card-head"><span>Tape 04 / 07</span><span>[Career]</span></span>
+                    <span class="pdos-about-well" aria-hidden="true"><span class="pdos-icon" data-icon="till" data-icon-p="4" data-icon-manual></span></span>
+                    <span class="pdos-about-dates"><span>Sep &ndash; Oct 2024</span></span>
+                    <span class="pdos-about-card-title">Jones the Grocer</span>
+                    <span class="pdos-about-role">Finance Intern</span>
+                    <span class="pdos-about-place">Dubai, UAE</span>
+                    <span class="pdos-about-hl"><span>Spot checks across 3+ franchise locations</span><span>Reconciled 100+ daily delivery-platform transactions</span><span>Matched supplier invoices to stock across 1,000+ SKUs</span></span>
+                    <span class="pdos-about-card-foot"><span>jones_the_grocer.tape</span><span class="pdos-about-open-hint">Enter &#9656; Open</span><span class="pdos-about-tap-hint">Tap to open</span></span>
+                  </span>
+                </button>
+                <button class="pdos-about-card" type="button" data-stop="5" data-tc="2025.07" data-t0="2025.5" data-t1="2025.58" data-row="0" data-lane="Education" data-link="/dissertation.pdf" data-link-label="Read dissertation &#8599;">
+                  <span class="pdos-about-spine" aria-hidden="true"><span>MP-05 &middot; Education &middot; 2025</span></span>
+                  <span class="pdos-about-card-body">
+                    <span class="pdos-about-card-head"><span>Tape 05 / 07</span><span>[Education]</span></span>
+                    <span class="pdos-about-well" aria-hidden="true"><span class="pdos-icon" data-icon="uon" data-icon-p="4" data-icon-manual></span></span>
+                    <span class="pdos-about-dates"><span>Jul 2025</span></span>
+                    <span class="pdos-about-card-title">University of Nottingham</span>
+                    <span class="pdos-about-role">BSc Economics</span>
+                    <span class="pdos-about-place">Nottingham, UK</span>
+                    <span class="pdos-about-hl"><span>Graduated</span><span>Dissertation: Conflict &amp; Risk Preferences</span></span>
+                    <span class="pdos-about-card-foot"><span>nottingham_grad.tape</span><span class="pdos-about-open-hint">Enter &#9656; Open</span><span class="pdos-about-tap-hint">Tap to open</span></span>
+                  </span>
+                </button>
+                <button class="pdos-about-card" type="button" data-stop="6" data-tc="2025.09" data-t0="2025.67" data-t1="2026.58" data-row="0" data-lane="Career">
+                  <span class="pdos-about-spine" aria-hidden="true"><span>MP-06 &middot; Career &middot; 2025</span></span>
+                  <span class="pdos-about-card-body">
+                    <span class="pdos-about-card-head"><span>Tape 06 / 07</span><span>[Career]</span></span>
+                    <span class="pdos-about-well" aria-hidden="true"><span class="pdos-icon" data-icon="perfume" data-icon-p="6" data-icon-manual></span></span>
+                    <span class="pdos-about-dates"><span>Sep 2025 &ndash; Aug 2026</span></span>
+                    <span class="pdos-about-card-title">Signature Esscents Perfumes</span>
+                    <span class="pdos-about-role">Business Analyst</span>
+                    <span class="pdos-about-place">Dubai, UAE</span>
+                    <span class="pdos-about-hl"><span>Power BI KPI dashboards: +35% dashboard usage in 2 months</span><span>Consolidated inventory into one dataset covering 1,000+ SKUs</span><span>Automated recurring reporting</span></span>
+                    <span class="pdos-about-card-foot"><span>signature_esscents.tape</span><span class="pdos-about-open-hint">Enter &#9656; Open</span><span class="pdos-about-tap-hint">Tap to open</span></span>
+                  </span>
+                </button>
+                <button class="pdos-about-card is-now" type="button" data-stop="7" data-tc="2026.08" data-t0="2026.58" data-t1="2027" data-row="0" data-lane="Career">
+                  <span class="pdos-about-spine" aria-hidden="true"><span>MP-07 &middot; Career &middot; 2026</span></span>
+                  <span class="pdos-about-card-body">
+                    <span class="pdos-about-card-head"><span>Tape 07 / 07</span><span>[Career]</span></span>
+                    <span class="pdos-about-well" aria-hidden="true"><span class="pdos-icon" data-icon="allianz" data-icon-p="4" data-icon-manual></span></span>
+                    <span class="pdos-about-dates"><span>Aug 2026 &ndash; Present</span><span class="pdos-about-now-chip"><span aria-hidden="true">&#9679;</span> Now</span></span>
+                    <span class="pdos-about-card-title">Allianz Trade</span>
+                    <span class="pdos-about-role">Credit Underwriting Trainee</span>
+                    <span class="pdos-about-place">Dubai, UAE &middot; Middle East</span>
+                    <span class="pdos-about-hl"><span>Credit underwriting for Trade Credit Insurance</span></span>
+                    <span class="pdos-about-card-foot"><span>allianz_trade.tape</span><span class="pdos-about-open-hint">Enter &#9656; Open</span><span class="pdos-about-tap-hint">Tap to open</span></span>
+                  </span>
+                </button>
+              </div>
+              <div class="pdos-about-ruler" aria-hidden="true">
+                <div class="pdos-about-lanes"><span>Education</span><span>Career</span></div>
+                <div class="pdos-about-years" id="pdosAboutYears"><div class="pdos-about-base"></div><div class="pdos-about-progress" id="pdosAboutProgress"></div><div class="pdos-about-playhead" id="pdosAboutPlayhead"><span></span></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="pdos-about-foot">
+          <div class="pdos-about-meta"><span>Source: LinkedIn</span><span>Lane: <span id="pdosAboutLane">Profile</span></span></div>
+          <div class="pdos-about-rail" id="pdosAboutRail" role="group" aria-label="Timeline stops"></div>
+          <div class="pdos-about-transport">
+            <button type="button" id="pdosAboutPrev" aria-label="Previous stop">&#9664;&#9664;</button>
+            <button type="button" id="pdosAboutPlay" aria-label="Play the timeline">&#9654;</button>
+            <button type="button" id="pdosAboutNext" aria-label="Next stop">&#9654;&#9654;</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- A stop's detail window. Moved to the end of the page root by initWindows, like the project windows. -->
+      <div class="pdos-overlay" id="pdosAboutOverlay" hidden>
+        <div class="pdos-overlay-scrim" data-close-window></div>
+        <div class="pdos-dialog pdos-dialog--about" role="dialog" aria-modal="true" aria-labelledby="pdosAboutDTitle" tabindex="-1">
+          <div class="pdos-window-bar"><span id="pdosAboutDFile">file.tape</span><button class="pdos-close" type="button" id="pdosAboutDClose" data-close-window aria-label="Close window">&#10005;</button></div>
+          <div class="pdos-about-detail">
+            <div class="pdos-about-dwell" aria-hidden="true"><span class="pdos-icon" id="pdosAboutDIcon" data-icon="dess" data-icon-p="7" data-icon-manual></span></div>
+            <div class="pdos-about-dtext">
+              <div class="pdos-about-dmeta"><span id="pdosAboutDTape"></span><span id="pdosAboutDLane"></span></div>
+              <h3 class="pdos-about-dtitle" id="pdosAboutDTitle"></h3>
+              <p class="pdos-about-drole" id="pdosAboutDRole"></p>
+              <p class="pdos-about-dwhen" id="pdosAboutDWhen"></p>
+              <ul class="pdos-about-dhl" id="pdosAboutDHl"></ul>
+              <a class="pdos-about-dlink" id="pdosAboutDLink" href="/dissertation.pdf" target="_blank" rel="noopener noreferrer" hidden></a>
+              <div class="pdos-about-dfoot"><button type="button" id="pdosAboutDNav">&#9664; &#9654; Browse stops</button><span>Esc to close</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div></div></div><div class="pdos-crt-line" aria-hidden="true"></div></section>
 
     <section class="v2-section" id="v2-journal" data-sec="journal"><div class="pdos-crt-clip"><div class="pdos-crt-slide">
@@ -1166,7 +1369,7 @@
            When an entry is written, put its text in the entry's .pdos-journal-article, replacing the
            "in progress" note — never placeholder text. Every photo keeps its v2-journal-credit link. -->
       <div class="pdos-window pdos-window--journal">
-        <div class="pdos-window-bar"><span>journal.log &mdash; ref. 01 &middot; 03 entries</span><span class="pdos-window-nav"><a href="#v2-home">&#8593; Home</a><a href="#v2-projects">Projects &#8595;</a></span></div>
+        <div class="pdos-window-bar"><span>journal.log &mdash; ref. 01 &middot; 03 entries</span><span class="pdos-window-nav"><a href="#v2-about">&#8593; About</a><a href="#v2-projects">Projects &#8595;</a></span></div>
         <div class="pdos-journal">
           <div class="pdos-journal-main">
             <div class="pdos-journal-head">
@@ -1247,7 +1450,7 @@
         <div class="pdos-projects">
           <button class="pdos-project pdos-project--music" type="button" data-open-project="music" data-icon-host>
             <span class="pdos-project-head"><span>01</span><span>[ Music ]</span></span>
-            <span class="pdos-project-icon" aria-hidden="true"><span class="pdos-icon pdos-icon--fit" data-icon="decks"></span></span>
+            <span class="pdos-project-icon" aria-hidden="true"><span class="pdos-icon pdos-icon--fit" data-icon="speakers"></span></span>
             <span class="pdos-project-title">Sounds Like</span>
             <span class="pdos-project-desc">A similarity engine for music discovery. Turn text into personalised playlists.</span>
             <span class="pdos-project-foot"><span>Phase 02 / Similarity engine</span><span>Explore &#9656;</span></span>
@@ -5280,8 +5483,8 @@
 
 </script>
 
-<script src="/ui-v2.js?v=72"></script>
-<script src="/pdos-icons.js?v=7" defer></script>
+<script src="/ui-v2.js?v=75"></script>
+<script src="/pdos-icons.js?v=9" defer></script>
 
 </body>
 </html>

@@ -63,7 +63,7 @@ Full spec and interactive reference: `design_handoff_parwani_dos/` (`README.md`,
 | ID | Item | Status |
 |---|---|---|
 | R-DOS-1 | Theme tokens (Mono / Paper / Night) + top bar + theme switcher (persisted) | Live 2026-10-07 — Crimson (`#780606`) added 2026-10-11, removed 2026-10-12 at Milind's request (a saved Crimson choice falls back to Night) |
-| R-DOS-2 | Scroll-snap shell, CRT transition, 1–7 / Esc keys, reduced-motion fallback | Live 2026-10-07 |
+| R-DOS-2 | Scroll-snap shell, CRT transition, 1–7 / Esc keys, reduced-motion fallback | Live 2026-10-07 — keys became 1–8 with About on 2026-10-22 (ABT-01) |
 | R-DOS-3 | Home tiles, extras, headline auto-fit | Live 2026-10-07 — tile/extras icons are reserved empty space pending R-DOS-9 (Phase 8). Fixed 2026-10-07 with Phase 3: steps/heart numbers overflowed their windows, the weather window had collapsed to 0 px, and the headline now fits per spec (72→14 px against the whole panel, summary 0.36×, summary dropped only if even 14 px overflows) |
 | R-DOS-4 | Journal list/detail with scroll-to-top on switch | Live 2026-10-07 — article bodies show the summary plus an "in progress" note until the posts are written (no placeholder text) |
 | R-DOS-5 | Projects grid + overlay windows + scroll lock | Live 2026-10-07 — six cards + Champion Run cartridge; each opens a window over the page (Esc / ✕ / scrim close, focus kept inside, page locked). Since 2026-10-12 every project opens only as an overlay (no full-screen / new-tab link) and Sounds Like shows the planned placeholder; Crack has its own overlay in the original site theme since 2026-10-11 (shared `crack-game.js`); the other four say they are planned |
@@ -87,6 +87,19 @@ Full spec and interactive reference: `design_handoff_parwani_dos/` (`README.md`,
 | R-DOS-8 | Media / Playlists / Gigs restyle | Live 2026-10-07 — windows with pink / green / yellow bars, same carousels. Filter chips added 2026-10-07: Media All / Films / Games (`kind`), Gigs Both / Dubai / Abu Dhabi (from the venue line). The playlists now-playing strip was dropped at Milind's request |
 | R-DOS-9 | Pixel icon sprites (Poké Ball, safe, terminal, bulb, skyline, globe, EQ, book, whiteboard, toolbox, projector, Spotify mark, guitar fire) | Live 2026-10-07 — `public/pdos-icons.js`, ported from the mockup; animate on hover and keyboard focus; still with reduced motion |
 | R-DOS-10 | Accessibility and Lighthouse pass for all three themes | Live 2026-10-07 — WCAG AA text contrast checked per theme (Paper got darker status/dim text tokens), dialogs and tabs have ARIA, focus trap in windows. Production Lighthouse (mobile): performance 90–91, accessibility 100, best practices 100 |
+| ABT-01 | About section placed second; keys 1–8; counter `/ 08`; `cd about`; Home tile badges 2–8 | Built 2026-10-22 (Claude) |
+| ABT-02 | Home about.txt `open ▸` jumps to About; Journal bar `↑ About` | Built 2026-10-22 |
+| ABT-03 | Summary: name, headline, typed statement, [Now], Experience/Education (rows jump to stops), skills, LinkedIn · Dissertation · Spotify, `Scroll ▶ Timeline` | Built 2026-10-22 — no photo, no email (Revision 2); LinkedIn is the real profile URL |
+| ABT-04 | Scroll capture: one stop per wheel gesture, 650 ms lock, 800 ms entry lock, release at both ends; desktop paging layout only | Built 2026-10-22 — swallow/release logic tested with synthetic wheel events; real-trackpad release still to confirm by hand |
+| ABT-05 | Curved 3D tape carousel + two-lane year ruler with progress line and playhead | Built 2026-10-22 |
+| ABT-06 | Rolling timecode `TC YYYY.MM` | Built 2026-10-22 |
+| ABT-07 | Rail (8 dots) + transport ◀◀ ▶ ▶▶ (▶ autoplays every 2.6 s) | Built 2026-10-22 |
+| ABT-08 | Detail window per stop (click centred tape / Enter), page lock, Esc / ✕ / scrim, ←/→ browse stops 1–7, focus to ✕ and back | Built 2026-10-22 |
+| ABT-09 | Pixel icons that play only while centred: DESS crest, Nottingham and Allianz Trade logo plates, till, torii, perfume | Built 2026-10-22 — brand-guideline check for the three logos still open |
+| ABT-10 | Phones / short windows: native horizontal snap row, flat cards, no wheel capture | Built 2026-10-22 — checked at 390×844 and 360×740 |
+| ABT-11 | Reduced motion: centred card only (cross-fade), no slide, typing, rolling, rotation or icon animation | Built 2026-10-22 |
+| ABT-12 | Mono / Paper / Night; AA on the teal fills (`--on` text) | Built 2026-10-22 — local Lighthouse accessibility 100 |
+| ABT-13 | Home About tile: "tall" option (spans both rows of a 4-column grid), DDJ-FLX4 decks icon (moved from Sounds Like) | Built 2026-10-22 — Milind chose the decks icon; the layout is the handoff's recommended default |
 
 ## Projects
 
@@ -94,7 +107,7 @@ Each project needs before `Live`: working happy path, error/empty states, mobile
 
 | ID | Project | What it must do | Dependencies | Priority | Status |
 |---|---|---|---|---|---|
-| PR-01 | Sounds Like | Enter a track, get its audio profile (energy, valence, danceability, tempo, key) and similar-feeling tracks. Since 2026-10-12 one project with Prompt Playlist (PR-03): card titled "Sounds Like", DDJ-FLX4 decks icon | `/api/audio-features` (live); similarity source to choose | 1 | Built (partial) |
+| PR-01 | Sounds Like | Enter a track, get its audio profile (energy, valence, danceability, tempo, key) and similar-feeling tracks. Since 2026-10-12 one project with Prompt Playlist (PR-03): card titled "Sounds Like", DDJ-FLX4 decks icon (since 2026-10-22: pixel speakers with bass waves on hover; the decks moved to the Home About tile) | `/api/audio-features` (live); similarity source to choose | 1 | Built (partial) |
 | PR-02 | Where Next | Suggest a place to go, with the Liveliness Index scoring how busy/lively it is now | Places API (Google Places or Foursquare) + new Worker route | 2 | Planned |
 | PR-03 | Prompt Playlist | Text prompt → playlist. Part of Sounds Like (PR-01) since 2026-10-12, not a separate project; works the same way inside it | Spotify search; LLM or rules for mapping | 3 | Planned |
 | PR-04 | YouShant | Chrome extension (MV3, [repo](https://github.com/milindparwani04/youshant)): YouTube opens only for a video clicked from Google Search. Project card 02 links to its [Chrome Web Store page](https://chromewebstore.google.com/detail/youshant/gldhpaeejnamjbhahbmgjannkckehfmh) | None on this site | 4 | Live 2026-10-12 (replaced Today Somewhere, dropped: Where Next and the Gig Finder already cover it) |
