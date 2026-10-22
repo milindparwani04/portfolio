@@ -976,7 +976,7 @@
     .tools{ grid-template-columns:1fr; }
   }
 </style>
-<link rel="stylesheet" href="/ui-v2.css?v=56">
+<link rel="stylesheet" href="/ui-v2.css?v=57">
 </head>
 <body class="locked">
 
@@ -1169,11 +1169,6 @@
            education lane). To add a stop, add a card in date order and bump the 07 / 08 counts. -->
       <div class="pdos-window pdos-window--about">
         <div class="pdos-window-bar"><span>about.sys &mdash; ref. 02 / career.tape</span><span class="pdos-window-nav"><a href="#v2-home">&#8593; Home</a><a href="#v2-journal">Journal &#8595;</a></span></div>
-        <div class="pdos-about-head">
-          <span class="pdos-about-crumb" id="pdosAboutCrumb">[About] Milind Parwani / Profile</span>
-          <span class="pdos-about-tc"><span class="pdos-about-rec" aria-hidden="true"></span>TC <span id="pdosAboutTc">2026.10</span></span>
-          <span class="pdos-about-stop">Stop <span id="pdosAboutStopN">01</span> / 08 <span class="pdos-about-dim">&middot; <span id="pdosAboutStopLabel">Summary</span></span></span>
-        </div>
         <div class="pdos-about-view" id="pdosAboutBody">
           <div class="pdos-about-track" id="pdosAboutTrack">
             <div class="pdos-about-summary">
@@ -1184,20 +1179,6 @@
                   <p class="pdos-about-headline">Credit Underwriting Trainee @ Allianz Trade &middot; BSc Economics, University of Nottingham</p>
                 </div>
                 <p class="pdos-about-statement"><span class="pdos-sr">An Economics graduate who blends analytical thinking with creativity, with hands-on experience across finance and business analysis.</span><span aria-hidden="true"><span id="pdosAboutTyped">An Economics graduate who blends analytical thinking with creativity, with hands-on experience across finance and business analysis.</span><span class="pdos-about-caret"></span><span class="pdos-about-rest" id="pdosAboutRest"></span></span></p>
-                <div class="pdos-about-cols">
-                  <div class="pdos-about-list">
-                    <span class="pdos-about-label">[Experience]</span>
-                    <button type="button" data-goto="7"><span>Allianz Trade</span><span>2026&ndash;</span></button>
-                    <button type="button" data-goto="6"><span>Signature Esscents Perfumes</span><span>2025&ndash;26</span></button>
-                    <button type="button" data-goto="4"><span>Jones the Grocer</span><span>2024</span></button>
-                  </div>
-                  <div class="pdos-about-list">
-                    <span class="pdos-about-label">[Education]</span>
-                    <button type="button" data-goto="2"><span>University of Nottingham</span><span>2022&ndash;25</span></button>
-                    <button type="button" data-goto="1"><span>DESS College</span><span>2015&ndash;22</span></button>
-                    <button type="button" data-goto="3"><span>IJLC, Osaka</span><span>2023</span></button>
-                  </div>
-                </div>
               </div>
               <div class="pdos-about-side">
                 <div class="pdos-widget pdos-about-now">
@@ -1220,8 +1201,8 @@
                   <a href="/dissertation.pdf" target="_blank" rel="noopener noreferrer"><span>Dissertation</span><span aria-hidden="true">&#8599;</span></a>
                   <a href="https://open.spotify.com/user/9zbpfc2ssjpy9tjiqo7xm3at0" target="_blank" rel="noopener noreferrer"><span>Spotify</span><span aria-hidden="true">&#8599;</span></a>
                 </div>
-                <button class="pdos-about-next" type="button" data-goto="next"><span>Scroll &#9654; Timeline</span><span aria-hidden="true">&#9654;</span></button>
-                <p class="pdos-about-swipe">Swipe &#9664; &#9654; Timeline &middot; Swipe &#9650; &#9660; Sections</p>
+                <button class="pdos-about-next" type="button" data-goto="next"><span>Scroll &#9654;&#xFE0E; Timeline</span><span aria-hidden="true">&#9654;&#xFE0E;</span></button>
+                <p class="pdos-about-swipe">Swipe &#9664;&#xFE0E; &#9654;&#xFE0E; Timeline &middot; Swipe &#9650; &#9660; Sections</p>
               </div>
             </div>
             <div class="pdos-about-timeline">
@@ -1329,9 +1310,9 @@
           <div class="pdos-about-meta"><span>Source: LinkedIn</span><span>Lane: <span id="pdosAboutLane">Profile</span></span></div>
           <div class="pdos-about-rail" id="pdosAboutRail" role="group" aria-label="Timeline stops"></div>
           <div class="pdos-about-transport">
-            <button type="button" id="pdosAboutPrev" aria-label="Previous stop">&#9664;&#9664;</button>
-            <button type="button" id="pdosAboutPlay" aria-label="Play the timeline">&#9654;</button>
-            <button type="button" id="pdosAboutNext" aria-label="Next stop">&#9654;&#9654;</button>
+            <button type="button" id="pdosAboutPrev" aria-label="Previous stop"><svg viewBox="0 0 16 10" width="16" height="10" aria-hidden="true" focusable="false"><path d="M8 0 0 5 8 10ZM16 0 8 5 16 10Z"/></svg></button>
+            <button type="button" id="pdosAboutPlay" aria-label="Play the timeline"><svg viewBox="0 0 16 10" width="16" height="10" aria-hidden="true" focusable="false"><path d="M4 0 13 5 4 10Z"/></svg></button>
+            <button type="button" id="pdosAboutNext" aria-label="Next stop"><svg viewBox="0 0 16 10" width="16" height="10" aria-hidden="true" focusable="false"><path d="M0 0 8 5 0 10ZM8 0 16 5 8 10Z"/></svg></button>
           </div>
         </div>
       </div>
@@ -1350,7 +1331,7 @@
               <p class="pdos-about-dwhen" id="pdosAboutDWhen"></p>
               <ul class="pdos-about-dhl" id="pdosAboutDHl"></ul>
               <a class="pdos-about-dlink" id="pdosAboutDLink" href="/dissertation.pdf" target="_blank" rel="noopener noreferrer" hidden></a>
-              <div class="pdos-about-dfoot"><button type="button" id="pdosAboutDNav"><span class="pdos-key-only">&#9664; &#9654; Browse stops</span><span class="pdos-touch-only">Next stop &#9656;</span></button><span class="pdos-key-only">Esc to close</span></div>
+              <div class="pdos-about-dfoot"><button type="button" id="pdosAboutDNav"><span class="pdos-key-only">&#9664;&#xFE0E; &#9654;&#xFE0E; Browse stops</span><span class="pdos-touch-only">Next stop &#9656;</span></button><span class="pdos-key-only">Esc to close</span></div>
             </div>
           </div>
         </div>
@@ -1470,21 +1451,21 @@
             <span class="pdos-project-foot"><span>Planned</span><span>In development</span></span>
           </button>
           <button class="pdos-project pdos-project--speed" type="button" data-open-project="speed" data-icon-host>
-            <span class="pdos-project-head"><span>04</span><span class="pdos-chip">&#9654; Game</span></span>
+            <span class="pdos-project-head"><span>04</span><span class="pdos-chip">&#9654;&#xFE0E; Game</span></span>
             <span class="pdos-project-icon" aria-hidden="true"><span class="pdos-icon pdos-icon--fit" data-icon="bulb"></span></span>
             <span class="pdos-project-title">Speed Round</span>
             <span class="pdos-project-desc">A fast-paced trivia game for curious minds.</span>
             <span class="pdos-project-foot"><span>Planned</span><span>In development</span></span>
           </button>
           <button class="pdos-project pdos-project--terminal" type="button" data-open-project="terminal" data-icon-host>
-            <span class="pdos-project-head"><span>05</span><span class="pdos-chip">&#9654; Game</span></span>
+            <span class="pdos-project-head"><span>05</span><span class="pdos-chip">&#9654;&#xFE0E; Game</span></span>
             <span class="pdos-project-icon" aria-hidden="true"><span class="pdos-icon pdos-icon--fit" data-icon="terminal"></span></span>
             <span class="pdos-project-title">Untitled Terminal Adventure</span>
             <span class="pdos-project-desc">A text-based experiment in choice and consequence.</span>
             <span class="pdos-project-foot"><span>Planned</span><span>In development</span></span>
           </button>
           <button class="pdos-project pdos-project--crack" type="button" data-open-project="crack" data-icon-host>
-            <span class="pdos-project-head"><span>06</span><span class="pdos-chip">&#9654; Game</span></span>
+            <span class="pdos-project-head"><span>06</span><span class="pdos-chip">&#9654;&#xFE0E; Game</span></span>
             <span class="pdos-project-icon" aria-hidden="true"><span class="pdos-icon pdos-icon--fit" data-icon="safe"></span></span>
             <span class="pdos-project-title">Crack</span>
             <span class="pdos-project-desc">Visual experiments with fracture, distortion and decay.</span>
@@ -1493,7 +1474,7 @@
           <button class="pdos-project pdos-champ-card" type="button" data-open-project="champion" data-icon-host>
             <span class="pdos-champ-lockup"><span class="pdos-icon pdos-champ-ball" data-icon="ball" data-icon-max="6"></span><span class="pdos-champ-word">The Very<br>Best</span></span>
             <span class="pdos-champ-copy">
-              <span class="pdos-champ-meta"><span>07 &middot; cartridge</span><span class="pdos-chip">&#9654; Game</span></span>
+              <span class="pdos-champ-meta"><span>07 &middot; cartridge</span><span class="pdos-chip">&#9654;&#xFE0E; Game</span></span>
               <span class="pdos-champ-desc">Build a party from all 1,025 Pok&eacute;mon, then take on the reigning champion in a doubles battle. Stack modifiers for bigger rewards.</span>
               <span class="pdos-champ-chips"><span>Random team &times;1.35</span><span>Random moves &times;1.5</span><span>No potions &times;1.25</span><span>Level cap 45 &times;1.75</span><span>No switching &times;1.2</span></span>
             </span>
@@ -5488,7 +5469,7 @@
 
 </script>
 
-<script src="/ui-v2.js?v=76"></script>
+<script src="/ui-v2.js?v=77"></script>
 <script src="/pdos-icons.js?v=9" defer></script>
 
 </body>

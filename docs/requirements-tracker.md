@@ -89,10 +89,10 @@ Full spec and interactive reference: `design_handoff_parwani_dos/` (`README.md`,
 | R-DOS-10 | Accessibility and Lighthouse pass for all three themes | Live 2026-10-07 — WCAG AA text contrast checked per theme (Paper got darker status/dim text tokens), dialogs and tabs have ARIA, focus trap in windows. Production Lighthouse (mobile): performance 90–91, accessibility 100, best practices 100 |
 | ABT-01 | About section placed second; keys 1–8; counter `/ 08`; `cd about`; Home tile badges 2–8 | Live 2026-10-22 (`95caa24`, verified on milindparwani.com) |
 | ABT-02 | Home about.txt `open ▸` jumps to About; Journal bar `↑ About` | Live 2026-10-22 (`95caa24`, verified on milindparwani.com) |
-| ABT-03 | Summary: name, headline, typed statement, [Now], Experience/Education (rows jump to stops), skills, LinkedIn · Dissertation · Spotify, `Scroll ▶ Timeline` | Live 2026-10-22 (`95caa24`, verified on milindparwani.com) — no photo, no email (Revision 2); LinkedIn is the real profile URL |
+| ABT-03 | Summary: name, headline, typed statement, [Now], ~~Experience/Education (rows jump to stops)~~ (removed 2026-10-22 at Milind's request), skills, LinkedIn · Dissertation · Spotify, `Scroll ▶ Timeline` | Live 2026-10-22 (`95caa24`, verified on milindparwani.com) — no photo, no email (Revision 2); LinkedIn is the real profile URL |
 | ABT-04 | Scroll capture: one stop per wheel gesture, 650 ms lock, 800 ms entry lock, release at both ends; desktop paging layout only | Live 2026-10-22 (`95caa24`, verified on milindparwani.com) — swallow/release logic tested with synthetic wheel events; real-trackpad release still to confirm by hand |
 | ABT-05 | Curved 3D tape carousel + two-lane year ruler with progress line and playhead | Live 2026-10-22 (`95caa24`, verified on milindparwani.com) |
-| ABT-06 | Rolling timecode `TC YYYY.MM` | Live 2026-10-22 (`95caa24`, verified on milindparwani.com) |
+| ABT-06 | Rolling timecode `TC YYYY.MM` | Dropped 2026-10-22: Milind removed the header strip it lived in (the detail window still shows each tape's TC) |
 | ABT-07 | Rail (8 dots) + transport ◀◀ ▶ ▶▶ (▶ autoplays every 2.6 s) | Live 2026-10-22 (`95caa24`, verified on milindparwani.com) |
 | ABT-08 | Detail window per stop (click centred tape / Enter), page lock, Esc / ✕ / scrim, ←/→ browse stops 1–7, focus to ✕ and back | Live 2026-10-22 (`95caa24`, verified on milindparwani.com) |
 | ABT-09 | Pixel icons that play only while centred: DESS crest, Nottingham and Allianz Trade logo plates, till, torii, perfume | Live 2026-10-22 (`95caa24`, verified on milindparwani.com) — brand-guideline check for the three logos still open |
@@ -104,6 +104,7 @@ Full spec and interactive reference: `design_handoff_parwani_dos/` (`README.md`,
 | MOB-02 | Phone tap targets ≥24px (most ~40px): window ✕, About rail/transport/rows, filters, Tracks/Artists, small links | Built 2026-10-22 — local mobile Lighthouse target-size passes, accessibility 100 |
 | MOB-03 | Touch wording instead of keyboard hints on phones (Home status line, About detail "Next stop ▸") | Built 2026-10-22 |
 | MOB-04 | pdf-lib not loaded on page load; qrcode.js deferred | Built 2026-10-22 — QR tool checked; local mobile Lighthouse performance 94 |
+| MOB-05 | Transport and ▶/◀ glyphs render as text, not emoji, on iPhone | Built 2026-10-22 — SVG transport icons; U+FE0E elsewhere |
 
 ## Projects
 

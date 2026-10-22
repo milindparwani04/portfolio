@@ -320,7 +320,7 @@
     byId(ids.next)?.addEventListener('click', () => { batch += 1; render(); });
     byId(ids.pause)?.addEventListener('click', (event) => {
       paused = !paused;
-      event.currentTarget.textContent = paused ? '▶' : '‖';
+      event.currentTarget.textContent = paused ? '▶︎' : '‖';
       event.currentTarget.setAttribute('aria-label', paused ? `Resume ${noun} rotation` : `Pause ${noun} rotation`);
     });
     // "Hover or focus pauses": the countdown holds while the pointer or keyboard focus is on a card.
@@ -926,14 +926,16 @@
     const locked = () => document.documentElement.classList.contains('pdos-locked');
     const icons = () => window.pdosIcons;
     const pad2 = (n) => String(n).padStart(2, '0');
-    const today = new Date();
-    const NOW_TC = `${today.getFullYear()}.${pad2(today.getMonth() + 1)}`;
     const pos = (t) => `${((t - 2015) / 12 * 100).toFixed(2)}%`;
     const typedEl = byId('pdosAboutTyped');
     const restEl = byId('pdosAboutRest');
     const sinceEl = byId('pdosAboutSince');
-    const tcEl = byId('pdosAboutTc');
     const STATEMENT = typedEl.textContent;
+    // Transport icons are drawn, not ▶ / ‖ characters, which iPhones show as colour emoji.
+    const TRANSPORT = {
+      play: '<svg viewBox="0 0 16 10" width="16" height="10" aria-hidden="true" focusable="false"><path d="M4 0 13 5 4 10Z"/></svg>',
+      pause: '<svg viewBox="0 0 16 10" width="16" height="10" aria-hidden="true" focusable="false"><path d="M4 0h3v10H4zM9 0h3v10H9z"/></svg>',
+    };
     // Logo sprites keep their size; the drawn ones grow a little on phones and in the detail window.
     const SCALES = new Set(['dess', 'torii', 'till', 'perfume']);
     const stops = cards.map((card, i) => ({
@@ -991,7 +993,6 @@
     let gestureUsed = false;
     let lastWheel = 0;
     let lastDy = 0;
-    let tcShown = NOW_TC;
     const timers = { enter: 0, type: 0, since: 0, play: 0, tc: 0 };
     const stopTimers = (...keys) => keys.forEach((k) => { window.clearTimeout(timers[k]); window.clearInterval(timers[k]); timers[k] = 0; });
 
@@ -1018,9 +1019,6 @@
       const centre = Math.max(0, stop - 1);
       const still = rm();
       win.classList.toggle('is-timeline', stop > 0);
-      byId('pdosAboutCrumb').textContent = stop === 0 ? '[About] Milind Parwani / Profile' : `[About] Timeline / ${cur.lane}`;
-      byId('pdosAboutStopN').textContent = pad2(stop + 1);
-      byId('pdosAboutStopLabel').textContent = stop === 0 ? 'Summary' : cur.title;
       byId('pdosAboutLane').textContent = stop === 0 ? 'Profile' : cur.lane;
       dots.forEach((dot, i) => { if (i === stop) dot.setAttribute('aria-current', 'step'); else dot.removeAttribute('aria-current'); });
       bars.forEach((bar, i) => bar.classList.toggle('is-active', i + 1 === stop));
@@ -1044,19 +1042,6 @@
       });
     }
 
-    // The timecode rolls: each changed digit shows random digits, settling left to right.
-    function rollTc(target) {
-      stopTimers('tc');
-      if (rm()) { tcShown = target; tcEl.textContent = target; return; }
-      const from = tcShown;
-      let f = 0;
-      timers.tc = window.setInterval(() => {
-        f += 1;
-        if (f >= 10) { stopTimers('tc'); tcShown = target; tcEl.textContent = target; return; }
-        tcEl.textContent = target.split('').map((ch, j) => (/\d/.test(ch) && ch !== from[j] && f < 3 + j ? String(Math.floor(Math.random() * 10)) : ch)).join('');
-      }, 40);
-    }
-
     function scrollPhoneTo(i, smooth) {
       if (desk()) return;
       track.scrollTo({ left: i * track.clientWidth, behavior: smooth && !rm() ? 'smooth' : 'auto' });
@@ -1068,7 +1053,6 @@
       if (i === stop) return;
       lockUntil = performance.now() + 650;
       stop = i;
-      rollTc(i ? stops[i - 1].tc : NOW_TC);
       render();
       if (detail.isOpen()) fillDetail();
       if (!fromScroll) scrollPhoneTo(i, true);
@@ -1081,28 +1065,26 @@
 
     function stopPlay() {
       stopTimers('play');
-      byId('pdosAboutPlay').textContent = '▶';
+      byId('pdosAboutPlay').innerHTML = TRANSPORT.play;
       byId('pdosAboutPlay').setAttribute('aria-label', 'Play the timeline');
     }
 
     function togglePlay() {
       if (timers.play) { stopPlay(); return; }
       if (stop >= LAST) go(1);
-      byId('pdosAboutPlay').textContent = '‖';
+      byId('pdosAboutPlay').innerHTML = TRANSPORT.pause;
       byId('pdosAboutPlay').setAttribute('aria-label', 'Pause the timeline');
       timers.play = window.setInterval(() => { if (stop >= LAST) stopPlay(); else go(stop + 1); }, 2600);
     }
 
     // Entry: the statement types in, the [Now] rows step in and the start year counts up.
     function enter(at) {
-      stopTimers('enter', 'type', 'since', 'tc');
+      stopTimers('enter', 'type', 'since');
       stopPlay();
       active = true;
       lockUntil = performance.now() + 800;
       gestureUsed = true;
       stop = at;
-      tcShown = at ? stops[at - 1].tc : NOW_TC;
-      tcEl.textContent = tcShown;
       win.classList.remove('is-in');
       render();
       window.setTimeout(() => scrollPhoneTo(at, false), 60);

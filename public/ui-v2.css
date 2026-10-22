@@ -1089,12 +1089,6 @@ html.pdos-locked { overflow: hidden; }
 .pdos-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .pdos-window--about { --bar: var(--about); margin: 12px; }
 :where(.pdos-window--about) button { font: inherit; letter-spacing: inherit; text-transform: inherit; color: inherit; cursor: pointer; }
-.pdos-about-head { flex: 0 0 40px; display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 12px; padding: 0 14px; background: var(--p1); border-bottom: 1px solid var(--line); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; }
-.pdos-about-crumb { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--v2-dim); }
-.pdos-about-tc { display: flex; align-items: center; gap: 8px; font-size: 18px; letter-spacing: .08em; white-space: nowrap; font-variant-numeric: tabular-nums; }
-.pdos-about-rec { width: 9px; height: 9px; background: var(--rec); animation: pxblink 1.2s steps(1) infinite; }
-.pdos-about-stop { justify-self: end; white-space: nowrap; }
-.pdos-about-dim { color: var(--v2-dim); }
 .pdos-about-view { flex: 1 1 auto; min-height: 0; position: relative; overflow: hidden; background: var(--bg); }
 .pdos-about-track { position: absolute; top: 0; left: 0; bottom: 0; width: 200%; display: flex; transition: transform .7s cubic-bezier(.7, 0, .2, 1); }
 .pdos-window--about.is-timeline .pdos-about-track { transform: translateX(-50%); }
@@ -1102,19 +1096,13 @@ html.pdos-locked { overflow: hidden; }
 
 /* Panel 1: Summary. */
 .pdos-about-summary { width: 50%; height: 100%; box-sizing: border-box; padding: 16px 16px 16px 24px; display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 40px; }
-.pdos-about-main { min-width: 0; display: flex; flex-direction: column; justify-content: space-between; gap: 18px; }
+.pdos-about-main { min-width: 0; display: flex; flex-direction: column; gap: 18px; }
 .pdos-about-id { display: flex; flex-direction: column; gap: 8px; }
 .pdos-about-name { margin: 0; font-family: var(--display); font-weight: 700; font-size: 76px; line-height: .9; text-transform: uppercase; }
 .pdos-about-headline { margin: 0; font-size: 15px; line-height: 1.4; }
-.pdos-about-statement { margin: 0; max-width: 24em; font-family: var(--display); font-weight: 700; font-size: 46px; line-height: 1.1; text-wrap: pretty; }
+.pdos-about-statement { margin: auto 0; max-width: 24em; font-family: var(--display); font-weight: 700; font-size: 46px; line-height: 1.1; text-wrap: pretty; }
 .pdos-about-caret { display: inline-block; width: .5em; height: .9em; margin-left: 4px; vertical-align: -.08em; background: var(--fg); animation: pxblink 1s steps(1) infinite; }
 .pdos-about-rest { color: transparent; }
-.pdos-about-cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; padding-top: 14px; border-top: 1px solid var(--line); }
-.pdos-about-list { display: flex; flex-direction: column; gap: 6px; }
-.pdos-about-list .pdos-about-label { margin-bottom: 2px; }
-.pdos-about-list button { display: flex; justify-content: space-between; gap: 12px; margin: 0 -6px; padding: 4px 6px; border: 0; background: none; font-size: 15px; text-align: left; text-transform: none; letter-spacing: 0; }
-.pdos-about-list button > span:last-child { opacity: .7; white-space: nowrap; }
-.pdos-about-list button:hover, .pdos-about-list button:focus-visible { background: var(--about); color: var(--on); }
 .pdos-about-side { min-width: 0; display: flex; flex-direction: column; gap: 12px; }
 .pdos-about-now .pdos-widget-head { height: 26px; padding: 0 8px; font-size: 11px; }
 .pdos-about-live { display: flex; align-items: center; gap: 6px; color: var(--v2-green); }
@@ -1192,6 +1180,7 @@ html.pdos-locked { overflow: hidden; }
 .pdos-about-transport { justify-self: end; display: flex; background: var(--p2); font-size: 12px; }
 .pdos-about-transport button { width: 40px; height: 30px; display: flex; align-items: center; justify-content: center; padding: 0; border: 0; background: none; }
 .pdos-about-transport button:hover, .pdos-about-transport button:focus-visible { background: var(--fg); color: var(--bg); }
+.pdos-about-transport svg { display: block; fill: currentColor; }
 
 /* A stop's detail window (outside the scaled canvas, so these are real px). */
 .pdos-dialog--about { --dialog-bar: var(--about); width: 860px; overflow: auto; }
@@ -1224,29 +1213,21 @@ html.pdos-locked { overflow: hidden; }
    then one flat card per stop. Vertical swipes scroll the page as usual. */
 @media not all and (min-width: 721px) and (min-height: 620px) {
   .pdos-window--about { margin: 0; height: max(560px, calc(100svh - 72px)); max-height: 900px; }
-  .pdos-about-head { flex-basis: 36px; grid-template-columns: auto minmax(0, 1fr); padding: 0 10px; }
-  .pdos-about-crumb { display: none; }
-  .pdos-about-tc { font-size: 15px; }
-  .pdos-about-stop { justify-self: stretch; min-width: 0; overflow: hidden; text-overflow: ellipsis; text-align: right; font-size: 12px; }
   .pdos-about-track { position: absolute; inset: 0; width: auto; transform: none !important; transition: none; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; overscroll-behavior-x: contain; scrollbar-width: none; }
   .pdos-about-track::-webkit-scrollbar { display: none; }
   .pdos-about-summary { flex: 0 0 100%; width: auto; padding: 14px; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; scroll-snap-align: start; }
   .pdos-about-main, .pdos-about-side, .pdos-about-id { display: contents; }
   .pdos-about-id .pdos-about-label { display: none; }
   /* Short screens: the summary scrolls rather than squashing its blocks into each other. */
-  .pdos-about-summary :is(.pdos-about-name, .pdos-about-headline, .pdos-about-statement, .pdos-about-now, .pdos-about-cols, .pdos-about-skills, .pdos-about-links) { flex-shrink: 0; }
+  .pdos-about-summary :is(.pdos-about-name, .pdos-about-headline, .pdos-about-statement, .pdos-about-now, .pdos-about-skills, .pdos-about-links) { flex-shrink: 0; }
   .pdos-about-name { order: 1; font-size: 32px; line-height: .92; }
   .pdos-about-headline { order: 2; margin-top: -8px; font-size: 12px; }
-  .pdos-about-statement { order: 3; font-size: 21px; line-height: 1.15; }
+  .pdos-about-statement { order: 3; margin: 0; font-size: 21px; line-height: 1.15; }
   .pdos-about-caret { display: none; }
   .pdos-about-now { order: 4; }
   .pdos-about-now dl > div { grid-template-columns: 76px minmax(0, 1fr); gap: 6px; font-size: 12px; line-height: 1.3; }
   .pdos-about-now dl.pdos-widget-body, .pdos-about-now .pdos-widget-body { padding: 10px; gap: 5px; }
   .pdos-about-now dt, .pdos-about-now .pdos-widget-head, .pdos-about-label { font-size: 12px; }
-  .pdos-about-cols { order: 5; gap: 12px; padding-top: 0; border-top: 0; }
-  .pdos-about-list { gap: 0; }
-  .pdos-about-list button { font-size: 12px; line-height: 1.35; padding: 7px 6px; }
-  .pdos-about-list button > span:last-child { display: none; }
   .pdos-about-skills { order: 6; }
   .pdos-about-skills .pdos-about-label, .pdos-about-links .pdos-about-label { display: none; }
   .pdos-about-skills > div { gap: 5px; }
