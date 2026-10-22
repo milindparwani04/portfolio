@@ -15,7 +15,7 @@
   'use strict';
 
   const T = window.TVB;
-  const { G, C, A, ART, h, go, announce, typeRow, TYPE_COLOURS } = T;
+  const { G, C, A, ART, h, go, typeRow, TYPE_COLOURS } = T;
   const ENGINE_URL = '/vr/vr-engine.js?v=6';
   const CHAMP = { name: 'Ren Kestrel', short: 'Ren', label: 'Ren Kestrel · Reigning Champion' };
   const toId = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');

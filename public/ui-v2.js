@@ -406,7 +406,6 @@
   // Live listening data (dashboard Spotify card, playlist cards, Top Tracks / Artists). Each
   // panel keeps its static empty state, or its last good data, when its route fails.
   const safeUrl = (value) => (typeof value === 'string' && /^https:\/\//.test(value) ? value : '');
-  const pad2 = (value) => String(value).padStart(2, '0');
 
   function timeAgo(iso) {
     const minutes = Math.round((Date.now() - new Date(iso).getTime()) / 60000);
@@ -1406,7 +1405,7 @@
   // cartridge opens the window and paints the boot screen at once; the game's CSS and scripts load
   // next (the first 40% of the bar), then the game loads its data (/vr/vr-game.js, the rest). The
   // battle engine loads only when a battle starts. Technical paths keep the old "vr" name.
-  const VR_VERSION = '34';
+  const VR_VERSION = '35';
   const VR_FILES = ['/vr/vr-core.js', '/vr/vr-audio.js', '/vr/vr-art.js', '/vr/vr-game.js', '/vr/vr-setup.js', '/vr/vr-cinematic.js', '/vr/vr-field.js', '/vr/vr-certificate.js', '/vr/vr-battle.js'];
 
   let vrLoading = null;
@@ -1505,6 +1504,33 @@
     panel.inert = true;
     panel.setAttribute('aria-hidden', 'true');
 
+    // Every tool's behaviour lives in tools.js (plus qrcode.js), kept out of page start-up. It loads
+    // when the Toolbox comes within a screen of view, or at the latest when a tool opens; the tool
+    // then gets toolmodalopen. A failed script is forgotten so the next open retries it.
+    const loads = new Map();
+    function loadScript(src) {
+      if (!loads.has(src)) {
+        loads.set(src, new Promise((resolve, reject) => {
+          const script = document.createElement('script');
+          script.src = src;
+          script.async = false;
+          script.onload = resolve;
+          script.onerror = () => { loads.delete(src); script.remove(); reject(new Error(`${src} failed to load`)); };
+          document.head.appendChild(script);
+        }));
+      }
+      return loads.get(src);
+    }
+    const ensureTools = () => Promise.all(['/lib/qrcode.js', '/tools.js?v=1'].map(loadScript));
+    if ('IntersectionObserver' in window) {
+      const near = new IntersectionObserver((entries) => {
+        if (!entries.some((entry) => entry.isIntersecting)) return;
+        near.disconnect();
+        ensureTools().catch(() => {});
+      }, { rootMargin: '100% 0px' });
+      near.observe(box);
+    }
+
     function giveBack() {
       if (!borrowed) return;
       if (borrowed.classList.contains('open')) {
@@ -1535,6 +1561,7 @@
         modal.classList.add('open');
         modal.setAttribute('aria-hidden', 'false');
         borrowed = modal;
+        ensureTools().then(() => { if (borrowed === modal) modal.dispatchEvent(new CustomEvent('toolmodalopen')); }, () => {});
       } else {
         byId('pdosToolSoonText').textContent = btn.dataset.toolLong || '';
       }

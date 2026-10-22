@@ -97,7 +97,7 @@
     const ext = [];
     for (let r = 0; r < 12; r++) { let l = 12, rr = -1; for (let c = 0; c < 12; c++) if ((c - 5.5) ** 2 + (r - 5.5) ** 2 <= 34) { l = Math.min(l, c); rr = Math.max(rr, c); } ext.push([l, rr + 1]); }
     const pts = [];
-    ext.forEach(([l, r], i) => { pts.push([r, i], [r, i + 1]); });
+    ext.forEach(([, r], i) => { pts.push([r, i], [r, i + 1]); });
     for (let i = 11; i >= 0; i--) { const [l] = ext[i]; pts.push([l, i + 1], [l, i]); }
     return 'polygon(' + pts.map(([x, y]) => `${(x / 12 * 100).toFixed(2)}% ${(y / 12 * 100).toFixed(2)}%`).join(',') + ')';
   }

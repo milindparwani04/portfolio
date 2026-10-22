@@ -24,7 +24,7 @@ Covers the `portfolio` Worker on milindparwani.com, its static assets, the `GIG_
 - [x] User input passed to upstream URLs via `encodeURIComponent` / `URLSearchParams`.
 - [x] Upstream error text truncated to 200 characters.
 - [x] Edge caching on every read endpoint (5 min to 1 hr) limits upstream quota burn.
-- [x] Audio Range header parsed strictly by regex; invalid ranges return 416.
+- [x] ~~Audio Range header parsed strictly by regex; invalid ranges return 416.~~ The `/audio/*` route was removed on 2026-10-22 (no audio assets were served through it).
 - [x] Ticketmaster queries bounded to future dates; tribute acts filtered.
 - [x] Gig Finder (rebuilt 2026-10-02): one Ticketmaster UAE events query (≤ 3 pages) plus capped, KV-cached lookups — Last.fm artist tags (`gig_tags:v1:*`, ≤ 15 per run) and photos for curated events from the Ticketmaster attraction, then Deezer's public artist search with no key (`gig_image:v2:*`, ≤ 10 per run, at most 2 subrequests each). Since 2026-10-02 the photos can be hotlinked from Ticketmaster, Deezer, Wikimedia, Squarespace (Dubai Comedy Festival) and Fever, all over `https://`, 30-day TTL — so a cold run stays well under the 50-subrequest limit. MusicBrainz and the Spotify top-artists call are no longer used by this route. `/api/gigs` takes no input, uses a fixed versioned cache key (`gigs-v3`), and now returns a generic `{"error":"Gig lookup failed"}` (detail logged with `console.error`); a Ticketmaster outage still serves the curated list with a 5-minute cache. Curated events come from `worker/gig-picks.json`, bundled at deploy (not fetched at runtime). Image, ticket and photo-credit URLs (`imageCredits`, 2026-10-02) are accepted only if `https://`, and the frontend escapes them and re-checks the scheme before rendering. A weekly Claude cloud routine (`trig_01V5wXhtAzpJkHrW11is9yt2`) edits that JSON and pushes to `main`, which deploys production — review its commits like any other.
 - [x] Media tracker (2026-10-02): `/api/media` takes no input and uses a fixed cache key (`media-v1`). It fetches only fixed URLs (Reel's public Google Cloud Storage JSON, Cinema Akil `/api/films` with server-computed dates, optionally TMDB search with the `TMDB_API_KEY` secret, KV-cached and capped at 12 a run) with 15 s timeouts. A failing source is skipped and logged, and other errors return a generic 502 `{"error":"Media lookup failed"}`. Image URLs are accepted only if `https://` or a local `/assets/media/` path, and the frontend escapes all fields. A second weekly routine (`trig_014ZDNi4Uf1ecndu8k5oJ6as`) edits `worker/media-picks.json` and pushes to `main`.
@@ -69,6 +69,10 @@ Covers the `portfolio` Worker on milindparwani.com, its static assets, the `GIG_
 ### Victory Road (2026-10-07, Claude)
 
 Static assets only: no new Worker routes, secrets or third-party requests. The battle engine (`public/vr/vr-engine.js`, Pokémon Showdown sim, MIT) runs in a same-origin Web Worker with no network access or `eval`. Page text from game data goes through `textContent`. `localStorage` keys `pdosVictoryRoad`, `pdosVrMuted`, `pdosVrMusic`, `pdosVrVolume` are validated on read. Third-party rights are listed in `public/vr/NOTICE.md`. No finding opened.
+
+### Dead-code cleanup (2026-10-22, Claude)
+
+Attack surface reduced, nothing added: the Worker's `/api/last-updated` route (and its `version_metadata` binding) and the `/audio/*` Range handler were removed, and `run_worker_first` now lists only `/api/*`. The hidden legacy shell that polled `/api/news` and `/api/last-updated` is gone. No new routes, secrets, cookies or third-party requests; `/privacy` claims unchanged.
 
 ### The Very Best (2026-10-10, Claude — deployed 2026-10-10)
 

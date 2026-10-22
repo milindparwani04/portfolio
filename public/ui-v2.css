@@ -51,17 +51,6 @@
   --v2-green: #1d5e33; --v2-yellow: #6b4700;
 }
 
-#boot { display: none !important; }
-body.locked { overflow: auto !important; height: auto !important; }
-
-#site > .site-header,
-#site > .nav-float,
-#site > .gig-fab,
-#site > .gig-scrim,
-#site > .gig-rail,
-#site > audio,
-#site > main { display: none !important; }
-
 .portfolio-v2 {
   min-height: 100vh;
   background: var(--v2-bg);
@@ -138,8 +127,6 @@ body.locked { overflow: auto !important; height: auto !important; }
 
 .v2-section { width: 100%; margin: 0 auto; padding: .7rem 0 1.1rem; scroll-margin-top: 52px; }
 .v2-section + .v2-section { border-top: 1px solid var(--v2-line); }
-.v2-section-head { margin-bottom: .65rem; }
-.v2-ref { display: block; font-size: clamp(.68rem, 1.45vh, .9rem); color: var(--v2-fg); letter-spacing: .06em; text-transform: uppercase; }
 .v2-display {
   margin: .25rem 0 1.2rem;
   font-family: var(--display);
@@ -150,23 +137,11 @@ body.locked { overflow: auto !important; height: auto !important; }
   white-space: nowrap;
   font-size: 12vw;
 }
-.v2-section-title {
-  margin: .18rem 0 .55rem;
-  font-family: var(--display);
-  font-weight: 400;
-  text-transform: uppercase;
-  line-height: .88;
-  font-size: clamp(3.7rem, 6.2vw, 7rem);
-}
-.v2-section-kicker { margin: 0 0 .8rem; color: var(--v2-fg); font-size: .9rem; letter-spacing: .16em; text-transform: uppercase; }
 
 .v2-panel { border: 0; background: var(--v2-panel); }
 .v2-index-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; font-size: .66rem; text-transform: uppercase; letter-spacing: .04em; }
 .v2-tag { color: var(--v2-dim); }
 
-.v2-scroll-next { display: flex; align-items: center; justify-content: center; gap: 1rem; margin-top: .85rem; color: var(--v2-fg); font-size: clamp(.66rem, 1.45vh, .86rem); letter-spacing: .04em; text-align: center; text-transform: uppercase; white-space: nowrap; }
-.v2-scroll-next span { height: 1px; flex: 1; background: var(--v2-soft-line); }
-.v2-scroll-next:hover { color: var(--v2-yellow); }
 
 /* Parwani-DOS Home (Phase 2, 2026-10-07): a title + about.txt row, a 3x2 grid of tiles that
    jump to each section (pixel icons land in Phase 8 — .pdos-tile-icon is reserved empty space
@@ -674,9 +649,6 @@ html.pdos-locked { overflow: hidden; }
 .v2-footer-links span { color: var(--v2-dim); }
 .v2-footer a:hover, .v2-footer a:focus-visible { text-decoration: underline; text-underline-offset: .3em; }
 
-.v2-ref-row { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin-bottom: .3rem; }
-.v2-scroll-prev { color: var(--v2-dim); font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
-.v2-scroll-prev:hover, .v2-scroll-prev:focus-visible { color: var(--v2-fg); }
 /* CRT power-on transition (Parwani-DOS): outside paging mode these wrappers are inert
    (display:contents — zero effect on phones/continuous scroll). Inside paging mode they
    become the three animated layers from the design handoff. initShell() in ui-v2.js toggles
@@ -756,14 +728,10 @@ html.pdos-locked { overflow: hidden; }
     background: repeating-linear-gradient(0deg, rgba(255, 255, 255, .025) 0 1px, transparent 1px 3px);
   }
 
-  .pdos-crt-slide > .v2-scroll-next { margin-top: auto; padding-top: clamp(.6rem, 2vh, 1.4rem); }
   .pdos-crt-slide > .v2-footer { margin-top: auto; padding-top: clamp(.6rem, 2vh, 1.4rem); }
 
   /* Fit every section to the stage: the header keeps its size, the stage takes whatever
      height is left, and cards/type scale with viewport height as well as width. */
-  .v2-section-head { flex: 0 0 auto; margin-bottom: 0; }
-  .v2-section-title { margin: .1rem 0 .35rem; font-size: clamp(3rem, min(10.5vh, 8vw), 7.4rem); line-height: .86; }
-  .v2-section-kicker { margin: 0 0 clamp(.5rem, 1.5vh, 1rem); font-size: clamp(.72rem, 1.9vh, 1.1rem); }
   .v2-stage { flex: 1 1 auto; min-height: 0; }
   .v2-index-row { font-size: clamp(.6rem, 1.35vh, .8rem); }
 
@@ -779,9 +747,6 @@ html.pdos-locked { overflow: hidden; }
 
 /* Short laptop viewports (e.g. 1366x768 screens minus browser chrome): tighten spacing and
    drop purely decorative lines so every card still fits its section. */
-@media (min-width: 721px) and (min-height: 620px) and (max-height: 760px) {
-  .v2-metric h3 { margin-top: .3rem; }
-}
 /* Home on desktop/tablet (2026-10-07): drawn on the mockup's own canvas — 1440 design px wide,
    scaled by --pdos-s = min(width / 1440, height / 900), floored at .75 (initHomeScale in
    ui-v2.js) — so its proportions match the Claude Design reference 1:1 at any window size. The
@@ -958,12 +923,12 @@ html.pdos-locked { overflow: hidden; }
   .v2-footer { flex-wrap: wrap; justify-content: space-between; white-space: normal; }
   .v2-footer-rule { display: none; }
   /* Phones: no small print below 12px. */
-  .v2-index-row, .v2-ref, .v2-scroll-prev, .v2-scroll-next, .v2-card-foot, .v2-metric-foot, .v2-spotify-state, .v2-spotify-status,
-  .v2-steps-label, .v2-steps-goal, .v2-about-date, .v2-bottom-card p, .v2-news-desc, .pdos-journal-meta, .pdos-journal-note,
-  .v2-journal-media figcaption, .pdos-journal-card-head, .pdos-journal-card-foot, .pdos-journal-kicker, .pdos-journal-chip, .pdos-window-bar, .v2-journal-credit, .v2-gig-credit, .v2-playlist-copy p, .v2-track-row, .v2-top-toggle button,
-  .v2-gig p, .v2-gig-link, .v2-gig-controls, .v2-strip, .v2-footer,
-  .pdos-widget-head, .pdos-widget-tag, .pdos-widget-foot, .pdos-tile-head, .pdos-tile-key, .pdos-tile-foot, .pdos-tile-foot > span:first-child,
-  .pdos-extra, .pdos-status-bar, .pdos-boot-log, .v2-game-text p, .pdos-widget-label { font-size: .75rem; }
+  .v2-index-row, .v2-card-foot, .v2-metric-foot, .v2-spotify-state, .v2-spotify-status, .v2-steps-label, .v2-steps-goal, .v2-about-date,
+  .v2-news-desc, .pdos-journal-meta, .pdos-journal-note, .v2-journal-media figcaption, .pdos-journal-card-head, .pdos-journal-card-foot,
+  .pdos-journal-kicker, .pdos-journal-chip, .pdos-window-bar, .v2-journal-credit, .v2-gig-credit, .v2-playlist-copy p, .v2-track-row,
+  .v2-top-toggle button, .v2-gig p, .v2-gig-link, .v2-gig-controls, .v2-strip, .v2-footer, .pdos-widget-head, .pdos-widget-tag,
+  .pdos-widget-foot, .pdos-tile-head, .pdos-tile-key, .pdos-tile-foot, .pdos-tile-foot > span:first-child, .pdos-extra, .pdos-status-bar,
+  .pdos-boot-log, .v2-game-text p, .pdos-widget-label { font-size: .75rem; }
   .pdos-key-only { display: none; }
   .pdos-touch-only { display: inline; }
   .v2-gig-auto { display: none; }
@@ -989,7 +954,6 @@ html.pdos-locked { overflow: hidden; }
 @keyframes pxspin { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 @keyframes pxvu { 0% { clip-path: inset(62.5% 0 0 0); } 20% { clip-path: inset(25% 0 0 0); } 40% { clip-path: inset(50% 0 0 0); } 60% { clip-path: inset(0 0 0 0); } 80% { clip-path: inset(37.5% 0 0 0); } }
 @keyframes pxrot { to { transform: rotate(360deg); } }
-@keyframes pxflame { 0% { opacity: .95; transform: translateY(0); } 50% { opacity: .35; transform: translateY(-100%); } 100% { opacity: .95; transform: translateY(0); } }
 @keyframes pxglow { 0%, 100% { filter: drop-shadow(0 0 3px #1ed760) drop-shadow(0 0 0 #1ed760); } 50% { filter: drop-shadow(0 0 10px #1ed760) drop-shadow(0 0 22px rgba(30, 215, 96, .6)); } }
 @keyframes pxflick { 0%, 100% { opacity: 1; } 37% { opacity: .82; } 41% { opacity: 1; } 73% { opacity: .9; } }
 @keyframes pxfr { 0%, 33% { visibility: visible; } 33.1%, 100% { visibility: hidden; } }
