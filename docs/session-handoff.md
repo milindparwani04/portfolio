@@ -139,6 +139,8 @@ Settled removals (do not re-propose without flagging): Today Somewhere project (
 
 ### 2026-10-22 — About trim
 
+Pushed together with the mobile pass (`9ddf399`, `790a4be`) and verified on milindparwani.com: About checks at 1440/1366/390/360, mobile audit at 390×844 and 844×390, `tests/journal-browser.cjs` against production. Production mobile Lighthouse after the push (two runs): performance 86 / 88, accessibility 100, best practices 100, SEO 100; FCP 2.0 s (was 2.6), LCP 2.5 s, speed index 3.4 s (was 3.7). The score fell from 92 only because TBT rose 90 → 320 ms: the page now paints earlier, so the legacy inline script in index.html (two ~250 ms tasks, unchanged) lands after first paint, where TBT counts it. Splitting or deferring that script is the next performance step.
+
 At Milind's request (Claude): Milind removed three things from About: the header strip under the teal bar (`[About] … / Profile`, the rolling `TC` timecode and `Stop 0N / 08 · label`), the Experience/Education rows in the Summary (too tall on iPhone), and the ▶/◀ characters on the transport buttons, which iPhones drew as colour emoji. ◀◀ ▶ ▶▶ and pause are now inline SVG (`fill: currentColor`); every other ▶/◀ in the visible site has U+FE0E (text presentation) after it, including the Projects "▶ Game" chips and the Media/Gigs resume button. Dead CSS/JS for the strip, timecode and rows removed. Tested at 1440×900, 1366×657, 1100×620, 390×844, 360×740 and 844×390: layout sweep clean, play/pause toggles its icon, detail windows in view, no page errors.
 
 ### 2026-10-22 — Mobile pass

@@ -100,11 +100,11 @@ Full spec and interactive reference: `design_handoff_parwani_dos/` (`README.md`,
 | ABT-11 | Reduced motion: centred card only (cross-fade), no slide, typing, rolling, rotation or icon animation | Live 2026-10-22 (`95caa24`, verified on milindparwani.com) |
 | ABT-12 | Mono / Paper / Night; AA on the teal fills (`--on` text) | Live 2026-10-22 (`95caa24`, verified on milindparwani.com) — local Lighthouse accessibility 100 |
 | ABT-13 | Home About tile: "tall" option (spans both rows of a 4-column grid), DDJ-FLX4 decks icon (moved from Sounds Like) | Live 2026-10-22 (`95caa24`, verified on milindparwani.com) — Milind chose the decks icon; the layout is the handoff's recommended default |
-| MOB-01 | Landscape phones (≤960 wide, <620 tall) use the phone layout | Built 2026-10-22 (Claude) — checked at 844×390 |
-| MOB-02 | Phone tap targets ≥24px (most ~40px): window ✕, About rail/transport/rows, filters, Tracks/Artists, small links | Built 2026-10-22 — local mobile Lighthouse target-size passes, accessibility 100 |
-| MOB-03 | Touch wording instead of keyboard hints on phones (Home status line, About detail "Next stop ▸") | Built 2026-10-22 |
-| MOB-04 | pdf-lib not loaded on page load; qrcode.js deferred | Built 2026-10-22 — QR tool checked; local mobile Lighthouse performance 94 |
-| MOB-05 | Transport and ▶/◀ glyphs render as text, not emoji, on iPhone | Built 2026-10-22 — SVG transport icons; U+FE0E elsewhere |
+| MOB-01 | Landscape phones (≤960 wide, <620 tall) use the phone layout | Live 2026-10-22 (`9ddf399`, verified in production at 844×390) |
+| MOB-02 | Phone tap targets ≥24px (most ~40px): window ✕, About rail/transport, filters, Tracks/Artists, small links | Live 2026-10-22 — production mobile Lighthouse target-size passes, accessibility 100 |
+| MOB-03 | Touch wording instead of keyboard hints on phones (Home status line, About detail "Next stop ▸") | Live 2026-10-22 |
+| MOB-04 | pdf-lib not loaded on page load; qrcode.js deferred | Live 2026-10-22 — production FCP 2.6 → 2.0 s; performance score 86–88 (TBT now counts the legacy inline script, see session log) |
+| MOB-05 | Transport and ▶/◀ glyphs render as text, not emoji, on iPhone | Live 2026-10-22 (`790a4be`) — not yet seen on a real iPhone |
 
 ## Projects
 
