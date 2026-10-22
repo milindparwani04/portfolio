@@ -104,8 +104,8 @@ Full spec and interactive reference: `design_handoff_parwani_dos/` (`README.md`,
 | MOB-02 | Phone tap targets ≥24px (most ~40px): window ✕, About rail/transport, filters, Tracks/Artists, small links | Live 2026-10-22 — production mobile Lighthouse target-size passes, accessibility 100 |
 | MOB-03 | Touch wording instead of keyboard hints on phones (Home status line, About detail "Next stop ▸") | Live 2026-10-22 |
 | MOB-04 | pdf-lib not loaded on page load; qrcode.js deferred | Live 2026-10-22 — production FCP 2.6 → 2.0 s; performance score 86–88 (TBT now counts the legacy inline script, see session log) |
-| PERF-01 | Mobile Lighthouse performance ≥ 90: legacy start-up script removed, tool code loads on demand (`tools.js`) | Built 2026-10-22 (Claude) — local 96–98 |
-| CLN-01 | No dead code: legacy shell, unused CSS/JS/keyframes/variables, dead Worker routes removed; hidden tools kept | Built 2026-10-22 (Claude) — 0 px visual change, all suites pass |
+| PERF-01 | Mobile Lighthouse performance ≥ 90: legacy start-up script removed, tool code loads on demand (`tools.js`) | Live 2026-10-22 (`7de380b`) — production 91 / 97 / 93 over three runs (TBT 50–220 ms) |
+| CLN-01 | No dead code: legacy shell, unused CSS/JS/keyframes/variables, dead Worker routes removed; hidden tools kept | Live 2026-10-22 (`7de380b`) — 0 px visual change, all suites pass locally and against production |
 | MOB-05 | Transport and ▶/◀ glyphs render as text, not emoji, on iPhone | Live 2026-10-22 (`790a4be`) — not yet seen on a real iPhone |
 
 ## Projects
