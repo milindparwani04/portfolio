@@ -836,7 +836,7 @@
   // On phones the Journal reader and the Toolbox panel cover the screen, so the back gesture should
   // close them rather than leave the site: opening pushes a history entry, closing pops it.
   function backCloses(close) {
-    const phone = window.matchMedia('(max-width: 720px)');
+    const phone = window.matchMedia('(max-width: 720px), (max-width: 960px) and (max-height: 619px)');
     let pushed = false;
     window.addEventListener('popstate', () => { if (pushed) { pushed = false; close(); } });
     return {

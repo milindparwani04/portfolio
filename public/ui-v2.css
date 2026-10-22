@@ -185,11 +185,11 @@ body.locked { overflow: auto !important; height: auto !important; }
    19.5cqw fills the cell. Capped by height (two lines) so the tiles keep their room, lower on
    short screens so the tile icons stay visible. Pure CSS so the LCP element paints at its final
    size without waiting for script. */
-@media (min-width: 721px) {
+@media (min-width: 721px) and (min-height: 620px), (min-width: 961px) {
   .pdos-title-cell { container-type: inline-size; }
   .pdos-title-cell .v2-display { font-size: min(19.5cqw, 23.5vh, 340px); }
 }
-@media (min-width: 721px) and (max-height: 799px) {
+@media (min-width: 721px) and (min-height: 620px) and (max-height: 799px), (min-width: 961px) and (max-height: 799px) {
   .pdos-title-cell .v2-display { font-size: min(19.5cqw, 15vh, 340px); }
 }
 .v2-display { margin: 0; font-family: var(--display); font-weight: 400; text-transform: uppercase; line-height: 1.02; letter-spacing: -.02em; white-space: nowrap; font-size: 12vw; }
@@ -317,6 +317,8 @@ body.locked { overflow: auto !important; height: auto !important; }
 .pdos-dissertation-body h3 { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--display); font-weight: 400; font-size: clamp(.85rem, min(1.5vw, 2.8vh), 1.25rem); line-height: 1.05; text-transform: uppercase; }
 .pdos-dissertation-body a { flex: 0 0 auto; color: var(--v2-fg); font-size: .7rem; text-transform: uppercase; text-decoration: underline; text-underline-offset: .2em; }
 
+/* Hint pairs: keyboard wording on desktop, touch wording on phones (swapped in the phone block). */
+.pdos-touch-only { display: none; }
 .pdos-status-bar { flex: 0 0 auto; margin-top: auto; padding-top: clamp(.6rem, 2vh, 1.4rem); display: flex; align-items: center; justify-content: space-between; gap: 1rem; color: var(--v2-dim); font-size: .7rem; text-transform: uppercase; letter-spacing: .04em; }
 .pdos-status-cmd { color: var(--v2-fg); white-space: nowrap; }
 
@@ -390,7 +392,7 @@ body.locked { overflow: auto !important; height: auto !important; }
 .pdos-journal.is-open .pdos-journal-card-byline { display: none; }
 /* When the grid gets narrow (reader open on a small window) the cards stack into rows.
    Phones have their own stack. */
-@media (min-width: 721px) {
+@media (min-width: 721px) and (min-height: 620px), (min-width: 961px) {
   @container journal-main (max-width: 620px) {
     .pdos-journal-grid { grid-template-columns: minmax(0, 1fr); grid-auto-rows: minmax(0, 1fr); }
     .pdos-journal-card { gap: 6px; }
@@ -566,7 +568,7 @@ html.pdos-locked { overflow: hidden; }
 .pdos-tool-name { margin-top: auto; font-family: var(--display); font-weight: 700; font-size: clamp(.75rem, min(8.5cqi, 3.4vh), 1.9rem); line-height: 1.1; text-transform: uppercase; text-wrap: balance; }
 @container (max-width: 170px) { .pdos-tool-head > span:last-child { display: none; } }
 /* A tool open on a small window leaves a narrow grid: smaller heading, tighter cards. */
-@media (min-width: 721px) {
+@media (min-width: 721px) and (min-height: 620px), (min-width: 961px) {
   @container toolbox-main (max-width: 600px) {
     .pdos-toolbox-title { font-size: clamp(1.2rem, 7cqi, 2.4rem); }
     .pdos-tool { padding-inline: 10px; }
@@ -859,7 +861,7 @@ html.pdos-locked { overflow: hidden; }
   .pdos-window--playlists .v2-playlist { padding: 8px 12px; }
 }
 
-@media (max-width: 720px) {
+@media (max-width: 720px), (max-width: 960px) and (max-height: 619px) {
   .portfolio-v2 { padding-inline: .7rem; }
   /* The typed command line is decorative (aria-hidden) and the first thing to go when the
      bar can't fit brand + theme switcher + section counter + clock on one line. */
@@ -961,7 +963,24 @@ html.pdos-locked { overflow: hidden; }
   .v2-journal-media figcaption, .pdos-journal-card-head, .pdos-journal-card-foot, .pdos-journal-kicker, .pdos-journal-chip, .pdos-window-bar, .v2-journal-credit, .v2-gig-credit, .v2-playlist-copy p, .v2-track-row, .v2-top-toggle button,
   .v2-gig p, .v2-gig-link, .v2-gig-controls, .v2-strip, .v2-footer,
   .pdos-widget-head, .pdos-widget-tag, .pdos-widget-foot, .pdos-tile-head, .pdos-tile-key, .pdos-tile-foot, .pdos-tile-foot > span:first-child,
-  .pdos-extra, .pdos-status-bar, .pdos-boot-log, .v2-game-text p { font-size: .75rem; }
+  .pdos-extra, .pdos-status-bar, .pdos-boot-log, .v2-game-text p, .pdos-widget-label { font-size: .75rem; }
+  .pdos-key-only { display: none; }
+  .pdos-touch-only { display: inline; }
+  .v2-gig-auto { display: none; }
+  .v2-index-row .v2-tag { white-space: nowrap; }
+  /* Touch targets: at least ~40px tall. Small links and the window ✕ grow their hit area with
+     padding and take it back with negative margins, so the bars they sit in keep their height. */
+  .pdos-close { padding: 12px 14px; margin: -12px -14px -12px 0; line-height: 1.2; }
+  .pdos-tool-panel-bar { height: 44px; padding-right: 0; }
+  .pdos-tool-panel-bar .pdos-close { margin: 0; padding: 12px 16px; }
+  .pdos-about-open { padding: 12px 8px; margin: -12px -8px -12px 0; }
+  .pdos-dissertation-body a, .v2-card-foot a, .v2-footer a, .pdos-window-nav a { display: inline-block; padding-block: 11px; margin-block: -11px; }
+  .pdos-filter button { min-height: 40px; }
+  .v2-top-toggle button { min-height: 36px; }
+  .pdos-extra { min-height: 44px; }
+  .v2-gig-buttons button { width: 44px; height: 40px; }
+  .v2-gig-empty { font-size: .75rem; }
+  .v2-footer { row-gap: 1.2rem; }
 }
 
 /* Pixel icon animations (pdos-icons.js), copied from the design mockup. */
@@ -1054,7 +1073,7 @@ html.pdos-locked { overflow: hidden; }
   .pdos-dialog--crack .ck-hud { grid-template-columns: repeat(4, 1fr); }
   .pdos-dialog--crack .ck-log { max-height: 150px; }
 }
-@media (max-width: 720px) {
+@media (max-width: 720px), (max-width: 960px) and (max-height: 619px) {
   .pdos-dialog--crack { width: 100%; height: 100%; }
   .pdos-dialog--crack .ck-hud { grid-template-columns: repeat(2, 1fr); }
   .pdos-dialog--crack .ck-btn { width: 100%; }
@@ -1214,6 +1233,8 @@ html.pdos-locked { overflow: hidden; }
   .pdos-about-summary { flex: 0 0 100%; width: auto; padding: 14px; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; scroll-snap-align: start; }
   .pdos-about-main, .pdos-about-side, .pdos-about-id { display: contents; }
   .pdos-about-id .pdos-about-label { display: none; }
+  /* Short screens: the summary scrolls rather than squashing its blocks into each other. */
+  .pdos-about-summary :is(.pdos-about-name, .pdos-about-headline, .pdos-about-statement, .pdos-about-now, .pdos-about-cols, .pdos-about-skills, .pdos-about-links) { flex-shrink: 0; }
   .pdos-about-name { order: 1; font-size: 32px; line-height: .92; }
   .pdos-about-headline { order: 2; margin-top: -8px; font-size: 12px; }
   .pdos-about-statement { order: 3; font-size: 21px; line-height: 1.15; }
@@ -1223,8 +1244,8 @@ html.pdos-locked { overflow: hidden; }
   .pdos-about-now dl.pdos-widget-body, .pdos-about-now .pdos-widget-body { padding: 10px; gap: 5px; }
   .pdos-about-now dt, .pdos-about-now .pdos-widget-head, .pdos-about-label { font-size: 12px; }
   .pdos-about-cols { order: 5; gap: 12px; padding-top: 0; border-top: 0; }
-  .pdos-about-list { gap: 2px; }
-  .pdos-about-list button { font-size: 12px; line-height: 1.35; padding: 2px 6px; }
+  .pdos-about-list { gap: 0; }
+  .pdos-about-list button { font-size: 12px; line-height: 1.35; padding: 7px 6px; }
   .pdos-about-list button > span:last-child { display: none; }
   .pdos-about-skills { order: 6; }
   .pdos-about-skills .pdos-about-label, .pdos-about-links .pdos-about-label { display: none; }
@@ -1249,6 +1270,13 @@ html.pdos-locked { overflow: hidden; }
   .pdos-about-tap-hint { display: inline; }
   .pdos-about-foot { display: flex; justify-content: space-between; padding: 0 10px; }
   .pdos-about-meta { display: none; }
+  /* Rail dots are 24x32 tap targets; the visible square is drawn inside each one. */
+  .pdos-about-rail { gap: 0; }
+  .pdos-about-rail button, .pdos-about-rail button[aria-current="step"] { position: relative; width: 24px; height: 32px; background: none; box-shadow: none; transition: none; }
+  .pdos-about-rail button::after { content: ""; position: absolute; top: 10px; left: 6px; width: 12px; height: 12px; box-shadow: inset 0 0 0 1px var(--fg); }
+  .pdos-about-rail button[aria-current="step"]::after { left: 1px; width: 22px; background: var(--about); box-shadow: none; }
+  .pdos-about-transport button { width: 36px; height: 44px; }
+  .pdos-about-dfoot button { padding: 12px 0; margin: -10px 0 -12px; color: var(--fg); }
   .pdos-dialog--about { width: 100%; max-height: 100%; }
   .pdos-about-detail { grid-template-columns: minmax(0, 1fr); padding: 14px; gap: 14px; }
   .pdos-about-dwell { min-height: 160px; }

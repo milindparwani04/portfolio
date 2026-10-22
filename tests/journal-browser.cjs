@@ -19,7 +19,7 @@ const server = http.createServer((req, res) => {
   try {
     browser = await chromium.launch({ executablePath: 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe', headless: true });
     for (const [width, height] of [[1280, 900], [800, 560], [390, 844]]) {
-      const phone = width <= 720;
+      const phone = width <= 720 || (width <= 960 && height <= 619); // landscape phones get the phone layout too
       const page = await browser.newPage({ viewport: { width, height }, isMobile: phone, hasTouch: phone });
       const errors = [];
       page.on('pageerror', (e) => errors.push(e.message));

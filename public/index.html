@@ -976,7 +976,7 @@
     .tools{ grid-template-columns:1fr; }
   }
 </style>
-<link rel="stylesheet" href="/ui-v2.css?v=55">
+<link rel="stylesheet" href="/ui-v2.css?v=56">
 </head>
 <body class="locked">
 
@@ -1157,7 +1157,7 @@
           </div>
         </div>
       </div>
-      <div class="pdos-status-bar"><span class="pdos-status-cmd">C:\PARWANI&gt;<span class="v2-cursor" aria-hidden="true"></span></span><span class="pdos-status-hint">Scroll, or press 1&ndash;8 to jump &middot; Esc closes a window</span></div>
+      <div class="pdos-status-bar"><span class="pdos-status-cmd">C:\PARWANI&gt;<span class="v2-cursor" aria-hidden="true"></span></span><span class="pdos-status-hint"><span class="pdos-key-only">Scroll, or press 1&ndash;8 to jump &middot; Esc closes a window</span><span class="pdos-touch-only">Tap a tile to jump to it</span></span></div>
     </div></div></div><div class="pdos-crt-line" aria-hidden="true"></div></section>
 
     <section class="v2-section" id="v2-about" data-sec="about"><div class="pdos-crt-clip"><div class="pdos-crt-slide"><div class="pdos-stage">
@@ -1350,7 +1350,7 @@
               <p class="pdos-about-dwhen" id="pdosAboutDWhen"></p>
               <ul class="pdos-about-dhl" id="pdosAboutDHl"></ul>
               <a class="pdos-about-dlink" id="pdosAboutDLink" href="/dissertation.pdf" target="_blank" rel="noopener noreferrer" hidden></a>
-              <div class="pdos-about-dfoot"><button type="button" id="pdosAboutDNav">&#9664; &#9654; Browse stops</button><span>Esc to close</span></div>
+              <div class="pdos-about-dfoot"><button type="button" id="pdosAboutDNav"><span class="pdos-key-only">&#9664; &#9654; Browse stops</span><span class="pdos-touch-only">Next stop &#9656;</span></button><span class="pdos-key-only">Esc to close</span></div>
             </div>
           </div>
         </div>
@@ -1603,7 +1603,7 @@
       <div class="pdos-sec-head"><div><h2 class="pdos-sec-title">Media</h2><p class="pdos-sec-kicker">Films in Dubai cinemas and new games. Next three months.</p></div><div class="pdos-filter" id="pdosMediaFilter" role="group" aria-label="Show"><button type="button" data-filter="all" aria-pressed="true">All</button><button type="button" data-filter="film" aria-pressed="false">Films</button><button type="button" data-filter="game" aria-pressed="false">Games</button></div></div>
       <div class="v2-stage v2-gig-stage">
         <div class="v2-gig-controls">
-          <span class="v2-gig-status"><span id="v2MediaBatch">Batch 01 of 01</span>&nbsp; / &nbsp;Auto 10 sec</span>
+          <span class="v2-gig-status"><span id="v2MediaBatch">Batch 01 of 01</span><span class="v2-gig-auto">&nbsp; / &nbsp;Auto 10 sec</span></span>
           <div class="v2-gig-buttons"><button type="button" id="v2MediaPrev" aria-label="Previous releases">&#8249;</button><button type="button" id="v2MediaPause" aria-label="Pause releases rotation">&#8214;</button><button type="button" id="v2MediaNext" aria-label="Next releases">&#8250;</button></div>
           <span class="v2-gig-timer"><span id="v2MediaTick">01 / 10</span><span class="v2-gig-progress"><span id="v2MediaProgress"></span></span></span>
         </div>
@@ -1661,7 +1661,7 @@
       <div class="pdos-sec-head"><div><h2 class="pdos-sec-title">Upcoming</h2><p class="pdos-sec-kicker">Dubai and Abu Dhabi. Six at a time.</p></div><div class="pdos-filter" id="pdosGigFilter" role="group" aria-label="City"><button type="button" data-filter="all" aria-pressed="true">Both</button><button type="button" data-filter="dubai" aria-pressed="false">Dubai</button><button type="button" data-filter="abu-dhabi" aria-pressed="false">Abu Dhabi</button></div></div>
       <div class="v2-stage v2-gig-stage">
         <div class="v2-gig-controls">
-          <span class="v2-gig-status"><span id="v2GigBatch">Batch 01 of 01</span>&nbsp; / &nbsp;Auto 10 sec</span>
+          <span class="v2-gig-status"><span id="v2GigBatch">Batch 01 of 01</span><span class="v2-gig-auto">&nbsp; / &nbsp;Auto 10 sec</span></span>
           <div class="v2-gig-buttons"><button type="button" id="v2GigPrev" aria-label="Previous gigs">&#8249;</button><button type="button" id="v2GigPause" aria-label="Pause gig rotation">&#8214;</button><button type="button" id="v2GigNext" aria-label="Next gigs">&#8250;</button></div>
           <span class="v2-gig-timer"><span id="v2GigTick">01 / 10</span><span class="v2-gig-progress"><span id="v2GigProgress"></span></span></span>
         </div>
@@ -2365,10 +2365,9 @@
 </div>
 
 <!-- QR Code Generator for JavaScript, (c) 2009 Kazuhiko Arase, MIT licensed. -->
-<script src="lib/qrcode.js"></script>
-<!-- pdf-lib (MIT) — https://pdf-lib.js.org, v1.17.1. pdf.js (Apache-2.0) is loaded lazily via
-     dynamic import() from the PDF Editor's own script, since its dist ships ES modules only. -->
-<script src="lib/pdf-lib.min.js"></script>
+<script src="lib/qrcode.js" defer></script>
+<!-- pdf-lib (MIT) — https://pdf-lib.js.org, v1.17.1 — and pdf.js (Apache-2.0) are both loaded lazily by
+     the PDF Editor's ensurePdfjs() the first time a PDF is opened, so they never block the page. -->
 
 <script>
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -3192,7 +3191,7 @@
     const canvas = document.getElementById('qrCanvas');
     const emptyState = document.getElementById('qrEmptyState');
     const downloadBtn = document.getElementById('qrDownload');
-    if(!modal || typeof qrcode === 'undefined') return;
+    if(!modal) return;
 
     const CELL_SIZE = 6;
     const MARGIN = 2;
@@ -4086,7 +4085,6 @@
 
   /* ============ PDF EDITOR ============ */
   (() => {
-    if(typeof PDFLib === 'undefined') return;
     const modal = document.getElementById('pdfEditorModal');
     const drop = document.getElementById('pdfedDrop');
     const dropText = document.getElementById('pdfedDropText');
@@ -4125,7 +4123,14 @@
     let pdfjsReady = null;
     function ensurePdfjs(){
       if(!pdfjsReady){
-        pdfjsReady = import('./lib/pdf.min.mjs').then(mod => {
+        const pdfLibReady = typeof PDFLib !== 'undefined' ? Promise.resolve() : new Promise((resolve, reject) => {
+          const script = document.createElement('script');
+          script.src = 'lib/pdf-lib.min.js';
+          script.onload = resolve;
+          script.onerror = () => { pdfjsReady = null; script.remove(); reject(new Error('pdf-lib failed to load')); };
+          document.head.appendChild(script);
+        });
+        pdfjsReady = Promise.all([import('./lib/pdf.min.mjs'), pdfLibReady]).then(([mod]) => {
           mod.GlobalWorkerOptions.workerSrc = './lib/pdf.worker.min.mjs';
           pdfjs = mod;
           return mod;
@@ -5483,7 +5488,7 @@
 
 </script>
 
-<script src="/ui-v2.js?v=75"></script>
+<script src="/ui-v2.js?v=76"></script>
 <script src="/pdos-icons.js?v=9" defer></script>
 
 </body>
