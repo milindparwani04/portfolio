@@ -9,9 +9,6 @@
 /og.png
   X-Robots-Tag: noindex
 
-/favicon.svg
-  X-Robots-Tag: noindex
-
 /assets/*
   X-Robots-Tag: noindex
 

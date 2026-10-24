@@ -121,6 +121,12 @@ Areas Claude has most recently owned (coordinate before Codex changes these):
 
 ## Work log (newest first)
 
+### 2026-10-24 — Favicon for Google Search
+
+- Cause: `/favicon.svg` carried `X-Robots-Tag: noindex` from the 2026-10-15 homepage-only rules, so Google ignored it; `/favicon.ico` 404'd; the SVG's "MP" is `<text>` in Archivo Black, which Google's renderer can't load.
+- Fix: dropped the `/favicon.svg` block from `public/_headers` (**icon files must never be noindexed**); generated `public/favicon.ico` (PNG entries 16/32/48), `public/favicon-192.png`, `public/apple-touch-icon.png` with @resvg/resvg-js in a scratch folder (same mark, Arial Black, #0A0A0A rounded background for contrast on Google's light page). `index.html` head links ico (48x48), png (192x192), svg, apple-touch-icon.
+- Tested: `wrangler dev` headers for each icon (200, correct content types, no noindex; og.png still noindex); PNGs inspected visually.
+
 ### 2026-10-18 — Journal rebuilt as a Toolbox-style grid; Toolbox toggle; phone pass
 
 - **Milind's brief:** Journal should look like Toolbox/Projects — a 3x3 grid of entries, no icons, editorial: each card is the headline plus a short byline; opening one slides the entry in from the side like a tool (photo + title). With three entries they fill the grid. Pressing the open entry again closes it, and the same for Toolbox tools. Make the site look great on phones. Milind's answers: three entries = three tall columns (rows added at 4–6 and 7–9); byline = the entry's existing lead line; on phones the entry/tool covers the screen and slides in; phone focus = sizing/spacing and text cut off with "…".

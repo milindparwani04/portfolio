@@ -137,6 +137,10 @@ Settled removals (do not re-propose without flagging): Today Somewhere project (
 
 ## Session log
 
+### 2026-10-24 — Google favicon fix
+
+At Milind's request (Claude): Google showed no icon next to milindparwani.com because `public/_headers` sent `X-Robots-Tag: noindex` on `/favicon.svg` (added 2026-10-15) and there was no raster or `/favicon.ico` fallback (the SVG draws "MP" as text in a font Google doesn't have). Removed that noindex rule; added `favicon.ico` (16/32/48), `favicon-192.png` and `apple-touch-icon.png` (yellow MP on the site's #0A0A0A rounded square, rasterised from favicon.svg with Arial Black) and their `<link>` tags; the SVG stays for browser tabs. Verified in `wrangler dev`: all four icons 200 with no `x-robots-tag`, `og.png` still noindex. Milind to request indexing of `/` in Search Console; Google refreshes favicons on its own schedule.
+
 ### 2026-10-22 — Dead-code cleanup, tool code out of start-up
 
 Pushed as `7de380b` and verified on milindparwani.com: the tools test (incl. the hidden PDF Editor and pdf-lib on demand), About checks at 1440/1366/390/360, the 390×844 mobile audit and `tests/journal-browser.cjs` all pass against production; live widgets (headlines, weather, Spotify, game) fill, The Very Best boots to its title on VR v35, `/api/last-updated` now 404s. Production mobile Lighthouse (three runs): performance 91 / 97 / 93, accessibility 100, best practices 100, SEO 100; FCP 2.1–2.3 s, LCP 2.1–2.4 s, TBT 50–220 ms (was 320), speed index 2.7–3.3 s.
